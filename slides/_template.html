@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 Deck Template</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="deck.css">
+<script src="deck.js" defer></script>
+</head>
+<body>
+<!-- Slide patterns for EN5425 decks. Copy this file to weekNN.html and build.
+     Every slide is <section class="slide">. Variants: .title .section .two-col via .cols. -->
+
+<section class="slide title">
+  <p class="kicker">EN5425 / EV4240 · Week N · Fall 2026</p>
+  <h1>Lecture Title Goes Here</h1>
+  <p class="big muted">One-line goal of the session, set in the large quiet style.</p>
+  <div class="foot"><span>Deep Learning Applications in Environmental Big Data</span><span>Prof. Hyunglok Kim · GIST</span></div>
+</section>
+
+<section class="slide section">
+  <p class="kicker">Part 1 · 15 min</p>
+  <h2>A Section Divider</h2>
+  <aside class="notes">Speaker note: what to emphasize in this part; timing cue.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Concept</p>
+  <h2>A standard content slide</h2>
+  <ul>
+    <li>Three to five bullets maximum — a slide is a claim, not a paragraph.</li>
+    <li>Inline <code>code</code> and <span class="accent">accent phrases</span> where they earn it.</li>
+    <li class="muted">De-emphasized supporting line.</li>
+  </ul>
+  <div class="foot"><span>Reference: Author et al. (2024), arXiv:XXXX.XXXXX</span></div>
+  <aside class="notes">Say why this matters before reading the bullets.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Two columns</p>
+  <h2>Comparison slide</h2>
+  <div class="cols">
+    <div>
+      <h3>Left thing</h3>
+      <ul class="small"><li>Property one</li><li>Property two</li></ul>
+    </div>
+    <div>
+      <h3>Right thing</h3>
+      <ul class="small"><li>Property one</li><li>Property two</li></ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="kicker">Diagram</p>
+  <h2>Inline SVG figure — theme-safe colors</h2>
+  <div class="figure">
+    <!-- Use currentColor for strokes/text and var(--accent)/var(--hairline) fills so
+         the figure works in light and dark. viewBox only, no fixed width/height. -->
+    <svg viewBox="0 0 560 200" role="img" aria-label="Example pipeline diagram" style="width:min(90%,700px)">
+      <g fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="10"  y="70" width="130" height="60" rx="10"/>
+        <rect x="215" y="70" width="130" height="60" rx="10" stroke="var(--accent)"/>
+        <rect x="420" y="70" width="130" height="60" rx="10"/>
+        <path d="M140 100 H215 M345 100 H420" stroke="var(--accent)" marker-end="none"/>
+      </g>
+      <g font-family="var(--sans)" font-size="14" fill="currentColor" text-anchor="middle">
+        <text x="75"  y="105">input</text>
+        <text x="280" y="105" fill="var(--accent)">model</text>
+        <text x="485" y="105">output</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="kicker">Reading discussion · 15 min</p>
+  <h2>Paper Title (Author, Year)</h2>
+  <ol>
+    <li>Discussion question one, verbatim from the week's reading page.</li>
+    <li>Discussion question two.</li>
+    <li>Discussion question three.</li>
+  </ol>
+  <div class="foot"><span>Lead: rotation pair · opens with one reproduced figure</span></div>
+</section>
+
+<section class="slide">
+  <p class="kicker">Lab briefing · 5 min</p>
+  <h2>Today's lab</h2>
+  <div class="card">
+    <p><b>Task.</b> One-sentence task. <b>Data.</b> <span class="pill">DATASET</span>
+    <b>Deliverable.</b> pushed to your repo as <code>notes/weekNN.md</code>.</p>
+  </div>
+</section>
+</body>
+</html>

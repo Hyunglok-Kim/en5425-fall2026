@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Week</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js" defer></script>
+<style>
+  .pillrow { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 0; }
+  .kv { font-size:11px; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+        color:var(--muted); margin:12px 0 4px; }
+  .pager { display:flex; justify-content:space-between; gap:10px; margin-top:34px; }
+</style>
+</head>
+<body data-page="schedule">
+<div class="wrap">
+  <div id="wk"><p class="sub" style="margin-top:38px">Loading week…</p></div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const el = $("#wk");
+  const linkOf = (r) => r.link ? `<a href="${esc(r.link)}">${esc(r.title)}</a>` : esc(r.title);
+  try {
+    const { weeks } = await loadJSON("weeks");
+    let n = parseInt(new URLSearchParams(location.search).get("w"), 10) || 1;
+    const w = weeks.find((x) => x.n === n) || weeks[0];
+    n = w.n;
+    document.title = `EN5425 · Week ${n} · ${w.title}`;
+    const lab = w.lab || {}, rd = w.reading || {};
+    const primary = Array.isArray(rd.primary) ? rd.primary : [];
+    const optional = Array.isArray(rd.optional) ? rd.optional : [];
+    const questions = Array.isArray(rd.questions) ? rd.questions : [];
+    const pills = (a) => (a || []).map((x) => `<span class="pill">${esc(x)}</span>`).join("");
+    const prev = weeks.find((x) => x.n === n - 1), next = weeks.find((x) => x.n === n + 1);
+
+    el.innerHTML = `
+      <p class="eyebrow">Week ${n} · ${esc(w.phase || "")}${w.date ? " · " + esc(fmtDate(w.date)) : ""}</p>
+      <h1>${esc(w.title)}</h1>
+      <p class="lede">${esc(w.goal || "")}</p>
+      ${w.slides ? `<p style="margin-top:10px"><a class="btn" href="slides/week${String(n).padStart(2, "0")}.html">Lecture slides →</a></p>` : ""}
+
+      <h2>Concept (75 min)</h2>
+      <div class="rows">${(w.concept || []).map((c) => `
+        <div class="row"><span class="tnum" style="flex:none;width:38px;color:var(--muted)">${esc(c.min)}&#8242;</span>
+          <span>${esc(c.topic)}</span></div>`).join("")
+        || '<div class="row"><span class="sub">Details coming soon.</span></div>'}</div>
+
+      <h2>Lab (75 min)</h2>
+      <div class="card">
+        <p style="margin:0">${esc(lab.task || "Lab details coming soon.")}</p>
+        ${(lab.data || []).length ? `<p class="kv">Data</p><div class="pillrow">${pills(lab.data)}</div>` : ""}
+        ${(lab.tools || []).length ? `<p class="kv">Tools</p><div class="pillrow">${pills(lab.tools)}</div>` : ""}
+        ${lab.deliverable ? `<p class="kv">Deliverable</p><p style="margin:0;font-size:13.5px">${esc(lab.deliverable)}</p>` : ""}
+        ${lab.homework ? `<div class="note" style="margin:14px 0 0"><b>Homework</b> — ${esc(lab.homework)}</div>` : ""}
+      </div>
+
+      <h2>Reading</h2>
+      <div class="card">
+        ${primary.length ? `<p class="kv" style="margin-top:0">Primary</p>
+          <ul style="margin-top:4px">${primary.map((r) => `<li>${linkOf(r)}</li>`).join("")}</ul>` : ""}
+        ${optional.length ? `<p class="kv">Optional</p>
+          <ul style="margin-top:4px">${optional.map((r) => `<li>${linkOf(r)}</li>`).join("")}</ul>` : ""}
+        ${rd.memo && rd.memo !== "none"
+          ? `<p class="sub" style="margin:10px 0 0">Memo type: <span class="pill acc">${esc(rd.memo)}</span> — due 24 h before class, committed to your repo.</p>`
+          : (primary.length ? '<p class="sub" style="margin:10px 0 0">No memo due this week.</p>'
+                            : '<p class="sub" style="margin:0">No assigned reading this week.</p>')}
+        ${questions.length ? `<p class="kv">Discussion questions</p>
+          <ol style="margin-top:4px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>` : ""}
+      </div>
+
+      ${(w.skills || []).length ? `<h2>Skills you leave with</h2>
+        <div class="pillrow">${(w.skills || []).map((s) => `<span class="pill acc">${esc(s)}</span>`).join("")}</div>` : ""}
+
+      <div class="pager">
+        <span>${prev ? `<a class="btn" href="week.html?w=${prev.n}">&#8592; Week ${prev.n}</a>` : ""}</span>
+        <a class="btn" href="schedule.html">All weeks</a>
+        <span>${next ? `<a class="btn primary" href="week.html?w=${next.n}">Week ${next.n} &#8594;</a>` : ""}</span>
+      </div>`;
+  } catch {
+    el.innerHTML = `<p class="eyebrow">Schedule</p><h1>Week plan coming soon</h1>
+      <p class="lede">This week's plan has not been published yet.</p>
+      <a class="btn" href="schedule.html">Back to schedule</a>`;
+  }
+});
+</script>
+</body>
+</html>

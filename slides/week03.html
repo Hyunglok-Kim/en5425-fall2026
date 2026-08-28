@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Week 3 · Environmental Big Data and Cloud-Native Pipelines</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="deck.css">
+<script src="deck.js" defer></script>
+</head>
+<body>
+
+<!-- 1 ─ Title -->
+<section class="slide title">
+  <p class="kicker">EN5425 / EV4240 · Week 3 · Fall 2026</p>
+  <h1>Environmental Big Data and Cloud-Native Pipelines</h1>
+  <p class="big muted">Fluently move satellite, reanalysis, and in-situ data through cloud-native formats — and meet ERA5 and cos-latitude weighting.</p>
+  <div class="foot"><span>Deep Learning Applications in Environmental Big Data</span><span>Prof. Hyunglok Kim · GIST</span></div>
+  <aside class="notes">Open: last week we learned how to train without lying to ourselves (leakage, splits). This week is the other half of every foundation-model paper — the data. By the end of today you should be able to open any dataset in this field, know exactly what it measures and how much model is inside it, and stream it without downloading a single file. Timing: 75 min total, six blocks, keep the zoo brisk.</aside>
+</section>
+
+<!-- 2 ─ Roadmap -->
+<section class="slide">
+  <p class="kicker">Week 3 · 75 min</p>
+  <h2>Today in six blocks</h2>
+  <ul>
+    <li><b>1 · The data zoo</b> (15) — what each product measures, at what resolution, latency, and error character.</li>
+    <li><b>2 · Cloud-native geospatial</b> (15) — COG, Zarr, STAC; why chunking dominates throughput; where the data lives.</li>
+    <li><b>3 · ERA5 as a pretraining corpus</b> (15) — equiangular grids, the cos φ weighted mean, anomalies, regridding.</li>
+    <li><b>4 · Dataset objects</b> (10) — chips vs tiles vs time series; normalization and QA masking done right.</li>
+    <li><b>5 · Reading</b> (15) + <b>6 · Lab briefing</b> (5) — Rolf et al. 2024; two ETL pipes you keep all semester.</li>
+  </ul>
+  <div class="foot"><span>Skills this week: cloud-native ETL (Zarr/STAC/COG) · ERA5 handling · cos-lat weighting · regridding · dataset/normalization design</span></div>
+  <aside class="notes">One sentence per block, 60 seconds total. Emphasize the arc: pick data (zoo) → reach it (formats) → shape it for training (ERA5, dataset objects). The lab's chip store is reused in Week 7 — today's work is infrastructure, not a throwaway exercise.</aside>
+</section>
+
+<!-- ============ PART 1 · DATA ZOO ============ -->
+
+<!-- 3 -->
+<section class="slide section">
+  <p class="kicker">Part 1 · 15 min</p>
+  <h2>The Data Zoo</h2>
+  <aside class="notes">15 minutes. Goal: not memorizing spec sheets — building the reflex of asking four questions of any product: what does it measure, at what spacing, how often, how late, and how wrong. Transition: start with why this matters for models, not just for data hygiene.</aside>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <p class="kicker">Part 1 · 15 min</p>
+  <h2>The corpus is the prior</h2>
+  <ul>
+    <li>A pretrained model can only know what its corpus sampled: <span class="accent">coverage, cadence, spectral content, and error character become the model's inductive prior</span>.</li>
+    <li>Prithvi saw HLS over the US → global transfer is an open question; Prithvi-WxC saw 160 MERRA-2 variables → it inherits MERRA-2's biases.</li>
+    <li>Every headline weather model — FourCastNet, Pangu, GraphCast, GenCast — is an ERA5 emulator first.</li>
+    <li class="muted">So "which dataset?" is a modeling decision, not a logistics one.</li>
+  </ul>
+  <div class="foot"><span>Jakubik et al. 2023 (Prithvi) · Schmude et al. 2024 (Prithvi-WxC) · Rasp et al. 2024 (WeatherBench 2)</span></div>
+  <aside class="notes">2 min. Frame hard: students often treat data choice as plumbing. Point out that a model trained purely on ERA5 has never seen an observation — it has seen a model's opinion of observations. That lands the whole lecture. Transition: so let's meet the animals.</aside>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <p class="kicker">Part 1 · 15 min</p>
+  <h2>The zoo at a glance</h2>
+  <div class="scroll"><table class="small">
+    <thead><tr><th>Product</th><th>What it measures</th><th>Resolution</th><th>Cadence</th><th>Latency</th></tr></thead>
+    <tbody>
+      <tr><td><b>SMAP L3</b></td><td>Surface (0–5 cm) soil moisture, L-band radiometer retrieval</td><td class="num">36 km (9 km enh.)</td><td>Daily composite; global ~2–3 d</td><td class="num">~1 d</td></tr>
+      <tr><td><b>SMAP L4</b></td><td>Surface + root-zone SM, obs assimilated into Catchment model</td><td class="num">9 km</td><td>3-hourly, gap-free</td><td class="num">~2.5 d</td></tr>
+      <tr><td><b>ERA5</b></td><td>Full atmospheric state (reanalysis)</td><td class="num">0.25° (~31 km), 137 levels</td><td>Hourly, 1940–present</td><td class="num">~5 d (ERA5T)</td></tr>
+      <tr><td><b>MERRA-2</b></td><td>Atmospheric state + aerosols (reanalysis)</td><td class="num">0.5° × 0.625°</td><td>Hourly, 1980–present</td><td class="num">~2–3 wk</td></tr>
+      <tr><td><b>MODIS</b></td><td>36-band optical/IR radiances → LST, NDVI, snow, fire…</td><td class="num">250 m – 1 km</td><td>1–2 d per satellite</td><td class="num">NRT ~3 h</td></tr>
+      <tr><td><b>GPM IMERG</b></td><td>Merged multi-satellite precipitation</td><td class="num">0.1°</td><td>30-min</td><td class="num">4 h / 14 h / ~3.5 mo</td></tr>
+      <tr><td><b>HLS</b></td><td>Harmonized Landsat 8/9 + S2 surface reflectance</td><td class="num">30 m</td><td>~2–3 d combined</td><td class="num">~2–4 d</td></tr>
+      <tr><td><b>Sentinel-1</b></td><td>C-band SAR backscatter (VV/VH) — all-weather</td><td class="num">10 m (IW GRD)</td><td>6–12 d repeat</td><td class="num">hours–1 d</td></tr>
+      <tr><td><b>Sentinel-2</b></td><td>13-band optical reflectance (MSI)</td><td class="num">10/20/60 m</td><td>~5 d</td><td class="num">hours–2 d</td></tr>
+    </tbody>
+  </table></div>
+  <div class="foot"><span>Spec values are nominal; check product user guides per version</span></div>
+  <aside class="notes">4 min — do NOT read the table. Walk two contrasts: (1) SMAP L3 vs L4 — same mission, totally different objects, sets up the next slide. (2) IMERG's three latencies — same field, three answers, quality vs freshness is a dial. Point at the resolution column: five orders of magnitude from Sentinel-1's 10 m to ERA5's 31 km. That spread is Rolf's "multi-scale" argument in one column — flag that we return to it in the reading.</aside>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <p class="kicker">Part 1 · 15 min</p>
+  <h2>Processing level = how much model is in the product</h2>
+  <ul>
+    <li><b>L1</b> calibrated instrument measurements (radiances, backscatter) · <b>L2</b> retrieved geophysical variable, swath geometry · <b>L3</b> gridded/composited L2 · <b>L4</b> obs <span class="accent">assimilated into a model</span>.</li>
+    <li>SMAP L3: a retrieval — gaps where the satellite didn't pass, flags where retrieval fails.</li>
+    <li>SMAP L4: gap-free, 3-hourly, root-zone — because a land-surface model fills the space between overpasses.</li>
+    <li class="muted">Gap-free is not free: you are training on model physics wherever there was no overpass.</li>
+  </ul>
+  <div class="foot"><span>SMAP L3 = SPL3SMP · SMAP L4 = SPL4SMGP (NASA Catchment model + EnKF)</span></div>
+  <aside class="notes">2 min. The one-liner to repeat: "every level up trades instrument error for model error." Ask the class: for training an FM on soil moisture, which do you want — honest gaps (L3) or seamless model blend (L4)? There's no universal answer; it depends whether the model should learn observation structure or a complete state. Transition: this question explodes for ERA5.</aside>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <p class="kicker">Part 1 · 15 min</p>
+  <h2>Reanalysis ≠ observation ≠ analysis</h2>
+  <div class="cols">
+    <div>
+      <ul class="small">
+        <li><b>Observation</b> — what an instrument measured: irregular, gappy, instrument error.</li>
+        <li><b>Analysis</b> — best estimate of the current state: observations assimilated into a forecast model; the operational system keeps changing.</li>
+        <li><b>Reanalysis</b> — decades of analyses recomputed with <span class="accent">one frozen model + DA system</span>.</li>
+        <li>ERA5 = IFS Cy41r2 (2016-era) + 4D-Var, hourly, 0.25°, 137 levels, 1940–present.</li>
+        <li class="muted">Consistent physics ≠ consistent accuracy: the observing system underneath still changes (satellite era ≫ pre-1979).</li>
+      </ul>
+    </div>
+    <div class="figure">
+      <svg viewBox="0 0 300 230" role="img" aria-label="Data assimilation cycle: prior forecast plus observations enter 4D-Var analysis, which initializes the next forecast, looping" style="width:100%">
+        <g fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="20" y="20" width="120" height="44" rx="9"/>
+          <rect x="180" y="20" width="100" height="44" rx="9"/>
+          <rect x="75" y="100" width="150" height="44" rx="9" stroke="var(--accent)"/>
+          <rect x="75" y="180" width="150" height="40" rx="9"/>
+          <path d="M80 64 V88 L95 100 M230 64 V88 L215 100"/>
+          <path d="M150 144 V180" stroke="var(--accent)"/>
+          <path d="M225 200 H262 V42 L280 42" stroke="currentColor" stroke-dasharray="4 4"/>
+          <path d="M146 176 L150 184 L154 176 Z" fill="var(--accent)" stroke="none"/>
+        </g>
+        <g font-size="12" fill="currentColor" text-anchor="middle">
+          <text x="80" y="46">prior forecast</text>
+          <text x="230" y="46">observations</text>
+          <text x="150" y="126" fill="var(--accent)">4D-Var analysis</text>
+          <text x="150" y="204">next forecast (+12 h)</text>
+          <text x="262" y="130" font-size="10" transform="rotate(90 262 130)">cycle repeats</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <div class="foot"><span>Hersbach et al. 2020, QJRMS (ERA5) · ERA5T preliminary stream runs ~5 days behind real time</span></div>
+  <aside class="notes">3 min — this is the conceptual core of Part 1. Walk the loop: the model forecasts, observations correct it, the corrected state seeds the next forecast. A reanalysis replays this loop for 80 years without upgrading the model, so trends aren't artifacts of software upgrades. Punchline for this course: when we "evaluate against ERA5," we evaluate against this loop's output — a model product. That is DQ2 in the reading discussion; plant it now.</aside>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <p class="kicker">Part 1 · 15 min</p>
+  <h2>Error character: every product has a personality</h2>
+  <ul>
+    <li><b>IMERG</b> Early (4 h) → Late (14 h) → Final (~3.5 mo, gauge-corrected): pick freshness or quality — <span class="accent">never train on Final and deploy on Early without testing the gap</span>.</li>
+    <li><b>Optical</b> (MODIS, S2, HLS): clouds are structured missingness — correlated with rain, i.e. with the events you care about.</li>
+    <li><b>SAR</b> (S1): all-weather but speckled; backscatter lives in dB (log) space.</li>
+    <li><b>Reanalysis</b>: smooth and gap-free by construction — variance is too low, extremes are damped.</li>
+  </ul>
+  <div class="foot"><span>Error structure is rarely i.i.d. — it correlates with the phenomena being predicted</span></div>
+  <aside class="notes">2–3 min. Hammer the cloud point: missingness in optical EO is not random — it co-occurs with precipitation, so a flood-mapping model trained on cloud-free optical chips has a censored view of floods. That's why Sen1Floods11 (W4 lab) exists. Check time: should be ~13 min in. Transition: knowing what to read is half; now how to read petabytes without downloading them.</aside>
+</section>
+
+<!-- ============ PART 2 · CLOUD-NATIVE ============ -->
+
+<!-- 9 -->
+<section class="slide section">
+  <p class="kicker">Part 2 · 15 min</p>
+  <h2>Cloud-Native Geospatial</h2>
+  <aside class="notes">15 minutes: three formats (COG, Zarr, STAC), one mechanism (chunking), one map of where everything lives. The thesis: the format decides your training throughput before your model runs a single step.</aside>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <p class="kicker">Part 2 · 15 min</p>
+  <h2>Download-then-process is dead</h2>
+  <ul>
+    <li>ERA5 at 0.25°/hourly is petabyte-scale; the Sentinel-2 archive is tens of PB — <span class="accent">no one downloads the corpus anymore</span>.</li>
+    <li>Cloud-native flips the model: data sits in object storage (S3/GCS); you issue <b>HTTP range requests</b> for exactly the bytes you need.</li>
+    <li>Three specs make that possible: <b>COG</b> (images), <b>Zarr</b> (N-D arrays), <b>STAC</b> (search).</li>
+    <li class="muted">Throughput currency: useful bytes ÷ bytes moved. Everything today optimizes that ratio.</li>
+  </ul>
+  <aside class="notes">2 min. Define "cloud-native" precisely: a format is cloud-native when a remote reader can fetch a small piece without reading the whole file — layout + metadata designed for partial reads over HTTP. Write the ratio on the board; the chunking slide quantifies it.</aside>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <p class="kicker">Part 2 · 15 min</p>
+  <h2>COG — Cloud-Optimized GeoTIFF</h2>
+  <ul>
+    <li>A completely valid GeoTIFF, internally organized: <b>tiled layout</b> (e.g. 512×512 blocks) + <b>overview pyramids</b> + metadata at the front of the file.</li>
+    <li>A reader fetches the header, learns where each tile's bytes live, then range-requests <span class="accent">only the tiles under its window</span>.</li>
+    <li>Overviews serve zoomed-out views for free — same file powers browsing and training.</li>
+    <li class="muted">One object, many concurrent windowed readers; no server-side code — plain object storage.</li>
+  </ul>
+  <div class="foot"><span>Sentinel-2 L2A on AWS Earth Search is distributed as COGs · readers: rasterio/GDAL, rioxarray, stackstac</span></div>
+  <aside class="notes">2 min. Key mental model: COG turns "an image file" into "a byte-addressable tile database." Reading a 64×64 chip from an 11,000×11,000-pixel scene costs a header read plus one or two tile reads — a few hundred KB, not the ~1 GB scene. This is exactly what stackstac does under the hood in today's lab.</aside>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <p class="kicker">Part 2 · 15 min</p>
+  <h2>Zarr — chunked N-D arrays in object storage</h2>
+  <ul>
+    <li>An N-D array cut into <b>chunks</b>; each chunk is one compressed object; JSON metadata describes shape, dtype, chunking, compression.</li>
+    <li>Chunks are addressed by index (<code>t.0.3.7</code>) → <span class="accent">massively parallel reads, no file server</span>.</li>
+    <li><code>xarray.open_zarr</code> maps it to labeled dims/coords; consolidated metadata = one round-trip to open a PB-scale store.</li>
+    <li class="muted">Zarr is to arrays what COG is to images — and it is how ERA5 is actually served for ML.</li>
+  </ul>
+  <div class="foot"><span>zarr-python · xarray · gcsfs/s3fs for the storage layer</span></div>
+  <aside class="notes">2 min. Contrast with NetCDF/HDF5: same data model (labeled N-D arrays), but classic HDF5 assumed a local filesystem — remote partial reads are painful. Zarr's move: metadata in plain JSON, each chunk its own object. Opening WeatherBench2's ERA5 store takes seconds because metadata is consolidated into one JSON document.</aside>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <p class="kicker">Part 2 · 15 min</p>
+  <h2>STAC — the search index over it all</h2>
+  <ul>
+    <li>SpatioTemporal Asset Catalog: an <b>Item</b> = one scene — geometry, datetime, properties, and <b>assets</b> (links to the actual COGs); Items group into <b>Collections</b>.</li>
+    <li>The STAC API answers: <span class="accent">bbox + datetime + property filters</span> (e.g. <code>eo:cloud_cover &lt; 20</code>) → a list of Items.</li>
+    <li><code>pystac-client</code> searches; <code>stackstac</code>/<code>odc-stac</code> turn the result into a lazy xarray datacube.</li>
+    <li class="muted">STAC finds the scenes; COG serves the pixels; Zarr holds what you keep.</li>
+  </ul>
+  <div class="foot"><span>Earth Search (Element 84) on AWS: Sentinel-2 L2A · Copernicus Data Space and NASA CMR also speak STAC</span></div>
+  <aside class="notes">2 min. The last bullet is the sentence to remember — the three specs are one pipeline, not three competing formats. In the lab, the chip pipe is literally: STAC query → filter by cloud metadata → stackstac windowed COG reads → write local chip store.</aside>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <p class="kicker">Part 2 · 15 min</p>
+  <h2>Chunk layout dominates throughput</h2>
+  <div class="figure">
+    <svg viewBox="0 0 640 250" role="img" aria-label="Two chunk layouts for a space-time datacube: map-chunked stores touch every chunk for a time-series query; time-chunked stores touch one" style="width:min(92%,760px)">
+      <!-- left panel: map-chunked (thin in time) -->
+      <g fill="none" stroke="currentColor" stroke-width="1">
+        <rect x="30" y="55" width="240" height="140" rx="4"/>
+        <path d="M60 55 V195 M90 55 V195 M120 55 V195 M150 55 V195 M180 55 V195 M210 55 V195 M240 55 V195"/>
+      </g>
+      <rect x="30" y="115" width="240" height="20" fill="var(--accent)" opacity="0.28"/>
+      <g fill="var(--wash)" stroke="none">
+        <rect x="31" y="56" width="28" height="138"/><rect x="61" y="56" width="28" height="138"/>
+        <rect x="91" y="56" width="28" height="138"/><rect x="121" y="56" width="28" height="138"/>
+        <rect x="151" y="56" width="28" height="138"/><rect x="181" y="56" width="28" height="138"/>
+        <rect x="211" y="56" width="28" height="138"/><rect x="241" y="56" width="28" height="138"/>
+      </g>
+      <!-- right panel: time-chunked (thin in space) -->
+      <g fill="none" stroke="currentColor" stroke-width="1">
+        <rect x="370" y="55" width="240" height="140" rx="4"/>
+        <path d="M370 90 H610 M370 125 H610 M370 160 H610"/>
+      </g>
+      <rect x="370" y="115" width="240" height="20" fill="var(--accent)" opacity="0.28"/>
+      <rect x="371" y="126" width="238" height="33" fill="var(--wash)" stroke="none"/>
+      <!-- axes + labels -->
+      <g fill="none" stroke="currentColor" stroke-width="1.2">
+        <path d="M30 215 H120 M112 211 L120 215 L112 219"/>
+        <path d="M370 215 H460 M452 211 L460 215 L452 219"/>
+      </g>
+      <g font-size="12" fill="currentColor">
+        <text x="30" y="40">A · chunk = full map × 1 step</text>
+        <text x="370" y="40">B · chunk = small box × all steps</text>
+        <text x="128" y="232">time →</text>
+        <text x="468" y="232">time →</text>
+        <text x="30" y="248" font-size="11">query: one pixel, all times → touches all 8 chunks</text>
+        <text x="370" y="248" font-size="11" fill="var(--accent)">same query → touches 1 chunk</text>
+        <text x="12" y="130" font-size="11" transform="rotate(-90 12 130)" text-anchor="middle">space (flattened)</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Cost of a read = <span class="accent">chunks touched × chunk size</span> — the store decompresses whole chunks, never single values.</li>
+    <li>Layout A is perfect for "one global map" and catastrophic for time series; layout B is the mirror image.</li>
+    <li>Rule: chunk so your <b>dominant access pattern</b> — for training, the sample shape — touches few chunks.</li>
+  </ul>
+  <aside class="notes">3–4 min, the mechanism slide of Part 2. Quantify: ERA5 T2m is 721×1440 float32 ≈ 4 MB per hourly step. In layout A, a 40-year hourly point time series touches ~350,000 chunks — you move ~1.4 TB to keep 1.4 MB: efficiency 10⁻⁶. Same data, same store tech, only the chunk map changed. This is DQ3 — chunking as a scientific issue: whether a climatology, a time-series analysis, or a training epoch is feasible is decided at write time by whoever chunked the archive. WB2 publishes multiple chunkings of the same ERA5 for exactly this reason.</aside>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <p class="kicker">Part 2 · 15 min</p>
+  <h2>Where the data actually lives</h2>
+  <ul>
+    <li><b>NASA Earthdata Cloud</b> — DAAC holdings on AWS (HLS, SMAP, GPM…); <code>earthaccess</code> handles auth + search + open in ~5 lines.</li>
+    <li><b>Copernicus Data Space Ecosystem</b> — Sentinel-1/2/3/5P; STAC + S3 access, openEO processing.</li>
+    <li><b>WeatherBench2 public ERA5 Zarr</b> — <code>gs://weatherbench2/datasets/era5/…</code>: 0.25° down to 5.625° subsets, anonymous access — <span class="accent">today's lab corpus</span>.</li>
+    <li><b>AWS Earth Search</b> (Element 84) — STAC API over Sentinel-2 L2A COGs, no login.</li>
+    <li class="muted">Also: Google's ARCO-ERA5 bucket, Microsoft Planetary Computer.</li>
+  </ul>
+  <div class="foot"><span>Rasp et al. 2024, WeatherBench 2, arXiv:2308.15560 · earthaccess docs · earth-search.aws.element84.com/v1</span></div>
+  <aside class="notes">2 min. The point isn't the list — it's that every item is anonymous-or-free programmatic access. The era of clicking through download portals is over for these archives. Both lab pipes use exactly two of these: WB2's Zarr and Earth Search.</aside>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <p class="kicker">Part 2 · 15 min</p>
+  <h2>The whole stack in ten lines</h2>
+  <div class="cols">
+    <div>
+      <h3 class="small">ERA5 via Zarr</h3>
+      <pre>import xarray as xr
+ds = xr.open_zarr(
+  "gs://weatherbench2/datasets/era5/"
+  "1959-2023_...-64x32_equiangular....zarr",
+  storage_options={"token": "anon"})
+z500 = ds["geopotential"].sel(level=500)</pre>
+    </div>
+    <div>
+      <h3 class="small">Sentinel-2 via STAC</h3>
+      <pre>from pystac_client import Client
+cat = Client.open(
+  "https://earth-search.aws.element84.com/v1")
+items = cat.search(
+  collections=["sentinel-2-l2a"],
+  bbox=korea, datetime="2026-05/2026-08",
+  query={"eo:cloud_cover": {"lt": 20}}).items()</pre>
+    </div>
+  </div>
+  <ul class="small"><li>Both are <b>lazy</b>: nothing moves until you slice and <code>.compute()</code> — the chunk map then decides how fast that is.</li></ul>
+  <aside class="notes">2 min, don't walk every line. Two things to notice: anonymous token on the left, cloud-cover filter pushed into the search on the right — filtering by metadata before touching pixels. This is the skeleton the agent will scaffold in lab; your job is to verify what comes back. Time check: ~30 min in. Transition: now we treat ERA5 not as a dataset but as a corpus.</aside>
+</section>
+
+<!-- ============ PART 3 · ERA5 AS CORPUS ============ -->
+
+<!-- 17 -->
+<section class="slide section">
+  <p class="kicker">Part 3 · 15 min</p>
+  <h2>ERA5 as a Pretraining Corpus</h2>
+  <aside class="notes">15 minutes, the most mathematical part of today: the grid, the cos-latitude weight (derived, not asserted), anomalies vs climatology, and regridding. All four reappear in Weeks 9–11 as the machinery under GraphCast and WeatherBench2 scores.</aside>
+</section>
+
+<!-- 18 -->
+<section class="slide">
+  <p class="kicker">Part 3 · 15 min</p>
+  <h2>ERA5 is the ImageNet of weather</h2>
+  <ul>
+    <li>FourCastNet, Pangu-Weather, GraphCast, GenCast: all trained on <span class="accent">ERA5 at 0.25°</span> — one corpus, one field's worth of models.</li>
+    <li>WeatherBench 2 fixes the protocol: train ≤ 2018, test 2020 — temporal holdout, exactly the W2 leakage lesson.</li>
+    <li>State vector: surface (T2m, U10/V10, MSLP) + upper-air variables on 13 pressure levels (50 → 1000 hPa); <b>Z500</b> is the headline — geopotential height at 500 hPa tracks the midlatitude synoptic pattern.</li>
+    <li class="muted">"Beats IFS" always means: beats IFS at reproducing ERA5's version of the atmosphere.</li>
+  </ul>
+  <div class="foot"><span>Bi et al. 2023 (Pangu) · Lam et al. 2023 (GraphCast) · Rasp et al. 2024 (WB2)</span></div>
+  <aside class="notes">3 min. Explain why Z500 of all things: it's smooth, dynamically central (ridges/troughs = weather regimes), and the historical NWP skill metric — continuity back to Bauer et al.'s "quiet revolution." The last bullet plants DQ2 again: the ceiling of this whole enterprise is ERA5's own fidelity. Lab pipe (a) computes a Z500 climatology — today they touch the exact variable the field scores itself on.</aside>
+</section>
+
+<!-- 19 -->
+<section class="slide">
+  <p class="kicker">Part 3 · 15 min</p>
+  <h2>The equiangular grid oversamples the poles</h2>
+  <div class="cols">
+    <div>
+      <ul class="small">
+        <li>0.25° equiangular lat–lon grid → a <b>721 × 1440</b> array; every row has 1440 cells.</li>
+        <li>But physical cell width shrinks with latitude: <span class="accent">area ∝ cos φ</span>.</li>
+        <li>cos 0° = 1 vs cos 89.875° ≈ 0.0022 → an equator cell covers ~<b>450×</b> the area of a near-pole cell.</li>
+        <li class="muted">The array is a lie about the sphere — any unweighted mean over it inherits the lie.</li>
+      </ul>
+    </div>
+    <div class="figure">
+      <svg viewBox="0 0 320 240" role="img" aria-label="Latitude bands drawn at true width: rows shrink proportionally to cos latitude toward the pole, while the storage array keeps all rows equal" style="width:100%">
+        <!-- true-area rows, width ∝ cos φ, 8 cells each -->
+        <g fill="none" stroke="currentColor" stroke-width="1">
+          <rect x="20"  y="180" width="280" height="34"/>
+          <path d="M55 180 V214 M90 180 V214 M125 180 V214 M160 180 V214 M195 180 V214 M230 180 V214 M265 180 V214"/>
+          <rect x="38.8" y="140" width="242.5" height="34"/>
+          <path d="M69.1 140 V174 M99.4 140 V174 M129.7 140 V174 M160 140 V174 M190.3 140 V174 M220.6 140 V174 M250.9 140 V174"/>
+          <rect x="90"  y="100" width="140" height="34"/>
+          <path d="M107.5 100 V134 M125 100 V134 M142.5 100 V134 M160 100 V134 M177.5 100 V134 M195 100 V134 M212.5 100 V134"/>
+          <rect x="135.7" y="60" width="48.6" height="34" stroke="var(--accent)"/>
+          <path d="M141.8 60 V94 M147.9 60 V94 M153.9 60 V94 M160 60 V94 M166.1 60 V94 M172.1 60 V94 M178.2 60 V94" stroke="var(--accent)"/>
+        </g>
+        <g font-size="12" fill="currentColor">
+          <text x="308" y="202" text-anchor="start" font-size="11">φ = 0°</text>
+          <text x="288" y="162" text-anchor="start" font-size="11">30°</text>
+          <text x="238" y="122" text-anchor="start" font-size="11">60°</text>
+          <text x="192" y="82" text-anchor="start" font-size="11" fill="var(--accent)">80°</text>
+          <text x="160" y="40" text-anchor="middle" font-size="11">same Δφ × Δλ, same 1440 columns —</text>
+          <text x="160" y="54" text-anchor="middle" font-size="11" fill="var(--accent)">width shrinks as cos φ</text>
+          <text x="160" y="232" text-anchor="middle" font-size="11" class="muted">each box = one grid cell at true relative width</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <aside class="notes">2–3 min. Point at the figure: every row holds the same number of array cells, but the 80° row is a sliver of real estate. So in the flat array, polar air is stored ~450 times more densely per unit area than tropical air. Ask: what happens to a naive global-mean temperature? (Poles are cold → biased cold.) Don't give the number — the lab measures it. Transition: let's make the fix exact, not hand-wavy.</aside>
+</section>
+
+<!-- 20 -->
+<section class="slide">
+  <p class="kicker">Part 3 · 15 min</p>
+  <h2>Deriving the cos-latitude weighted mean</h2>
+  <ul>
+    <li>Area element on a sphere: <b>dA = R² · cos φ · dφ · dλ</b> — the cos φ is the shrinking circumference of a latitude circle.</li>
+    <li>For a grid cell at latitude φᵢ with fixed Δφ, Δλ: <b>Aᵢ ≈ R² · cos φᵢ · Δφ · Δλ</b> → everything cancels but <span class="accent">wᵢ = cos φᵢ</span>.</li>
+    <li>Area-true global mean of a field xᵢⱼ (i = lat row, j = lon column):</li>
+  </ul>
+  <p class="big" style="font-family:var(--serif)">⟨x⟩ = Σᵢ Σⱼ cos φᵢ · xᵢⱼ&thinsp; / &thinsp;( Nλ · Σᵢ cos φᵢ )</p>
+  <ul class="small">
+    <li>One line of code: <code>ds.weighted(np.cos(np.deg2rad(ds.lat))).mean(("lat","lon"))</code> — but now you know <i>why</i>.</li>
+    <li>Same weight sits inside WB2's headline metric, latitude-weighted RMSE — and inside ACC (W11).</li>
+  </ul>
+  <div class="foot"><span>Exact per-row weight uses Δ(sin φ) across cell edges; cos φᵢ is its midpoint approximation — fine at 0.25°</span></div>
+  <aside class="notes">4 min — do the derivation live on the board, it's three lines: sphere area element → cell area → constants cancel. Emphasize the logical order: the weight is not a convention, it falls out of geometry. Mention the footnote honestly: the exact discrete weight is proportional to sin(φ_north edge) − sin(φ_south edge); cos φ at the midpoint is the small-Δφ approximation everyone uses. Lab pipe (a) verifies weighted vs naive T2m mean — students must predict the sign of the difference before running it.</aside>
+</section>
+
+<!-- 21 -->
+<section class="slide">
+  <p class="kicker">Part 3 · 15 min</p>
+  <h2>Anomalies: subtract the boring part</h2>
+  <ul>
+    <li><b>Climatology</b> c = the expected state for this location, day-of-year, hour — averaged over a fixed reference period (WB2: 1990–2019).</li>
+    <li><b>Anomaly</b>: x′ = x − c — what remains is <span class="accent">weather</span>, after the seasonal and diurnal cycles are removed.</li>
+    <li>Why it matters: predicting "warm in August" is free skill; anomaly metrics refuse to pay for it.</li>
+    <li>Sets up W11: <b>ACC = Σ w·x′f·x′o / √(Σ w·x′f² · Σ w·x′o²)</b> — the anomaly correlation coefficient, with the same cos φ weights; ACC ≈ 0.6 is the classic "useful forecast" line.</li>
+  </ul>
+  <div class="foot"><span>ACC compares forecast anomaly x′f with observed anomaly x′o — climatology scores exactly 0</span></div>
+  <aside class="notes">3 min. The rhetorical move: a model that memorizes the seasonal cycle looks great on raw RMSE at long leads. Anomaly space is where skill claims become honest — climatology itself scores zero ACC by construction. Lab pipe (a) builds a Z500 climatology and anomaly field, so this slide becomes muscle memory today. Note normalization parallel: climatology is also computed on reference years only — same train-only discipline as normalization stats, coming in Part 4.</aside>
+</section>
+
+<!-- 22 -->
+<section class="slide">
+  <p class="kicker">Part 3 · 15 min</p>
+  <h2>Regridding: conservative vs bilinear</h2>
+  <div class="cols">
+    <div>
+      <h3>Bilinear</h3>
+      <ul class="small">
+        <li>Interpolates <b>point values</b> from the 4 surrounding nodes; smooth output.</li>
+        <li>Right for smooth, <b>intensive</b> state fields: T, Z, wind — especially going finer.</li>
+        <li>Does not preserve integrals — it will quietly create or destroy total rainfall.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Conservative</h3>
+      <ul class="small">
+        <li>Weights by <b>cell-overlap areas</b>; preserves area integrals (mass, energy, total precip).</li>
+        <li>Right for <b>fluxes and precipitation</b>, and for any coarsening (0.25° → 5.625° WB2 subsets).</li>
+        <li>Going finer it gives blocky fields — correct totals, ugly maps.</li>
+      </ul>
+    </div>
+  </div>
+  <ul class="small"><li>Categorical fields (SCL, land cover): <span class="accent">nearest-neighbor only</span> — you cannot average class 4 and class 6. Tools: xesmf/ESMF.</li></ul>
+  <aside class="notes">3 min. Decision rule to dictate: "Is the quantity a point sample of a smooth field, or an amount per area? Point → bilinear. Amount → conservative. Class label → nearest." Concrete failure: bilinearly regrid IMERG to 0.25° and continental total rainfall changes — a physics bug, not a rendering bug. The 5.625° ERA5 they use in lab was produced conservatively; they are consumers of this choice today. Time check: ~45 min in.</aside>
+</section>
+
+<!-- ============ PART 4 · DATASET OBJECTS ============ -->
+
+<!-- 23 -->
+<section class="slide section">
+  <p class="kicker">Part 4 · 10 min</p>
+  <h2>Dataset Objects for Pretraining</h2>
+  <aside class="notes">10 minutes. From archives to __getitem__: what a sample IS (chips, tiles, pixel series), and the two curation steps every real FM corpus lives on — normalization and QA masking.</aside>
+</section>
+
+<!-- 24 -->
+<section class="slide">
+  <p class="kicker">Part 4 · 10 min</p>
+  <h2>What is a training sample? Chips, tiles, pixel series</h2>
+  <div class="figure">
+    <svg viewBox="0 0 640 210" role="img" aria-label="A tile is the delivery granule; a chip is a small training window cut from it; a per-pixel time series is one pixel tracked through time" style="width:min(92%,740px)">
+      <g fill="none" stroke="currentColor" stroke-width="1.3">
+        <!-- tile -->
+        <rect x="25" y="35" width="130" height="130" rx="4"/>
+        <rect x="95" y="75" width="34" height="34" stroke="var(--accent)" fill="var(--wash)"/>
+        <!-- chip stack -->
+        <rect x="255" y="75" width="64" height="64" rx="3" stroke="var(--accent)"/>
+        <rect x="247" y="67" width="64" height="64" rx="3"/>
+        <rect x="239" y="59" width="64" height="64" rx="3"/>
+        <!-- pixel series -->
+        <rect x="450" y="45" width="26" height="26" rx="3"/>
+        <rect x="500" y="45" width="26" height="26" rx="3"/>
+        <rect x="550" y="45" width="26" height="26" rx="3"/>
+        <circle cx="463" cy="58" r="3" fill="var(--accent)" stroke="none"/>
+        <circle cx="513" cy="58" r="3" fill="var(--accent)" stroke="none"/>
+        <circle cx="563" cy="58" r="3" fill="var(--accent)" stroke="none"/>
+        <path d="M455 130 H600 M455 130 V95" stroke-width="1"/>
+        <path d="M460 122 L490 112 L520 125 L550 104 L580 110" stroke="var(--accent)"/>
+      </g>
+      <g font-size="12" fill="currentColor">
+        <text x="90" y="185" text-anchor="middle">tile · delivery granule</text>
+        <text x="90" y="200" text-anchor="middle" font-size="11">S2 MGRS: 110 km, 10,980² px</text>
+        <text x="279" y="165" text-anchor="middle">chip · training sample</text>
+        <text x="279" y="180" text-anchor="middle" font-size="11">64–512 px window × bands (× time)</text>
+        <text x="527" y="155" text-anchor="middle">per-pixel time series</text>
+        <text x="527" y="170" text-anchor="middle" font-size="11">one location, (T × C) sequence</text>
+        <text x="527" y="88" text-anchor="middle" font-size="11">t₁ → t₂ → t₃</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>The choice couples to architecture: ViT-MAE models eat <b>chips</b> (SatMAE 224², Prithvi); Presto (~400K params) and TESSERA eat <b>pixel series</b>; tiles are for delivery and inference tiling, <span class="accent">never for batching</span>.</li>
+  </ul>
+  <div class="foot"><span>Cong et al. 2022 (SatMAE) · Tseng et al. 2023 (Presto) · lab chips: 64×64 × 4 bands</span></div>
+  <aside class="notes">3 min. Vocabulary slide — nail the three words because papers blur them. A tile is what the agency ships; a chip is what your dataloader yields; a pixel series is the degenerate chip that turns EO into sequence modeling. Note the economy argument: Presto proves a 400K-param model on pixel series is competitive for many tasks — chips are not the only road to an FM, and that matters for capstone compute budgets.</aside>
+</section>
+
+<!-- 25 -->
+<section class="slide">
+  <p class="kicker">Part 4 · 10 min</p>
+  <h2>Normalization statistics are model parameters</h2>
+  <ul>
+    <li><b>Per-band</b> μ and σ — band B02 and band B08 live on different scales; SAR is already log (dB); one global μ/σ across bands destroys spectral structure.</li>
+    <li><b>Train-set-only</b>: stats computed over test years/regions are leakage — the W2 lesson, now in the corpus itself.</li>
+    <li>Compute once, streaming (Welford / chunked accumulation), and <span class="accent">version the stats file with the corpus</span> — fine-tuning must reuse pretraining stats, not recompute.</li>
+    <li class="muted">Per-chip min–max normalization erases absolute brightness — a real signal (albedo, backscatter level), not noise.</li>
+  </ul>
+  <div class="foot"><span>Prithvi and SatMAE ship fixed per-band stats with their weights — reusing the backbone means reusing the stats</span></div>
+  <aside class="notes">3 min. The title is the claim: μ and σ are as much a part of the model as the weights — mismatch them and a pretrained encoder sees garbage. Real-world bug to tell: fine-tuning Prithvi with your own recomputed stats silently degrades transfer; TerraTorch configs pin the original stats for exactly this reason. Lab deliverable includes per-band stats stored beside the chip store.</aside>
+</section>
+
+<!-- 26 -->
+<section class="slide">
+  <p class="kicker">Part 4 · 10 min</p>
+  <h2>QA masking: the curation every FM corpus lives on</h2>
+  <ul>
+    <li>Sentinel-2 L2A ships <b>SCL</b> (scene classification, 20 m): reject pixels in classes <b>3</b> cloud shadow, <b>8/9</b> cloud medium/high, <b>10</b> cirrus (+ 0/1 nodata/defective); keep 4 vegetation, 5 bare, 6 water.</li>
+    <li>Chip rule in today's lab: <span class="accent">keep a chip only if its bad-SCL fraction is below a threshold</span> (e.g. &lt; 5–10%).</li>
+    <li>SMAP: use <code>retrieval_qual_flag</code> (bit 0 = recommended) and surface flags — frozen ground, RFI, dense vegetation, open water.</li>
+    <li class="muted">Skipping this step doesn't crash — it just pretrains your model on clouds. Corpus papers bury it in appendices; it is half the work.</li>
+  </ul>
+  <div class="foot"><span>Sen2Cor SCL classes 0–11 · SMAP L2/L3 product user guides</span></div>
+  <aside class="notes">3 min. The last bullet is the message: curation failures are silent. Show of hands — who has trained on an image dataset without looking at 100 random samples? The chip gallery in the lab deliverable exists to force that look. Also note masks are categorical: if you ever regrid SCL, nearest-neighbor only (callback to regridding). Transition: everything today was one pipeline — one slide to close the loop.</aside>
+</section>
+
+<!-- 27 -->
+<section class="slide">
+  <p class="kicker">Part 4 · 10 min</p>
+  <h2>The corpus pipeline you now own</h2>
+  <ul>
+    <li><b>Choose</b> from the zoo — knowing what's measured vs modeled, at what resolution, latency, error character.</li>
+    <li><b>Reach</b> it cloud-natively — STAC to find, COG/Zarr to read only the bytes you need, chunking to make it fast.</li>
+    <li><b>Shape</b> it — grid geometry (cos φ), anomalies vs climatology, the right regridding.</li>
+    <li><b>Curate</b> it — chips with QA masking and versioned, train-only, per-band stats.</li>
+    <li class="muted">Every FM paper's "Data" section is these four verbs. Most of the effort — and many of the bugs — live here.</li>
+  </ul>
+  <aside class="notes">1–2 min, breathe. This is the synthesis: today was one pipeline told four ways. In W7, when we pretrain on the chip store built today, zero new data code should be needed. Time check: ~55 min — move to the reading discussion.</aside>
+</section>
+
+<!-- ============ PART 5 · READING ============ -->
+
+<!-- 28 -->
+<section class="slide section">
+  <p class="kicker">Part 5 · 15 min</p>
+  <h2>Reading: Rolf et al. 2024</h2>
+  <p class="big muted">Position: Satellite data is a distinct modality in machine learning</p>
+  <aside class="notes">15 minutes. Rotation pair opens with one reproduced figure (2 min), then the board exercise, then the three DQs. Keep the board list — we photograph it and revisit it all semester.</aside>
+</section>
+
+<!-- 29 -->
+<section class="slide">
+  <p class="kicker">Part 5 · 15 min</p>
+  <h2>The position in one slide</h2>
+  <ul>
+    <li>Claim: satellite data is not "images, but bigger" — it differs from natural images in ways that should <span class="accent">change how we design, train, and evaluate models</span>.</li>
+    <li>If true: EO-native architectures (SatMAE's temporal/spectral tokens, Scale-MAE's GSD encoding) are necessary, not decoration.</li>
+    <li>If false: general vision backbones (DINOv3) should win — and on high-res RGB benchmarks, GEO-Bench-2 says they sometimes do.</li>
+    <li class="muted">This tension is the course thesis; we test it empirically for the rest of the semester.</li>
+  </ul>
+  <div class="foot"><span>Rolf et al. 2024, arXiv:2402.01444 (ICML position paper) · GEO-Bench-2, arXiv:2511.15658</span></div>
+  <aside class="notes">2 min framing before discussion. Be fair to both sides: the position paper is an argument, and DINOv3-beats-GFMs on RGB tasks is real counter-evidence. The honest reading: "distinct modality" is most true for multispectral, temporal, and pixel-time-series regimes — least true for high-res RGB. That nuance should come out in DQ1.</aside>
+</section>
+
+<!-- 30 -->
+<section class="slide">
+  <p class="kicker">Part 5 · 15 min</p>
+  <h2>Board exercise: five concrete differences</h2>
+  <ul>
+    <li>Collect on the board: <span class="accent">five concrete ways satellite data differs from natural images</span> — concrete enough to change a line of code.</li>
+    <li>Each must name its design consequence: tokenizer? positional encoding? masking scheme? loss? evaluation split?</li>
+    <li class="muted">We photograph this board and re-grade it in W7 (EO FMs) and W13 (capstone design reviews).</li>
+  </ul>
+  <div class="foot"><span>Rule: "there's more of it" is not a difference — scale of archive vs scarcity of labels is</span></div>
+  <aside class="notes">6–7 min. Target list to steer toward (don't reveal upfront): (1) metric scale/GSD is meaningful and varies by orders of magnitude → Scale-MAE's GSD positional encoding; (2) many physically-meaningful spectral channels and sensor types beyond RGB → SatMAE's band groups, DOFA's wavelength-conditioned embeddings; (3) revisit structure — the same place imaged repeatedly, irregularly → temporal tokens, pixel-time-series models; (4) every pixel is georeferenced → auxiliary data joins, spatial autocorrelation, non-IID splits (W2 callback); (5) planetary unlabeled archives vs scarce, geographically biased labels → SSL pretraining as the default, label-shift-aware evaluation. If students propose others (nadir viewpoint, no canonical orientation, physical units vs perceptual RGB), take them — five is a floor for discussion, not a ceiling.</aside>
+</section>
+
+<!-- 31 -->
+<section class="slide">
+  <p class="kicker">Reading discussion · 15 min</p>
+  <h2>Rolf et al. 2024 — discussion questions</h2>
+  <ol>
+    <li>Which of Rolf's claimed distinctions actually change architecture choices (cite SatMAE/Scale-MAE design decisions)?</li>
+    <li>Reanalysis is a model product — what does that mean for 'ground truth' when we evaluate a weather FM against ERA5?</li>
+    <li>Why is chunking layout a scientific issue, not just an engineering one?</li>
+  </ol>
+  <div class="foot"><span>Lead: rotation pair · opens with one reproduced figure · optional: Bauer, Thorpe &amp; Brunet 2015, doi:10.1038/nature14956</span></div>
+  <aside class="notes">Remaining ~6 min across the three DQs. DQ1 harvests the board exercise into citations. DQ2: return to the assimilation-cycle diagram — good answers mention data-sparse regions being mostly model, and that "beating IFS on ERA5" partly measures agreement with ECMWF's own worldview. DQ3: return to the chunking slide — feasibility of whole analyses is set at archive-write time, and whoever chunks the archive decides which science is cheap. Close with a one-line bridge to lab.</aside>
+</section>
+
+<!-- ============ PART 6 · LAB ============ -->
+
+<!-- 32 -->
+<section class="slide">
+  <p class="kicker">Lab briefing · 5 min</p>
+  <h2>Today's lab: two ETL pipes, one reusable module</h2>
+  <div class="card small">
+    <p><b>Pipe (a) — ERA5.</b> Open WeatherBench2's public ERA5 Zarr (5.625° subset) with xarray → compute a <b>Z500 climatology + anomaly field</b> → verify the <b>cos-lat weighted global mean of T2m against the naive mean</b>. <span class="pill">WB2 ERA5 Zarr</span> <span class="pill">xarray · zarr · gcsfs</span></p>
+    <p><b>Pipe (b) — Sentinel-2.</b> Pull ~200 <b>S2 L2A chips</b> (64×64, 4 bands) over South Korea via STAC (Earth Search on AWS) or HLS via earthaccess, <b>SCL cloud/QA filtering at chip selection</b> → local Zarr/NPZ <b>chip store with per-band stats</b>. <span class="pill">STAC / Earth Search</span> <span class="pill">pystac-client · stackstac · earthaccess</span></p>
+    <p><b>Deliverable.</b> Reusable <code>data/</code> module + Note 03: chip gallery, anomaly map, weighted-vs-naive mean table. <b>This chip store is reused in W7.</b></p>
+  </div>
+  <ul class="small">
+    <li>Agent scaffolds the pipes; <span class="accent">you verify</span>: predict the weighted-vs-naive sign first, eyeball 20 chips, check per-band stats are train-only and stored.</li>
+  </ul>
+  <aside class="notes">5 min. Set the verification contract explicitly — three checks: (1) before running, write down the expected sign of naive-minus-weighted T2m and why; (2) open the chip gallery and actually look — clouds that slipped past SCL will be visible; (3) confirm the stats JSON sits beside the chip store and states which items/dates produced it. If the agent's scaffold hardcodes stats or skips SCL, that's the bug you're meant to catch. Dismiss to lab.</aside>
+</section>
+
+</body>
+</html>

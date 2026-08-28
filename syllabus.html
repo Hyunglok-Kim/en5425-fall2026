@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Syllabus · EN5425 Deep Learning Applications in Environmental Big Data</title>
+<meta name="description" content="Course facts, workload, AI-agent policy, grading decomposition, and policies for EN5425/EV4240, GIST Fall 2026.">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js" defer></script>
+</head>
+<body data-page="syllabus">
+<div class="wrap">
+  <p class="eyebrow">EN5425 / EV4240 · Fall 2026</p>
+  <h1>Syllabus</h1>
+  <p class="lede">Read this page in full before the add/drop deadline. It states, without softening,
+    what the course demands, how every point is earned, and the rules you are agreeing to by staying enrolled.</p>
+
+  <h2>Course facts</h2>
+  <div class="rows">
+    <div class="row"><span style="flex:none;width:130px;color:var(--muted)">Course</span>
+      <span>EN5425 (graduate) / EV4240 (undergraduate), cross-listed · <i>Deep Learning Applications in Environmental Big Data</i></span></div>
+    <div class="row"><span style="flex:none;width:130px;color:var(--muted)">Institution</span>
+      <span>Gwangju Institute of Science and Technology (GIST) · Fall 2026</span></div>
+    <div class="row"><span style="flex:none;width:130px;color:var(--muted)">Instructor</span>
+      <span>Prof. Hyunglok Kim · <a href="https://hydroai.net">HydroAI Lab</a></span></div>
+    <div class="row"><span style="flex:none;width:130px;color:var(--muted)">Format</span>
+      <span>One 3-hour session per week: ~75 minutes concept + ~75 minutes hands-on lab. 16 weeks.</span></div>
+    <div class="row"><span style="flex:none;width:130px;color:var(--muted)">Level</span>
+      <span>Taught at first-semester PhD pace for both sections; see the EV4240/EN5425 differentiation policy below.</span></div>
+    <div class="row"><span style="flex:none;width:130px;color:var(--muted)">Prerequisites</span>
+      <span>Solid Python; an introductory machine-learning course <i>or</i> consent of the instructor.
+        Week 1's ungraded diagnostic (linear algebra through SVD, probability through Bayes/MLE, calculus and backprop,
+        NumPy/PyTorch, shell/git, geospatial data literacy) tells you whether your preparation is real.</span></div>
+    <div class="row"><span style="flex:none;width:130px;color:var(--muted)">Grade skeleton</span>
+      <span class="tnum">Attendance 10% · Paper discussion 30% · Project 60%</span></div>
+  </div>
+
+  <h2>Workload &amp; expectations</h2>
+  <p>This course is taught at the level of a first-semester PhD course and is deliberately demanding.
+    Plan for <b>8–12 hours per week outside of class, every week</b>: one assigned research paper weekly with a written
+    response due 24 hours before class and active participation in discussion (30% of your grade); hands-on labs whose
+    threads continue between sessions; and a semester project (60%) in which you will fine-tune, evaluate, document, and
+    publicly release a small geospatial or weather/climate foundation model, with graded milestones beginning in Week&nbsp;4.
+    The material compounds: each week's lab is a component of your capstone, and falling one week behind means falling
+    behind on your own model. Week 1 includes an ungraded readiness diagnostic and a pass/fail gate assignment (HW0) that
+    together give you an honest measurement of what this course will cost you; I ask you to trust that measurement and
+    decide accordingly before the add/drop deadline. Students who commit will leave with a released model, a public
+    engineering portfolio, and research-grade habits; students who cannot commit this particular semester should take the
+    prerequisite coursework first and return — a decision I will always respect and support.</p>
+
+  <h2>AI coding agent policy</h2>
+  <p>AI coding agents (Claude Code, Codex, Cursor, or equivalent) are <b>required tools</b> in this course: every lab and
+    the capstone assume you are working alongside an agent, and learning to direct one effectively — decomposing problems,
+    specifying interfaces, reviewing generated code critically — is an explicit learning objective. The corresponding
+    obligation is absolute: <b>you are personally accountable for every line of code you submit, whoever or whatever wrote
+    it.</b> You must be able to explain what any line does, why it is there, and what would break if it changed. I reserve
+    the right to conduct a brief <b>oral defense</b> of any submission at any time; inability to explain your own
+    repository is treated identically to submitting work that is not yours, and repeated failures will be referred under
+    the university's academic integrity procedures. Each substantial submission must include a short disclosure of which
+    tools you used and how. Agents are prohibited only where explicitly stated: the Week 1 diagnostic and any in-class
+    assessment designated closed-book. The standard, stated plainly: use the strongest tools available, and understand
+    everything you ship — that combination, not either half alone, is what this course trains.</p>
+
+  <h2>Grading</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Component</th><th class="num">Weight</th><th>How it is earned</th></tr></thead>
+      <tbody>
+        <tr class="phase"><td colspan="3">Attendance — 10%</td></tr>
+        <tr><td>Attendance</td><td class="num">10%</td>
+          <td>Sign-in every session. The 3-hour block is the course; there is no recorded substitute.</td></tr>
+
+        <tr class="phase"><td colspan="3">Paper discussion — 30%</td></tr>
+        <tr><td>Weekly reading memos</td><td class="num">18%</td>
+          <td>14 memo opportunities (Weeks 1–7 and 9–15; no memo in proposal Week 8). Best 12 count at 1.5% each,
+            graded 0 / 1 / 1.5 (missing / adequate / insightful). <b>The Week 1 memo is non-droppable</b> — it is the
+            course's first commitment signal. In Weeks 13–14 the memo shrinks to a <b>5-line capstone-connection memo</b>,
+            graded pass/fail (a pass earns the full 1.5%). Due <b>24 h before class</b>, pushed to your repo.</td></tr>
+        <tr><td>Discussion leadership</td><td class="num">9%</td>
+          <td>Leads work in pairs by default. Each student <b>leads once</b> and <b>serves as the assigned discussant
+            once</b>. Leads open with one figure from the paper <b>reproduced or re-plotted from data or code</b>, then run
+            the discussion questions (max 5 slides). Graded on preparation, technical accuracy, and the discussion generated.</td></tr>
+        <tr><td>Graded forum posts</td><td class="num">3%</td>
+          <td>Three substantive posts on the class reading forum across the semester, 1% each — a real question, a
+            worked answer to someone else's, or evidence that extends a discussion.</td></tr>
+
+        <tr class="phase"><td colspan="3">Project — 60%</td></tr>
+        <tr><td>Lab portfolio</td><td class="num">20%</td>
+          <td>11 graded lab research notes (Weeks 1–7 and 9–12); best 10 count at 2% each. The labs are the capstone
+            skill acquisition; the notes are the evidence.</td></tr>
+        <tr><td>Proposal (Week 8)</td><td class="num">5%</td>
+          <td>2-page proposal + pitch. Graded on evaluation-first design and compute-budget realism, not ambition.</td></tr>
+        <tr><td>Milestones M1–M3</td><td class="num">15%</td>
+          <td>5% each, end of Weeks 13 / 14 / 15. Graded on process quality: frozen data and eval before results,
+            CI green, honest interim tables — the design that prevents demo-week heroics.</td></tr>
+        <tr><td>Final deliverable</td><td class="num">20%</td>
+          <td>Release quality 8% (the README quickstart must run from a fresh clone) · report + model card 7%
+            (honest baselines, ablation, specific limitations) · demo 5%. <b>A rigorously evaluated negative result can
+            earn full marks</b> — the rubric rewards rigor, not leaderboard position.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note"><b>Memo format</b> (max 1 page): a 3-sentence summary · 1 substantive critique · 1 connection to your
+    capstone · 1 question you actually want answered. Agents may be used to interrogate the paper, but the critique must be
+    specific enough that it could not have been written without reading — spot-checked by cold-calling in class.</div>
+
+  <h2>The capstone, in one paragraph</h2>
+  <p>The project running through the whole semester is a single capstone: by default every student
+    <b>fine-tunes and rigorously evaluates a public foundation model</b> (e.g., OlmoEarth-Nano, Presto, or a small
+    weather/climate FM) on a real environmental downstream task — honest baselines, spatially and temporally disjoint
+    splits, one genuine ablation, a model card, and a public release of code and weights under your own name.
+    Pretraining a foundation model <b>from scratch</b> is reserved for the HydroAI lab team project and is not the default
+    path. Milestones: proposal in Week 8, M1–M3 in Weeks 13–15, demo and release in Week 16. Full specification, tracks,
+    and rubric: <a href="capstone.html">Capstone</a>.</p>
+
+  <h2>HW0 — the gate</h2>
+  <div class="note"><span class="pill acc">pass/fail</span> <b>HW0 is due 48 h before the Week 2 class</b> (Sunday 23:59 KST).
+    It is a compressed sample of an ordinary week — environment, repo, a small trained model with baselines, a report, a
+    research note, clean git history — and it is designed to take 4–8 hours with an AI agent if your prerequisites are in
+    place. <b>Project milestones will not be accepted without a passed HW0.</b> One borderline criterion earns a single
+    48-hour resubmission window. If HW0 takes you 20 hours, this course will take you 20 hours a week: use that
+    information before add/drop closes.</div>
+
+  <h2>Policies</h2>
+
+  <h3>Late work</h3>
+  <p>Reading memos and lab research notes may be submitted up to <b>48 hours late at a 25% deduction</b> (a late memo can
+    therefore score at most ~1.1 of 1.5; a late note at most 1.5 of 2). After 48 hours the item scores zero — this is what
+    the drop allowances (best 12 of 14 memos, best 10 of 11 notes) exist to absorb, so spend them deliberately. A memo
+    submitted after its class session still earns late credit but cannot inform the discussion, which is its actual
+    purpose. <b>Milestones (proposal, M1–M3, final deliverable) are not covered by the late window</b>: they anchor
+    in-class events and peer review, and are accepted late only by arrangement made with the instructor <i>before</i> the
+    deadline. HW0 follows its own gate rules above.</p>
+
+  <h3>Compute force majeure</h3>
+  <p>If shared-server downtime, Colab preemption, or a comparable documented compute failure lands on a milestone, the
+    milestone is <b>graded on process rather than results</b>: your frozen evaluation protocol, your logs, and your
+    Weights &amp; Biases run history are the evidence, and a run killed at epoch 40 with a clean resumable checkpoint
+    trail is full-credit process. Report the failure when it happens, not at the deadline — this policy protects students
+    who were visibly underway, and cannot manufacture progress that never existed.</p>
+
+  <h3>Academic integrity</h3>
+  <p>GIST academic-integrity regulations apply in full. In this course the operative rule is the oral-defense rule of the
+    AI-agent policy above: <b>any line of any submission, any time</b> — inability to explain your own repository is
+    treated identically to submitting work that is not yours. Collaboration on ideas is encouraged and must be
+    acknowledged; shared code outside sanctioned pair work is not. Fabricated results, doctored logs, or evaluation
+    numbers that do not reproduce from the committed code are integrity violations, not sloppiness, and will be referred
+    under university procedures. The closed-book Week 1 diagnostic and any designated in-class assessment permit no AI
+    tools; everywhere else, disclosure is the rule.</p>
+
+  <h3>EV4240 vs EN5425 — one classroom, two contracts</h3>
+  <p>Both sections attend the same lectures, do the same labs, and read the same papers — the pitch stays at
+    first-semester-PhD level, and Week 1's double reading is the honest advertisement of that. Differentiation is in
+    assessment depth, which is legitimate for a cross-listed course: EN5425 memos must contain a methodological critique
+    and a proposed extension, while EV4240 memos may be summary + question, with the 0/1/1.5 rubric rewarding accurate
+    understanding over novelty; graduate discussion leads are assigned a 2024–2026 foundation-model paper, undergraduate
+    leads a classic; and on the capstone, EN5425 students must report both frozen-probe and fine-tuned results with a
+    genuine ablation (weather track adds CRPS), while EV4240 students may put their full weight on rigorous fine-tuning
+    and evaluation of a released checkpoint and may work in pairs with a signed contribution statement. Rubric line items
+    are identical in kind and scaled in depth, so no one takes a different course — undergraduates get a survivable path
+    through the same demanding material, and the add/drop filter does the rest.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Students</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js" defer></script>
+<style>
+  #board th.a { max-width:110px; white-space:normal; }
+  #board td, #board th { text-align:center; }
+  #board td:first-child, #board th:first-child { text-align:left; white-space:nowrap; }
+  .legend { display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:12px;
+            font-size:12.5px; color:var(--ink-2); align-items:center; }
+</style>
+</head>
+<body data-page="students">
+<div class="wrap">
+  <p class="eyebrow">EN5425 / EV4240 · Fall 2026</p>
+  <h1>Submission Board</h1>
+  <p class="lede">Public view of who has turned in what.</p>
+  <div class="note"><b>Submission status only</b> — grades and feedback stay in your private repo.</div>
+
+  <div id="board-wrap"><p class="sub" id="empty">Loading roster…</p></div>
+  <div class="legend" id="legend" hidden>
+    <span><span class="st ok">&#10003;</span> submitted</span>
+    <span><span class="st due">&#183;</span> due / in progress</span>
+    <span><span class="st miss">&#8212;</span> missing</span>
+  </div>
+  <p class="sub" id="updated" style="margin-top:10px"></p>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const wrapEl = $("#board-wrap");
+  const chip = (s) =>
+    s === "ok"   ? '<span class="st ok" title="submitted">&#10003;</span>' :
+    s === "due"  ? '<span class="st due" title="due">&#183;</span>' :
+    s === "miss" ? '<span class="st miss" title="missing">&#8212;</span>' : "";
+  try {
+    const d = await loadJSON("status");
+    const assignments = Array.isArray(d.assignments) ? d.assignments : [];
+    const students = Array.isArray(d.students) ? d.students : [];
+    if (!students.length || !assignments.length) {
+      wrapEl.innerHTML = '<p class="sub">Roster appears here after HW0.</p>';
+    } else {
+      wrapEl.innerHTML = `<div class="scroll"><table id="board">
+        <thead><tr><th>Student</th>${assignments.map((a) =>
+          `<th class="a" title="${esc(a.due ? "due " + fmtDate(a.due) : "")}">${esc(a.title || a.id)}</th>`).join("")}
+        </tr></thead>
+        <tbody>${students.map((s) => `<tr>
+          <td><a href="https://github.com/${esc(s.gh)}">${esc(s.display || s.gh)}</a></td>
+          ${assignments.map((a) => `<td>${chip((s.status || {})[a.id])}</td>`).join("")}
+        </tr>`).join("")}</tbody></table></div>`;
+      $("#legend").hidden = false;
+    }
+    if (d.updated) $("#updated").textContent =
+      "Updated " + (fmtDate(String(d.updated).slice(0, 10)) || d.updated);
+  } catch {
+    wrapEl.innerHTML = '<p class="sub">Roster appears here after HW0.</p>';
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setup · EN5425 Deep Learning Applications in Environmental Big Data</title>
+<meta name="description" content="Environment, accounts, compute, and semester-repository setup for EN5425/EV4240, GIST Fall 2026.">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js" defer></script>
+</head>
+<body data-page="setup">
+<div class="wrap">
+  <p class="eyebrow">EN5425 / EV4240 · Fall 2026</p>
+  <h1>Setup</h1>
+  <p class="lede">Everything on this page should be done before the Week 1 lab and is verified by HW0.
+    Work through it top to bottom with your AI agent beside you — driving an agent through setup is itself the
+    first exercise of the course.</p>
+
+  <h2>1 · Environment</h2>
+  <p class="sub">Python 3.11 in an isolated environment named <code>en5425</code>, created with conda <i>or</i> uv —
+    your choice, but you must be able to export and rebuild it (HW0 checks this from a fresh clone).</p>
+  <pre><code># Option A — conda (Miniconda is enough)
+conda create -n en5425 python=3.11
+conda activate en5425
+pip install torch numpy pandas xarray matplotlib
+conda env export --from-history &gt; environment.yml   # commit this
+
+# Option B — uv
+uv init en5425 --python 3.11 &amp;&amp; cd en5425
+uv add torch numpy pandas xarray matplotlib
+# pyproject.toml + uv.lock are your export — commit both</code></pre>
+  <p class="sub">Configure git with your real name and university email — commit history is graded evidence in this course.</p>
+  <pre><code>git config --global user.name  "Your Real Name"
+git config --global user.email "you@gm.gist.ac.kr"</code></pre>
+  <ul>
+    <li><b>Editor:</b> <a href="https://code.visualstudio.com">VS Code</a> or the editor of your choice — anything you are fast in.</li>
+    <li><b>AI coding agent (required, at least one):</b> <a href="https://claude.com/product/claude-code">Claude Code</a>,
+      <a href="https://openai.com/codex/">Codex</a>, or <a href="https://cursor.com">Cursor</a>. Agents are mandatory
+      tooling here — and you remain accountable for every line they write (see the
+      <a href="syllabus.html">AI coding agent policy</a>).</li>
+  </ul>
+
+  <h2>2 · Accounts</h2>
+  <p class="sub">Create all six before Week 1 lab; each is used repeatedly from Week 1–3 onward.</p>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Account</th><th>Where</th><th>Why / what to do</th></tr></thead>
+      <tbody>
+        <tr><td><b>GitHub</b> + SSH key</td>
+          <td><a href="https://github.com">github.com</a></td>
+          <td>Home of your semester repo and all submissions. Add an SSH key:
+            <code>ssh-keygen -t ed25519</code>, paste the public key at
+            <a href="https://github.com/settings/keys">github.com/settings/keys</a>, verify with
+            <code>ssh -T git@github.com</code>
+            (<a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh">guide</a>).</td></tr>
+        <tr><td><b>Weights &amp; Biases</b></td>
+          <td><a href="https://wandb.ai">wandb.ai</a></td>
+          <td>Experiment tracking, mandatory from Week 2. Free academic tier; run <code>wandb login</code> once inside
+            your <code>en5425</code> env.</td></tr>
+        <tr><td><b>Hugging Face</b></td>
+          <td><a href="https://huggingface.co">huggingface.co</a></td>
+          <td>Datasets and public checkpoints all semester; your capstone model is released here in Week 15–16.
+            Create a write token under Settings → Access Tokens.</td></tr>
+        <tr><td><b>NASA Earthdata Login</b></td>
+          <td><a href="https://urs.earthdata.nasa.gov">urs.earthdata.nasa.gov</a></td>
+          <td>Required for SMAP, HLS, and anything pulled via <code>earthaccess</code> from Week 3 onward.
+            Registration is free and instant.</td></tr>
+        <tr><td><b>Kaggle</b> <span class="pill acc">compute floor</span></td>
+          <td><a href="https://www.kaggle.com">kaggle.com</a></td>
+          <td>Free ~30 GPU-hours/week — <b>the course compute floor</b>: every lab and the default capstone fit inside
+            it even if you never touch another GPU. Verify your phone number to unlock GPU sessions.</td></tr>
+        <tr><td><b>Google Colab</b></td>
+          <td><a href="https://colab.research.google.com">colab.research.google.com</a></td>
+          <td>Secondary free GPU. Sessions are preemptible and time-limited, so practice
+            <b>checkpoint-resume discipline</b> from day one: save checkpoints every N steps to Drive, and write every
+            training script so a restarted session resumes from the last checkpoint instead of starting over.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>3 · Your semester repository</h2>
+  <p>All of your graded written work — memos, research notes, labs, the capstone — lives in one <b>private</b> GitHub
+    repository that you own.</p>
+  <ol>
+    <li>Open the template repo <code>en5425-student-template</code> in the course GitHub organization and click
+      <b>Use this template → Create a new repository</b>. Name it <code>en5425-&lt;your-github-username&gt;</code> and set it
+      to <b>Private</b>.</li>
+    <li>Invite the instructor as a collaborator (Settings → Collaborators; the instructor's GitHub handle is announced
+      in class and on LMS).</li>
+    <li>Clone it over SSH and work in it all semester.</li>
+  </ol>
+  <pre><code>your-repo/
+├── labs/        # one folder per weekly lab (code, figures)
+├── memos/       # weekNN.md — reading memos
+├── notes/       # research notes, one per lab
+├── project/     # capstone: proposal, milestones, final report
+└── hw0/         # the gate assignment</code></pre>
+  <p><b>Conventions</b> — these are graded habits, not suggestions:</p>
+  <ul>
+    <li><code>memos/weekNN.md</code> pushed <b>24 h before class</b>; the push timestamp is the submission time.</li>
+    <li>A research note in <code>notes/</code> after <b>every</b> lab, using the course template
+      (<i>What I did / What I learned / What confused me / Open questions</i>).</li>
+    <li>Commit at <b>every lab checkpoint</b> with informative messages — commit history is part of AI-agent
+      accountability, and one giant "final" commit reads as exactly what it is.</li>
+    <li><b>Never commit data or model checkpoints.</b> The template ships a <code>.gitignore</code> that covers
+      <code>data/</code>, <code>*.ckpt</code>, <code>*.pt</code>, and friends — keep it intact.</li>
+  </ul>
+
+  <h2>4 · Course materials</h2>
+  <p>Lecture notebooks, lab scaffolds, and the smoke test live in the course repo. Clone it once and pull weekly:</p>
+  <pre><code>git clone git@github.com:gist-en5425/course.git
+cd course &amp;&amp; git pull        # run before every session</code></pre>
+  <div class="note"><b>Never edit inside the clone.</b> Copy notebooks and scaffolds out into your own repo
+    (e.g., into <code>labs/weekNN/</code>) before touching them — local edits will collide with the weekly
+    <code>git pull</code>, and your work belongs in <i>your</i> repository, where it is graded.</div>
+</div>
+</body>
+</html>

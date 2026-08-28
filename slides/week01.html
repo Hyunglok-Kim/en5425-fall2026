@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 Week 1 · Orientation</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="deck.css">
+<script src="deck.js" defer></script>
+</head>
+<body>
+
+<!-- 1 ▸ Title -->
+<section class="slide title">
+  <p class="kicker">EN5425 / EV4240 · Week 1 · Fall 2026</p>
+  <h1>Course Overview, the 2026 FM Landscape, and AI-Native Engineering</h1>
+  <p class="big muted">One goal today: honest self-selection. You leave knowing exactly what this course demands — and with evidence of whether you are prepared to commit.</p>
+  <div class="foot"><span>Deep Learning Applications in Environmental Big Data</span><span>Prof. Hyunglok Kim · GIST</span></div>
+  <aside class="notes">This slide is on screen as students arrive and sign attendance. No welcome small talk beyond a greeting — the room should feel like a lab meeting, not orientation. Wi-Fi info and the course-site QR are posted. Move to the thesis at 0:00 sharp.</aside>
+</section>
+
+<!-- 2 ▸ Opening thesis -->
+<section class="slide">
+  <p class="kicker">Part 1 · Framing · 5 min</p>
+  <div class="fill">
+    <p class="big">By Week 16 you will have <span class="accent">pretrained, fine-tuned, evaluated, documented, and publicly released</span> a small foundation model.</p>
+    <p class="big muted">Today you decide whether that is what you want this semester.</p>
+  </div>
+  <div class="foot"><span>Course site: syllabus, diagnostic, HW0 — everything shown today is already posted</span></div>
+  <aside class="notes">Read both sentences once, slowly, then stop. Let the silence work. Tone for the whole session: demanding, transparent, respectful — we filter by revealed workload, never by humiliation. Transition: "Here is the syllabus, in the order that matters." (0:05)</aside>
+</section>
+
+<!-- 3 ▸ Section: Syllabus -->
+<section class="slide section">
+  <p class="kicker">Part 2 · 0:05–0:25 · 20 min</p>
+  <h2>The syllabus, delivered calmly</h2>
+  <aside class="notes">Four stops in fixed order: capstone (6 min), workload (4), grading (4), AI-agent policy (6). Flat, factual register throughout — the intimidation is entirely in the content of the workload, never in the delivery.</aside>
+</section>
+
+<!-- 4 ▸ Capstone claim -->
+<section class="slide">
+  <p class="kicker">Part 2 · Capstone · 6 min</p>
+  <h2>The capstone: you release a model, individually</h2>
+  <ul>
+    <li><b>Pretrain</b> a small geospatial or weather/climate foundation model — yourself, not a team.</li>
+    <li><b>Fine-tune</b> it on a real downstream environmental task.</li>
+    <li><b>Evaluate</b> it against honest baselines; write a <b>model card</b>.</li>
+    <li><b>Release</b> weights + code publicly: GitHub and Hugging Face, under your own name.</li>
+  </ul>
+  <div class="foot"><span>Project = 60% of grade · milestones from Week 4 · gate = HW0</span></div>
+  <aside class="notes">Say "individually" twice. This is not a group deliverable and not a report — it is a public artifact. Transition: "So that 'released' is not abstract, here is exactly what it looks like." (0:05–0:11 total for this pair of slides)</aside>
+</section>
+
+<!-- 5 ▸ Capstone artifacts -->
+<section class="slide">
+  <p class="kicker">Part 2 · Capstone · 6 min</p>
+  <h2>What “released” actually means</h2>
+  <div class="figure">
+    <svg viewBox="0 0 740 190" role="img" aria-label="Capstone release pipeline: pretrain, fine-tune, evaluate, release" style="width:min(94%,860px)">
+      <g fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="8"   y="40" width="150" height="58" rx="10"/>
+        <rect x="200" y="40" width="150" height="58" rx="10"/>
+        <rect x="392" y="40" width="150" height="58" rx="10"/>
+        <rect x="584" y="40" width="150" height="58" rx="10" stroke="var(--accent)" stroke-width="2"/>
+        <path d="M158 69 H200 M350 69 H392 M542 69 H584" stroke="var(--accent)"/>
+      </g>
+      <g font-size="15" fill="currentColor" text-anchor="middle">
+        <text x="83"  y="64">pretrain</text><text x="83"  y="84" opacity="0.65" font-size="12">SSL on EO / climate data</text>
+        <text x="275" y="64">fine-tune</text><text x="275" y="84" opacity="0.65" font-size="12">downstream task</text>
+        <text x="467" y="64">evaluate</text><text x="467" y="84" opacity="0.65" font-size="12">vs honest baselines</text>
+        <text x="659" y="64" fill="var(--accent)">release</text><text x="659" y="84" opacity="0.65" font-size="12">GitHub + HF Hub</text>
+        <text x="371" y="150" font-size="13" opacity="0.8">artifacts: weights · model card (intended use, data, eval table, limitations) · repo with runnable code · research notes</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>A <b>Hugging Face model page</b>: weights, config, and a README that <i>is</i> the model card — eval table against baselines included.</li>
+    <li>A <b>public GitHub repo</b>: training + eval code runnable from a fresh clone, commit history, weekly research notes.</li>
+  </ul>
+  <aside class="notes">Show one real example live: an actual model card and an actual repo (OlmoEarth or Prithvi pages work well). Point at the eval table and the limitations section — "this is the standard you will be held to." Transition: "What does that cost per week? Numbers, not vibes." (by 0:11)</aside>
+</section>
+
+<!-- 6 ▸ Workload -->
+<section class="slide">
+  <p class="kicker">Part 2 · Workload · 4 min</p>
+  <h2>8–12 hours per week outside class — every week</h2>
+  <div class="figure">
+    <svg viewBox="0 0 740 130" role="img" aria-label="Sample week: paper 3 hours, lab follow-through 3 hours, project 6 hours" style="width:min(92%,820px)">
+      <g stroke="currentColor" stroke-width="1.2">
+        <rect x="20"  y="35" width="175" height="40" fill="var(--accent)" stroke="none" rx="6"/>
+        <rect x="199" y="35" width="175" height="40" fill="var(--hairline)" stroke="none" rx="6"/>
+        <rect x="378" y="35" width="350" height="40" fill="none" stroke="var(--accent)" rx="6"/>
+        <path d="M20 95 H728" stroke="var(--hairline)"/>
+      </g>
+      <g font-size="14" fill="currentColor" text-anchor="middle">
+        <text x="107" y="60" fill="var(--accent-ink)">paper · 3 h</text>
+        <text x="286" y="60">lab · 2–3 h</text>
+        <text x="553" y="60">project · 3–6 h</text>
+      </g>
+      <g font-size="12" fill="currentColor" opacity="0.65" text-anchor="middle">
+        <text x="20"  y="115">0 h</text><text x="374" y="115">6 h</text><text x="728" y="115">12 h</text>
+      </g>
+    </svg>
+  </div>
+  <ul>
+    <li>Paper + written response (3 h) · lab follow-through (2–3 h) · project progress (3–6 h).</li>
+    <li>Including reading weeks. <span class="muted">There are no light weeks after today.</span></li>
+  </ul>
+  <div class="foot"><span>“If your semester cannot absorb this, this course is not for you this semester — that is a scheduling fact, not a judgment.”</span></div>
+  <aside class="notes">Walk the bar left to right, then say the footer line verbatim, flat. Do not soften it and do not apologize for it. Transition: "Here is how that effort is graded." (by 0:15)</aside>
+</section>
+
+<!-- 7 ▸ Grading -->
+<section class="slide">
+  <p class="kicker">Part 2 · Grading · 4 min</p>
+  <h2>Grading: 10 / 30 / 60</h2>
+  <ul>
+    <li><b>10% attendance.</b> You are here, prepared, on time.</li>
+    <li><b>30% paper discussion.</b> One paper <span class="accent">every week</span>; written memo due 24 h before class; cold-call discussion in class — being unprepared is visible and graded. Discussion leads rotate.</li>
+    <li><b>60% project.</b> Milestones from Week 4 onward; the capstone gate is <b>HW0</b>. Public GitHub Pages site + weekly research notes are required infrastructure.</li>
+  </ul>
+  <div class="foot"><span>Logistics on the course site: memo format, lead rotation, compute accounts</span></div>
+  <aside class="notes">Emphasize the mechanics, not the percentages: the memo deadline (24 h before class) and cold-calling are what make the 30% real. "Cold-call means I pick; the memo means you cannot improvise." Transition: "One policy left, and it is the one that makes this course different." (by 0:19)</aside>
+</section>
+
+<!-- 8 ▸ AI-agent policy -->
+<section class="slide">
+  <p class="kicker">Part 2 · AI agents · 6 min</p>
+  <h2>AI coding agents: required — and you own every line</h2>
+  <ul>
+    <li>Claude Code / Codex / Cursor (or equivalent) are <b>required tooling</b>: every lab and the capstone assume you work alongside an agent.</li>
+    <li>You are <b>personally accountable for every line</b> they write: what it does, why it is there, what breaks if it changes.</li>
+    <li><b>Oral defense of any line, any time.</b> Failing a defense is treated like not knowing your own work — because it is.</li>
+    <li>Each substantial submission includes a short tool-use disclosure. Agents are banned only where stated: today’s diagnostic, closed-book assessments.</li>
+  </ul>
+  <div class="foot"><span>“This is the easy part. Understanding it is the course.”</span></div>
+  <aside class="notes">Now the 60-second live demo: in the open terminal, ask an agent to write a small training loop; let it stream. Then close the laptop lid halfway, face the room, and deliver the footer line verbatim. Transition: "Now the most honest ten minutes of the semester." (end Part 2 at 0:25)</aside>
+</section>
+
+<!-- 9 ▸ Section: self-selection -->
+<section class="slide section">
+  <p class="kicker">Part 3 · 0:25–0:35 · 10 min</p>
+  <h2>Who should take this course — and who should not</h2>
+  <aside class="notes">Slow down here. Three slides, delivered faithfully. End the segment with: "The diagnostic you take next is for you, not for me. Nobody sees your score unless you show me."</aside>
+</section>
+
+<!-- 10 ▸ What this course actually is -->
+<section class="slide">
+  <p class="kicker">Part 3 · 10 min</p>
+  <h2>What this course actually is</h2>
+  <ul>
+    <li>Not a survey, not an intro to deep learning. A <b>build course</b>: sixteen weeks constructing, end to end, the skill set to pretrain and fine-tune foundation models for Earth observation and weather/climate data.</li>
+    <li>By December: a small FM pretrained by you, fine-tuned on a real environmental task, evaluated against honest baselines, <b>released publicly</b> with weights, code, and a model card under your name.</li>
+    <li>Fixed weekly rhythm: one paper + written response, one 3-hour session, lab follow-through, project progress. 8–12 h outside class, every week.</li>
+    <li>Everything is public-facing: notes, labs, capstone live on Git. You are building a portfolio a PhD advisor or employer can read — a feature, and a commitment.</li>
+  </ul>
+  <aside class="notes">"Unforgiving in the best sense" is the register: the rhythm never changes, which is exactly what makes the output real. Pause after the portfolio point — for many students that is the actual sell.</aside>
+</section>
+
+<!-- 11 ▸ Take it if -->
+<section class="slide">
+  <p class="kicker">Part 3 · 10 min</p>
+  <h2>You should take this course if…</h2>
+  <ul>
+    <li>You have <b>real fluency</b> in the prerequisites: linear algebra through SVD, probability through MLE and Bayes, multivariable calculus, comfortable Python/NumPy. Today’s diagnostic tells you whether “fluency” is the right word — believe it either way.</li>
+    <li>You want to do <b>research</b> with environmental data — hydrology, remote sensing, climate, ecology — and you want the modeling skills that field now assumes, not a tour of them.</li>
+    <li>You are willing to <b>work in public</b>: commit history, released models, written notes. Willing to be wrong in writing and fix it in writing.</li>
+    <li>You are excited, not annoyed, that your primary engineering partner is an AI agent — and that you must be able to defend every line it writes.</li>
+    <li>One honest sentence: if the diagnostic feels hard-but-doable and HW0 sounds like a fun weekend, this course was designed for you — undergraduate or PhD student alike. <span class="muted">The bar is preparation, not seniority.</span></li>
+  </ul>
+  <aside class="notes">On the last bullet: mention that several of the strongest students in courses like this are seniors. Keep eye contact with the undergraduates when you say it.</aside>
+</section>
+
+<!-- 12 ▸ Not yet if -->
+<section class="slide">
+  <p class="kicker">Part 3 · 10 min</p>
+  <h2>You should probably not take this course <i>(yet)</i> if…</h2>
+  <ul>
+    <li>The diagnostic puts you <b>below 40%</b>, or Sections A–C read like a foreign language rather than rusty memory. The pace is PhD-1 from Week 2; I will not re-teach eigendecomposition or the chain rule. The gap compounds weekly — <span class="accent">no amount of effort in November can buy back September</span>.</li>
+    <li>Your semester genuinely cannot absorb 8–12 extra hours per week — heavy load, thesis deadline, job. A scheduling fact, not a character flaw.</li>
+    <li>You wanted a gentler on-ramp to ML. Completely legitimate — simply a different course. Take intro ML and Python first, come back next fall; you will get far more out of it.</li>
+    <li>My intent: not to talk anyone out of ambition, but to make sure this week’s decision is made with <b>full information instead of optimism</b>. Attempt HW0 before deciding — it is the most honest 4–8 hours of information you will get.</li>
+    <li>Whatever you decide by add/drop: <b>decide deliberately</b>. Both staying and leaving are respectable — drifting is not.</li>
+  </ul>
+  <aside class="notes">Slowest slide of the day. My door is open all week; the conversation is friendly; "I'll take it next year after the prerequisites" is an answer I will actively help plan. Then: "The diagnostic you take next is for you, not for me. Nobody sees your score unless you show me." (end at 0:35)</aside>
+</section>
+
+<!-- 13 ▸ Section: diagnostic -->
+<section class="slide section">
+  <p class="kicker">Part 4 · 0:35–1:40 · 65 min</p>
+  <h2>The readiness diagnostic</h2>
+  <aside class="notes">Five minutes of instructions, then 60 minutes of test. Printed papers are face-down on desks; PDF link is on the course site for anyone remote.</aside>
+</section>
+
+<!-- 14 ▸ Diagnostic instructions -->
+<section class="slide">
+  <p class="kicker">Part 4 · Instructions · 5 min</p>
+  <h2>Rules — the point is to measure what is in your head</h2>
+  <div class="cols">
+    <div>
+      <h3>Conditions</h3>
+      <ul class="small">
+        <li>60 minutes · 100 points · 7 sections</li>
+        <li><b>Closed book. No AI tools, no phones, no internet.</b></li>
+        <li>Not graded, not collected — but it <b>must be attempted</b></li>
+        <li>Self-scored after the break; score is private</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Section time budgets</h3>
+      <ul class="small">
+        <li>A Linear algebra <b>10</b> · B Probability &amp; stats <b>10</b></li>
+        <li>C Calculus &amp; backprop <b>8</b> · D Python/NumPy <b>10</b></li>
+        <li>E PyTorch <b>7</b> · F Shell &amp; Git <b>5</b></li>
+        <li>G Geospatial &amp; climate data <b>10</b></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Why closed book: what is in your head is what you will lean on at 2 a.m. in November</span></div>
+  <aside class="notes">Say the footer line out loud — it defuses "why no AI in an AI-agent course?" before anyone asks. Distribute papers / post the PDF link. Start the clock at 0:40 exactly.</aside>
+</section>
+
+<!-- 15 ▸ Test in progress -->
+<section class="slide">
+  <p class="kicker">Part 4 · Test · 60 min</p>
+  <h2>Diagnostic in progress</h2>
+  <div class="fill">
+    <p class="big">A:10 · B:10 · C:8 · D:10 · E:7 · F:5 · G:10 <span class="muted">minutes</span></p>
+    <p class="muted">Finished early? Leave quietly for break. Stuck? Move on — budgets are per section for a reason.</p>
+  </div>
+  <aside class="notes">Leave this on screen for the full hour. Proctor lightly — walk once every 15 minutes, otherwise sit. At 1:30 announce "ten minutes", nothing else. No jokes, no commentary while they work.</aside>
+</section>
+
+<!-- 16 ▸ Break -->
+<section class="slide section">
+  <p class="kicker">Break · 1:40–1:50 · 10 min</p>
+  <h2>Break — back in 10</h2>
+  <aside class="notes">At 1:48, replace this with the answer-key URL on screen (also printed at the front). Restart on time at 1:50 — ending and restarting exactly on time is part of the signal.</aside>
+</section>
+
+<!-- 17 ▸ Section: self-scoring -->
+<section class="slide section">
+  <p class="kicker">Part 5 · 1:50–2:05 · 15 min</p>
+  <h2>Self-scoring and what your number means</h2>
+  <aside class="notes">Students score their own paper against the key (screen + printed). Then walk the four questions with the highest expected miss rate, then read the bands aloud, neutrally. Never joke at students' expense in this debrief.</aside>
+</section>
+
+<!-- 18 ▸ High-miss walkthrough -->
+<section class="slide">
+  <p class="kicker">Part 5 · 15 min</p>
+  <h2>The four questions most people miss</h2>
+  <ul class="small">
+    <li><b>C1 · backprop by hand:</b> a=6, b=2, L=4 → ∂L/∂b = 2b = 4, so ∂L/∂z = 4, ∂L/∂x = y·4 = <b>12</b>, ∂L/∂y = x·4 = <b>8</b>. The chain rule is bookkeeping, done in order.</li>
+    <li><b>D2 · broadcasting:</b> (3,1) + (1,4) → shape <b>(3,4)</b>; C[2,1] = 2 + 10 = <b>12</b>. Broadcasting stretches size-1 axes — no loops, no copies.</li>
+    <li><b>B1 · Bayes:</b> P(drought | flag) = (0.95·0.01) / (0.95·0.01 + 0.05·0.99) ≈ <b>0.16</b>. A 95%-sensitive detector on a 1% prior is wrong 5 times in 6.</li>
+    <li><b>G2 · NetCDF:</b> (365, 721, 1440) → 0.25° global grid, one year daily; 365·721·1440 ≈ <b>3.8×10⁸</b> values (~1.5 GB at float32). You must be able to read a header and know the cost.</li>
+  </ul>
+  <div class="foot"><span>Full key + worked answers: course site</span></div>
+  <aside class="notes">Two minutes each, at the board, no slides-only hand-waving for C1 — write the graph and push the 4 backwards. These four predict success better than the total: they are respectively the chain rule, array semantics, base rates, and data literacy.</aside>
+</section>
+
+<!-- 19 ▸ Advisory bands -->
+<section class="slide">
+  <p class="kicker">Part 5 · 15 min</p>
+  <h2>Scoring bands — private, advisory, and worth believing</h2>
+  <ul class="small">
+    <li><b>≥ 75</b> — Well prepared. Expect the stated 8–12 h/week; demanding but comfortable.</li>
+    <li><b>60–74</b> — Prepared, with specific gaps. Identify your weakest section today; remediate within two weeks (resources on the site). Budget the full 10–12 h/week early on.</li>
+    <li><b>40–59</b> — Significant prerequisite gaps. Possible, but only with a deliberate remediation plan and well above 12 h/week for the first month. Come to office hours this week — or decide, with full information, to take prerequisites first.</li>
+    <li><b>&lt; 40</b> — Take this seriously: the time investment will likely exceed what a normal course load can absorb, and the material compounds weekly. Talk to me before add/drop. Taking linear algebra, probability, and a Python ML course first, then returning next year, is an entirely respectable path — and usually the better one.</li>
+  </ul>
+  <div class="foot"><span>Whatever your score: attempt HW0 — it measures the other half of readiness, engineering follow-through</span></div>
+  <aside class="notes">Read each band aloud in a flat, neutral voice — no eyebrow, no emphasis. Then: anyone below 40, email me or come to office hours this week; "the conversation is friendly; the math is not negotiable." (end at 2:05)</aside>
+</section>
+
+<!-- 20 ▸ Section: the arc -->
+<section class="slide section">
+  <p class="kicker">Part 6 · 2:05–2:20 · 15 min</p>
+  <h2>The 16-week arc — and the field you are entering</h2>
+  <aside class="notes">One slide per phase, then a four-slide teaser of the 2026 landscape. Core message, said once here and once at the end: "Every lab is one brick of your capstone. Miss a week and your own project stalls."</aside>
+</section>
+
+<!-- 21 ▸ Arc timeline -->
+<section class="slide">
+  <p class="kicker">Part 6 · 2:05–2:20</p>
+  <h2>Four phases, one artifact</h2>
+  <div class="figure">
+    <svg viewBox="0 0 760 210" role="img" aria-label="16-week timeline: Foundations weeks 1 to 4, Pretraining Core 5 to 8, Foundation Models 9 to 12, Capstone Sprints 13 to 16" style="width:min(96%,900px)">
+      <g fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="10"  y="60" width="178" height="54" rx="10"/>
+        <rect x="196" y="60" width="178" height="54" rx="10"/>
+        <rect x="382" y="60" width="178" height="54" rx="10"/>
+        <rect x="568" y="60" width="178" height="54" rx="10" stroke="var(--accent)" stroke-width="2"/>
+      </g>
+      <g font-size="15" fill="currentColor" text-anchor="middle">
+        <text x="99"  y="83">Foundations</text><text x="99"  y="103" opacity="0.65" font-size="12">W1–4</text>
+        <text x="285" y="83">Pretraining Core</text><text x="285" y="103" opacity="0.65" font-size="12">W5–8</text>
+        <text x="471" y="83">Foundation Models</text><text x="471" y="103" opacity="0.65" font-size="12">W9–12</text>
+        <text x="657" y="83" fill="var(--accent)">Capstone Sprints</text><text x="657" y="103" opacity="0.65" font-size="12">W13–16</text>
+      </g>
+      <g stroke="var(--accent)" stroke-width="1.2">
+        <path d="M60 114 V140 M285 114 V140 M471 114 V140 M700 114 V140"/>
+      </g>
+      <g font-size="12" fill="currentColor" opacity="0.8" text-anchor="middle">
+        <text x="60"  y="158">HW0 gate</text>
+        <text x="285" y="158">milestones from W4 · W8 midterm pitch</text>
+        <text x="471" y="178">fine-tune + evaluate</text>
+        <text x="700" y="158">W16 Demo Day: release</text>
+      </g>
+    </svg>
+  </div>
+  <p class="small muted">Every lab is one brick of your capstone. Miss a week and your own project stalls.</p>
+  <aside class="notes">Point at the arrow of dependency: nothing in W13–16 is new work, it is assembly of what the labs already produced. That is why attendance and lab follow-through are non-negotiable.</aside>
+</section>
+
+<!-- 22 ▸ Phase 1 -->
+<section class="slide">
+  <p class="kicker">Part 6 · 2:05–2:20</p>
+  <h2>Weeks 1–4 · Foundations, at speed</h2>
+  <ul>
+    <li>Tensors → optimization → CNN/ViT → transformers, compressed and assumed thereafter.</li>
+    <li>Leakage-safe evaluation design (W2) — the discipline every later number depends on.</li>
+    <li>Environmental big data and cloud-native pipelines (W3); CNNs on gridded data (W4).</li>
+    <li>Models you meet: <span class="accent">ViT</span>, CNN/U-Net baselines — read as the ancestors of every FM that follows.</li>
+  </ul>
+  <div class="foot"><span>Readings: Vaswani 2017 · Dosovitskiy 2020 (ViT) · Reichstein 2019</span></div>
+  <aside class="notes">"At speed" means: from Week 2 I assume the diagnostic's content. These four weeks are the last time anything is review.</aside>
+</section>
+
+<!-- 23 ▸ Phase 2 -->
+<section class="slide">
+  <p class="kicker">Part 6 · 2:05–2:20</p>
+  <h2>Weeks 5–8 · Pretraining Core: self-supervised learning</h2>
+  <ul>
+    <li>Masked autoencoding on EO imagery; contrastive learning; tokenizing gridded climate fields.</li>
+    <li>W7: you <b>pretrain your first model</b> — the seed of your capstone.</li>
+    <li>W8 midterm: portfolio review + capstone proposal pitch.</li>
+    <li>Models you meet: <span class="accent">MAE, SimCLR, DINO, SatMAE, Presto</span>.</li>
+  </ul>
+  <div class="foot"><span>He 2021 (MAE) · Chen 2020 (SimCLR) · Cong 2022 (SatMAE) · Tseng 2023 (Presto)</span></div>
+  <aside class="notes">The objective functions taught here (masked reconstruction, contrastive) are exactly the ones the capstone reuses. W8 pitch = first graded checkpoint where the project is a plan, not a hope.</aside>
+</section>
+
+<!-- 24 ▸ Phase 3 -->
+<section class="slide">
+  <p class="kicker">Part 6 · 2:05–2:20</p>
+  <h2>Weeks 9–12 · Foundation Models: fine-tune, evaluate, compare</h2>
+  <ul>
+    <li>Fine-tuning, evaluation, and <b>baselines that matter</b>: SMAP downscaling, ERA5 emulation at toy scale, drought/flood downstream tasks.</li>
+    <li>Scaling laws and honest benchmarking — when does a FM actually beat a supervised U-Net?</li>
+    <li>Models you meet: <span class="accent">ClimaX, Prithvi, SatMAE</span>; <span class="accent">GraphCast / Pangu</span> (reading only); <span class="accent">Aurora</span>.</li>
+  </ul>
+  <div class="foot"><span>Bi 2023 (Pangu, Nature) · Lam 2023 (GraphCast, Science) · Nguyen 2023 (ClimaX) · Bodnar 2025 (Aurora, Nature)</span></div>
+  <aside class="notes">"Reading only" for GraphCast/Pangu: we derive and critique them, we do not train them — 0.25° global training is not Colab-scale, and pretending otherwise teaches the wrong lesson. The lab track stays at toy scale by design.</aside>
+</section>
+
+<!-- 25 ▸ Phase 4 -->
+<section class="slide">
+  <p class="kicker">Part 6 · 2:05–2:20</p>
+  <h2>Weeks 13–16 · Capstone Sprints + release engineering</h2>
+  <ul>
+    <li>Three sprint weeks: agentic ML engineering, peer code review, evaluation + ablation.</li>
+    <li>Release engineering as a subject: <b>model cards, reproducibility, public release</b> done properly.</li>
+    <li>W16 <b>Demo Day</b>: presentation + the public release itself — HF page live, repo tagged.</li>
+  </ul>
+  <div class="foot"><span>Templates and rubrics for model cards and release checklists on the course site from W12</span></div>
+  <aside class="notes">By W13 there is no new theory — the course becomes a supervised research sprint. Transition: "Why is this a reasonable thing to demand of you in 2026? Because of where the field now is — four slides." (arc + teaser end at 2:20)</aside>
+</section>
+
+<!-- 26 ▸ Landscape 1: EO -->
+<section class="slide">
+  <p class="kicker">Part 6 · 2026 landscape</p>
+  <h2>EO foundation models: three generations in four years</h2>
+  <div class="figure">
+    <svg viewBox="0 0 760 170" role="img" aria-label="Three generations of EO foundation models from 2022 to 2026" style="width:min(96%,900px)">
+      <g fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="10"  y="40" width="230" height="62" rx="10"/>
+        <rect x="262" y="40" width="230" height="62" rx="10"/>
+        <rect x="514" y="40" width="236" height="62" rx="10" stroke="var(--accent)" stroke-width="2"/>
+        <path d="M240 71 H262 M492 71 H514" stroke="var(--accent)"/>
+      </g>
+      <g font-size="14" fill="currentColor" text-anchor="middle">
+        <text x="125" y="63">MAE-era</text><text x="125" y="83" opacity="0.65" font-size="12">SatMAE · Scale-MAE · Prithvi</text>
+        <text x="377" y="63">sensor-agnostic multimodal</text><text x="377" y="83" opacity="0.65" font-size="12">DOFA · TerraMind · Galileo</text>
+        <text x="632" y="63" fill="var(--accent)">global embedding fields</text><text x="632" y="83" opacity="0.65" font-size="12">AlphaEarth · TESSERA</text>
+      </g>
+      <g font-size="12" fill="currentColor" opacity="0.65" text-anchor="middle">
+        <text x="125" y="130">2022–2023</text><text x="377" y="130">2024–2025</text><text x="632" y="130">2025–2026</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Gen 3’s deliverable is <b>precomputed embeddings</b>, not a backbone — AlphaEarth ships 64-D embeddings at 10 m, globally, annually.</li>
+    <li>A 2026 evaluation counted <b>89 public geospatial FMs</b>; GEO-Bench-2 finds <b>no single model dominates all tasks</b>.</li>
+  </ul>
+  <div class="foot"><span>SatMAE arXiv:2207.08051 · Prithvi 2310.18660 · DOFA 2403.15356 · TerraMind 2504.11171 · AlphaEarth 2507.22291 · TESSERA 2506.20380 · GEO-Bench-2 2511.15658</span></div>
+  <aside class="notes">One pass, left to right: masking objectives → any-sensor architectures → embeddings-as-product. The "no single model dominates" finding is the course's evaluation thesis in one line — hold onto it until W9–12.</aside>
+</section>
+
+<!-- 27 ▸ Landscape 2: weather -->
+<section class="slide">
+  <p class="kicker">Part 6 · 2026 landscape</p>
+  <h2>ML weather is not a demo — it is operational</h2>
+  <ul>
+    <li><b>ECMWF AIFS</b>: operational since <b>Feb 2025</b>; CRPS-trained ensemble since July 2025.</li>
+    <li><b>NOAA AIGFS</b>: deployed <b>Jan 2026</b> — GraphCast fine-tuned on NOAA GDAS analyses.</li>
+    <li><b>Google WeatherNext 2</b>: powering Search, Gemini, Pixel, and Maps.</li>
+    <li>The frontier has moved: <span class="accent">probabilistic skill (CRPS), obs-direct pipelines, honest evaluation</span> — not “can ML forecast?”, which is settled.</li>
+  </ul>
+  <div class="foot"><span>AIFS arXiv:2406.01465 · GraphCast Science 2023 · WeatherNext 2 (FGN) arXiv:2506.10772 · Aardvark Nature 2025 · WeatherBench 2 arXiv:2308.15560</span></div>
+  <aside class="notes">Timing anchor for the room: the debate closed while current seniors were sophomores. Aardvark and GraphDOP go straight from raw observations to forecast — no reanalysis in the loop — which is where the open problems now live. That frontier framing is precisely where the reading list lands them by W12.</aside>
+</section>
+
+<!-- 28 ▸ Landscape 3: small models -->
+<section class="slide">
+  <p class="kicker">Part 6 · 2026 landscape</p>
+  <h2>Small models are real models</h2>
+  <ul>
+    <li><b>OlmoEarth-Nano: 1.4M parameters</b> — the smallest member of a fully open family (to 300M) that is state-of-the-art against 12 FMs on most benchmark tasks.</li>
+    <li><b>Presto: ~400K parameters</b> — a pixel-time-series transformer pretrained on Sentinel-1/2 + ERA5 that remains competitive on real tasks.</li>
+    <li>Meaningful EO pretraining therefore <b>fits Colab-scale compute</b>. Your capstone is these models’ younger sibling — smaller data, same objectives, same release standard.</li>
+    <li class="muted">The capstone is not a toy imitation of research; at this scale it <i>is</i> research practice.</li>
+  </ul>
+  <div class="foot"><span>OlmoEarth arXiv:2511.13655 (CVPR 2026) · Presto arXiv:2304.14065</span></div>
+  <aside class="notes">This slide is the existence proof for the entire course design: 1.4M and 400K parameters are numbers a student GPU budget can train. Say it plainly: "Nobody in this room lacks the compute to do this. The constraint is skill and consistency, which is what the 16 weeks build."</aside>
+</section>
+
+<!-- 29 ▸ Landscape 4: skills -->
+<section class="slide">
+  <p class="kicker">Part 6 · 2026 landscape</p>
+  <h2>What this landscape demands of you</h2>
+  <ul>
+    <li><b>Transformer + SSL fluency</b> — every model named today is a ViT descendant trained with masking, contrast, or latent prediction.</li>
+    <li><b>Data engineering for Earth data</b> — NetCDF, CRS, cos φ area weighting, cloud-native access; the diagnostic’s Section G was not decoration.</li>
+    <li><b>Honest evaluation</b> — leakage-safe splits, real baselines, lat-weighted RMSE and CRPS; the field’s own benchmarks show FMs often lose to a tuned U-Net.</li>
+    <li><b>Agent-driven engineering with verification discipline</b> — agents scaffold and refactor; silent numerical bugs and eval leakage are yours to catch. You own every number.</li>
+  </ul>
+  <div class="foot"><span>PANGAEA arXiv:2412.04204 · GEO-Bench-2 arXiv:2511.15658</span></div>
+  <aside class="notes">Map each bullet to a course phase (1→W1–8, 2→W3, 3→W2+W9–12, 4→every lab). This is the syllabus re-derived from the field rather than asserted. Transition: "Your first two papers train exactly bullet one — here is how we will discuss them." (2:20)</aside>
+</section>
+
+<!-- 30 ▸ Reading discussion -->
+<section class="slide">
+  <p class="kicker">Part 6 · reading cold-calls</p>
+  <h2>Attention Is All You Need (Vaswani 2017) + ViT (Dosovitskiy 2020)</h2>
+  <ol>
+    <li>Why does attention scale as O(n²) in tokens, and what does that imply for a 0.25° global weather grid (721×1440)?</li>
+    <li>ViT needs more data than CNNs to win — what inductive biases were traded away, and do satellite images restore any of them?</li>
+    <li>What exactly is a 'token' for a multispectral image cube?</li>
+  </ol>
+  <div class="foot"><span>Lead: rotation pair · opens with one reproduced figure · memo due 24 h before class, every week</span></div>
+  <aside class="notes">If the room has read the papers, run this as the first cold-call: derive scaled dot-product attention shapes at the board (Q·Kᵀ/√d over n tokens → an n×n map; 721×1440 ≈ 1.04×10⁶ grid points → ~10¹² pairwise scores — hence patching, windowing, meshes) and press on why patchify is tokenization. If not, these three questions are the memo prompts and this slide is the preview of how every discussion will run: no summaries, derivations and design trade-offs only.</aside>
+</section>
+
+<!-- 31 ▸ Lab 0 -->
+<section class="slide">
+  <p class="kicker">Lab 0 · 2:20–2:55 · 35 min</p>
+  <h2>Lab 0: environment bring-up with an AI agent</h2>
+  <ol class="small">
+    <li>Install Miniconda or <code>uv</code>; create env <code>en5425</code> with Python 3.11.</li>
+    <li><code>git config</code> name/email; GitHub account + SSH key; clone the course repo.</li>
+    <li>Run <code>python smoke_test.py</code> — imports numpy/pandas/torch/xarray, prints versions, downloads a 1 MB sample NetCDF, prints its dims.</li>
+    <li>Open Colab, enable GPU, run <code>torch.cuda.is_available()</code> — screenshot the <code>True</code>.</li>
+    <li><b>Agent literacy:</b> ask your agent to explain <code>smoke_test.py</code> line by line — then close the agent and explain any two lines to a neighbor.</li>
+  </ol>
+  <div class="card"><p class="small"><b>Goal.</b> Leave with a working toolchain <i>or</i> a precise list of what is broken. <b>Finished early?</b> Start HW0. <b>Broken?</b> Note exactly what failed — that is HW0’s first half.</p></div>
+  <aside class="notes">Checklist stays on screen; TAs and instructor circulate. Step 5 is the point of the lab: the open-agent/closed-agent cycle is the oral-defense muscle in miniature. Do not debug for students — debug with them, narrating the diagnosis.</aside>
+</section>
+
+<!-- 32 ▸ HW0 -->
+<section class="slide">
+  <p class="kicker">Part 8 · 2:55–3:00 · 5 min</p>
+  <h2>HW0: the gate — due 48 h before Week 2 (Sun 23:59 KST)</h2>
+  <ul class="small">
+    <li><b>Pass/fail, and a hard gate</b> for the project (60%): milestones are not accepted without a passed HW0. Designed for 4–8 h with an AI agent if prerequisites are in place.</li>
+    <li><b>Build:</b> fork the template repo; train a small MLP on ~10,000 rows of station soil-moisture data; temporal split (train ≤2018 / val 2019 / test 2020), scaling fit on train only; beat the mean-predictor baseline.</li>
+    <li><b>Ship:</b> <code>train_mlp.py</code> runnable from a fresh clone · <code>metrics.json</code> + loss curve · 1-page <code>report.md</code> with baselines table and an <b>agent-accountability section</b> · research note · ≥5 meaningful commits.</li>
+    <li class="accent">“HW0 is a compressed sample of an ordinary week. If HW0 takes you 20 hours, this course will take you 20 hours a week.”</li>
+  </ul>
+  <div class="foot"><span>Full spec + rubric on the course site · late without arrangement is read as a decision to drop; I will contact you to confirm</span></div>
+  <aside class="notes">Show the deliverables checklist on the course site; do not soften it. Say the quoted line once, plainly. The agent-accountability section — quote the line you understand least and explain it — is the oral-defense muscle: start now.</aside>
+</section>
+
+<!-- 33 ▸ Week 2 reading -->
+<section class="slide">
+  <p class="kicker">Part 8 · Week 2 reading</p>
+  <h2>For Week 2: Reichstein et al. (2019), <i>Nature</i></h2>
+  <ul>
+    <li>“Deep learning and process understanding for data-driven Earth system science” — the paper that frames this whole field.</li>
+    <li><b>Memo:</b> 300–400-word written response, standard format, <b>due 24 h before Week 2 class</b>. Prompt on the course site.</li>
+    <li>This is the weekly rhythm starting now: paper → memo → cold-call discussion. Week 2’s lecture assumes you have read it.</li>
+  </ul>
+  <div class="foot"><span>Reichstein et al. 2019, Nature 566, 195–204 · doi:10.1038/s41586-019-0912-1</span></div>
+  <aside class="notes">One sentence of framing only: "Reichstein asks what deep learning can and cannot do for Earth system science — you will spend 16 weeks answering him." Do not lecture the paper today.</aside>
+</section>
+
+<!-- 34 ▸ Close -->
+<section class="slide">
+  <p class="kicker">Part 8 · Adjourn</p>
+  <div class="fill">
+    <p class="big">You now have the syllabus, a diagnostic score, and a gate assignment.</p>
+    <p class="big accent">Decide deliberately. Both staying and leaving are respectable — drifting is not.</p>
+    <p class="muted">Office hours all week · attempt HW0 before you decide · see you (or not) in Week 2.</p>
+  </div>
+  <aside class="notes">Adjourn on time — two minutes early rather than late; precision is part of the signal. No pep talk after this slide: the whole session was the pep talk, delivered as information.</aside>
+</section>
+
+</body>
+</html>

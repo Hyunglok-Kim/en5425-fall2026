@@ -1,0 +1,1120 @@
+{
+  "course": "EN5425/EV4240 Fall 2026",
+  "weeks": [
+    {
+      "n": 1,
+      "phase": "Foundations",
+      "title": "Course Overview, the 2026 FM Landscape, and AI-Native Engineering",
+      "goal": "Understand what you will build (a small foundation model, released publicly), set up the full toolchain, and self-select honestly.",
+      "date": null,
+      "concept": [
+        {
+          "min": 15,
+          "topic": "What this course produces: walk through OlmoEarth-Nano (1.4M params) and Presto (~400K) as proof that real EO pretraining fits Colab-scale compute; show the capstone endpoint (HF Hub release + model card + eval table)."
+        },
+        {
+          "min": 15,
+          "topic": "The 2026 landscape in one pass: three generations of geospatial FMs (MAE-era → sensor-agnostic multimodal → global embedding fields like AlphaEarth/TESSERA); ML weather is operational (ECMWF AIFS since Feb 2025, NOAA AIGFS Jan 2026, Google WeatherNext 2) — the frontier is now probabilistic skill, obs-direct pipelines, and honest evaluation."
+        },
+        {
+          "min": 15,
+          "topic": "AI-agent-native engineering: what Claude Code/Cursor are good at (scaffolding, refactors, sweeps) and bad at (silent numerical bugs, eval leakage); the verification discipline — you own every number; repo hygiene, commit-per-lab, research notes as first-class output."
+        },
+        {
+          "min": 10,
+          "topic": "Logistics: grading (10/30/60), weekly memos, discussion-lead rotation, GitHub Pages site requirement, compute accounts. Explicit self-selection statement: if this week's two papers took more than ~6 hours and still feel opaque, the course will feel like that every week."
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion: Attention Is All You Need + ViT — cold-called derivation of scaled dot-product attention shapes; why patchify is tokenization."
+        },
+        {
+          "min": 5,
+          "topic": "Preview of W2 and lab kickoff."
+        }
+      ],
+      "lab": {
+        "task": "(a) Environment: Python + PyTorch on Colab and/or the shared GPU server, uv/conda, GPU sanity check. (b) Create personal course repo with GitHub Pages (Quarto or MkDocs-Material) and publish Research Note 00. (c) With the agent, build and train a small CNN classifier on EuroSAT (RGB), ~10 epochs, and manually verify one gradient with a finite-difference check the agent writes tests for.",
+        "data": [
+          "EuroSAT (RGB, via TorchGeo/HF Datasets)"
+        ],
+        "tools": [
+          "Claude Code/Cursor",
+          "PyTorch",
+          "TorchGeo",
+          "GitHub Pages (Quarto/MkDocs)"
+        ],
+        "deliverable": "Live course site URL + Note 01 (loss curve, accuracy, one paragraph on what the agent got wrong and how you caught it) pushed to git.",
+        "homework": null
+      },
+      "reading": {
+        "memo": "standard",
+        "primary": [
+          {
+            "title": "Vaswani et al. 2017 — Attention Is All You Need",
+            "link": "https://arxiv.org/abs/1706.03762"
+          },
+          {
+            "title": "Dosovitskiy et al. 2020 — An Image is Worth 16x16 Words (ViT)",
+            "link": "https://arxiv.org/abs/2010.11929"
+          }
+        ],
+        "optional": [
+          {
+            "title": "He et al. 2021 — Masked Autoencoders (MAE), skim; returns in W7",
+            "link": "https://arxiv.org/abs/2111.06377"
+          }
+        ],
+        "questions": [
+          "Why does attention scale as O(n²) in tokens, and what does that imply for a 0.25° global weather grid (721×1440)?",
+          "ViT needs more data than CNNs to win — what inductive biases were traded away, and do satellite images restore any of them?",
+          "What exactly is a 'token' for a multispectral image cube?"
+        ]
+      },
+      "skills": [
+        "agent-driven development",
+        "repo/site hygiene",
+        "transformer fundamentals",
+        "verification discipline"
+      ],
+      "slides": true
+    },
+    {
+      "n": 2,
+      "phase": "Foundations",
+      "title": "Leakage-Safe Evaluation Design (and the Fundamentals Recap)",
+      "goal": "Design evaluations that survive spatial/temporal autocorrelation — the geoscience failure mode — with the optimization recipe compressed to a working recap.",
+      "date": null,
+      "concept": [
+        {
+          "min": 10,
+          "topic": "Backprop as vector–Jacobian products; where activation memory goes (sets up gradient checkpointing in W12) — compressed recap, full derivation in the handout"
+        },
+        {
+          "min": 15,
+          "topic": "The optimizer recipe every FM in this course uses: AdamW, LR warmup + cosine schedule, weight decay vs L2, gradient clipping; regularization and early stopping in one pass"
+        },
+        {
+          "min": 25,
+          "topic": "HEADLINE — leakage in environmental data: spatial and temporal autocorrelation, why random splits lie, effective sample size under blocked CV; spatial-block and temporal-holdout design; train/test year separation as WeatherBench2 does it"
+        },
+        {
+          "min": 10,
+          "topic": "Designing a split a reviewer cannot reject: worked example on a global soil-moisture model (holdout by region, by year, by station network)"
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion — Reichstein et al. 2019: where has DL for Earth system science delivered since 2019, and where hasn't it?"
+        }
+      ],
+      "lab": {
+        "task": "Predict runoff ratio and mean annual streamflow from CAMELS-US catchment attributes (~671 basins, tabular). Agent builds MLP + gradient-boosting baseline; W&B sweep (LR, depth, dropout); then re-evaluate with spatial-block CV (holdout by HUC region) and quantify the optimism gap vs random splits.",
+        "data": [
+          "CAMELS-US catchment attributes (~671 basins)"
+        ],
+        "tools": [
+          "PyTorch",
+          "scikit-learn",
+          "W&B"
+        ],
+        "deliverable": "Note 02 with sweep parallel-coordinates plot + a 'random split vs spatial split' table; one-paragraph leakage post-mortem.",
+        "homework": null
+      },
+      "reading": {
+        "memo": "standard",
+        "primary": [
+          {
+            "title": "Reichstein et al. 2019 — Deep learning and process understanding for data-driven Earth system science (Nature)",
+            "link": "https://doi.org/10.1038/s41586-019-0912-1"
+          }
+        ],
+        "optional": [
+          {
+            "title": "Schultz et al. 2021 — Can deep learning beat NWP?",
+            "link": "https://doi.org/10.1098/rsta.2020.0097"
+          }
+        ],
+        "questions": [
+          "Which of Reichstein's five challenges have FMs since addressed, and which have they dodged?",
+          "Design a split for a global soil-moisture model that a reviewer couldn't reject — what do you hold out?",
+          "Is 'hybrid physics-ML' (their vision) winning in 2026, given NeuralGCM vs pure-ML GraphCast?"
+        ]
+      },
+      "skills": [
+        "optimization recipes",
+        "LR schedules",
+        "experiment tracking (W&B)",
+        "leakage-safe evaluation design"
+      ],
+      "slides": true
+    },
+    {
+      "n": 3,
+      "phase": "Foundations",
+      "title": "Environmental Big Data and Cloud-Native Pipelines",
+      "goal": "Fluently move satellite, reanalysis, and in-situ data through cloud-native formats; meet ERA5 and cos-latitude weighting.",
+      "date": null,
+      "concept": [
+        {
+          "min": 15,
+          "topic": "The data zoo: SMAP L3/L4, ERA5/MERRA-2 (reanalysis ≠ observation ≠ analysis), MODIS, GPM IMERG, HLS, Sentinel-1/2; spatial/temporal resolutions, latencies, error characteristics."
+        },
+        {
+          "min": 15,
+          "topic": "Cloud-native geospatial: COG, Zarr, STAC, chunking and why it dominates throughput; NASA Earthdata/earthaccess, Copernicus Data Space, Google/AWS public buckets, WeatherBench2's public ERA5 Zarr."
+        },
+        {
+          "min": 15,
+          "topic": "ERA5 as a pretraining corpus: equiangular grids, pressure levels, why area weighting exists — derive the cos-lat weighted mean; anomalies vs climatology (sets up ACC in W11); regridding: conservative vs bilinear remapping and when each is correct."
+        },
+        {
+          "min": 10,
+          "topic": "Designing dataset objects for pretraining: chips, tiles, per-pixel time series; normalization statistics done right (per-band, train-set-only)."
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion: Rolf et al. — is satellite data really a distinct ML modality? Collect the five concrete differences on the board (revisited all semester)."
+        },
+        {
+          "min": 5,
+          "topic": "Lab briefing: what the agent will scaffold vs what you must verify."
+        }
+      ],
+      "lab": {
+        "task": "Agent-built ETL, two pipes: (a) open WeatherBench2's public ERA5 Zarr (5.625° subset) with xarray, compute a Z500 climatology and anomaly field, verify a cos-lat weighted global mean of T2m against a naive mean; (b) pull ~200 Sentinel-2 L2A chips (64×64, 4 bands) over South Korea via STAC (Earth Search on AWS) or HLS via earthaccess, with SCL-based cloud/QA filtering applied when selecting chips, and write a local Zarr/NPZ chip store with per-band stats.",
+        "data": [
+          "WeatherBench2 ERA5 Zarr (5.625°)",
+          "Sentinel-2 L2A chips (STAC/Earth Search)",
+          "HLS via earthaccess"
+        ],
+        "tools": [
+          "xarray",
+          "zarr",
+          "gcsfs",
+          "pystac-client/stackstac",
+          "earthaccess"
+        ],
+        "deliverable": "Reusable data/ module + Note 03 (chip gallery, anomaly map, weighted-vs-naive mean table). This chip store is reused in W7.",
+        "homework": null
+      },
+      "reading": {
+        "memo": "standard",
+        "primary": [
+          {
+            "title": "Rolf et al. 2024 — Position: Satellite data is a distinct modality in ML",
+            "link": "https://arxiv.org/abs/2402.01444"
+          }
+        ],
+        "optional": [
+          {
+            "title": "Bauer, Thorpe & Brunet 2015 — The quiet revolution of NWP (Nature)",
+            "link": "https://doi.org/10.1038/nature14956"
+          }
+        ],
+        "questions": [
+          "Which of Rolf's claimed distinctions actually change architecture choices (cite SatMAE/Scale-MAE design decisions)?",
+          "Reanalysis is a model product — what does that mean for 'ground truth' when we evaluate a weather FM against ERA5?",
+          "Why is chunking layout a scientific issue, not just an engineering one?"
+        ]
+      },
+      "skills": [
+        "cloud-native ETL (Zarr/STAC/COG)",
+        "ERA5 handling",
+        "cos-lat weighting",
+        "regridding",
+        "dataset/normalization design"
+      ],
+      "slides": true
+    },
+    {
+      "n": 4,
+      "phase": "Foundations",
+      "title": "CNNs and Spatiotemporal Modeling on Gridded Data",
+      "goal": "Master the convolutional toolbox and dense-prediction craft that every FM is benchmarked against.",
+      "date": null,
+      "concept": [
+        {
+          "min": 15,
+          "topic": "Convolutions, receptive fields, encoder–decoder U-Net; skip connections as multi-scale fusion."
+        },
+        {
+          "min": 15,
+          "topic": "Dense prediction craft: segmentation losses (CE, Dice, focal), class imbalance, boundary effects, tiling/overlap inference."
+        },
+        {
+          "min": 15,
+          "topic": "Spatiotemporal extensions: ConvLSTM, 3D conv, factorized space–time; when convolution beats attention (small data, strong locality)."
+        },
+        {
+          "min": 10,
+          "topic": "The humbling PANGAEA preview: well-tuned supervised U-Nets still beat many GFMs on many tasks — your capstone baselines must include one."
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion: U-Net + ConvLSTM — why has a 2015 biomedical architecture survived every architectural fashion cycle?"
+        },
+        {
+          "min": 5,
+          "topic": "Multispectral input handling: >3 channels, per-band normalization, band dropout as augmentation."
+        }
+      ],
+      "lab": {
+        "task": "Flood extent segmentation on a Sen1Floods11 subset (~200 hand-labeled Sentinel-1/Sentinel-2 chips, via TorchGeo). Agent scaffolds U-Net (segmentation-models-pytorch); student defines the eval (IoU, precision/recall, spatially disjoint split) and runs an ablation: S1-only vs S2-only vs fused input.",
+        "data": [
+          "Sen1Floods11 subset (~200 chips)"
+        ],
+        "tools": [
+          "TorchGeo",
+          "segmentation-models-pytorch",
+          "W&B"
+        ],
+        "deliverable": "Note 04 with IoU table (3 input configs vs 'always-dry' baseline) + 4 prediction panels. This U-Net becomes the standing supervised baseline for capstone comparisons.",
+        "homework": null
+      },
+      "reading": {
+        "memo": "standard",
+        "primary": [
+          {
+            "title": "Ronneberger et al. 2015 — U-Net",
+            "link": "https://arxiv.org/abs/1505.04597"
+          }
+        ],
+        "optional": [
+          {
+            "title": "Shi et al. 2015 — ConvLSTM for precipitation nowcasting",
+            "link": "https://arxiv.org/abs/1506.04214"
+          }
+        ],
+        "questions": [
+          "Exactly what information do skip connections carry that the bottleneck destroys, and why does that matter more at 10 m GSD than on ImageNet?",
+          "Where should a pretrained FM plug into a U-Net-style decoder (this is what TerraTorch/Prithvi do)?",
+          "Why did ConvLSTM lose to transformers for global weather but survive for nowcasting (MetNet-3)?"
+        ]
+      },
+      "skills": [
+        "dense prediction heads",
+        "segmentation metrics",
+        "multispectral input handling",
+        "supervised baselines"
+      ]
+    },
+    {
+      "n": 5,
+      "phase": "Pretraining Core",
+      "title": "Sequence Models, Autoregressive Forecasting, and Rollout Stability",
+      "goal": "LSTMs for hydrologic time series, and the autoregressive rollout mechanics that all ML weather models live or die by.",
+      "date": null,
+      "concept": [
+        {
+          "min": 15,
+          "topic": "RNN/LSTM/GRU mechanics; gradients through time; why LSTMs still rule rainfall–runoff (the CAMELS story, NSE/KGE metrics)."
+        },
+        {
+          "min": 20,
+          "topic": "Autoregressive forecasting as a discipline: teacher forcing vs free-running, exposure bias, error accumulation, multi-step (rollout) training curricula — exactly GraphCast's 1→12-step curriculum and Pangu's hierarchical 1/3/6/24-h models, previewed on 1-D problems."
+        },
+        {
+          "min": 10,
+          "topic": "Stability and blurring: why MSE-trained autoregressive models regress to the mean at long lead times; first look at the double-penalty problem."
+        },
+        {
+          "min": 10,
+          "topic": "Probabilistic outputs on time series: quantile loss, NLL heads — CRPS foreshadowed."
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion: Kratzert — what does 'one LSTM for 500 basins beats 500 calibrated models' imply for foundation-model logic?"
+        },
+        {
+          "min": 5,
+          "topic": "Lab briefing."
+        }
+      ],
+      "lab": {
+        "task": "Train an LSTM on CAMELS-US forcing→streamflow for ~30 basins (NeuralHydrology or plain PyTorch). Key experiment: compare 1-step-ahead teacher-forced skill vs free-running 15-day rollout; plot NSE vs lead time; add a 3-step rollout loss and show the stability gain. Close with a 20-min ERA5 teaser: single-variable next-step prediction on the WeatherBench2 5.625° Zarr — the weather-direction seed.",
+        "data": [
+          "CAMELS-US (forcing + streamflow, ~30 basins)",
+          "WeatherBench2 ERA5 Zarr (single-variable teaser)"
+        ],
+        "tools": [
+          "NeuralHydrology (or PyTorch)",
+          "xarray",
+          "W&B"
+        ],
+        "deliverable": "Note 05 with NSE-vs-lead-time curves for both training regimes + hydrograph panels + the ERA5 next-step teaser result.",
+        "homework": null
+      },
+      "reading": {
+        "memo": "standard",
+        "primary": [
+          {
+            "title": "Kratzert et al. 2019 — Towards learning universal, regional, and local hydrological behaviors (HESS)",
+            "link": "https://doi.org/10.5194/hess-23-5089-2019"
+          }
+        ],
+        "optional": [
+          {
+            "title": "Nearing et al. 2024 — Global prediction of extreme floods in ungauged watersheds (Nature)",
+            "link": "https://doi.org/10.1038/s41586-024-07145-1"
+          }
+        ],
+        "questions": [
+          "Map Kratzert's 'regional model + static attributes' onto FM vocabulary: what is pretraining, what is conditioning?",
+          "Derive why 1-step MSE training produces unstable long rollouts; what are three remedies (curriculum, multi-step loss, noise injection)?",
+          "Is streamflow prediction in ungauged basins a 'fine-tuning' or 'zero-shot' problem?"
+        ]
+      },
+      "skills": [
+        "autoregressive rollout",
+        "rollout-curriculum training",
+        "exposure bias",
+        "hydrologic metrics (NSE)",
+        "time-series heads"
+      ]
+    },
+    {
+      "n": 6,
+      "phase": "Pretraining Core",
+      "title": "Attention and the Transformer, Built From Scratch (With an Agent You Verify)",
+      "goal": "Own every line of a Transformer/ViT implementation; understand the positional-encoding choices EO and weather models hinge on.",
+      "date": null,
+      "concept": [
+        {
+          "min": 20,
+          "topic": "Attention from first principles: QKV, multi-head, masking, complexity; pre-norm vs post-norm; residual stream intuition."
+        },
+        {
+          "min": 15,
+          "topic": "Positional encodings as the geoscience battleground: sincos, learned, RoPE (one slide); then the ones that matter here — SatMAE's temporal+spectral encodings, Prithvi-EO-2.0's lat/lon+date embeddings, Scale-MAE's GSD encoding, ClimaX's variable tokenization."
+        },
+        {
+          "min": 10,
+          "topic": "ViT anatomy: patchify as tokenization; patch size vs sequence length vs resolution trade-offs (why weather models at 0.25° need tricks)."
+        },
+        {
+          "min": 10,
+          "topic": "Windowed/shifted attention (Swin) and why Pangu, FuXi, and Aurora are Swin-based; 3D windows for pressure levels."
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion: Swin — hierarchical attention as a convolution–attention compromise; Presto (optional) as an existence proof of tiny FMs."
+        },
+        {
+          "min": 5,
+          "topic": "Mixed-precision and FlashAttention as 'why your lab fits in 75 minutes'."
+        }
+      ],
+      "lab": {
+        "task": "Implement mini_vit.py (attention, MHA, block, patchify, ViT) from scratch with the agent — test-driven: student specifies shape tests, causal-mask tests, a gradient-flow test, and an equivalence test against torch.nn.MultiheadAttention before the agent writes code. Train the tiny ViT (~1M params) on EuroSAT-MS (13-band Sentinel-2) with per-band-group patch embedding.",
+        "data": [
+          "EuroSAT-MS (13-band Sentinel-2)"
+        ],
+        "tools": [
+          "PyTorch",
+          "pytest",
+          "W&B"
+        ],
+        "deliverable": "Note 06 + mini_vit.py with passing test suite committed; accuracy vs the W1 CNN. This file is the backbone of the W7 MAE and, for many students, the capstone.",
+        "homework": null
+      },
+      "reading": {
+        "memo": "standard",
+        "primary": [
+          {
+            "title": "Liu et al. 2021 — Swin Transformer",
+            "link": "https://arxiv.org/abs/2103.14030"
+          }
+        ],
+        "optional": [
+          {
+            "title": "Tseng et al. 2023 — Presto",
+            "link": "https://arxiv.org/abs/2304.14065"
+          }
+        ],
+        "questions": [
+          "Why does shifted windowing recover cross-window information flow — and what is the weather-model analog at the poles/dateline?",
+          "For a 13-band image, argue for/against: one patch embed for all bands vs band-group embeds vs wavelength-conditioned embeds (DOFA's answer).",
+          "Presto has 400K params and competes with giants on pixel time series — what does that say about scale vs inductive fit?"
+        ]
+      },
+      "skills": [
+        "transformer implementation",
+        "positional/metadata encodings",
+        "patchify/tokenization",
+        "test-driven agent verification"
+      ]
+    },
+    {
+      "n": 7,
+      "phase": "Pretraining Core",
+      "title": "Self-Supervised Learning: Pretrain Your First Model",
+      "goal": "Understand the SSL design space and actually pretrain a mini-MAE on satellite imagery — everyone's hands-on pretraining experience and the capstone seed.",
+      "date": null,
+      "concept": [
+        {
+          "min": 20,
+          "topic": "SSL taxonomy with lineage map: masked reconstruction (MAE → SatMAE/Prithvi), contrastive (SimCLR), self-distillation (DINO → DINOv3-satellite), latent prediction (I-JEPA → Galileo, AnySat, OlmoEarth's Latent MIM Lite); collapse and how each family avoids it."
+        },
+        {
+          "min": 15,
+          "topic": "MAE mechanics in detail: 75% masking, asymmetric encoder/decoder, normalized-pixel targets, why high masking works for images and what changes for EO (spatial redundancy, cloud pixels)."
+        },
+        {
+          "min": 10,
+          "topic": "Structured masking for EO/weather: spatial, spectral/band-group, temporal, and modality masking (SatMAE, SpectralGPT, Galileo); Prithvi-WxC's mixed masked+forecast objective as the bridge to W11."
+        },
+        {
+          "min": 10,
+          "topic": "Evaluating SSL: linear probe vs kNN vs full fine-tune; why probe rankings mislead (GEO-Bench-2 evidence)."
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion: MAE — the paper your capstone will imitate; optional DINO contrast."
+        },
+        {
+          "min": 5,
+          "topic": "Mixed precision (torch.amp) introduced hands-on in the lab today."
+        }
+      ],
+      "lab": {
+        "task": "In-class core: pretrain a mini-MAE (~2M params, from your W6 ViT) on the W3 Sentinel-2/HLS chip store (or a ~5k-chip SSL4EO-S12 subset), bf16 autocast, ~15 min on one GPU; then linear probe on EuroSAT vs (a) random init and (b) supervised-from-scratch at equal epochs; visualize reconstructions.",
+        "data": [
+          "W3 Sentinel-2/HLS chip store",
+          "SSL4EO-S12 subset (~5k chips, alternative)",
+          "EuroSAT (probe)"
+        ],
+        "tools": [
+          "PyTorch AMP (bf16)",
+          "W&B"
+        ],
+        "deliverable": "Note 07 with probe-accuracy table (pretrained vs random vs supervised) and reconstruction grids. This checkpoint and codebase are every student's hands-on pretraining experience and the capstone seed — reused in the W9 scaling sweep and the W10 leaderboard; the HydroAI lab's Hydro-FM team builds on it directly.",
+        "homework": "Masking-ratio ablation: rerun pretraining at 50/75/90% masking; add reconstruction grids and the probe mini-ablation table to Note 07."
+      },
+      "reading": {
+        "memo": "standard",
+        "primary": [
+          {
+            "title": "He et al. 2021 — Masked Autoencoders Are Scalable Vision Learners",
+            "link": "https://arxiv.org/abs/2111.06377"
+          }
+        ],
+        "optional": [
+          {
+            "title": "Caron et al. 2021 — DINO",
+            "link": "https://arxiv.org/abs/2104.14294"
+          },
+          {
+            "title": "Chen et al. 2020 — SimCLR",
+            "link": "https://arxiv.org/abs/2002.05709"
+          }
+        ],
+        "questions": [
+          "Why can MAE mask 75% while BERT masks 15% — and what ratio would you predict for cloud-free Sentinel-2 vs ERA5 fields (compare Prithvi-WxC's choice)?",
+          "What exactly does the decoder learn, and why throw it away?",
+          "Propose one EO-specific masking structure and the invariance it would induce."
+        ]
+      },
+      "skills": [
+        "masking strategies",
+        "MAE pretraining",
+        "SSL evaluation (probe/kNN/FT)",
+        "mixed precision (bf16/AMP)"
+      ]
+    },
+    {
+      "n": 8,
+      "phase": "Pretraining Core",
+      "title": "Midterm: Portfolio Review and Capstone Proposal Pitches",
+      "goal": "Convert seven weeks of labs into a credible, compute-budgeted capstone proposal.",
+      "date": null,
+      "concept": [
+        {
+          "min": 15,
+          "topic": "How to write a capstone proposal: data → objective → architecture → compute budget → evaluation-first design (name your baselines and metrics before training anything)."
+        },
+        {
+          "min": 10,
+          "topic": "Compute budgeting at course scale: back-of-envelope FLOPs, tokens-seen, GPU-hours; Chinchilla logic previewed (formalized in W9)."
+        },
+        {
+          "min": 10,
+          "topic": "Track briefing: default track for everyone = fine-tune and rigorously evaluate a public FM (LoRA, free-tier compute); pretraining is experienced by all in the W7/W9 labs; from-scratch development is reserved for the HydroAI lab team's joint Hydro-FM project. Weather-direction proposals are provisional, with a revision gate after W11. Scope ladders for EV4240 vs EN5425."
+        },
+        {
+          "min": 40,
+          "topic": "Proposal pitches, round 1: 5-min pitch + 3-min hostile-but-kind Q&A per student/team (instructor + one assigned peer discussant each)."
+        }
+      ],
+      "lab": {
+        "task": "Pitches continue; every student files written feedback (GitHub issues) on two peers' proposals; instructor sign-off queue. Portfolio spot-check: instructor clones two random repos and re-runs a lab note live — a reproducibility culture moment.",
+        "data": [],
+        "tools": [
+          "GitHub (issues, PR review)"
+        ],
+        "deliverable": "2-page proposal (data, objective, model size, GPU-hour budget, downstream tasks, eval protocol, risk plan) merged to repo via reviewed PR; weather-direction proposals filed as provisional pending the post-W11 revision gate.",
+        "homework": null
+      },
+      "reading": {
+        "memo": "none",
+        "primary": [],
+        "optional": [],
+        "questions": []
+      },
+      "skills": [
+        "eval-first experimental design",
+        "compute budgeting",
+        "scientific communication"
+      ]
+    },
+    {
+      "n": 9,
+      "phase": "Foundation Models",
+      "title": "Foundation Models and Scaling Laws",
+      "goal": "The intellectual frame — what makes a model a foundation model, and how scaling laws let you budget a tiny one honestly.",
+      "date": null,
+      "concept": [
+        {
+          "min": 15,
+          "topic": "Foundation-model definition (Bommasani): emergence and homogenization; what transfers from the LLM playbook to EO/weather and what doesn't (no internet-scale text; data is spatially correlated and physically constrained)."
+        },
+        {
+          "min": 20,
+          "topic": "Scaling laws: Kaplan power laws, Chinchilla compute-optimal N vs D, data-constrained scaling; worked example live: 'you have 10 GPU-hours and 50 GB of chips — solve for model size'."
+        },
+        {
+          "min": 10,
+          "topic": "When pretraining pays: transfer gap vs supervised baselines; PANGAEA/GEO-Bench-2 evidence that it often doesn't — framing your capstone claim honestly."
+        },
+        {
+          "min": 10,
+          "topic": "Emergence skepticism and evaluation-metric artifacts; what 'emergent' could even mean for a weather model."
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion: Chinchilla — compute-optimal N vs D, and which scaling-law assumptions (iid data, single modality, LM loss) break for EO?"
+        },
+        {
+          "min": 5,
+          "topic": "Lab briefing: you will fit your own scaling law today."
+        }
+      ],
+      "lab": {
+        "task": "Fit a mini scaling law for your own model family. The 4-size sweep (launched pre-class as homework) is already done; the 75 in-class minutes go to fitting and diagnosing the power law: plot reconstruction loss (and probe accuracy) vs params on log–log, fit the power law, stress-test where the fit breaks, and extrapolate to your capstone budget — writing the prediction into your proposal.",
+        "data": [
+          "W3 chip corpus (fixed)",
+          "W7 mini-MAE at 4 sizes (~0.1M/0.5M/2M/8M params)"
+        ],
+        "tools": [
+          "W&B sweeps",
+          "agent-orchestrated multi-run script",
+          "matplotlib"
+        ],
+        "deliverable": "Note 09 with the log–log fit reported as a prediction interval plus enumerated failure modes (not a point prediction) + a one-paragraph capstone budget memo (chosen N, D, GPU-hours, predicted loss range).",
+        "homework": "Pre-class: launch the 4-size scaling sweep (~0.1M/0.5M/2M/8M params, fixed wall-clock on the fixed chip corpus) so all runs finish before the lab."
+      },
+      "reading": {
+        "memo": "standard",
+        "primary": [
+          {
+            "title": "Hoffmann et al. 2022 — Training Compute-Optimal Large Language Models (Chinchilla)",
+            "link": "https://arxiv.org/abs/2203.15556"
+          }
+        ],
+        "optional": [
+          {
+            "title": "Kaplan et al. 2020 — Scaling Laws for Neural Language Models",
+            "link": "https://arxiv.org/abs/2001.08361"
+          },
+          {
+            "title": "Bommasani et al. 2021 — Opportunities and Risks of Foundation Models (Secs. 1–2)",
+            "link": "https://arxiv.org/abs/2108.07258"
+          }
+        ],
+        "questions": [
+          "Chinchilla says balance N and D — what is 'a token' of ERA5, and how many does 40 years of 0.25° reanalysis contain?",
+          "Why might scaling exponents differ for satellite imagery vs text?",
+          "Given your W9 lab fit: is your capstone compute-optimal, over-parameterized, or data-starved?"
+        ]
+      },
+      "skills": [
+        "scaling-law fitting",
+        "compute-optimal budgeting",
+        "transfer-learning framing",
+        "automated sweep orchestration"
+      ]
+    },
+    {
+      "n": 10,
+      "phase": "Foundation Models",
+      "title": "Earth Observation Foundation Models (EO-FM Week)",
+      "goal": "Command the GFM design space — from SatMAE to embedding fields — and how to evaluate them without fooling yourself.",
+      "date": null,
+      "concept": [
+        {
+          "min": 15,
+          "topic": "Generation 1: SatMAE (temporal/spectral tokens, band-group masking), Scale-MAE (GSD positional encoding, Laplacian decoder), Prithvi-EO-1.0/2.0 (HLS, 3D geolocation+date embeddings, TerraTorch fine-tuning stack — the closest published blueprint to your capstone)."
+        },
+        {
+          "min": 15,
+          "topic": "Generation 2, sensor-agnostic and multimodal: DOFA/Copernicus-FM (wavelength-conditioned hypernetwork patch embeds), TerraMind (any-to-any generation, Thinking-in-Modalities), Galileo (dual global+local latent objectives, structured space/time/modality masking), SpectralGPT, SkySense."
+        },
+        {
+          "min": 15,
+          "topic": "Generation 3, embeddings as the product: AlphaEarth Foundations (64-D annual 10 m embeddings in GEE — a 'virtual satellite', not a backbone), TESSERA (open competitor), Major-TOM embeddings; OlmoEarth as the fully open small-model + platform exemplar; DINOv3-satellite as the outsider that wins on high-res RGB."
+        },
+        {
+          "min": 10,
+          "topic": "Honest evaluation: GEO-Bench → GEO-Bench-2 capability groups ('no model dominates'), PANGAEA's U-Net reality check, the 89-GFM usability study; what your capstone eval must therefore include."
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion: Prithvi-EO-2.0 — dissect it as a capstone template (data curation → objective → metadata embeddings → TerraTorch downstream)."
+        },
+        {
+          "min": 5,
+          "topic": "Lab briefing."
+        }
+      ],
+      "lab": {
+        "task": "Mini-GFM leaderboard, in-class core: linear-probe three frozen encoders — (a) your W7 mini-MAE, (b) OlmoEarth-Nano (HF checkpoint), (c) Presto — on ONE classification task with the same split: EuroSAT-MS.",
+        "data": [
+          "EuroSAT-MS",
+          "OlmoEarth-Nano checkpoint (HF Hub)",
+          "Presto checkpoint"
+        ],
+        "tools": [
+          "HF Hub",
+          "TorchGeo",
+          "GEE (optional)",
+          "W&B"
+        ],
+        "deliverable": "Note 10 — leaderboard table + 200-word 'which encoder for which task and why', citing GEO-Bench-2's capability-group logic.",
+        "homework": "Optional extensions: a dense-task probe (Sen1Floods11 with a 1×1-conv head) and a fourth AlphaEarth Satellite Embeddings column from GEE over a Korean AOI. Required: capstone corpus curation — assemble and document your fine-tuning dataset (default track) or pretraining chip corpus (Hydro-FM team)."
+      },
+      "reading": {
+        "memo": "standard",
+        "primary": [
+          {
+            "title": "Szwarcman et al. 2024 — Prithvi-EO-2.0",
+            "link": "https://arxiv.org/abs/2412.02732"
+          }
+        ],
+        "optional": [
+          {
+            "title": "Cong et al. 2022 — SatMAE",
+            "link": "https://arxiv.org/abs/2207.08051"
+          },
+          {
+            "title": "Herzog et al. 2025 — OlmoEarth",
+            "link": "https://arxiv.org/abs/2511.13655"
+          }
+        ],
+        "questions": [
+          "Which Prithvi-EO-2.0 design choices survive at 1/1000th scale, and which are pointless below 100M params?",
+          "Are location/date embeddings a feature or a leakage channel for downstream tasks?",
+          "If AlphaEarth-style embedding fields keep improving, who still needs to fine-tune a backbone — and what does that mean for your capstone's claim?"
+        ]
+      },
+      "skills": [
+        "multi-sensor/multispectral architectures",
+        "metadata conditioning",
+        "GFM benchmarking (GEO-Bench/PANGAEA)",
+        "frozen-embedding workflows",
+        "HF checkpoint reuse"
+      ]
+    },
+    {
+      "n": 11,
+      "phase": "Foundation Models",
+      "title": "Weather and Climate Foundation Models (Weather-FM Week)",
+      "goal": "The full ML-weather stack: paradigms, spherical geometry, rollout stability, and WeatherBench2-grade evaluation — then train your own tiny forecaster.",
+      "date": null,
+      "concept": [
+        {
+          "min": 10,
+          "topic": "Problem setup: atmospheric state as a tensor (variables × levels × lat × lon), ERA5 as corpus, initial-condition provenance (ERA5 vs operational analysis — an evaluation trap), 2026 operational status (AIFS, NOAA AIGFS, WeatherNext 2)."
+        },
+        {
+          "min": 20,
+          "topic": "Paradigm tour, one architecture slide each: deterministic transformers (Pangu's 3D Earth-specific attention, Stormer, FuXi/FengWu), graph/mesh (GraphCast's icosahedral encode-process-decode, AIFS), spherical operators (SFNO — why FFTs on lat-lon grids are wrong at the poles), probabilistic/generative (GenCast diffusion, FGN/WeatherNext 2, FourCastNet 3), hybrid (NeuralGCM), obs-direct (Aardvark, GraphDOP), and the pretrain→fine-tune FMs proper (ClimaX variable tokenization, Aurora, Prithvi-WxC)."
+        },
+        {
+          "min": 15,
+          "topic": "Rollout stability engineering: multi-step loss curricula (GraphCast's schedule), fine-tuning horizon, blurring/double-penalty, power-spectra diagnostics, effective resolution."
+        },
+        {
+          "min": 15,
+          "topic": "Metrics you must be able to derive: lat-weighted RMSE, ACC vs climatology (and the 0.6 'useful skill' convention), bias; probabilistic: CRPS as generalized MAE, spread–skill, rank histograms; the WeatherBench2 protocol (test years, headline scorecard)."
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion: GraphCast — why a mesh, why a 12-step curriculum, what did NOAA change to operationalize it?"
+        }
+      ],
+      "lab": {
+        "task": "Train a tiny weather emulator on the WeatherBench2 ERA5 5.625° Zarr (Z500 + T850, 6-h steps, ~1979–2015 train / 2018–2019 test): small U-Net or your W6 ViT (~1–3M params) predicting residual (Δstate) targets, with per-variable-per-level normalization and static input channels (orography, land–sea mask). Write the lat-weighted MSE loss yourself and test it against analytic values (agent writes the test). Evaluate lat-weighted RMSE and ACC vs persistence and climatology baselines at 1–5-day leads via autoregressive rollout; plot the zonal power spectrum at day 1 vs day 5 to see blurring.",
+        "data": [
+          "WeatherBench2 ERA5 5.625° Zarr (Z500 + T850)"
+        ],
+        "tools": [
+          "xarray + gcsfs (WB2 public bucket)",
+          "PyTorch",
+          "W&B",
+          "ClimateLearn (optional scaffold)"
+        ],
+        "deliverable": "Note 11 — WB2-style scorecard table (model vs persistence vs climatology), ACC-vs-lead-time plot, spectra figure, rollout animation GIF. This is the weather-direction capstone seed; provisional W8 weather proposals hit their revision gate after this week.",
+        "homework": null
+      },
+      "reading": {
+        "memo": "standard",
+        "primary": [
+          {
+            "title": "Lam et al. 2023 — GraphCast",
+            "link": "https://arxiv.org/abs/2212.12794"
+          }
+        ],
+        "optional": [
+          {
+            "title": "Bi et al. 2023 — Pangu-Weather",
+            "link": "https://arxiv.org/abs/2211.02556"
+          },
+          {
+            "title": "Price et al. 2025 — GenCast",
+            "link": "https://arxiv.org/abs/2312.15796"
+          }
+        ],
+        "questions": [
+          "Derive why unweighted MSE on a lat-lon grid over-weights the poles, and by how much at 60°N.",
+          "GraphCast beats HRES on RMSE partly by blurring — how would CRPS-trained GenCast change that comparison, and what does the double-penalty argument say?",
+          "Is an ERA5 emulator forecasting the atmosphere or forecasting ECMWF's data assimilation system? Defend both readings."
+        ]
+      },
+      "skills": [
+        "lat-weighted loss",
+        "ACC/RMSE/CRPS",
+        "spherical/mesh representations",
+        "rollout curriculum & stability",
+        "WeatherBench2 evaluation",
+        "spectra diagnostics"
+      ]
+    },
+    {
+      "n": 12,
+      "phase": "Foundation Models",
+      "title": "Scaling the Pipeline: Training Engineering, Fine-Tuning, and Release",
+      "goal": "Every remaining capstone skill: efficient training at your compute ceiling, PEFT fine-tuning, ablation design, and a real HF Hub release — after this week you have 100% of the capstone skill set.",
+      "date": null,
+      "concept": [
+        {
+          "min": 20,
+          "topic": "Training engineering: bf16/AMP recap, gradient accumulation, activation/gradient checkpointing (memory math from W2 revisited), DDP concepts (all-reduce, effective batch size, LR scaling) and when FSDP matters; streaming dataloaders (WebDataset/streaming Zarr) so GPUs never starve."
+        },
+        {
+          "min": 15,
+          "topic": "Fine-tuning spectrum: linear probe → decoder-only → LoRA/PEFT (derive the low-rank update, rank/alpha choices) → full FT; decoder heads for dense EO tasks (UperNet-style, TerraTorch conventions) and forecast heads for weather."
+        },
+        {
+          "min": 15,
+          "topic": "Evaluation and ablation design for the capstone: minimum honest set = {random-init control, supervised baseline (your W4 U-Net or persistence/climatology), frozen probe, fine-tuned}, one ablation axis (masking ratio, data volume, or model size), seeds and error bars."
+        },
+        {
+          "min": 15,
+          "topic": "Significance testing for forecast and benchmark comparisons: paired block bootstrap over time (and space), why naive per-sample tests lie under autocorrelation, error bars for scorecard tables."
+        },
+        {
+          "min": 10,
+          "topic": "Release engineering: HF Hub mechanics (weights, config, README.md model card), semantic versioning, licenses for models and data (Copernicus, NASA open-data terms), W&B reports as the lab notebook of record."
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion: LoRA — where do low-rank updates live in a ViT and why does that work? (Optional PANGAEA feeds the ablation-design segment.)"
+        }
+      ],
+      "lab": {
+        "task": "Capstone dress rehearsal, in-class core: (a) attach LoRA adapters (peft) to your W7/W9 pretrained mini-MAE (or OlmoEarth-Nano) and fine-tune on Sen1Floods11 (geo rehearsal) or fine-tune the W11 emulator on a Korea-region T2m patch (weather rehearsal); (b) build a CRPS mini-ensemble via MC-dropout and score it; (c) push the checkpoint to HF Hub with an agent-drafted, human-corrected model card; run DDP on 2 GPUs on the shared server if available (otherwise simulate with accumulation).",
+        "data": [
+          "Sen1Floods11 (geo rehearsal)",
+          "WeatherBench2 ERA5 Korea-region T2m patch (weather rehearsal)"
+        ],
+        "tools": [
+          "peft",
+          "accelerate",
+          "HF Hub",
+          "W&B"
+        ],
+        "deliverable": "Note 12 — LoRA fine-tune result, CRPS mini-ensemble score, live HF Hub link with model card; homework adds the three-way fine-tuning table and memory/throughput mini-benchmark.",
+        "homework": "Probe vs LoRA vs full-FT three-way comparison in one W&B report; enable gradient checkpointing + accumulation and measure the memory/throughput trade-off."
+      },
+      "reading": {
+        "memo": "standard",
+        "primary": [
+          {
+            "title": "Hu et al. 2021 — LoRA",
+            "link": "https://arxiv.org/abs/2106.09685"
+          }
+        ],
+        "optional": [
+          {
+            "title": "Marsocci et al. 2024 — PANGAEA",
+            "link": "https://arxiv.org/abs/2412.04204"
+          },
+          {
+            "title": "GEO-Bench-2 (skim)",
+            "link": "https://arxiv.org/abs/2511.15658"
+          }
+        ],
+        "questions": [
+          "Why can rank-8 updates match full fine-tuning — what does that imply about the geometry of task adaptation?",
+          "For a 2M-param model, is PEFT ever worth it, or is it purely a big-model technology? Test your answer in the lab.",
+          "PANGAEA shows GFMs losing to U-Nets — list three experimental-design choices that could flip such a comparison dishonestly."
+        ]
+      },
+      "skills": [
+        "PEFT/LoRA",
+        "gradient checkpointing & accumulation",
+        "DDP concepts",
+        "streaming dataloaders",
+        "significance testing (block bootstrap)",
+        "HF Hub release",
+        "model cards",
+        "ablation design"
+      ]
+    },
+    {
+      "n": 13,
+      "phase": "Capstone Sprints",
+      "title": "Agentic ML Engineering + Capstone Sprint 1",
+      "goal": "Turn your AI agent from code generator into experiment orchestrator; launch the capstone run. Milestone M1 due.",
+      "date": null,
+      "concept": [
+        {
+          "min": 15,
+          "topic": "Agentic engineering for ML: multi-agent patterns (planner/implementer/reviewer), MCP servers for W&B and HF, agent-run ablation loops with guardrails (immutable eval script, human-approved config diffs)."
+        },
+        {
+          "min": 10,
+          "topic": "CI for research code: smoke-test on 1 batch, deterministic seeds, config-as-code (hydra/yaml); pre-registration of the capstone eval protocol (frozen this week, before results exist)."
+        },
+        {
+          "min": 10,
+          "topic": "Chinchilla applied: each team defends its N/D/GPU-hour triple against its W9 scaling fit in 60 seconds."
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion: GenCast — diffusion-based ensemble forecasting, CRPS-trained probabilistic skill, and what it changes about how capstone forecasts should be judged."
+        }
+      ],
+      "lab": {
+        "task": "Sprint 1 (100 min): freeze data pipeline and eval protocol; launch the capstone run — default track: LoRA fine-tuning of a public FM on free-tier compute; Hydro-FM team: pretraining launch (background on shared server or checkpoint-resumable Colab); set up agent-monitored W&B alerts. Instructor circulates for design reviews.",
+        "data": [],
+        "tools": [
+          "W&B (alerts, MCP)",
+          "GitHub Actions CI",
+          "hydra/yaml configs",
+          "Claude Code/Cursor"
+        ],
+        "deliverable": "M1 (end of week, pushed to repo): frozen data/ + eval/ modules with CI badge green; capstone run launched with public W&B link; pre-registered eval protocol document.",
+        "homework": null
+      },
+      "reading": {
+        "memo": "short",
+        "primary": [
+          {
+            "title": "Price et al. 2024 — GenCast",
+            "link": "https://arxiv.org/abs/2312.15796"
+          }
+        ],
+        "optional": [
+          {
+            "title": "FGN / WeatherNext 2",
+            "link": "https://arxiv.org/abs/2506.10772"
+          }
+        ],
+        "questions": [
+          "CRPS-trained GenCast redefines what a 'better' forecast means vs RMSE-optimized deterministic models — which metric should headline your capstone eval, and why?",
+          "Your data is capped — what does data-constrained (Chinchilla-with-epoching) scaling say about repeating epochs vs shrinking the model?",
+          "What can an agent safely automate in your capstone loop, and what must remain human-gated? Write the gate list into your repo."
+        ]
+      },
+      "skills": [
+        "multi-agent/MCP workflows",
+        "experiment automation",
+        "CI for ML",
+        "pre-registered evaluation",
+        "compute-optimal execution"
+      ]
+    },
+    {
+      "n": 14,
+      "phase": "Capstone Sprints",
+      "title": "Capstone Sprint 2 + Peer Code Review; Model Cards and Reproducibility",
+      "goal": "Fine-tune and evaluate the model; subject your code to structured peer review. Milestone M2 due.",
+      "date": null,
+      "concept": [
+        {
+          "min": 15,
+          "topic": "Model cards and data cards done properly: intended use, out-of-scope use, eval disaggregation (by region/biome/lead time), limitations that are specific, not liability boilerplate."
+        },
+        {
+          "min": 10,
+          "topic": "Reproducibility checklist: seeds, environment lockfiles, data versioning/DOIs, exact commit for every number in the report; license compatibility of your release."
+        },
+        {
+          "min": 5,
+          "topic": "Peer-review protocol: assigned reviewer pairs (geo↔weather cross-track), review = run their smoke test + read eval code + file ≥3 substantive GitHub issues."
+        },
+        {
+          "min": 15,
+          "topic": "Reading discussion: Model Cards (Mitchell) + the 89-GFM usability study — why most released GFMs are barely usable, and how not to add to the pile."
+        }
+      ],
+      "lab": {
+        "task": "Sprint 2 (105 min): downstream fine-tuning and evaluation (≥1 task, with the mandatory baseline quartet from W12); 30-min structured peer code-review block mid-session; triage reviewer issues.",
+        "data": [],
+        "tools": [
+          "GitHub (issues, review)",
+          "W&B",
+          "peft/HF Hub"
+        ],
+        "deliverable": "M2: checkpoint archived; ≥1 fine-tuned downstream result with baselines table; peer review given and received (issue links); draft model card in repo.",
+        "homework": null
+      },
+      "reading": {
+        "memo": "short",
+        "primary": [
+          {
+            "title": "Mitchell et al. 2019 — Model Cards for Model Reporting",
+            "link": "https://arxiv.org/abs/1810.03993"
+          }
+        ],
+        "optional": [
+          {
+            "title": "How Usable Are Geospatial Foundation Models?",
+            "link": "https://arxiv.org/abs/2608.03804"
+          }
+        ],
+        "questions": [
+          "Write the 'out-of-scope uses' section for your own model in three honest sentences.",
+          "Of the usability failures found across 89 GFMs, which three are cheapest to prevent — and does your repo prevent them?"
+        ]
+      },
+      "skills": [
+        "model/data cards",
+        "reproducibility engineering",
+        "code review",
+        "licensing"
+      ]
+    },
+    {
+      "n": 15,
+      "phase": "Capstone Sprints",
+      "title": "Capstone Sprint 3: Evaluation, Ablation, Documentation, Release Candidate",
+      "goal": "Finish evaluation and ablation, harden documentation, cut a release candidate. Milestone M3 due.",
+      "date": null,
+      "concept": [
+        {
+          "min": 10,
+          "topic": "Release engineering final pass: HF Hub versioned release, GitHub tag, W&B report as appendix, GitHub Pages project page."
+        },
+        {
+          "min": 10,
+          "topic": "Demo-day rubric walkthrough + how to present a negative result honestly (pretraining or fine-tuning that didn't beat the baseline is publishable if the eval is airtight)."
+        },
+        {
+          "min": 20,
+          "topic": "Frontier reading discussion (menu week): 3-minute lightning takes — each student presents how their chosen frontier paper relates to their capstone."
+        }
+      ],
+      "lab": {
+        "task": "Sprint 3 (110 min): complete the ablation axis; finalize eval tables with seeds/error bars; finish model card, README quickstart (pip install → inference in <5 min), project page; tag release candidate. Instructor does pre-flight checks on demand.",
+        "data": [],
+        "tools": [
+          "HF Hub",
+          "GitHub (tags, Pages)",
+          "W&B"
+        ],
+        "deliverable": "M3: full results + ablation tables; complete model card; release candidate tagged on HF Hub + GitHub; draft slides.",
+        "homework": null
+      },
+      "reading": {
+        "memo": "menu",
+        "primary": [
+          {
+            "title": "AlphaEarth Foundations",
+            "link": "https://arxiv.org/abs/2507.22291"
+          },
+          {
+            "title": "TESSERA",
+            "link": "https://arxiv.org/abs/2506.20380"
+          },
+          {
+            "title": "Aardvark Weather (Nature 2025)",
+            "link": "https://arxiv.org/abs/2404.00411"
+          },
+          {
+            "title": "ACE2",
+            "link": "https://arxiv.org/abs/2411.11268"
+          },
+          {
+            "title": "DINOv3",
+            "link": "https://arxiv.org/abs/2508.10104"
+          },
+          {
+            "title": "EO-FMs for Terrestrial Ecohydrology",
+            "link": "https://arxiv.org/abs/2608.15282"
+          }
+        ],
+        "optional": [],
+        "questions": [
+          "What would this paper's authors say is wrong with your capstone?",
+          "What is the smallest experiment that would extend your capstone toward this frontier?"
+        ]
+      },
+      "skills": [
+        "benchmark reporting with uncertainty",
+        "ablation completion",
+        "release packaging",
+        "scientific presentation"
+      ]
+    },
+    {
+      "n": 16,
+      "phase": "Capstone Sprints",
+      "title": "Demo Day: Presentations and Model Release",
+      "goal": "Ship it.",
+      "date": null,
+      "concept": [
+        {
+          "min": 120,
+          "topic": "Demo talks: 8-min talk + 4-min Q&A per student/team — problem, data, training evidence (loss curves + scaling context), downstream results vs the full baseline quartet, ablation, limitations, live HF Hub + project page."
+        },
+        {
+          "min": 15,
+          "topic": "Live release verification: instructor (or a peer, agent-assisted) clones one randomly selected repo and runs the README quickstart during the session — it must work."
+        },
+        {
+          "min": 15,
+          "topic": "Course retrospective: what the 2026 landscape will look like in 2027; how to turn a capstone into a workshop paper (AGU/EGU, NeurIPS CCAI, ICLR ML4RS)."
+        }
+      ],
+      "lab": {
+        "task": "No lab — demo day.",
+        "data": [],
+        "tools": [],
+        "deliverable": "Final artifacts due 48 h after class: HF Hub model card, tagged GitHub repo with working quickstart, 6-page report on the GitHub Pages site, W&B report.",
+        "homework": null
+      },
+      "reading": {
+        "memo": "none",
+        "primary": [],
+        "optional": [],
+        "questions": []
+      },
+      "skills": [
+        "scientific presentation",
+        "live release verification",
+        "shipping a public model"
+      ]
+    }
+  ]
+}

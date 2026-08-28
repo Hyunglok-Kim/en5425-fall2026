@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Deep Learning Applications in Environmental Big Data</title>
+<meta name="description" content="GIST Fall 2026 — pretrain, fine-tune, evaluate, and release small geospatial and weather foundation models, working alongside AI coding agents.">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js" defer></script>
+</head>
+<body data-page="index">
+<div class="wrap">
+  <p class="eyebrow">EN5425 / EV4240 · GIST · Fall 2026</p>
+  <h1>Deep Learning Applications in Environmental Big&nbsp;Data</h1>
+  <p class="lede">A build course. By Week 16 you will have pretrained, fine-tuned, evaluated,
+    documented, and publicly released a small foundation model for Earth observation or
+    weather/climate data — working alongside AI coding agents whose every line you can defend.</p>
+  <div class="meta">
+    <span><b>Format</b> one 3-hour session/week · 75' concept + 75' lab</span>
+    <span><b>Level</b> first-semester PhD</span>
+    <span><b>Grading</b> attendance 10 · paper discussion 30 · project 60</span>
+    <span><b>Instructor</b> Prof. Hyunglok Kim</span>
+  </div>
+
+  <h2>Announcements</h2>
+  <div class="rows" id="announcements"><div class="row"><span class="sub">Loading…</span></div></div>
+
+  <h2>This week</h2>
+  <div class="card" id="thisweek"><span class="sub">Loading…</span></div>
+
+  <h2>Quick links</h2>
+  <div class="cards">
+    <a class="card" href="syllabus.html"><b>Syllabus</b><br><span class="sub">Workload, AI-agent policy, grading — read before add/drop.</span></a>
+    <a class="card" href="schedule.html"><b>16-week schedule</b><br><span class="sub">Weekly topics, labs, readings with discussion questions.</span></a>
+    <a class="card" href="capstone.html"><b>Capstone</b><br><span class="sub">Fine-tune &amp; evaluate a foundation model. Milestones, rubric, tracks.</span></a>
+    <a class="card" href="setup.html"><b>Setup</b><br><span class="sub">Environment, accounts, compute, and your semester repository.</span></a>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const anns = await loadJSON("announcements");
+    $("#announcements").innerHTML = anns.length ? anns.map((a) => `
+      <div class="row">
+        <span class="tnum" style="color:var(--muted);flex:none">${esc(fmtDate(a.date))}</span>
+        <span>${a.pin ? '<span class="pill acc">pinned</span> ' : ""}${esc(a.text)}</span>
+      </div>`).join("")
+      : '<div class="row"><span class="sub">No announcements yet.</span></div>';
+  } catch { $("#announcements").innerHTML = '<div class="row"><span class="sub">No announcements yet.</span></div>'; }
+
+  try {
+    const { weeks } = await loadJSON("weeks");
+    const w = currentWeek(weeks);
+    $("#thisweek").innerHTML = `
+      <p class="eyebrow" style="margin-top:0">Week ${w.n}${w.date ? " · " + esc(fmtDate(w.date)) : ""}</p>
+      <h3 style="margin:0 0 6px">${esc(w.title)}</h3>
+      <p class="sub" style="margin-bottom:10px">${esc(w.goal || "")}</p>
+      ${w.reading && w.reading.primary && w.reading.primary.length ? `<p style="font-size:13.5px;margin:6px 0">
+        <b>Reading due</b> (memo 24 h before class): ${w.reading.primary.map((r) =>
+          r.link ? `<a href="${esc(r.link)}">${esc(r.title)}</a>` : esc(r.title)).join(" · ")}</p>` : ""}
+      <a class="btn" href="week.html?w=${w.n}">Open week ${w.n} →</a>`;
+  } catch { $("#thisweek").innerHTML = '<span class="sub">Schedule coming soon.</span>'; }
+});
+</script>
+</body>
+</html>

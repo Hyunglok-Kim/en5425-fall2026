@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Capstone</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js" defer></script>
+<style>
+  .tier { margin-top:14px; }
+  .tier .tag { float:right; }
+  .quartet li b { font-family:var(--serif); }
+</style>
+</head>
+<body data-page="capstone">
+<div class="wrap">
+  <p class="eyebrow">EN5425 / EV4240 · Capstone</p>
+  <h1>Fine-tune, Evaluate, Release a Foundation Model</h1>
+  <p class="lede">The capstone is an evaluation project wearing a modeling project's clothes.
+    You will adapt a public Earth-observation or weather foundation model to a real task, test it
+    against baselines that are actually trying to win, and release everything publicly — adapters,
+    evaluation report, and model card. A rigorously demonstrated negative result scores full marks.</p>
+
+  <h2>The central question</h2>
+  <div class="note">The PANGAEA benchmark asked it bluntly: <b>does the foundation model really beat a
+    well-tuned supervised baseline on your task?</b> Sometimes yes, often no, and the field needs
+    honest answers. Your capstone answers that question for one model on one task, with an evaluation
+    airtight enough that either answer is publishable.</div>
+
+  <h2>Structure — three tiers</h2>
+
+  <div class="card tier">
+    <span class="tag pill fill">Tier 1 · default — everyone</span>
+    <h3 style="margin-top:0">Fine-tune &amp; rigorously evaluate a public FM</h3>
+    <p class="sub" style="margin-bottom:10px">Solo (EN5425) or pairs with a contribution statement (EV4240).</p>
+    <p style="font-size:13.5px"><b>Geospatial direction.</b> Adapt
+      <a href="https://huggingface.co/ibm-nasa-geospatial">Prithvi-EO-2.0</a> (via
+      <a href="https://github.com/IBM/terratorch">TerraTorch</a>), OlmoEarth-Nano, or
+      <a href="https://arxiv.org/abs/2304.14065">Presto</a> to one downstream task:
+      <span class="pill">Sen1Floods11 flood mapping</span> <span class="pill">crop-type from pixel time series</span>
+      <span class="pill">SMAP soil-moisture regression</span></p>
+    <p style="font-size:13.5px"><b>Weather/climate direction.</b> Adapt
+      <a href="https://arxiv.org/abs/2301.10343">ClimaX</a> or
+      <a href="https://arxiv.org/abs/2409.13598">Prithvi-WxC</a> checkpoints to:
+      <span class="pill">Korea-region downscaling</span> <span class="pill">multi-step forecasting at longer leads</span></p>
+    <p style="font-size:13.5px;margin-bottom:0"><b>Release =</b> LoRA adapters + evaluation report +
+      model card on the Hugging Face Hub, plus a tagged GitHub repo whose README quickstart runs in
+      under five minutes.</p>
+  </div>
+
+  <div class="card tier">
+    <span class="tag pill acc">Tier 2 · built into the labs</span>
+    <h3 style="margin-top:0">Everyone experiences pretraining</h3>
+    <p style="font-size:13.5px;margin-bottom:0">You do not need to pretrain for the capstone to know
+      what pretraining feels like: the Week 7 lab has you pretrain a small masked autoencoder yourself,
+      and the Week 9 lab has you fit scaling behavior on real runs. Those experiences are what make
+      your capstone's evaluation judgments credible — you will know what the checkpoint you are
+      fine-tuning actually went through.</p>
+  </div>
+
+  <div class="card tier">
+    <span class="tag pill acc">Tier 3 · from-scratch stretch</span>
+    <h3 style="margin-top:0">Hydro-FM — joint pretraining project</h3>
+    <p style="font-size:13.5px;margin-bottom:0">One team of <b>4 members from the HydroAI lab</b> may
+      opt into pretraining a small hydrology-focused foundation model from scratch as a joint project.
+      Same milestones and same rubric as everyone else, with two additions that keep individual
+      accountability real: <b>individual vivas</b> (each member defends the whole pipeline alone) and
+      <b>commit audits</b> (contribution is verified in the git history, not the author list).</p>
+  </div>
+
+  <h2>The baseline quartet</h2>
+  <p class="sub">Every capstone reports all four of these on the same frozen evaluation split.
+    Skipping one is the single fastest way to lose points — the quartet is what makes your headline
+    number mean something.</p>
+  <div class="card">
+    <ol class="quartet" style="margin:0">
+      <li><b>Random-init control</b> — your fine-tuning recipe applied to an untrained copy of the
+        same architecture. Separates "the pretraining helped" from "the architecture helped".</li>
+      <li><b>Supervised baseline that tries to win</b> — the Week 4 U-Net for segmentation tasks;
+        persistence and climatology for forecasting tasks. Tuned honestly, not sandbagged.</li>
+      <li><b>Frozen probe</b> — the FM's frozen features with only a lightweight head trained.
+        Measures what the representation gives you for free.</li>
+      <li><b>Fine-tuned model</b> — your headline system (LoRA or full fine-tune), reported with
+        seeds and error bars.</li>
+    </ol>
+  </div>
+  <div class="note"><b>Honest-negative-result rubric.</b> If the tuned U-Net beats your fine-tuned FM,
+    you have not failed — you have measured something the field cares about. The rubric grades the
+    rigor of the comparison (frozen splits, seeds, error bars, ablation, limitations stated plainly),
+    not which row of your table is bold.</div>
+
+  <h2>Milestones</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>When</th><th>Milestone</th><th>Deliverables</th></tr></thead>
+      <tbody>
+        <tr><td class="tnum">W8</td><td><b>Proposal</b></td>
+          <td>2-page proposal + in-class pitch. Graded on eval-first design and budget realism, not ambition.</td></tr>
+        <tr><td class="tnum">W13</td><td><b>M1 — frozen &amp; launched</b></td>
+          <td>Data and evaluation protocol frozen (splits committed before any results); fine-tuning runs launched; W&amp;B project public.</td></tr>
+        <tr><td class="tnum">W14</td><td><b>M2 — first result</b></td>
+          <td>Working checkpoint + first downstream result against interim baselines; structured peer review exchanged.</td></tr>
+        <tr><td class="tnum">W15</td><td><b>M3 — release candidate</b></td>
+          <td>Full evaluation + ablation tables with seeds/error bars; complete model card; release candidate tagged on HF Hub and GitHub; draft slides.</td></tr>
+        <tr><td class="tnum">W16</td><td><b>Demo day</b></td>
+          <td>8-min talk + 4-min Q&amp;A; live quickstart verification on a randomly selected repo; final release (adapters, model card, 6-page report, W&amp;B report) due 48 h after class.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Compute envelope</h2>
+  <p class="lede" style="font-size:14px">Free tiers are sufficient for the default track — that is a
+    design constraint, not an apology. LoRA fine-tuning of small public checkpoints fits comfortably in:</p>
+  <div class="cards">
+    <div class="card"><b>Kaggle</b><br><span class="sub" style="margin:0">~30 GPU-hours/week free (T4/P100). Enough for every fine-tuning experiment in this course.</span></div>
+    <div class="card"><b>Colab</b><br><span class="sub" style="margin:0">Free-tier sessions with checkpoint-resume discipline — save-and-restore is itself a Week 12 engineering skill.</span></div>
+    <div class="card"><b>Rule of thumb</b><br><span class="sub" style="margin:0">If your plan needs more than a free tier, shrink the plan, not the evaluation. The Hydro-FM team budgets separately with the instructor.</span></div>
+  </div>
+
+  <h2>Where the grade comes from</h2>
+  <p class="sub">The capstone drives the 60% project grade: lab portfolio 20% (best 10 of 11 weekly
+    lab notes — the labs are the skill acquisition), proposal 5%, milestones M1–M3 15% (graded on
+    process: eval frozen before results, honest interim tables), final deliverable 20% (release
+    quality, report + model card, demo). See the <a href="syllabus.html">syllabus</a> for the full
+    breakdown and the AI-agent policy that applies to every line of capstone code.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Schedule</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js" defer></script>
+<style>
+  td.topic b { font-family:var(--serif); font-size:14px; }
+  td .pills { margin-top:4px; display:flex; flex-wrap:wrap; gap:4px; }
+  #sched td { min-width:0; }
+  #sched td:nth-child(3) { min-width:220px; }
+  #sched td:nth-child(4), #sched td:nth-child(5) { min-width:200px; }
+</style>
+</head>
+<body data-page="schedule">
+<div class="wrap">
+  <p class="eyebrow">EN5425 / EV4240 · Fall 2026</p>
+  <h1>16-Week Schedule</h1>
+  <p class="lede">Each session is 75 minutes of concept plus 75 minutes of lab. Reading memos are due
+    24&nbsp;hours before class; click a week number for the full plan, minute-by-minute concept
+    breakdown, and discussion questions.</p>
+
+  <div class="scroll" style="margin-top:22px">
+    <table id="sched">
+      <thead><tr>
+        <th class="num">Wk</th><th>Date</th><th>Topic</th><th>Lab</th><th>Reading</th>
+      </tr></thead>
+      <tbody id="rows"><tr><td colspan="5"><span class="sub">Loading schedule…</span></td></tr></tbody>
+    </table>
+  </div>
+  <p class="sub" style="margin-top:12px">Dates appear once the weekday is fixed at registration.
+    Memo pills: <span class="pill">standard</span> full memo · <span class="pill">short</span> reduced
+    memo · <span class="pill">menu</span> choose one paper · no pill means no memo that week.</p>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const tb = $("#rows");
+  const firstSentence = (t) => {
+    const s = String(t || "");
+    const m = s.match(/^.*?[.!?](?=\s|$)/);
+    return m ? m[0] : s;
+  };
+  try {
+    const { weeks } = await loadJSON("weeks");
+    let phase = null, html = "";
+    for (const w of weeks) {
+      if (w.phase && w.phase !== phase) {
+        phase = w.phase;
+        html += `<tr class="phase"><td colspan="5">${esc(phase)}</td></tr>`;
+      }
+      const lab = w.lab || {};
+      const rd = w.reading || {};
+      const primary = Array.isArray(rd.primary) ? rd.primary : [];
+      const dataPills = (lab.data || []).map((d) => `<span class="pill">${esc(d)}</span>`).join("");
+      const readLinks = primary.map((r) =>
+        r.link ? `<a href="${esc(r.link)}">${esc(r.title)}</a>` : esc(r.title)).join("<br>");
+      const memoPill = rd.memo && rd.memo !== "none"
+        ? ` <span class="pill acc">${esc(rd.memo)}</span>` : "";
+      html += `<tr>
+        <td class="num"><a href="week.html?w=${w.n}"><b>${w.n}</b></a></td>
+        <td class="tnum">${esc(fmtDate(w.date))}</td>
+        <td class="topic"><b><a href="week.html?w=${w.n}">${esc(w.title)}</a></b><br>
+          <span class="sub" style="margin:0">${esc(w.goal || "")}</span></td>
+        <td>${esc(firstSentence(lab.task))}${dataPills ? `<div class="pills">${dataPills}</div>` : ""}</td>
+        <td>${readLinks || '<span class="sub" style="margin:0">—</span>'}${memoPill}</td>
+      </tr>`;
+    }
+    tb.innerHTML = html || '<tr><td colspan="5"><span class="sub">Schedule coming soon.</span></td></tr>';
+  } catch {
+    tb.innerHTML = '<tr><td colspan="5"><span class="sub">Schedule coming soon — check back shortly.</span></td></tr>';
+  }
+});
+</script>
+</body>
+</html>

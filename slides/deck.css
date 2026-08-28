@@ -1,0 +1,55 @@
+/* EN5425 slide deck framework — layered on assets/style.css tokens. */
+body.deck { overflow:hidden; }
+body.deck .slide { display:none; position:fixed; inset:0; padding:7vh 7vw;
+  background:var(--page); color:var(--ink); flex-direction:column; }
+body.deck .slide.on { display:flex; }
+
+.slide .kicker { font-size:clamp(11px,1.4vh,14px); font-weight:600; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--accent); margin:0 0 1.2vh; }
+.slide h1 { font-family:var(--serif); font-size:clamp(30px,6.5vh,64px); line-height:1.15;
+  margin:0 0 2vh; text-wrap:balance; }
+.slide h2 { font-family:var(--serif); font-size:clamp(24px,5vh,46px); line-height:1.2;
+  margin:0 0 3vh; text-wrap:balance; }
+.slide h3 { font-family:var(--serif); font-size:clamp(18px,3vh,28px); margin:2vh 0 1vh; }
+.slide p, .slide li { font-size:clamp(15px,2.6vh,24px); line-height:1.55; }
+.slide li { margin:.9vh 0; }
+.slide .small, .slide .small li, .slide .small p { font-size:clamp(13px,2vh,18px); }
+.slide .muted { color:var(--ink-2); }
+.slide .big { font-size:clamp(20px,3.6vh,34px); line-height:1.45; max-width:34ch; }
+.slide .accent { color:var(--accent); }
+
+/* layouts */
+.slide.title { justify-content:center; }
+.slide.section { justify-content:center; }
+.slide.section h2 { font-size:clamp(30px,7vh,64px); }
+.slide .cols { display:grid; grid-template-columns:1fr 1fr; gap:4vw; align-items:start; flex:1; min-height:0; }
+.slide .fill { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center; }
+.slide .figure { display:flex; align-items:center; justify-content:center; flex:1; min-height:0; }
+.slide .figure svg { max-width:100%; max-height:100%; height:auto; }
+.slide table { font-size:clamp(12px,2vh,18px); }
+.slide pre { font-size:clamp(12px,1.9vh,17px); }
+.slide .card { padding:2.2vh 1.6vw; }
+.slide .foot { margin-top:auto; padding-top:2vh; font-size:clamp(11px,1.6vh,14px);
+  color:var(--muted); display:flex; gap:2vw; }
+
+/* speaker notes — toggle with N */
+.slide .notes { display:none; }
+body.shownotes .slide .notes { display:block; position:absolute; left:7vw; right:7vw; bottom:3vh;
+  background:var(--surface); border:1px solid var(--hairline); border-left:3px solid var(--accent);
+  border-radius:0 10px 10px 0; padding:1.5vh 1.2vw; font-size:clamp(12px,1.8vh,15px);
+  color:var(--ink-2); max-height:30vh; overflow-y:auto; }
+
+/* chrome */
+#deckCounter { position:fixed; right:16px; bottom:12px; z-index:50; font-family:var(--mono);
+  font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; }
+#deckHint { position:fixed; left:16px; bottom:12px; z-index:50; font-size:11.5px; color:var(--muted); }
+
+/* print: every slide on its own landscape page */
+@media print {
+  body.deck { overflow:visible; }
+  body.deck .slide { display:flex !important; position:relative; inset:auto;
+    width:100%; height:100vh; page-break-after:always; }
+  #deckCounter, #deckHint { display:none; }
+  body.shownotes .slide .notes { position:relative; left:auto; right:auto; bottom:auto; margin-top:2vh; }
+}
+@page { size:landscape; margin:0; }
