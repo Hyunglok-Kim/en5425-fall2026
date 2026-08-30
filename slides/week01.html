@@ -180,30 +180,19 @@
 <!-- 8 ▸ Capstone artifacts -->
 <section class="slide">
   <p class="kicker">Part 2 · Capstone · 6 min</p>
-  <h2>What “released” actually means</h2>
-  <div class="figure">
-    <svg viewBox="0 0 740 190" role="img" aria-label="Capstone release pipeline: pretrain, fine-tune, evaluate, release" style="width:min(94%,860px)">
-      <g fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="8"   y="40" width="150" height="58" rx="10"/>
-        <rect x="200" y="40" width="150" height="58" rx="10"/>
-        <rect x="392" y="40" width="150" height="58" rx="10"/>
-        <rect x="584" y="40" width="150" height="58" rx="10" stroke="var(--accent)" stroke-width="2"/>
-        <path d="M158 69 H200 M350 69 H392 M542 69 H584" stroke="var(--accent)"/>
-      </g>
-      <g font-size="15" fill="currentColor" text-anchor="middle">
-        <text x="83"  y="64">pretrain</text><text x="83"  y="84" opacity="0.65" font-size="11">self-supervised, on satellite data</text>
-        <text x="275" y="64">fine-tune</text><text x="275" y="84" opacity="0.65" font-size="12">downstream task</text>
-        <text x="467" y="64">evaluate</text><text x="467" y="84" opacity="0.65" font-size="12">vs honest baselines</text>
-        <text x="659" y="64" fill="var(--accent)">release</text><text x="659" y="84" opacity="0.65" font-size="12">GitHub + Hugging Face</text>
-        <text x="371" y="150" font-size="13" opacity="0.8">artifacts: weights · model card (intended use, data, eval table, limitations) · repo with runnable code · research notes</text>
-      </g>
-    </svg>
+  <h2>What “released” actually means — two real pages</h2>
+  <div class="cols" style="align-items:start">
+    <div style="min-width:0">
+      <img src="img/gh-prithvi.png" alt="NASA's public Prithvi repository on GitHub with code, commits, and license" style="width:100%;border-radius:10px;border:1px solid var(--hairline)">
+      <p class="small muted" style="margin:.8vh 0 0;text-align:center"><b>A public repository</b> — runnable code, commit history, a license. <span class="muted">(NASA + IBM's Prithvi repo)</span></p>
+    </div>
+    <div style="min-width:0">
+      <img src="img/hf-files.png" alt="The Prithvi weights file on Hugging Face, 1.33 gigabytes, downloadable" style="width:100%;border-radius:10px;border:1px solid var(--hairline)">
+      <p class="small muted" style="margin:.8vh 0 0;text-align:center"><b>Public weights</b> — the actual 1.33 GB weights file, downloadable by anyone on Earth.</p>
+    </div>
   </div>
-  <ul class="small">
-    <li>A <b>Hugging Face model page</b>: weights, config, and a README that <i>is</i> the model card — eval table against baselines included.</li>
-    <li>A <b>public GitHub repo</b>: training + eval code runnable from a fresh clone, commit history, weekly research notes.</li>
-  </ul>
-  <aside class="notes">Show one real example live: an actual model card and an actual repo (OlmoEarth or Prithvi pages work well). Point at the eval table and the limitations section — "this is the standard you will be held to." Transition: "What does that cost per week? Numbers, not vibes." (by 0:14)</aside>
+  <p class="small" style="margin-top:1.2vh">Your artifacts, same shape: <b>weights</b> · <b>model card</b> (intended use, data, eval table, limitations) · <b>repo runnable from a fresh clone</b> · <b>research notes</b> — <span class="accent">smaller than NASA's, but built to the same standard, with your name at the top.</span></p>
+  <aside class="notes">Point at real things, not abstractions: the commit history on the left, the 1.33-gigabyte weights file on the right. "In December there is a page like each of these with your name on it — smaller model, same standard." If the network cooperates, open the live pages instead of the screenshots. Transition: "What does that cost per week? Numbers, not vibes." (by 0:14)</aside>
 </section>
 
 <!-- 9 ▸ Workload -->
@@ -652,9 +641,9 @@
 <!-- 35b ▸ Landscape 1: three generations -->
 <section class="slide">
   <p class="kicker">Part 8 · 2026 landscape</p>
-  <h2>Geospatial foundation models: three generations in a decade</h2>
+  <h2>Three generations in a decade — and you arrive right on time</h2>
   <div class="figure" style="flex:0 0 auto">
-    <svg viewBox="0 0 760 140" role="img" aria-label="Three generations of geospatial foundation models" style="width:min(96%,900px)">
+    <svg viewBox="0 0 760 158" role="img" aria-label="Three generations of geospatial foundation models, with a marker showing this course starting at the frontier in fall 2026" style="width:min(96%,900px)">
       <g fill="none" stroke="currentColor" stroke-width="1.5">
         <rect x="10"  y="40" width="230" height="62" rx="10"/>
         <rect x="262" y="40" width="230" height="62" rx="10"/>
@@ -669,16 +658,19 @@
       <g font-size="12" fill="currentColor" opacity="0.65" text-anchor="middle">
         <text x="125" y="128">~2017–2021</text><text x="377" y="128">2022–2024</text><text x="632" y="128">2025–2026</text>
       </g>
+      <g>
+        <path d="M700 108 V132" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+        <text x="755" y="150" text-anchor="end" font-size="12.5" font-weight="700" fill="var(--accent)">fall 2026 · you start here</text>
+      </g>
     </svg>
   </div>
   <ul class="small">
-    <li><b>Generation 1</b> — borrow a network trained on everyday photos (cats, cars), re-train its last layers on labeled satellite images. Problem: satellite data is nothing like everyday photos, and labels are scarce.</li>
-    <li><b>Generation 2</b> — hide-and-predict directly on the satellite archive (previous slide). Problem: each model welded to one sensor, one resolution, mostly one moment in time.</li>
-    <li><b>Generation 3</b> — one model fuses many sensors and whole time series, then publishes a precomputed <b>"fingerprint" vector for every spot on Earth, every year</b> — Google's AlphaEarth: 64 numbers per 10-meter square, globally. Mapping crops or forests becomes a lookup, not a supercomputing job.</li>
-    <li class="muted">A 2026 evaluation counts <b>89 public geospatial foundation models</b> — and finds no single one dominates all tasks. That finding is this course's evaluation thesis.</li>
+    <li><b>Generation 1</b> — borrow a network trained on cat photos, re-train it on scarce satellite labels. <b>Generation 2</b> — hide-and-predict on the free archive (previous slide), but each model welded to one sensor. <b>Generation 3, still being written</b> — one model, many sensors, whole time series: a precomputed <b>"fingerprint" for every 10-meter square on Earth, every year</b>.</li>
+    <li><b>The leaderboard is wide open.</b> A 2026 evaluation counts <b>89 public geospatial foundation models — and no single one dominates</b>. What the field is missing is exactly what Weeks 9–12 train you in: honest evaluation. <span class="accent">A careful graduate student can move this field right now.</span></li>
+    <li><b>And everything is open.</b> NASA's weights, Google's embeddings, the code, the archives — free. Five years ago, working at this frontier took a national lab. <span class="accent">This fall, it takes the skills in this course and the free compute you set up today.</span></li>
   </ul>
   <div class="foot"><span>SatMAE arXiv:2207.08051 · Prithvi 2310.18660 · AlphaEarth 2507.22291 · TESSERA 2506.20380 · GEO-Bench-2 2511.15658</span></div>
-  <aside class="notes">One pass, left to right, in plain words — the arXiv numbers are in the footer for later, not for now. The "no single model dominates" line is the seed of Weeks 9–12: evaluation is where this field is won or lost. Hold onto it.</aside>
+  <aside class="notes">This is a recruitment slide wearing a history slide's clothes — deliver it with rising energy, not as a survey. Beat 1: three generations in ten years, one pass across the diagram. Beat 2: point at the "you start here" marker — Generation 3 is roughly eighteen months old; the textbook for it does not exist, which is why we read its first drafts (the papers) every week. Beat 3: the two accent lines, said plainly and slowly — no winner yet, everything is open, a careful student can actually contribute. Pause one second after "right now." That pause is the pitch.</aside>
 </section>
 
 <!-- 36a ▸ Landscape 2: weather flipped -->
@@ -798,11 +790,11 @@
   <h2>HW0: the gate — due Sun 9/6, 23:59 (PDF on this site)</h2>
   <ul class="small">
     <li><b>Pass/fail, and a hard gate</b> for the project (60%): milestones are not accepted without a passed HW0. Designed for 4–8 h with an AI agent if prerequisites are in place.</li>
-    <li><b>Build:</b> fork the template repo; train a small multi-layer perceptron (a basic neural network) on ~10,000 rows of station soil-moisture data; temporal split (train ≤2018 / val 2019 / test 2020), scaling fit on train only; beat the mean-predictor baseline.</li>
+    <li><b>Build:</b> create your semester repo from the course template; train a small multi-layer perceptron (a basic neural network) on ~10,000 rows of station soil-moisture data; temporal split (train ≤2018 / val 2019 / test 2020), scaling fit on train only; beat the mean-predictor baseline.</li>
     <li><b>Ship:</b> <code>train_mlp.py</code> runnable from a fresh clone · <code>metrics.json</code> + loss curve · 1-page <code>report.md</code> with baselines table and an <b>agent-accountability section</b> · research note · ≥5 meaningful commits.</li>
     <li class="accent">“HW0 is a compressed sample of an ordinary week. If HW0 takes you 20 hours, this course will take you 20 hours a week.”</li>
   </ul>
-  <div class="foot"><span>Full spec + rubric on the course site · late without arrangement is read as a decision to drop; I will contact you to confirm</span></div>
+  <div class="foot"><span>Full spec + rubric: hw0/README.md in your semester repo (course template) — linked on the Week-1 page · late without arrangement is read as a decision to drop; I will contact you to confirm</span></div>
   <aside class="notes">Show the deliverables checklist on the course site; do not soften it. Say the quoted line once, plainly. The agent-accountability section — quote the line you understand least and explain it — is the oral-defense muscle: start now. Today's toolkit lab is HW0's on-ramp: all five tools are assumed working.</aside>
 </section>
 

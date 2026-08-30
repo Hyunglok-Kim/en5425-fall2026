@@ -1,1366 +1,1370 @@
 {
-  "course": "EN5425/EV4240 Fall 2026",
-  "weeks": [
+ "course": "EN5425/EV4240 Fall 2026",
+ "weeks": [
+  {
+   "n": 1,
+   "phase": "Foundations",
+   "title": "Course Overview, the 2026 FM Landscape, and AI-Native Engineering",
+   "goal": "Understand what you will build (a small foundation model, released publicly), set up the full toolchain, and self-select honestly.",
+   "title_ko": "과목 소개, 2026 FM 지형도, 그리고 AI-Native 엔지니어링",
+   "goal_ko": "이번 학기에 만들 것(공개 배포하는 작은 foundation model)을 이해하고, 전체 toolchain을 설정하며, 수강 적합성을 스스로 솔직하게 판단합니다.",
+   "date": "2026-08-31",
+   "concept": [
     {
-      "n": 1,
-      "phase": "Foundations",
-      "title": "Course Overview, the 2026 FM Landscape, and AI-Native Engineering",
-      "goal": "Understand what you will build (a small foundation model, released publicly), set up the full toolchain, and self-select honestly.",
-      "title_ko": "과목 소개, 2026 FM 지형도, 그리고 AI-Native 엔지니어링",
-      "goal_ko": "이번 학기에 만들 것(공개 배포하는 작은 foundation model)을 이해하고, 전체 toolchain을 설정하며, 수강 적합성을 스스로 솔직하게 판단합니다.",
-      "date": "2026-08-31",
-      "concept": [
-        {
-          "min": 15,
-          "topic": "What this course produces: walk through OlmoEarth-Nano (1.4M params) and Presto (~400K) as proof that real EO pretraining fits Colab-scale compute; show the capstone endpoint (HF Hub release + model card + eval table).",
-          "topic_ko": "이 과목이 만들어내는 것: OlmoEarth-Nano(1.4M params)와 Presto(~400K)를 훑으며 실제 EO pretraining이 Colab 규모 compute에 들어간다는 증거 확인 · capstone의 최종 도착점(HF Hub 릴리스 + model card + eval 표) 소개"
-        },
-        {
-          "min": 15,
-          "topic": "The 2026 landscape in one pass: three generations of geospatial FMs (MAE-era → sensor-agnostic multimodal → global embedding fields like AlphaEarth/TESSERA); ML weather is operational (ECMWF AIFS since Feb 2025, NOAA AIGFS Jan 2026, Google WeatherNext 2) — the frontier is now probabilistic skill, obs-direct pipelines, and honest evaluation.",
-          "topic_ko": "2026 지형도 한 번에 훑기: geospatial FM 3세대(MAE 시대 → sensor-agnostic 멀티모달 → AlphaEarth/TESSERA 같은 global embedding field) · ML 기상은 이미 현업 운영 단계(ECMWF AIFS는 2025년 2월부터, NOAA AIGFS 2026년 1월, Google WeatherNext 2) — 이제 프런티어는 확률적 skill, obs-direct 파이프라인, 정직한 평가"
-        },
-        {
-          "min": 15,
-          "topic": "AI-agent-native engineering: what Claude Code/Codex are good at (scaffolding, refactors, sweeps) and bad at (silent numerical bugs, eval leakage); the verification discipline — you own every number; repo hygiene, commit-per-lab, research notes as first-class output.",
-          "topic_ko": "AI-agent-native 엔지니어링: Claude Code/Codex가 잘하는 것(scaffolding, refactor, sweep)과 못하는 것(조용한 수치 버그, eval leakage) · 검증 규율 — 모든 숫자는 본인 책임 · repo 위생, lab당 commit, 일급 산출물로서의 연구 노트"
-        },
-        {
-          "min": 10,
-          "topic": "Logistics + honest self-selection: grading (10/30/60), site sign-in (id = student number), lead-pair sign-up. Explicit statement: \"the two papers assigned today are due as tickets before Week 2 — if they take you more than ~6 hours and still feel opaque, this course will feel like that every week.\"",
-          "topic_ko": "수업 운영 + 솔직한 수강 자가판단: 성적 비율(10/30/60), 사이트 로그인(id = 학번), lead-pair 신청 · 명시적 안내: \"오늘 배정된 논문 2편은 Week 2 전까지 ticket으로 제출 — 6시간 넘게 걸리는데도 여전히 난해하게 느껴진다면, 이 과목은 매주 그런 느낌일 것\""
-        },
-        {
-          "min": 15,
-          "topic": "Assigning the Week 1 readings in class: a guided walkthrough of Attention Is All You Need + ViT — what to look for, how to read them; both tickets (W1+W2) due Sun 9/6 13:00 on this site. First journal club is W2, instructor-moderated.",
-          "topic_ko": "Week 1 읽기 자료 수업 중 배정: Attention Is All You Need + ViT 가이드 워크스루 — 무엇을 봐야 하고 어떻게 읽는가 · ticket 2건(W1+W2)은 Sun 9/6 13:00까지 이 사이트에 제출 · 첫 journal club은 W2, 교수 진행"
-        },
-        {
-          "min": 5,
-          "topic": "Preview of W2 and lab kickoff.",
-          "topic_ko": "W2 미리보기와 lab 시작"
-        }
-      ],
-      "lab": {
-        "task": "AI Toolkit onboarding lab (after the diagnostic): set up the tools this course runs on and prove each one works. (1) VS Code + the Claude Code extension — install, sign in, and have it explain then modify a small script; (2) Codex in VS Code — same exercise, compare the two agents on one refactor; (3) Google Colab — GPU runtime on, torch.cuda.is_available() screenshot, save-a-copy discipline; (4) Kaggle — account + phone verification (unlocks the weekly free GPU quota), run one GPU notebook; (5) GitHub — account, SSH key, clone the course repo. Work through the linked official videos/docs at your own pace; instructor and TA circulate.",
-        "task_ko": "AI Toolkit 온보딩 lab(진단 퀴즈 후): 이 과목이 돌아가는 도구를 모두 설정하고 각각 작동함을 증명. (1) VS Code + Claude Code 확장 — 설치·로그인 후 작은 스크립트를 설명시키고 수정시키기; (2) VS Code의 Codex — 같은 연습, 하나의 refactor로 두 에이전트 비교; (3) Google Colab — GPU 런타임 켜기, torch.cuda.is_available() 스크린샷, 사본 저장 습관; (4) Kaggle — 계정 + 전화 인증(주간 무료 GPU quota 해제), GPU notebook 1개 실행; (5) GitHub — 계정, SSH key, 강의 repo clone. 링크된 공식 영상/문서를 각자 속도로 진행 · 교수와 TA가 순회 지원",
-        "data": [],
-        "tools": [
-          "VS Code",
-          "Claude Code",
-          "Codex",
-          "Google Colab",
-          "Kaggle",
-          "git/GitHub"
-        ],
-        "deliverable": "AI Toolkit Report — 5-page PDF due Sun 9/6 23:59 on this site: for each tool, how you set it up, one real thing you made it do (screenshot), where it fits your weekly workflow, and one limitation you noticed.",
-        "deliverable_ko": "AI Toolkit Report — 5쪽 PDF, Sun 9/6 23:59까지 이 사이트에 제출: 도구별 설정 과정, 실제로 시켜본 작업 1가지(스크린샷), 주간 워크플로에서의 위치, 발견한 한계 1가지",
-        "homework": "Finish whatever didn't complete in class before the HW0 deadline — HW0 assumes all five tools work.",
-        "homework_ko": "수업에서 끝내지 못한 항목은 HW0 마감 전까지 완료 — HW0는 다섯 도구가 모두 작동한다는 전제",
-        "resources": [
-          {
-            "title": "Claude Code — official docs (install & VS Code)",
-            "link": "https://code.claude.com/docs"
-          },
-          {
-            "title": "OpenAI Codex — official docs (IDE setup)",
-            "link": "https://developers.openai.com/codex"
-          },
-          {
-            "title": "Google Colab — welcome notebook",
-            "link": "https://colab.research.google.com/"
-          },
-          {
-            "title": "Kaggle notebooks — docs (GPU quota)",
-            "link": "https://www.kaggle.com/docs/notebooks"
-          },
-          {
-            "title": "Mastering Claude Code in 30 minutes",
-            "link": "https://www.youtube.com/watch?v=6eBSHbLKuN0",
-            "minutes": 28
-          },
-          {
-            "title": "OpenAI Codex in your code editor",
-            "link": "https://www.youtube.com/watch?v=sd21Igx4HtA",
-            "minutes": 7
-          },
-          {
-            "title": "Making the most of Colab (TF Dev Summit '20)",
-            "link": "https://www.youtube.com/watch?v=pnClcwTCyc0",
-            "minutes": 7
-          },
-          {
-            "title": "How to use Kaggle Notebooks",
-            "link": "https://www.youtube.com/watch?v=BPQDZLPtgDc",
-            "minutes": 4
-          },
-          {
-            "title": "How to take advantage of GPUs and TPUs for your ML project (Coding TensorFlow)",
-            "link": "https://www.youtube.com/watch?v=tCYSce6l8gA",
-            "minutes": 4
-          }
-        ]
-      },
-      "reading": {
-        "memo": "standard",
-        "primary": [
-          {
-            "title": "Vaswani et al. 2017 — Attention Is All You Need",
-            "link": "https://arxiv.org/abs/1706.03762"
-          },
-          {
-            "title": "Dosovitskiy et al. 2020 — An Image is Worth 16x16 Words (ViT)",
-            "link": "https://arxiv.org/abs/2010.11929"
-          }
-        ],
-        "optional": [
-          {
-            "title": "He et al. 2021 — Masked Autoencoders (MAE), skim; returns in W7",
-            "link": "https://arxiv.org/abs/2111.06377"
-          }
-        ],
-        "questions": [
-          "Why does attention scale as O(n²) in tokens, and what does that imply for a 0.25° global weather grid (721×1440)?",
-          "ViT needs more data than CNNs to win — what inductive biases were traded away, and do satellite images restore any of them?",
-          "What exactly is a 'token' for a multispectral image cube?"
-        ]
-      },
-      "skills": [
-        "agent-driven development",
-        "repo/site hygiene",
-        "transformer fundamentals",
-        "verification discipline"
-      ],
-      "slides": true
+     "min": 15,
+     "topic": "What this course produces: walk through OlmoEarth-Nano (1.4M params) and Presto (~400K) as proof that real EO pretraining fits Colab-scale compute; show the capstone endpoint (HF Hub release + model card + eval table).",
+     "topic_ko": "이 과목이 만들어내는 것: OlmoEarth-Nano(1.4M params)와 Presto(~400K)를 훑으며 실제 EO pretraining이 Colab 규모 compute에 들어간다는 증거 확인 · capstone의 최종 도착점(HF Hub 릴리스 + model card + eval 표) 소개"
     },
     {
-      "n": 2,
-      "phase": "Foundations",
-      "title": "Leakage-Safe Evaluation Design (and the Fundamentals Recap)",
-      "goal": "Design evaluations that survive spatial/temporal autocorrelation — the geoscience failure mode — with the optimization recipe compressed to a working recap.",
-      "title_ko": "Leakage 없는 평가 설계 (그리고 기초 복습)",
-      "goal_ko": "지구과학의 대표적 실패 요인인 공간·시간 자기상관을 견디는 평가를 설계하고, optimization 레시피를 실전용 복습으로 압축합니다.",
-      "date": "2026-09-07",
-      "concept": [
-        {
-          "min": 10,
-          "topic": "Backprop as vector–Jacobian products; where activation memory goes (sets up gradient checkpointing in W12) — compressed recap, full derivation in the handout",
-          "topic_ko": "backprop을 vector–Jacobian product로 이해 · activation 메모리가 어디로 가는가(W12 gradient checkpointing의 밑작업) — 압축 복습, 전체 유도는 handout에"
-        },
-        {
-          "min": 15,
-          "topic": "The optimizer recipe every FM in this course uses: AdamW, LR warmup + cosine schedule, weight decay vs L2, gradient clipping; regularization and early stopping in one pass",
-          "topic_ko": "이 과목의 모든 FM이 쓰는 optimizer 레시피: AdamW, LR warmup + cosine schedule, weight decay vs L2, gradient clipping · regularization과 early stopping 한 번에 정리"
-        },
-        {
-          "min": 25,
-          "topic": "HEADLINE — leakage in environmental data: spatial and temporal autocorrelation, why random splits lie, effective sample size under blocked CV; spatial-block and temporal-holdout design; train/test year separation as WeatherBench2 does it",
-          "topic_ko": "HEADLINE — 환경 데이터의 leakage: 공간·시간 autocorrelation, random split이 거짓말하는 이유, blocked CV에서의 유효 표본 크기 · spatial-block과 temporal-holdout 설계 · WeatherBench2 방식의 train/test 연도 분리"
-        },
-        {
-          "min": 10,
-          "topic": "Designing a split a reviewer cannot reject: worked example on a global soil-moisture model (holdout by region, by year, by station network)",
-          "topic_ko": "리뷰어가 기각할 수 없는 split 설계: 전 지구 soil-moisture 모델 실습 예제(지역별·연도별·관측망별 holdout)"
-        }
-      ],
-      "lab": {
-        "task": "Predict runoff ratio and mean annual streamflow from CAMELS-US catchment attributes (~671 basins, tabular). Agent builds MLP + gradient-boosting baseline; W&B sweep (LR, depth, dropout); then re-evaluate with spatial-block CV (holdout by HUC region) and quantify the optimism gap vs random splits.",
-        "task_ko": "CAMELS-US 유역 속성(~671개 유역, tabular)으로 runoff ratio와 연평균 streamflow 예측. 에이전트가 MLP + gradient-boosting baseline 구축 · W&B sweep(LR, depth, dropout) · 이후 spatial-block CV(HUC 지역별 holdout)로 재평가하고 random split 대비 낙관 편향 정량화",
-        "data": [
-          "CAMELS-US catchment attributes (~671 basins)"
-        ],
-        "tools": [
-          "PyTorch",
-          "scikit-learn",
-          "W&B"
-        ],
-        "deliverable": "Note 02 with sweep parallel-coordinates plot + a 'random split vs spatial split' table; one-paragraph leakage post-mortem.",
-        "deliverable_ko": "Note 02: sweep parallel-coordinates plot + 'random split vs spatial split' 표 · 한 문단짜리 leakage post-mortem",
-        "homework": null
-      },
-      "reading": {
-        "memo": "standard",
-        "video": {
-          "title": "Backpropagation, intuitively | Deep Learning Chapter 3",
-          "channel": "3Blue1Brown",
-          "link": "https://www.youtube.com/watch?v=Ilg3gGewQ5U",
-          "minutes": 13
-        },
-        "primary": [
-          {
-            "title": "Reichstein et al. 2019 — Deep learning and process understanding for data-driven Earth system science (Nature)",
-            "link": "https://doi.org/10.1038/s41586-019-0912-1"
-          }
-        ],
-        "optional": [
-          {
-            "title": "Schultz et al. 2021 — Can deep learning beat NWP?",
-            "link": "https://doi.org/10.1098/rsta.2020.0097"
-          },
-          {
-            "title": "(Optional) Goodfellow Ch. 8 §8.1–8.3 — Optimization; the lecture covers the working recipe",
-            "link": "https://www.deeplearningbook.org/contents/optimization.html"
-          }
-        ],
-        "questions": [
-          "Which of Reichstein's five challenges have FMs since addressed, and which have they dodged?",
-          "Design a split for a global soil-moisture model that a reviewer couldn't reject — what do you hold out?",
-          "Is 'hybrid physics-ML' (their vision) winning in 2026, given NeuralGCM vs pure-ML GraphCast?"
-        ],
-        "book": {
-          "title": "Goodfellow, Deep Learning — Ch. 6 (Deep Feedforward Networks, §6.1–6.5)",
-          "link": "https://www.deeplearningbook.org/contents/mlp.html",
-          "short": "Goodfellow Ch. 6"
-        }
-      },
-      "skills": [
-        "optimization recipes",
-        "LR schedules",
-        "experiment tracking (W&B)",
-        "leakage-safe evaluation design"
-      ],
-      "slides": true
+     "min": 15,
+     "topic": "The 2026 landscape in one pass: three generations of geospatial FMs (MAE-era → sensor-agnostic multimodal → global embedding fields like AlphaEarth/TESSERA); ML weather is operational (ECMWF AIFS since Feb 2025, NOAA AIGFS Jan 2026, Google WeatherNext 2) — the frontier is now probabilistic skill, obs-direct pipelines, and honest evaluation.",
+     "topic_ko": "2026 지형도 한 번에 훑기: geospatial FM 3세대(MAE 시대 → sensor-agnostic 멀티모달 → AlphaEarth/TESSERA 같은 global embedding field) · ML 기상은 이미 현업 운영 단계(ECMWF AIFS는 2025년 2월부터, NOAA AIGFS 2026년 1월, Google WeatherNext 2) — 이제 프런티어는 확률적 skill, obs-direct 파이프라인, 정직한 평가"
     },
     {
-      "n": 3,
-      "phase": "Foundations",
-      "title": "Environmental Big Data and Cloud-Native Pipelines",
-      "goal": "Fluently move satellite, reanalysis, and in-situ data through cloud-native formats; meet ERA5 and cos-latitude weighting.",
-      "title_ko": "환경 빅데이터와 Cloud-Native 파이프라인",
-      "goal_ko": "위성·재분석·현장 관측 데이터를 cloud-native 포맷으로 자유롭게 다루고, ERA5와 cos-latitude 가중을 처음 만납니다.",
-      "date": "2026-09-14",
-      "concept": [
-        {
-          "min": 15,
-          "topic": "The data zoo: SMAP L3/L4, ERA5/MERRA-2 (reanalysis ≠ observation ≠ analysis), MODIS, GPM IMERG, HLS, Sentinel-1/2; spatial/temporal resolutions, latencies, error characteristics.",
-          "topic_ko": "데이터 동물원: SMAP L3/L4, ERA5/MERRA-2(reanalysis ≠ observation ≠ analysis), MODIS, GPM IMERG, HLS, Sentinel-1/2 · 시공간 해상도, latency, 오차 특성"
-        },
-        {
-          "min": 15,
-          "topic": "Cloud-native geospatial: COG, Zarr, STAC, chunking and why it dominates throughput; NASA Earthdata/earthaccess, Copernicus Data Space, Google/AWS public buckets, WeatherBench2's public ERA5 Zarr.",
-          "topic_ko": "Cloud-native geospatial: COG, Zarr, STAC, chunking과 그것이 throughput을 지배하는 이유 · NASA Earthdata/earthaccess, Copernicus Data Space, Google/AWS 공개 버킷, WeatherBench2의 공개 ERA5 Zarr"
-        },
-        {
-          "min": 15,
-          "topic": "ERA5 as a pretraining corpus: equiangular grids, pressure levels, why area weighting exists — derive the cos-lat weighted mean; anomalies vs climatology (sets up ACC in W11); regridding: conservative vs bilinear remapping and when each is correct.",
-          "topic_ko": "pretraining corpus로서의 ERA5: 등각 격자, pressure level, 면적 가중이 존재하는 이유 — cos-lat weighted mean 직접 유도 · anomaly vs climatology(W11 ACC의 밑작업) · regridding: conservative vs bilinear remapping과 각각이 맞는 경우"
-        },
-        {
-          "min": 10,
-          "topic": "Designing dataset objects for pretraining: chips, tiles, per-pixel time series; normalization statistics done right (per-band, train-set-only).",
-          "topic_ko": "pretraining용 dataset 객체 설계: chip, tile, per-pixel 시계열 · 제대로 된 normalization 통계(per-band, train-set-only)"
-        },
-        {
-          "min": 5,
-          "topic": "Lab briefing: what the agent will scaffold vs what you must verify.",
-          "topic_ko": "lab 브리핑: 에이전트가 scaffold할 것 vs 직접 검증해야 할 것"
-        }
-      ],
-      "lab": {
-        "task": "Agent-built ETL, two pipes: (a) open WeatherBench2's public ERA5 Zarr (5.625° subset) with xarray, compute a Z500 climatology and anomaly field, verify a cos-lat weighted global mean of T2m against a naive mean; (b) pull ~200 Sentinel-2 L2A chips (64×64, 4 bands) over South Korea via STAC (Earth Search on AWS) or HLS via earthaccess, with SCL-based cloud/QA filtering applied when selecting chips, and write a local Zarr/NPZ chip store with per-band stats.",
-        "task_ko": "에이전트가 만드는 ETL, 파이프 2개: (a) WeatherBench2 공개 ERA5 Zarr(5.625° subset)를 xarray로 열어 Z500 climatology와 anomaly field 계산, T2m의 cos-lat weighted 전 지구 평균을 naive 평균과 대조 검증; (b) STAC(Earth Search on AWS) 또는 earthaccess의 HLS로 남한 지역 Sentinel-2 L2A chip ~200개(64×64, 4 band) 수집 — chip 선정 시 SCL 기반 구름/QA 필터링 적용 — 후 per-band 통계와 함께 로컬 Zarr/NPZ chip store 작성",
-        "data": [
-          "WeatherBench2 ERA5 Zarr (5.625°)",
-          "Sentinel-2 L2A chips (STAC/Earth Search)",
-          "HLS via earthaccess"
-        ],
-        "tools": [
-          "xarray",
-          "zarr",
-          "gcsfs",
-          "pystac-client/stackstac",
-          "earthaccess"
-        ],
-        "deliverable": "Reusable data/ module + Note 03 (chip gallery, anomaly map, weighted-vs-naive mean table). This chip store is reused in W7.",
-        "deliverable_ko": "재사용 가능한 data/ 모듈 + Note 03(chip 갤러리, anomaly 지도, weighted vs naive 평균 표) · 이 chip store는 W7에서 재사용",
-        "homework": null
-      },
-      "reading": {
-        "memo": "standard",
-        "video": {
-          "title": "The ERA5 and ERA6 | Hans Hersbach and Bill Bell",
-          "channel": "Copernicus ECMWF",
-          "link": "https://www.youtube.com/watch?v=wEZsbiiysZo",
-          "minutes": 15
-        },
-        "primary": [
-          {
-            "title": "Rolf et al. 2024 — Position: Satellite data is a distinct modality in ML",
-            "link": "https://arxiv.org/abs/2402.01444"
-          }
-        ],
-        "optional": [
-          {
-            "title": "Bauer, Thorpe & Brunet 2015 — The quiet revolution of NWP (Nature)",
-            "link": "https://doi.org/10.1038/nature14956"
-          }
-        ],
-        "questions": [
-          "Which of Rolf's claimed distinctions actually change architecture choices (cite SatMAE/Scale-MAE design decisions)?",
-          "Reanalysis is a model product — what does that mean for 'ground truth' when we evaluate a weather FM against ERA5?",
-          "Why is chunking layout a scientific issue, not just an engineering one?"
-        ],
-        "book": {
-          "title": "Goodfellow, Deep Learning — Ch. 5 (Machine Learning Basics, §5.1–5.5)",
-          "link": "https://www.deeplearningbook.org/contents/ml.html",
-          "short": "Goodfellow Ch. 5"
-        }
-      },
-      "skills": [
-        "cloud-native ETL (Zarr/STAC/COG)",
-        "ERA5 handling",
-        "cos-lat weighting",
-        "regridding",
-        "dataset/normalization design"
-      ],
-      "slides": true
+     "min": 15,
+     "topic": "AI-agent-native engineering: what Claude Code/Codex are good at (scaffolding, refactors, sweeps) and bad at (silent numerical bugs, eval leakage); the verification discipline — you own every number; repo hygiene, commit-per-lab, research notes as first-class output.",
+     "topic_ko": "AI-agent-native 엔지니어링: Claude Code/Codex가 잘하는 것(scaffolding, refactor, sweep)과 못하는 것(조용한 수치 버그, eval leakage) · 검증 규율 — 모든 숫자는 본인 책임 · repo 위생, lab당 commit, 일급 산출물로서의 연구 노트"
     },
     {
-      "n": 4,
-      "phase": "Foundations",
-      "title": "CNNs and Spatiotemporal Modeling on Gridded Data",
-      "goal": "Master the convolutional toolbox and dense-prediction craft that every FM is benchmarked against.",
-      "title_ko": "격자 데이터에서의 CNN과 시공간 모델링",
-      "goal_ko": "모든 FM의 비교 기준이 되는 convolution 도구상자와 dense prediction 기법을 익힙니다.",
-      "date": "2026-09-21",
-      "concept": [
-        {
-          "min": 15,
-          "topic": "Convolutions, receptive fields, encoder–decoder U-Net; skip connections as multi-scale fusion.",
-          "topic_ko": "convolution, receptive field, encoder–decoder U-Net · multi-scale fusion으로서의 skip connection"
-        },
-        {
-          "min": 15,
-          "topic": "Dense prediction craft: segmentation losses (CE, Dice, focal), class imbalance, boundary effects, tiling/overlap inference.",
-          "topic_ko": "dense prediction 기법: segmentation loss(CE, Dice, focal), class imbalance, 경계 효과, tiling/overlap inference"
-        },
-        {
-          "min": 15,
-          "topic": "Spatiotemporal extensions: ConvLSTM, 3D conv, factorized space–time; when convolution beats attention (small data, strong locality).",
-          "topic_ko": "시공간 확장: ConvLSTM, 3D conv, factorized space–time · convolution이 attention을 이기는 조건(작은 데이터, 강한 locality)"
-        },
-        {
-          "min": 10,
-          "topic": "The humbling PANGAEA preview: well-tuned supervised U-Nets still beat many GFMs on many tasks — your capstone baselines must include one.",
-          "topic_ko": "겸손해지는 PANGAEA 예고편: 잘 튜닝된 supervised U-Net이 여전히 많은 task에서 많은 GFM을 이김 — capstone baseline에 반드시 하나 포함"
-        },
-        {
-          "min": 5,
-          "topic": "Multispectral input handling: >3 channels, per-band normalization, band dropout as augmentation.",
-          "topic_ko": "multispectral 입력 처리: 3채널 초과 입력, per-band normalization, augmentation으로서의 band dropout"
-        }
-      ],
-      "lab": {
-        "task": "Flood extent segmentation on a Sen1Floods11 subset (~200 hand-labeled Sentinel-1/Sentinel-2 chips, via TorchGeo). Agent scaffolds U-Net (segmentation-models-pytorch); student defines the eval (IoU, precision/recall, spatially disjoint split) and runs an ablation: S1-only vs S2-only vs fused input.",
-        "task_ko": "Sen1Floods11 subset(hand-label된 Sentinel-1/Sentinel-2 chip ~200개, TorchGeo 경유)으로 홍수 범위 segmentation. 에이전트가 U-Net(segmentation-models-pytorch) scaffold · 학생이 eval을 정의(IoU, precision/recall, 공간적으로 분리된 split)하고 ablation 수행: S1-only vs S2-only vs fused 입력",
-        "data": [
-          "Sen1Floods11 subset (~200 chips)"
-        ],
-        "tools": [
-          "TorchGeo",
-          "segmentation-models-pytorch",
-          "W&B"
-        ],
-        "deliverable": "Note 04 with IoU table (3 input configs vs 'always-dry' baseline) + 4 prediction panels. This U-Net becomes the standing supervised baseline for capstone comparisons.",
-        "deliverable_ko": "Note 04: IoU 표(입력 구성 3종 vs 'always-dry' baseline) + 예측 패널 4장 · 이 U-Net이 capstone 비교의 상설 supervised baseline이 됨",
-        "homework": null
-      },
-      "reading": {
-        "memo": "standard",
-        "video": {
-          "title": "The moment we stopped understanding AI [AlexNet]",
-          "channel": "Welch Labs",
-          "link": "https://www.youtube.com/watch?v=UZDiGooFs54",
-          "minutes": 18
-        },
-        "primary": [
-          {
-            "title": "Ronneberger et al. 2015 — U-Net",
-            "link": "https://arxiv.org/abs/1505.04597"
-          }
-        ],
-        "optional": [
-          {
-            "title": "Shi et al. 2015 — ConvLSTM for precipitation nowcasting",
-            "link": "https://arxiv.org/abs/1506.04214"
-          }
-        ],
-        "questions": [
-          "Exactly what information do skip connections carry that the bottleneck destroys, and why does that matter more at 10 m GSD than on ImageNet?",
-          "Where should a pretrained FM plug into a U-Net-style decoder (this is what TerraTorch/Prithvi do)?",
-          "Why did ConvLSTM lose to transformers for global weather but survive for nowcasting (MetNet-3)?"
-        ],
-        "book": {
-          "title": "Goodfellow, Deep Learning — Ch. 9 (Convolutional Networks, §9.1–9.5)",
-          "link": "https://www.deeplearningbook.org/contents/convnets.html",
-          "short": "Goodfellow Ch. 9"
-        }
-      },
-      "skills": [
-        "dense prediction heads",
-        "segmentation metrics",
-        "multispectral input handling",
-        "supervised baselines"
-      ]
+     "min": 10,
+     "topic": "Logistics + honest self-selection: grading (10/30/60), site sign-in (id = student number), lead-pair sign-up. Explicit statement: \"the two papers assigned today are due as tickets before Week 2 — if they take you more than ~6 hours and still feel opaque, this course will feel like that every week.\"",
+     "topic_ko": "수업 운영 + 솔직한 수강 자가판단: 성적 비율(10/30/60), 사이트 로그인(id = 학번), lead-pair 신청 · 명시적 안내: \"오늘 배정된 논문 2편은 Week 2 전까지 ticket으로 제출 — 6시간 넘게 걸리는데도 여전히 난해하게 느껴진다면, 이 과목은 매주 그런 느낌일 것\""
     },
     {
-      "n": 5,
-      "phase": "Pretraining Core",
-      "title": "Sequence Models, Autoregressive Forecasting, and Rollout Stability",
-      "goal": "LSTMs for hydrologic time series, and the autoregressive rollout mechanics that all ML weather models live or die by.",
-      "title_ko": "시퀀스 모델, Autoregressive 예측, Rollout 안정성",
-      "goal_ko": "수문 시계열을 위한 LSTM과, 모든 ML 기상 모델의 성패를 가르는 autoregressive rollout 메커니즘을 배웁니다.",
-      "date": "2026-09-28",
-      "concept": [
-        {
-          "min": 15,
-          "topic": "RNN/LSTM/GRU mechanics; gradients through time; why LSTMs still rule rainfall–runoff (the CAMELS story, NSE/KGE metrics).",
-          "topic_ko": "RNN/LSTM/GRU 동작 원리 · 시간을 거슬러 흐르는 gradient · LSTM이 여전히 rainfall–runoff를 지배하는 이유(CAMELS 이야기, NSE/KGE metric)"
-        },
-        {
-          "min": 20,
-          "topic": "Autoregressive forecasting as a discipline: teacher forcing vs free-running, exposure bias, error accumulation, multi-step (rollout) training curricula — exactly GraphCast's 1→12-step curriculum and Pangu's hierarchical 1/3/6/24-h models, previewed on 1-D problems.",
-          "topic_ko": "규율로서의 autoregressive 예측: teacher forcing vs free-running, exposure bias, 오차 누적, multi-step(rollout) 학습 curriculum — 정확히 GraphCast의 1→12-step curriculum과 Pangu의 계층적 1/3/6/24-h 모델을 1-D 문제로 미리 체험"
-        },
-        {
-          "min": 10,
-          "topic": "Stability and blurring: why MSE-trained autoregressive models regress to the mean at long lead times; first look at the double-penalty problem.",
-          "topic_ko": "안정성과 blurring: MSE로 학습한 autoregressive 모델이 긴 lead time에서 평균으로 회귀하는 이유 · double-penalty 문제 첫 만남"
-        },
-        {
-          "min": 10,
-          "topic": "Probabilistic outputs on time series: quantile loss, NLL heads — CRPS foreshadowed.",
-          "topic_ko": "시계열의 확률적 출력: quantile loss, NLL head — CRPS 예고"
-        },
-        {
-          "min": 5,
-          "topic": "Lab briefing.",
-          "topic_ko": "lab 브리핑"
-        }
-      ],
-      "lab": {
-        "task": "Train an LSTM on CAMELS-US forcing→streamflow for ~30 basins (NeuralHydrology or plain PyTorch). Key experiment: compare 1-step-ahead teacher-forced skill vs free-running 15-day rollout; plot NSE vs lead time; add a 3-step rollout loss and show the stability gain. Close with a 20-min ERA5 teaser: single-variable next-step prediction on the WeatherBench2 5.625° Zarr — the weather-direction seed.",
-        "task_ko": "CAMELS-US forcing→streamflow로 ~30개 유역에서 LSTM 학습(NeuralHydrology 또는 순수 PyTorch). 핵심 실험: 1-step-ahead teacher-forced skill vs free-running 15일 rollout 비교 · NSE vs lead time 플롯 · 3-step rollout loss 추가 후 안정성 향상 확인. 마무리 20분은 ERA5 티저: WeatherBench2 5.625° Zarr에서 단일 변수 next-step 예측 — weather 방향의 씨앗",
-        "data": [
-          "CAMELS-US (forcing + streamflow, ~30 basins)",
-          "WeatherBench2 ERA5 Zarr (single-variable teaser)"
-        ],
-        "tools": [
-          "NeuralHydrology (or PyTorch)",
-          "xarray",
-          "W&B"
-        ],
-        "deliverable": "Note 05 with NSE-vs-lead-time curves for both training regimes + hydrograph panels + the ERA5 next-step teaser result.",
-        "deliverable_ko": "Note 05: 두 학습 방식의 NSE vs lead time 곡선 + hydrograph 패널 + ERA5 next-step 티저 결과",
-        "homework": null
-      },
-      "reading": {
-        "memo": "standard",
-        "video": {
-          "title": "Stanford CS231N | Spring 2025 | Lecture 7: Recurrent Neural Networks",
-          "channel": "Stanford Online",
-          "link": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
-          "minutes": 72
-        },
-        "primary": [
-          {
-            "title": "Kratzert et al. 2019 — Towards learning universal, regional, and local hydrological behaviors (HESS)",
-            "link": "https://doi.org/10.5194/hess-23-5089-2019"
-          }
-        ],
-        "optional": [
-          {
-            "title": "Nearing et al. 2024 — Global prediction of extreme floods in ungauged watersheds (Nature)",
-            "link": "https://doi.org/10.1038/s41586-024-07145-1"
-          }
-        ],
-        "questions": [
-          "Map Kratzert's 'regional model + static attributes' onto FM vocabulary: what is pretraining, what is conditioning?",
-          "Derive why 1-step MSE training produces unstable long rollouts; what are three remedies (curriculum, multi-step loss, noise injection)?",
-          "Is streamflow prediction in ungauged basins a 'fine-tuning' or 'zero-shot' problem?"
-        ],
-        "book": {
-          "title": "Goodfellow, Deep Learning — Ch. 10 (Sequence Modeling, §10.1–10.7)",
-          "link": "https://www.deeplearningbook.org/contents/rnn.html",
-          "short": "Goodfellow Ch. 10"
-        }
-      },
-      "skills": [
-        "autoregressive rollout",
-        "rollout-curriculum training",
-        "exposure bias",
-        "hydrologic metrics (NSE)",
-        "time-series heads"
-      ]
+     "min": 15,
+     "topic": "Assigning the Week 1 readings in class: a guided walkthrough of Attention Is All You Need + ViT — what to look for, how to read them; both tickets (W1+W2) due Sun 9/6 13:00 on this site. First journal club is W2, instructor-moderated.",
+     "topic_ko": "Week 1 읽기 자료 수업 중 배정: Attention Is All You Need + ViT 가이드 워크스루 — 무엇을 봐야 하고 어떻게 읽는가 · ticket 2건(W1+W2)은 Sun 9/6 13:00까지 이 사이트에 제출 · 첫 journal club은 W2, 교수 진행"
     },
     {
-      "n": 6,
-      "phase": "Pretraining Core",
-      "title": "Attention and the Transformer, Built From Scratch (With an Agent You Verify)",
-      "goal": "Own every line of a Transformer/ViT implementation; understand the positional-encoding choices EO and weather models hinge on.",
-      "title_ko": "Attention과 Transformer, 밑바닥부터 구현 (에이전트와 함께, 직접 검증)",
-      "goal_ko": "Transformer/ViT 구현의 모든 줄을 직접 책임지고, EO·기상 모델의 핵심인 positional encoding 선택을 이해합니다.",
-      "date": "2026-10-12",
-      "concept": [
-        {
-          "min": 20,
-          "topic": "Attention from first principles: QKV, multi-head, masking, complexity; pre-norm vs post-norm; residual stream intuition.",
-          "topic_ko": "제1원리에서 출발하는 attention: QKV, multi-head, masking, 복잡도 · pre-norm vs post-norm · residual stream 직관"
-        },
-        {
-          "min": 15,
-          "topic": "Positional encodings as the geoscience battleground: sincos, learned, RoPE (one slide); then the ones that matter here — SatMAE's temporal+spectral encodings, Prithvi-EO-2.0's lat/lon+date embeddings, Scale-MAE's GSD encoding, ClimaX's variable tokenization.",
-          "topic_ko": "지구과학의 격전지가 된 positional encoding: sincos, learned, RoPE(한 슬라이드) · 그리고 여기서 중요한 것들 — SatMAE의 temporal+spectral encoding, Prithvi-EO-2.0의 lat/lon+date embedding, Scale-MAE의 GSD encoding, ClimaX의 variable tokenization"
-        },
-        {
-          "min": 10,
-          "topic": "ViT anatomy: patchify as tokenization; patch size vs sequence length vs resolution trade-offs (why weather models at 0.25° need tricks).",
-          "topic_ko": "ViT 해부: tokenization으로서의 patchify · patch size vs sequence length vs 해상도 trade-off(0.25° 기상 모델에 트릭이 필요한 이유)"
-        },
-        {
-          "min": 10,
-          "topic": "Windowed/shifted attention (Swin) and why Pangu, FuXi, and Aurora are Swin-based; 3D windows for pressure levels.",
-          "topic_ko": "windowed/shifted attention(Swin)과 Pangu, FuXi, Aurora가 Swin 기반인 이유 · pressure level을 위한 3D window"
-        },
-        {
-          "min": 5,
-          "topic": "Mixed-precision and FlashAttention as \"why your lab fits in 60 minutes.\"",
-          "topic_ko": "\"lab이 60분 안에 끝나는 이유\"로서의 mixed precision과 FlashAttention"
-        }
-      ],
-      "lab": {
-        "task": "Implement mini_vit.py (attention, MHA, block, patchify, ViT) from scratch with the agent — test-driven: student specifies shape tests, causal-mask tests, a gradient-flow test, and an equivalence test against torch.nn.MultiheadAttention before the agent writes code. Train the tiny ViT (~1M params) on EuroSAT-MS (13-band Sentinel-2) with per-band-group patch embedding.",
-        "task_ko": "mini_vit.py(attention, MHA, block, patchify, ViT)를 에이전트와 함께 밑바닥부터 구현 — test-driven: 에이전트가 코드를 쓰기 전에 학생이 shape 테스트, causal-mask 테스트, gradient-flow 테스트, torch.nn.MultiheadAttention 대비 동등성 테스트를 먼저 명세. 이후 tiny ViT(~1M params)를 per-band-group patch embedding으로 EuroSAT-MS(13-band Sentinel-2)에서 학습",
-        "data": [
-          "EuroSAT-MS (13-band Sentinel-2)"
-        ],
-        "tools": [
-          "PyTorch",
-          "pytest",
-          "W&B"
-        ],
-        "deliverable": "Note 06 + mini_vit.py with passing test suite committed; accuracy vs the W1 CNN. This file is the backbone of the W7 MAE and, for many students, the capstone.",
-        "deliverable_ko": "Note 06 + 테스트 스위트 통과 상태로 commit된 mini_vit.py · W1 CNN 대비 정확도 · 이 파일이 W7 MAE의 backbone이 되고, 많은 학생에게는 capstone의 backbone",
-        "homework": null
-      },
-      "reading": {
-        "memo": "standard",
-        "video": {
-          "title": "Attention in transformers, step-by-step | Deep Learning Chapter 6",
-          "channel": "3Blue1Brown",
-          "link": "https://www.youtube.com/watch?v=eMlx5fFNoYc",
-          "minutes": 26
-        },
-        "primary": [
-          {
-            "title": "Liu et al. 2021 — Swin Transformer",
-            "link": "https://arxiv.org/abs/2103.14030"
-          }
-        ],
-        "optional": [
-          {
-            "title": "Tseng et al. 2023 — Presto",
-            "link": "https://arxiv.org/abs/2304.14065"
-          }
-        ],
-        "questions": [
-          "Why does shifted windowing recover cross-window information flow — and what is the weather-model analog at the poles/dateline?",
-          "For a 13-band image, argue for/against: one patch embed for all bands vs band-group embeds vs wavelength-conditioned embeds (DOFA's answer).",
-          "Presto has 400K params and competes with giants on pixel time series — what does that say about scale vs inductive fit?"
-        ],
-        "book": {
-          "title": "Dive into Deep Learning (d2l.ai) — Ch. 11 (Attention Mechanisms & Transformers)",
-          "link": "https://d2l.ai/chapter_attention-mechanisms-and-transformers/index.html",
-          "short": "d2l Ch. 11"
-        }
-      },
-      "skills": [
-        "transformer implementation",
-        "positional/metadata encodings",
-        "patchify/tokenization",
-        "test-driven agent verification"
-      ]
-    },
-    {
-      "n": 7,
-      "phase": "Pretraining Core",
-      "title": "Self-Supervised Learning: Pretrain Your First Model",
-      "goal": "Understand the SSL design space and actually pretrain a mini-MAE on satellite imagery — everyone's hands-on pretraining experience and the capstone seed.",
-      "title_ko": "Self-Supervised Learning: 첫 모델 Pretraining",
-      "goal_ko": "SSL 설계 공간을 이해하고 위성 영상으로 mini-MAE를 실제로 pretraining합니다 — 전원이 직접 해보는 pretraining 경험이자 capstone의 씨앗입니다.",
-      "date": "2026-10-26",
-      "concept": [
-        {
-          "min": 20,
-          "topic": "SSL taxonomy with lineage map: masked reconstruction (MAE → SatMAE/Prithvi), contrastive (SimCLR), self-distillation (DINO → DINOv3-satellite), latent prediction (I-JEPA → Galileo, AnySat, OlmoEarth's Latent MIM Lite); collapse and how each family avoids it.",
-          "topic_ko": "계보 지도와 함께 보는 SSL 분류: masked reconstruction(MAE → SatMAE/Prithvi), contrastive(SimCLR), self-distillation(DINO → DINOv3-satellite), latent prediction(I-JEPA → Galileo, AnySat, OlmoEarth의 Latent MIM Lite) · collapse와 각 계열의 회피법"
-        },
-        {
-          "min": 15,
-          "topic": "MAE mechanics in detail: 75% masking, asymmetric encoder/decoder, normalized-pixel targets, why high masking works for images and what changes for EO (spatial redundancy, cloud pixels).",
-          "topic_ko": "MAE 동작 원리 상세: 75% masking, 비대칭 encoder/decoder, normalized-pixel target · 이미지에서 높은 masking이 통하는 이유와 EO에서 달라지는 것(공간 중복성, 구름 픽셀)"
-        },
-        {
-          "min": 10,
-          "topic": "Structured masking for EO/weather: spatial, spectral/band-group, temporal, and modality masking (SatMAE, SpectralGPT, Galileo); Prithvi-WxC's mixed masked+forecast objective as the bridge to W11.",
-          "topic_ko": "EO/weather를 위한 구조화된 masking: spatial, spectral/band-group, temporal, modality masking(SatMAE, SpectralGPT, Galileo) · W11로 이어주는 다리인 Prithvi-WxC의 masked+forecast 혼합 objective"
-        },
-        {
-          "min": 10,
-          "topic": "Evaluating SSL: linear probe vs kNN vs full fine-tune; why probe rankings mislead (GEO-Bench-2 evidence).",
-          "topic_ko": "SSL 평가: linear probe vs kNN vs full fine-tune · probe 순위가 오도하는 이유(GEO-Bench-2 근거)"
-        },
-        {
-          "min": 5,
-          "topic": "Mixed precision (torch.amp) introduced hands-on in the lab today.",
-          "topic_ko": "mixed precision(torch.amp)은 오늘 lab에서 실습으로 도입"
-        }
-      ],
-      "lab": {
-        "task": "In-class core: pretrain a mini-MAE (~2M params, from your W6 ViT) on the W3 Sentinel-2/HLS chip store (or a ~5k-chip SSL4EO-S12 subset), bf16 autocast, ~15 min on one GPU; then linear probe on EuroSAT vs (a) random init and (b) supervised-from-scratch at equal epochs; visualize reconstructions.",
-        "task_ko": "수업 내 핵심: W3 Sentinel-2/HLS chip store(또는 ~5k-chip SSL4EO-S12 subset)로 mini-MAE(~2M params, W6 ViT 기반) pretraining, bf16 autocast, GPU 1장에서 ~15분 · 이후 EuroSAT에서 linear probe로 (a) random init, (b) 동일 epoch의 supervised-from-scratch와 비교 · reconstruction 시각화",
-        "data": [
-          "W3 Sentinel-2/HLS chip store",
-          "SSL4EO-S12 subset (~5k chips, alternative)",
-          "EuroSAT (probe)"
-        ],
-        "tools": [
-          "PyTorch AMP (bf16)",
-          "W&B"
-        ],
-        "deliverable": "Note 07 with probe-accuracy table (pretrained vs random vs supervised) and reconstruction grids. This checkpoint and codebase are every student's hands-on pretraining experience and the capstone seed — reused in the W9 scaling sweep and the W10 leaderboard; the HydroAI lab's Hydro-FM team builds on it directly.",
-        "deliverable_ko": "Note 07: probe 정확도 표(pretrained vs random vs supervised)와 reconstruction grid · 이 checkpoint와 codebase가 전원의 실전 pretraining 경험이자 capstone의 씨앗 — W9 scaling sweep과 W10 leaderboard에서 재사용, HydroAI lab의 Hydro-FM 팀은 이를 직접 기반으로 삼음",
-        "homework": "Masking-ratio ablation: rerun pretraining at 50/75/90% masking; add reconstruction grids and the probe mini-ablation table to Note 07.",
-        "homework_ko": "masking-ratio ablation: 50/75/90% masking으로 pretraining 재실행 · reconstruction grid와 probe mini-ablation 표를 Note 07에 추가"
-      },
-      "reading": {
-        "memo": "standard",
-        "video": {
-          "title": "Stanford CS231N | Spring 2025 | Lecture 12: Self-Supervised Learning",
-          "channel": "Stanford Online",
-          "link": "https://www.youtube.com/watch?v=4howBU7THbM",
-          "minutes": 75
-        },
-        "primary": [
-          {
-            "title": "He et al. 2021 — Masked Autoencoders Are Scalable Vision Learners",
-            "link": "https://arxiv.org/abs/2111.06377"
-          }
-        ],
-        "optional": [
-          {
-            "title": "Caron et al. 2021 — DINO",
-            "link": "https://arxiv.org/abs/2104.14294"
-          },
-          {
-            "title": "Chen et al. 2020 — SimCLR",
-            "link": "https://arxiv.org/abs/2002.05709"
-          }
-        ],
-        "questions": [
-          "Why can MAE mask 75% while BERT masks 15% — and what ratio would you predict for cloud-free Sentinel-2 vs ERA5 fields (compare Prithvi-WxC's choice)?",
-          "What exactly does the decoder learn, and why throw it away?",
-          "Propose one EO-specific masking structure and the invariance it would induce."
-        ],
-        "book": {
-          "title": "Goodfellow, Deep Learning — Ch. 14 (Autoencoders, §14.1–14.5)",
-          "link": "https://www.deeplearningbook.org/contents/autoencoders.html",
-          "short": "Goodfellow Ch. 14"
-        }
-      },
-      "skills": [
-        "masking strategies",
-        "MAE pretraining",
-        "SSL evaluation (probe/kNN/FT)",
-        "mixed precision (bf16/AMP)"
-      ]
-    },
-    {
-      "n": 8,
-      "phase": "Pretraining Core",
-      "title": "Midterm: Portfolio Review and Capstone Proposal Pitches",
-      "goal": "Convert seven weeks of labs into a credible, compute-budgeted capstone proposal.",
-      "title_ko": "중간 점검: 포트폴리오 리뷰와 Capstone 제안 발표",
-      "goal_ko": "지난 7주의 실습을 compute 예산까지 갖춘 설득력 있는 capstone 제안서로 완성합니다.",
-      "date": "2026-11-02",
-      "concept": [
-        {
-          "min": 15,
-          "topic": "How to write a capstone proposal: data → objective → architecture → compute budget → evaluation-first design (name your baselines and metrics before training anything).",
-          "topic_ko": "capstone 제안서 쓰는 법: data → objective → architecture → compute 예산 → evaluation-first 설계(무엇이든 학습하기 전에 baseline과 metric부터 명명)"
-        },
-        {
-          "min": 10,
-          "topic": "Compute budgeting at course scale: back-of-envelope FLOPs, tokens-seen, GPU-hours; Chinchilla logic previewed (formalized in W9).",
-          "topic_ko": "과목 규모의 compute 예산 수립: 어림 계산 FLOPs, tokens-seen, GPU-hours · Chinchilla 논리 예고(W9에서 정식화)"
-        },
-        {
-          "min": 10,
-          "topic": "Track briefing: default track for everyone = fine-tune and rigorously evaluate a public FM (LoRA, free-tier compute); pretraining is experienced by all in the W7/W9 labs; from-scratch development is reserved for the HydroAI lab team's joint Hydro-FM project. Weather-direction proposals are provisional, with a revision gate after W11. Scope ladders for EV4240 vs EN5425.",
-          "topic_ko": "트랙 브리핑: 전원의 기본 트랙 = 공개 FM을 fine-tuning하고 엄밀히 평가(LoRA, 무료 티어 compute) · pretraining은 W7/W9 lab에서 전원이 경험 · from-scratch 개발은 HydroAI lab 팀의 공동 Hydro-FM 프로젝트 전용 · weather 방향 제안은 잠정 승인, W11 이후 수정 게이트 · EV4240 vs EN5425 범위 사다리"
-        },
-        {
-          "min": 40,
-          "topic": "Proposal pitches, round 1: 5-min pitch + 3-min hostile-but-kind Q&A per student/team (instructor + one assigned peer discussant each).",
-          "topic_ko": "제안 발표 1라운드: 학생/팀당 5분 pitch + 3분의 까칠하지만 친절한 Q&A(교수 + 지정 peer discussant 1명)"
-        }
-      ],
-      "lab": {
-        "task": "Pitches continue; every student files written feedback (GitHub issues) on two peers' proposals; instructor sign-off queue. Portfolio spot-check: instructor clones two random repos and re-runs a lab note live — a reproducibility culture moment.",
-        "task_ko": "발표 계속 진행 · 모든 학생이 동료 제안 2건에 서면 피드백 제출(GitHub issue) · 교수 승인 대기열. 포트폴리오 불시 점검: 교수가 무작위 repo 2개를 clone해 lab note를 현장에서 재실행 — 재현성 문화의 순간",
-        "data": [],
-        "tools": [
-          "GitHub (issues, PR review)"
-        ],
-        "deliverable": "2-page proposal (data, objective, base model, compute budget, downstream tasks, eval protocol, risk plan) — PDF submitted on this site by Sun 11/1 13:00; pitched in class 11/2.",
-        "deliverable_ko": "2쪽 제안서(data, objective, base model, compute 예산, downstream task, eval protocol, risk plan) — PDF를 Sun 11/1 13:00까지 이 사이트에 제출 · 11/2 수업에서 발표",
-        "homework": null
-      },
-      "reading": {
-        "memo": "none",
-        "primary": [],
-        "optional": [],
-        "questions": []
-      },
-      "skills": [
-        "eval-first experimental design",
-        "compute budgeting",
-        "scientific communication"
-      ]
-    },
-    {
-      "n": 9,
-      "phase": "Foundation Models",
-      "title": "Foundation Models and Scaling Laws",
-      "goal": "The intellectual frame — what makes a model a foundation model, and how scaling laws let you budget a tiny one honestly.",
-      "title_ko": "Foundation Model과 Scaling Law",
-      "goal_ko": "무엇이 모델을 foundation model로 만드는지라는 지적 틀과, scaling law로 작은 모델의 예산을 정직하게 세우는 법을 다룹니다.",
-      "date": "2026-11-09",
-      "concept": [
-        {
-          "min": 15,
-          "topic": "Foundation-model definition (Bommasani): emergence and homogenization; what transfers from the LLM playbook to EO/weather and what doesn't (no internet-scale text; data is spatially correlated and physically constrained).",
-          "topic_ko": "foundation model의 정의(Bommasani): emergence와 homogenization · LLM playbook에서 EO/weather로 이전되는 것과 아닌 것(인터넷 규모 텍스트 부재 · 데이터는 공간적으로 상관되고 물리적으로 제약됨)"
-        },
-        {
-          "min": 20,
-          "topic": "Scaling laws: Kaplan power laws, Chinchilla compute-optimal N vs D, data-constrained scaling; worked example live: 'you have 10 GPU-hours and 50 GB of chips — solve for model size'.",
-          "topic_ko": "scaling law: Kaplan power law, Chinchilla compute-optimal N vs D, data-constrained scaling · 라이브 실습 예제: '10 GPU-hours와 50 GB chip이 있다 — 모델 크기를 구하라'"
-        },
-        {
-          "min": 10,
-          "topic": "When pretraining pays: transfer gap vs supervised baselines; PANGAEA/GEO-Bench-2 evidence that it often doesn't — framing your capstone claim honestly.",
-          "topic_ko": "pretraining이 수지맞는 조건: supervised baseline 대비 transfer gap · 흔히 그렇지 않다는 PANGAEA/GEO-Bench-2 근거 — capstone 주장을 정직하게 세우기"
-        },
-        {
-          "min": 10,
-          "topic": "Emergence skepticism and evaluation-metric artifacts; what 'emergent' could even mean for a weather model.",
-          "topic_ko": "emergence 회의론과 평가 metric의 artifact · 기상 모델에서 'emergent'가 도대체 무엇을 뜻할 수 있는가"
-        },
-        {
-          "min": 5,
-          "topic": "Lab briefing: you will fit your own scaling law today.",
-          "topic_ko": "lab 브리핑: 오늘 본인의 scaling law를 직접 fitting"
-        }
-      ],
-      "lab": {
-        "task": "Fit a mini scaling law for your own model family. The 4-size sweep (launched pre-class as homework) is already done; the 60 in-class minutes go to fitting and diagnosing the power law: plot reconstruction loss (and probe accuracy) vs params on log–log, fit the power law, stress-test where the fit breaks, and extrapolate to your capstone budget — writing the prediction into your proposal.",
-        "task_ko": "본인 모델 계열의 mini scaling law fitting. 4개 크기 sweep(수업 전 homework로 launch)은 이미 완료 · 수업 내 60분은 power law fitting과 진단에 사용: reconstruction loss(와 probe 정확도)를 params 대비 log–log로 플롯, power law fitting, fit이 깨지는 지점 스트레스 테스트, capstone 예산으로 외삽 — 그 예측을 제안서에 기록",
-        "data": [
-          "W3 chip corpus (fixed)",
-          "W7 mini-MAE at 4 sizes (~0.1M/0.5M/2M/8M params)"
-        ],
-        "tools": [
-          "W&B sweeps",
-          "agent-orchestrated multi-run script",
-          "matplotlib"
-        ],
-        "deliverable": "Note 09 with the log–log fit reported as a prediction interval plus enumerated failure modes (not a point prediction) + a one-paragraph capstone budget memo (chosen N, D, GPU-hours, predicted loss range).",
-        "deliverable_ko": "Note 09: log–log fit을 (점 예측이 아니라) 예측 구간 + 열거된 실패 모드로 보고 + 한 문단짜리 capstone 예산 메모(선택한 N, D, GPU-hours, 예측 loss 범위)",
-        "homework": "Pre-class: launch the 4-size scaling sweep (~0.1M/0.5M/2M/8M params, fixed wall-clock on the fixed chip corpus) so all runs finish before the lab.",
-        "homework_ko": "수업 전: 4개 크기 scaling sweep(~0.1M/0.5M/2M/8M params, 고정 chip corpus에서 고정 wall-clock) launch — lab 전에 모든 run이 끝나도록"
-      },
-      "reading": {
-        "memo": "standard",
-        "video": {
-          "title": "AI can't cross this line and we don't know why.",
-          "channel": "Welch Labs",
-          "link": "https://www.youtube.com/watch?v=5eqRuVp65eY",
-          "minutes": 24
-        },
-        "primary": [
-          {
-            "title": "Hoffmann et al. 2022 — Training Compute-Optimal Large Language Models (Chinchilla)",
-            "link": "https://arxiv.org/abs/2203.15556"
-          }
-        ],
-        "optional": [
-          {
-            "title": "Kaplan et al. 2020 — Scaling Laws for Neural Language Models",
-            "link": "https://arxiv.org/abs/2001.08361"
-          },
-          {
-            "title": "Bommasani et al. 2021 — Opportunities and Risks of Foundation Models (Secs. 1–2)",
-            "link": "https://arxiv.org/abs/2108.07258"
-          }
-        ],
-        "questions": [
-          "Chinchilla says balance N and D — what is 'a token' of ERA5, and how many does 40 years of 0.25° reanalysis contain?",
-          "Why might scaling exponents differ for satellite imagery vs text?",
-          "Given your W9 lab fit: is your capstone compute-optimal, over-parameterized, or data-starved?"
-        ],
-        "book": {
-          "title": "Goodfellow, Deep Learning — Ch. 11 (Practical Methodology)",
-          "link": "https://www.deeplearningbook.org/contents/guidelines.html",
-          "short": "Goodfellow Ch. 11"
-        }
-      },
-      "skills": [
-        "scaling-law fitting",
-        "compute-optimal budgeting",
-        "transfer-learning framing",
-        "automated sweep orchestration"
-      ]
-    },
-    {
-      "n": 10,
-      "phase": "Foundation Models",
-      "title": "Earth Observation Foundation Models (EO-FM Week)",
-      "goal": "Command the GFM design space — from SatMAE to embedding fields — and how to evaluate them without fooling yourself.",
-      "title_ko": "지구관측 Foundation Model (EO-FM 주간)",
-      "goal_ko": "SatMAE부터 embedding field까지 GFM 설계 공간을 장악하고, 스스로를 속이지 않고 평가하는 법을 배웁니다.",
-      "date": "2026-11-16",
-      "concept": [
-        {
-          "min": 15,
-          "topic": "Generation 1: SatMAE (temporal/spectral tokens, band-group masking), Scale-MAE (GSD positional encoding, Laplacian decoder), Prithvi-EO-1.0/2.0 (HLS, 3D geolocation+date embeddings, TerraTorch fine-tuning stack — the closest published blueprint to your capstone).",
-          "topic_ko": "1세대: SatMAE(temporal/spectral token, band-group masking), Scale-MAE(GSD positional encoding, Laplacian decoder), Prithvi-EO-1.0/2.0(HLS, 3D geolocation+date embedding, TerraTorch fine-tuning 스택 — capstone에 가장 가까운 공개 청사진)"
-        },
-        {
-          "min": 15,
-          "topic": "Generation 2, sensor-agnostic and multimodal: DOFA/Copernicus-FM (wavelength-conditioned hypernetwork patch embeds), TerraMind (any-to-any generation, Thinking-in-Modalities), Galileo (dual global+local latent objectives, structured space/time/modality masking), SpectralGPT, SkySense.",
-          "topic_ko": "2세대, sensor-agnostic·멀티모달: DOFA/Copernicus-FM(wavelength-conditioned hypernetwork patch embed), TerraMind(any-to-any 생성, Thinking-in-Modalities), Galileo(global+local 이중 latent objective, 구조화된 space/time/modality masking), SpectralGPT, SkySense"
-        },
-        {
-          "min": 15,
-          "topic": "Generation 3, embeddings as the product: AlphaEarth Foundations (64-D annual 10 m embeddings in GEE — a 'virtual satellite', not a backbone), TESSERA (open competitor), Major-TOM embeddings; OlmoEarth as the fully open small-model + platform exemplar; DINOv3-satellite as the outsider that wins on high-res RGB.",
-          "topic_ko": "3세대, 제품으로서의 embedding: AlphaEarth Foundations(GEE의 64-D 연간 10 m embedding — backbone이 아니라 'virtual satellite'), TESSERA(공개 경쟁자), Major-TOM embedding · 완전 공개 소형 모델 + 플랫폼 모범인 OlmoEarth · 고해상도 RGB에서 이기는 외부자 DINOv3-satellite"
-        },
-        {
-          "min": 10,
-          "topic": "Honest evaluation: GEO-Bench → GEO-Bench-2 capability groups ('no model dominates'), PANGAEA's U-Net reality check, the 89-GFM usability study; what your capstone eval must therefore include.",
-          "topic_ko": "정직한 평가: GEO-Bench → GEO-Bench-2 capability group('지배적 모델은 없다'), PANGAEA의 U-Net 현실 점검, 89개 GFM usability 연구 · 따라서 capstone eval에 반드시 들어가야 할 것"
-        },
-        {
-          "min": 5,
-          "topic": "Lab briefing.",
-          "topic_ko": "lab 브리핑"
-        }
-      ],
-      "lab": {
-        "task": "Mini-GFM leaderboard, in-class core: linear-probe three frozen encoders — (a) your W7 mini-MAE, (b) OlmoEarth-Nano (HF checkpoint), (c) Presto — on ONE classification task with the same split: EuroSAT-MS.",
-        "task_ko": "mini-GFM leaderboard, 수업 내 핵심: frozen encoder 3종 — (a) W7 mini-MAE, (b) OlmoEarth-Nano(HF checkpoint), (c) Presto — 를 같은 split의 단일 분류 task에서 linear probe: EuroSAT-MS",
-        "data": [
-          "EuroSAT-MS",
-          "OlmoEarth-Nano checkpoint (HF Hub)",
-          "Presto checkpoint"
-        ],
-        "tools": [
-          "HF Hub",
-          "TorchGeo",
-          "GEE (optional)",
-          "W&B"
-        ],
-        "deliverable": "Note 10 — leaderboard table + 200-word 'which encoder for which task and why', citing GEO-Bench-2's capability-group logic.",
-        "deliverable_ko": "Note 10 — leaderboard 표 + GEO-Bench-2 capability-group 논리를 인용한 200단어짜리 '어떤 task에 어떤 encoder를, 왜'",
-        "homework": "Optional extensions: a dense-task probe (Sen1Floods11 with a 1×1-conv head) and a fourth AlphaEarth Satellite Embeddings column from GEE over a Korean AOI. Required: capstone corpus curation — assemble and document your fine-tuning dataset (default track) or pretraining chip corpus (Hydro-FM team).",
-        "homework_ko": "선택 확장: dense-task probe(1×1-conv head를 단 Sen1Floods11)와 한국 AOI에 대한 GEE의 AlphaEarth Satellite Embeddings 네 번째 열. 필수: capstone corpus 큐레이션 — fine-tuning dataset(기본 트랙) 또는 pretraining chip corpus(Hydro-FM 팀)를 구성하고 문서화"
-      },
-      "reading": {
-        "memo": "standard",
-        "video": {
-          "title": "Earth Observation Foundation Models and their Applications: Casper Fibæk (The ESA Phi-Lab)",
-          "channel": "SFI Visual Intelligence",
-          "link": "https://www.youtube.com/watch?v=H8zAOMpA_-c",
-          "minutes": 34
-        },
-        "primary": [
-          {
-            "title": "Szwarcman et al. 2024 — Prithvi-EO-2.0",
-            "link": "https://arxiv.org/abs/2412.02732"
-          }
-        ],
-        "optional": [
-          {
-            "title": "Cong et al. 2022 — SatMAE",
-            "link": "https://arxiv.org/abs/2207.08051"
-          },
-          {
-            "title": "Herzog et al. 2025 — OlmoEarth",
-            "link": "https://arxiv.org/abs/2511.13655"
-          }
-        ],
-        "questions": [
-          "Which Prithvi-EO-2.0 design choices survive at 1/1000th scale, and which are pointless below 100M params?",
-          "Are location/date embeddings a feature or a leakage channel for downstream tasks?",
-          "If AlphaEarth-style embedding fields keep improving, who still needs to fine-tune a backbone — and what does that mean for your capstone's claim?"
-        ]
-      },
-      "skills": [
-        "multi-sensor/multispectral architectures",
-        "metadata conditioning",
-        "GFM benchmarking (GEO-Bench/PANGAEA)",
-        "frozen-embedding workflows",
-        "HF checkpoint reuse"
-      ]
-    },
-    {
-      "n": 11,
-      "phase": "Foundation Models",
-      "title": "Weather and Climate Foundation Models (Weather-FM Week)",
-      "goal": "The full ML-weather stack: paradigms, spherical geometry, rollout stability, and WeatherBench2-grade evaluation — then train your own tiny forecaster.",
-      "title_ko": "기상·기후 Foundation Model (Weather-FM 주간)",
-      "goal_ko": "ML 기상의 전체 스택 — 패러다임, 구면 기하, rollout 안정성, WeatherBench2급 평가 — 을 다룬 뒤, 직접 작은 forecaster를 학습합니다.",
-      "date": "2026-11-23",
-      "concept": [
-        {
-          "min": 10,
-          "topic": "Problem setup: atmospheric state as a tensor (variables × levels × lat × lon), ERA5 as corpus, initial-condition provenance (ERA5 vs operational analysis — an evaluation trap), 2026 operational status (AIFS, NOAA AIGFS, WeatherNext 2).",
-          "topic_ko": "문제 설정: 대기 상태를 tensor로(variables × levels × lat × lon), corpus로서의 ERA5, 초기조건 출처(ERA5 vs 현업 analysis — 평가의 함정), 2026 현업 운영 현황(AIFS, NOAA AIGFS, WeatherNext 2)"
-        },
-        {
-          "min": 20,
-          "topic": "Paradigm tour, one architecture slide each: deterministic transformers (Pangu's 3D Earth-specific attention, Stormer, FuXi/FengWu), graph/mesh (GraphCast's icosahedral encode-process-decode, AIFS), spherical operators (SFNO — why FFTs on lat-lon grids are wrong at the poles), probabilistic/generative (GenCast diffusion, FGN/WeatherNext 2, FourCastNet 3), hybrid (NeuralGCM), obs-direct (Aardvark, GraphDOP), and the pretrain→fine-tune FMs proper (ClimaX variable tokenization, Aurora, Prithvi-WxC).",
-          "topic_ko": "패러다임 투어, 아키텍처당 슬라이드 한 장: deterministic transformer(Pangu의 3D Earth-specific attention, Stormer, FuXi/FengWu), graph/mesh(GraphCast의 icosahedral encode-process-decode, AIFS), spherical operator(SFNO — lat-lon 격자의 FFT가 극에서 틀리는 이유), probabilistic/generative(GenCast diffusion, FGN/WeatherNext 2, FourCastNet 3), hybrid(NeuralGCM), obs-direct(Aardvark, GraphDOP), 그리고 진짜 pretrain→fine-tune FM(ClimaX variable tokenization, Aurora, Prithvi-WxC)"
-        },
-        {
-          "min": 15,
-          "topic": "Rollout stability engineering: multi-step loss curricula (GraphCast's schedule), fine-tuning horizon, blurring/double-penalty, power-spectra diagnostics, effective resolution.",
-          "topic_ko": "rollout 안정성 엔지니어링: multi-step loss curriculum(GraphCast의 schedule), fine-tuning horizon, blurring/double-penalty, power-spectra 진단, effective resolution"
-        },
-        {
-          "min": 15,
-          "topic": "Metrics you must be able to derive: lat-weighted RMSE, ACC vs climatology (and the 0.6 'useful skill' convention), bias; probabilistic: CRPS as generalized MAE, spread–skill, rank histograms; the WeatherBench2 protocol (test years, headline scorecard).",
-          "topic_ko": "직접 유도할 줄 알아야 하는 metric: lat-weighted RMSE, climatology 대비 ACC(그리고 0.6 'useful skill' 관례), bias · 확률적 metric: generalized MAE로서의 CRPS, spread–skill, rank histogram · WeatherBench2 protocol(test 연도, headline scorecard)"
-        }
-      ],
-      "lab": {
-        "task": "Train a tiny weather emulator on the WeatherBench2 ERA5 5.625° Zarr (Z500 + T850, 6-h steps, ~1979–2015 train / 2018–2019 test): small U-Net or your W6 ViT (~1–3M params) predicting residual (Δstate) targets, with per-variable-per-level normalization and static input channels (orography, land–sea mask). Write the lat-weighted MSE loss yourself and test it against analytic values (agent writes the test). Evaluate lat-weighted RMSE and ACC vs persistence and climatology baselines at 1–5-day leads via autoregressive rollout; plot the zonal power spectrum at day 1 vs day 5 to see blurring.",
-        "task_ko": "WeatherBench2 ERA5 5.625° Zarr(Z500 + T850, 6-h step, train ~1979–2015 / test 2018–2019)로 tiny weather emulator 학습: 작은 U-Net 또는 W6 ViT(~1–3M params)로 residual(Δstate) target 예측, per-variable-per-level normalization과 static 입력 채널(orography, land–sea mask) 사용. lat-weighted MSE loss를 직접 작성하고 해석값 대비 테스트(테스트는 에이전트가 작성). autoregressive rollout으로 1–5일 lead에서 persistence·climatology baseline 대비 lat-weighted RMSE와 ACC 평가 · day 1 vs day 5의 zonal power spectrum을 그려 blurring 확인",
-        "data": [
-          "WeatherBench2 ERA5 5.625° Zarr (Z500 + T850)"
-        ],
-        "tools": [
-          "xarray + gcsfs (WB2 public bucket)",
-          "PyTorch",
-          "W&B",
-          "ClimateLearn (optional scaffold)"
-        ],
-        "deliverable": "Note 11 — WB2-style scorecard table (model vs persistence vs climatology), ACC-vs-lead-time plot, spectra figure, rollout animation GIF. This is the weather-direction capstone seed; provisional W8 weather proposals hit their revision gate after this week.",
-        "deliverable_ko": "Note 11 — WB2 스타일 scorecard 표(model vs persistence vs climatology), ACC vs lead time 플롯, spectra 그림, rollout 애니메이션 GIF · 이것이 weather 방향 capstone의 씨앗 · W8의 잠정 weather 제안은 이번 주 이후 수정 게이트 통과",
-        "homework": null
-      },
-      "reading": {
-        "memo": "standard",
-        "video": {
-          "title": "The AI Weather Forecasting Revolution",
-          "channel": "ECMWF",
-          "link": "https://www.youtube.com/watch?v=JUsFvifyZeM",
-          "minutes": 68
-        },
-        "primary": [
-          {
-            "title": "Lam et al. 2023 — GraphCast",
-            "link": "https://arxiv.org/abs/2212.12794"
-          }
-        ],
-        "optional": [
-          {
-            "title": "Bi et al. 2023 — Pangu-Weather",
-            "link": "https://arxiv.org/abs/2211.02556"
-          },
-          {
-            "title": "Price et al. 2025 — GenCast",
-            "link": "https://arxiv.org/abs/2312.15796"
-          }
-        ],
-        "questions": [
-          "Derive why unweighted MSE on a lat-lon grid over-weights the poles, and by how much at 60°N.",
-          "GraphCast beats HRES on RMSE partly by blurring — how would CRPS-trained GenCast change that comparison, and what does the double-penalty argument say?",
-          "Is an ERA5 emulator forecasting the atmosphere or forecasting ECMWF's data assimilation system? Defend both readings."
-        ]
-      },
-      "skills": [
-        "lat-weighted loss",
-        "ACC/RMSE/CRPS",
-        "spherical/mesh representations",
-        "rollout curriculum & stability",
-        "WeatherBench2 evaluation",
-        "spectra diagnostics"
-      ]
-    },
-    {
-      "n": 12,
-      "phase": "Foundation Models",
-      "title": "Scaling the Pipeline: Training Engineering, Fine-Tuning, and Release",
-      "goal": "Every remaining capstone skill: efficient training at your compute ceiling, PEFT fine-tuning, ablation design, and a real HF Hub release — after this week you have 100% of the capstone skill set.",
-      "title_ko": "파이프라인 확장: Training 엔지니어링, Fine-Tuning, 릴리스",
-      "goal_ko": "capstone에 필요한 나머지 기술 전부 — compute 한도 내 효율적 학습, PEFT fine-tuning, ablation 설계, 실제 HF Hub 릴리스 — 를 익혀 이번 주로 capstone 기술 세트를 100% 갖춥니다.",
-      "date": "2026-11-30",
-      "concept": [
-        {
-          "min": 15,
-          "topic": "Training engineering: bf16/AMP recap, gradient accumulation, activation/gradient checkpointing (memory math from W2 revisited), DDP concepts (all-reduce, effective batch size, LR scaling) and when FSDP matters; streaming dataloaders (WebDataset/streaming Zarr) so GPUs never starve.",
-          "topic_ko": "training 엔지니어링: bf16/AMP 복습, gradient accumulation, activation/gradient checkpointing(W2의 메모리 계산 재방문), DDP 개념(all-reduce, effective batch size, LR scaling)과 FSDP가 중요해지는 시점 · GPU가 굶지 않게 하는 streaming dataloader(WebDataset/streaming Zarr)"
-        },
-        {
-          "min": 15,
-          "topic": "Fine-tuning spectrum: linear probe → decoder-only → LoRA/PEFT (derive the low-rank update, rank/alpha choices) → full FT; decoder heads for dense EO tasks (UperNet-style, TerraTorch conventions) and forecast heads for weather.",
-          "topic_ko": "fine-tuning 스펙트럼: linear probe → decoder-only → LoRA/PEFT(low-rank update 유도, rank/alpha 선택) → full FT · dense EO task용 decoder head(UperNet 스타일, TerraTorch 관례)와 weather용 forecast head"
-        },
-        {
-          "min": 15,
-          "topic": "Evaluation and ablation design for the capstone: minimum honest set = {random-init control, supervised baseline (your W4 U-Net or persistence/climatology), frozen probe, fine-tuned}, one ablation axis (masking ratio, data volume, or model size), seeds and error bars.",
-          "topic_ko": "capstone을 위한 평가·ablation 설계: 최소한의 정직한 세트 = {random-init control, supervised baseline(W4 U-Net 또는 persistence/climatology), frozen probe, fine-tuned}, ablation 축 1개(masking ratio, 데이터 양, 또는 모델 크기), seed와 error bar"
-        },
-        {
-          "min": 15,
-          "topic": "Significance testing for forecast and benchmark comparisons: paired block bootstrap over time (and space), why naive per-sample tests lie under autocorrelation, error bars for scorecard tables.",
-          "topic_ko": "예보·벤치마크 비교를 위한 유의성 검정: 시간(그리고 공간)에 대한 paired block bootstrap, autocorrelation 아래에서 naive per-sample 검정이 거짓말하는 이유, scorecard 표의 error bar"
-        },
-        {
-          "min": 10,
-          "topic": "Release engineering: HF Hub mechanics (weights, config, README.md model card), semantic versioning, licenses for models and data (Copernicus, NASA open-data terms), W&B reports as the lab notebook of record.",
-          "topic_ko": "릴리스 엔지니어링: HF Hub 메커니즘(weights, config, README.md model card), semantic versioning, 모델·데이터 라이선스(Copernicus, NASA 공개 데이터 약관), 공식 lab notebook으로서의 W&B report"
-        }
-      ],
-      "lab": {
-        "task": "Capstone dress rehearsal, in-class core: (a) attach LoRA adapters (peft) to your W7/W9 pretrained mini-MAE (or OlmoEarth-Nano) and fine-tune on Sen1Floods11 (geo rehearsal) or fine-tune the W11 emulator on a Korea-region T2m patch (weather rehearsal); (b) build a CRPS mini-ensemble via MC-dropout and score it; (c) push the checkpoint to HF Hub with an agent-drafted, human-corrected model card; run DDP on 2 GPUs on the shared server if available (otherwise simulate with accumulation).",
-        "task_ko": "capstone 총연습, 수업 내 핵심: (a) W7/W9 pretrained mini-MAE(또는 OlmoEarth-Nano)에 LoRA adapter(peft)를 붙여 Sen1Floods11에서 fine-tuning(geo 리허설) 또는 W11 emulator를 한국 지역 T2m patch에서 fine-tuning(weather 리허설); (b) MC-dropout으로 CRPS mini-ensemble 구축·채점; (c) 에이전트 초안 + 사람 교정 model card와 함께 checkpoint를 HF Hub에 push · 공유 서버 GPU 2장이 가능하면 DDP 실행(아니면 accumulation으로 시뮬레이션)",
-        "data": [
-          "Sen1Floods11 (geo rehearsal)",
-          "WeatherBench2 ERA5 Korea-region T2m patch (weather rehearsal)"
-        ],
-        "tools": [
-          "peft",
-          "accelerate",
-          "HF Hub",
-          "W&B"
-        ],
-        "deliverable": "Note 12 — LoRA fine-tune result, CRPS mini-ensemble score, live HF Hub link with model card; homework adds the three-way fine-tuning table and memory/throughput mini-benchmark.",
-        "deliverable_ko": "Note 12 — LoRA fine-tune 결과, CRPS mini-ensemble 점수, model card가 달린 라이브 HF Hub 링크 · homework에서 3-way fine-tuning 표와 메모리/throughput 미니 벤치마크 추가",
-        "homework": "Probe vs LoRA vs full-FT three-way comparison in one W&B report; enable gradient checkpointing + accumulation and measure the memory/throughput trade-off.",
-        "homework_ko": "probe vs LoRA vs full-FT 3-way 비교를 W&B report 하나로 · gradient checkpointing + accumulation을 켜고 메모리/throughput trade-off 측정"
-      },
-      "reading": {
-        "memo": "standard",
-        "video": {
-          "title": "Stanford CS224N: NLP w/ DL | Spring 2024 | Lecture 12 - Efficient Training, Shikhar Murty",
-          "channel": "Stanford Online",
-          "link": "https://www.youtube.com/watch?v=UVX7SYGCKkA",
-          "minutes": 63
-        },
-        "primary": [
-          {
-            "title": "Hu et al. 2021 — LoRA",
-            "link": "https://arxiv.org/abs/2106.09685"
-          }
-        ],
-        "optional": [
-          {
-            "title": "Marsocci et al. 2024 — PANGAEA",
-            "link": "https://arxiv.org/abs/2412.04204"
-          },
-          {
-            "title": "GEO-Bench-2 (skim)",
-            "link": "https://arxiv.org/abs/2511.15658"
-          }
-        ],
-        "questions": [
-          "Why can rank-8 updates match full fine-tuning — what does that imply about the geometry of task adaptation?",
-          "For a 2M-param model, is PEFT ever worth it, or is it purely a big-model technology? Test your answer in the lab.",
-          "PANGAEA shows GFMs losing to U-Nets — list three experimental-design choices that could flip such a comparison dishonestly."
-        ]
-      },
-      "skills": [
-        "PEFT/LoRA",
-        "gradient checkpointing & accumulation",
-        "DDP concepts",
-        "streaming dataloaders",
-        "significance testing (block bootstrap)",
-        "HF Hub release",
-        "model cards",
-        "ablation design"
-      ]
-    },
-    {
-      "n": 13,
-      "phase": "Capstone Sprints",
-      "title": "Agentic ML Engineering + Capstone Sprint 1",
-      "goal": "Turn your AI agent from code generator into experiment orchestrator; launch the capstone run. Milestone M1 due.",
-      "title_ko": "Agentic ML 엔지니어링 + Capstone Sprint 1",
-      "goal_ko": "AI 에이전트를 코드 생성기에서 실험 orchestrator로 격상시키고, capstone 학습 run을 시작합니다. Milestone M1 제출.",
-      "date": "2026-12-07",
-      "concept": [
-        {
-          "min": 15,
-          "topic": "Agentic engineering for ML: multi-agent patterns (planner/implementer/reviewer), MCP servers for W&B and HF, agent-run ablation loops with guardrails (immutable eval script, human-approved config diffs).",
-          "topic_ko": "ML을 위한 agentic 엔지니어링: multi-agent 패턴(planner/implementer/reviewer), W&B·HF용 MCP server, guardrail을 갖춘 에이전트 주도 ablation 루프(불변 eval 스크립트, 사람이 승인하는 config diff)"
-        },
-        {
-          "min": 10,
-          "topic": "CI for research code: smoke-test on 1 batch, deterministic seeds, config-as-code (hydra/yaml); pre-registration of the capstone eval protocol (frozen this week, before results exist).",
-          "topic_ko": "연구 코드를 위한 CI: 1 batch smoke-test, deterministic seed, config-as-code(hydra/yaml) · capstone eval protocol의 사전 등록(결과가 나오기 전, 이번 주에 freeze)"
-        },
-        {
-          "min": 10,
-          "topic": "Chinchilla applied: each team defends its N/D/GPU-hour triple against its W9 scaling fit in 60 seconds.",
-          "topic_ko": "Chinchilla 실전 적용: 각 팀이 자기 N/D/GPU-hour 조합을 W9 scaling fit에 비추어 60초 안에 방어"
-        }
-      ],
-      "lab": {
-        "task": "Capstone sprint studio, led by Dr. Budamala: freeze data pipeline and eval protocol; launch fine-tuning/eval runs (checkpoint-resumable); design reviews at the bench. The instructor is at AGU — Dr. Budamala runs the session.",
-        "task_ko": "capstone sprint 스튜디오, Dr. Budamala 진행: 데이터 파이프라인과 eval protocol freeze · fine-tuning/eval run launch(checkpoint에서 재개 가능) · 벤치별 설계 리뷰. 교수는 AGU 출장 — Dr. Budamala가 세션 진행",
-        "data": [],
-        "tools": [
-          "W&B (alerts, MCP)",
-          "GitHub Actions CI",
-          "hydra/yaml configs",
-          "Claude Code/Codex"
-        ],
-        "deliverable": "M1 (PDF on this site, due Fri 12/4 23:59): frozen data/ + eval/ modules with CI green; runs launched with public W&B link; pre-registered eval protocol.",
-        "deliverable_ko": "M1(PDF, 이 사이트에 Fri 12/4 23:59까지): CI green인 frozen data/ + eval/ 모듈 · 공개 W&B 링크와 함께 launch된 run · 사전 등록된 eval protocol",
-        "homework": null
-      },
-      "reading": {
-        "memo": "none",
-        "primary": [],
-        "optional": [
-          {
-            "title": "Price et al. 2024 — GenCast",
-            "link": "https://arxiv.org/abs/2312.15796"
-          },
-          {
-            "title": "FGN / WeatherNext 2",
-            "link": "https://arxiv.org/abs/2506.10772"
-          }
-        ],
-        "questions": [
-          "CRPS-trained GenCast redefines what a 'better' forecast means vs RMSE-optimized deterministic models — which metric should headline your capstone eval, and why?",
-          "Your data is capped — what does data-constrained (Chinchilla-with-epoching) scaling say about repeating epochs vs shrinking the model?",
-          "What can an agent safely automate in your capstone loop, and what must remain human-gated? Write the gate list into your repo."
-        ]
-      },
-      "skills": [
-        "multi-agent/MCP workflows",
-        "experiment automation",
-        "CI for ML",
-        "pre-registered evaluation",
-        "compute-optimal execution"
-      ],
-      "instructor": "Dr. Budamala (HydroAI postdoc)"
-    },
-    {
-      "n": 14,
-      "phase": "Capstone Sprints",
-      "title": "Capstone Sprint 2 + Peer Code Review; Model Cards and Reproducibility",
-      "goal": "Fine-tune and evaluate the model; subject your code to structured peer review. Milestone M2 due.",
-      "title_ko": "Capstone Sprint 2 + 동료 코드 리뷰; Model Card와 재현성",
-      "goal_ko": "모델을 fine-tuning하고 평가하며, 코드를 구조화된 동료 리뷰에 부칩니다. Milestone M2 제출.",
-      "date": "2026-12-14",
-      "concept": [
-        {
-          "min": 15,
-          "topic": "Model cards and data cards done properly: intended use, out-of-scope use, eval disaggregation (by region/biome/lead time), limitations that are specific, not liability boilerplate.",
-          "topic_ko": "제대로 쓰는 model card와 data card: 의도된 용도, 범위 밖 용도, eval 세분화(지역/biome/lead time별), 면책 보일러플레이트가 아닌 구체적 한계"
-        },
-        {
-          "min": 10,
-          "topic": "Reproducibility checklist: seeds, environment lockfiles, data versioning/DOIs, exact commit for every number in the report; license compatibility of your release.",
-          "topic_ko": "재현성 체크리스트: seed, 환경 lockfile, 데이터 버저닝/DOI, 보고서의 모든 숫자에 대한 정확한 commit · 릴리스의 라이선스 호환성"
-        },
-        {
-          "min": 5,
-          "topic": "Peer-review protocol: assigned reviewer pairs (geo↔weather cross-track), review = run their smoke test + read eval code + file ≥3 substantive GitHub issues.",
-          "topic_ko": "peer-review protocol: 지정 리뷰어 페어(geo↔weather 교차 트랙), 리뷰 = 상대 smoke test 실행 + eval 코드 읽기 + 실질적 GitHub issue 3건 이상 제출"
-        }
-      ],
-      "lab": {
-        "task": "Capstone sprint studio, led by Dr. Budamala: downstream fine-tuning with the mandatory baseline set; structured peer code review in session (>=3 substantive issues given and received).",
-        "task_ko": "capstone sprint 스튜디오, Dr. Budamala 진행: 필수 baseline 세트와 함께 downstream fine-tuning · 세션 내 구조화된 동료 코드 리뷰(실질적 issue 3건 이상 주고받기)",
-        "data": [],
-        "tools": [
-          "GitHub (issues, review)",
-          "W&B",
-          "peft/HF Hub"
-        ],
-        "deliverable": "M2: checkpoint archived; ≥1 fine-tuned downstream result with baselines table; peer review given and received (issue links); draft model card in repo.",
-        "deliverable_ko": "M2: checkpoint 보관 완료 · baseline 표를 갖춘 fine-tuned downstream 결과 1건 이상 · 주고받은 peer review(issue 링크) · repo 내 model card 초안",
-        "homework": null
-      },
-      "reading": {
-        "memo": "none",
-        "primary": [],
-        "optional": [
-          {
-            "title": "Mitchell et al. 2019 — Model Cards for Model Reporting",
-            "link": "https://arxiv.org/abs/1810.03993"
-          },
-          {
-            "title": "How Usable Are Geospatial Foundation Models?",
-            "link": "https://arxiv.org/abs/2608.03804"
-          }
-        ],
-        "questions": [
-          "Write the 'out-of-scope uses' section for your own model in three honest sentences.",
-          "Of the usability failures found across 89 GFMs, which three are cheapest to prevent — and does your repo prevent them?"
-        ]
-      },
-      "skills": [
-        "model/data cards",
-        "reproducibility engineering",
-        "code review",
-        "licensing"
-      ],
-      "instructor": "Dr. Budamala (HydroAI postdoc)"
-    },
-    {
-      "n": 15,
-      "phase": "Capstone Sprints",
-      "title": "Wrap-up: evaluation, documentation, release candidate — final polish week",
-      "goal": "Finish evaluation and ablation, harden documentation, cut a release candidate. Milestone M3 due.",
-      "title_ko": "마무리: 평가·문서화·릴리스 후보 — 최종 정리 주간",
-      "goal_ko": "평가와 ablation을 마무리하고 문서를 다듬어 release candidate를 만듭니다. Milestone M3 제출.",
-      "date": "2026-12-15",
-      "concept": [
-        {
-          "min": 10,
-          "topic": "Release engineering final pass: HF Hub versioned release, GitHub tag, W&B report as appendix, GitHub Pages project page.",
-          "topic_ko": "릴리스 엔지니어링 최종 점검: HF Hub 버전 릴리스, GitHub tag, 부록으로서의 W&B report, GitHub Pages 프로젝트 페이지"
-        },
-        {
-          "min": 10,
-          "topic": "Recorded-demo rubric: what the ~8-minute video must show (problem, data, evidence, baselines, ablation, limitations, live quickstart run).",
-          "topic_ko": "녹화 데모 rubric: ~8분 영상이 반드시 보여줄 것(문제, 데이터, 근거, baseline, ablation, 한계, 라이브 quickstart 실행)"
-        }
-      ],
-      "lab": {
-        "task": "Final polish on your own schedule: complete the ablation, finalize eval tables with seeds/error bars, finish model card and README quickstart, tag the release candidate. Questions via GitHub issues.",
-        "task_ko": "각자 일정에 맞춘 최종 정리: ablation 완료, seed/error bar가 있는 eval 표 확정, model card와 README quickstart 마무리, release candidate tag. 질문은 GitHub issue로",
-        "data": [],
-        "tools": [
-          "HF Hub",
-          "GitHub (tags, Pages)",
-          "W&B"
-        ],
-        "deliverable": "M3: full results + ablation tables; complete model card; release candidate tagged on HF Hub + GitHub; draft slides.",
-        "deliverable_ko": "M3: 전체 결과 + ablation 표 · 완성된 model card · HF Hub + GitHub에 tag된 release candidate · 슬라이드 초안",
-        "homework": null
-      },
-      "reading": {
-        "memo": "none",
-        "primary": [],
-        "optional": [
-          {
-            "title": "AlphaEarth Foundations",
-            "link": "https://arxiv.org/abs/2507.22291"
-          },
-          {
-            "title": "TESSERA",
-            "link": "https://arxiv.org/abs/2506.20380"
-          },
-          {
-            "title": "Aardvark Weather (Nature 2025)",
-            "link": "https://arxiv.org/abs/2404.00411"
-          },
-          {
-            "title": "ACE2",
-            "link": "https://arxiv.org/abs/2411.11268"
-          },
-          {
-            "title": "DINOv3",
-            "link": "https://arxiv.org/abs/2508.10104"
-          },
-          {
-            "title": "EO-FMs for Terrestrial Ecohydrology",
-            "link": "https://arxiv.org/abs/2608.15282"
-          }
-        ],
-        "questions": [
-          "What would this paper's authors say is wrong with your capstone?",
-          "What is the smallest experiment that would extend your capstone toward this frontier?"
-        ]
-      },
-      "skills": [
-        "benchmark reporting with uncertainty",
-        "ablation completion",
-        "release packaging",
-        "scientific presentation"
-      ],
-      "async": true
-    },
-    {
-      "n": 16,
-      "phase": "Capstone Sprints",
-      "title": "Demo Week: recorded presentations + public release (no class meeting)",
-      "goal": "Ship it.",
-      "title_ko": "데모 주간: 녹화 발표 + 공개 릴리스 (수업 없음)",
-      "goal_ko": "완성하고, 공개합니다.",
-      "date": "2026-12-16",
-      "concept": [
-        {
-          "min": 120,
-          "topic": "Recorded demo (~8 min video): problem, data, evidence, downstream results vs baselines, ablation, limitations, HF Hub + project page walk-through.",
-          "topic_ko": "녹화 데모(~8분 영상): 문제, 데이터, 근거, baseline 대비 downstream 결과, ablation, 한계, HF Hub + 프로젝트 페이지 워크스루"
-        },
-        {
-          "min": 15,
-          "topic": "Release verification (async): an assigned peer + the instructor clone your repo fresh and run the README quickstart; it must work.",
-          "topic_ko": "릴리스 검증(async): 지정 peer + 교수가 repo를 새로 clone해 README quickstart 실행 — 반드시 작동해야 함"
-        },
-        {
-          "min": 15,
-          "topic": "Course retrospective: what the 2026 landscape will look like in 2027; how to turn a capstone into a workshop paper (AGU/EGU, NeurIPS CCAI, ICLR ML4RS).",
-          "topic_ko": "과목 회고: 2026 지형도는 2027년에 어떤 모습일까 · capstone을 workshop 논문으로 만드는 법(AGU/EGU, NeurIPS CCAI, ICLR ML4RS)"
-        }
-      ],
-      "lab": {
-        "task": "No lab — recorded demo + public release week. Everything due Wed 12/16 23:59 KST, report PDF submitted on this site.",
-        "task_ko": "lab 없음 — 녹화 데모 + 공개 릴리스 주간. 모든 제출물은 Wed 12/16 23:59 KST까지, 보고서 PDF는 이 사이트에 제출",
-        "data": [],
-        "tools": [],
-        "deliverable": "Final package due Wed 12/16 23:59 KST: HF Hub release with model card, tagged GitHub repo with working quickstart, 6-page report (PDF on this site), W&B report link, recorded demo video link.",
-        "deliverable_ko": "최종 패키지, Wed 12/16 23:59 KST까지: model card를 갖춘 HF Hub 릴리스, 작동하는 quickstart가 있는 tag된 GitHub repo, 6쪽 보고서(이 사이트에 PDF), W&B report 링크, 녹화 데모 영상 링크",
-        "homework": null
-      },
-      "reading": {
-        "memo": "none",
-        "primary": [],
-        "optional": [],
-        "questions": []
-      },
-      "skills": [
-        "scientific presentation",
-        "release verification",
-        "shipping a public model"
-      ],
-      "async": true
+     "min": 5,
+     "topic": "Preview of W2 and lab kickoff.",
+     "topic_ko": "W2 미리보기와 lab 시작"
     }
-  ],
-  "events": [
+   ],
+   "lab": {
+    "task": "AI Toolkit onboarding lab (after the diagnostic): set up the tools this course runs on and prove each one works. (1) VS Code + the Claude Code extension — install, sign in, and have it explain then modify a small script; (2) Codex in VS Code — same exercise, compare the two agents on one refactor; (3) Google Colab — GPU runtime on, torch.cuda.is_available() screenshot, save-a-copy discipline; (4) Kaggle — account + phone verification (unlocks the weekly free GPU quota), run one GPU notebook; (5) GitHub — account, SSH key, clone the course repo. Work through the linked official videos/docs at your own pace; instructor and TA circulate.",
+    "task_ko": "AI Toolkit 온보딩 lab(진단 퀴즈 후): 이 과목이 돌아가는 도구를 모두 설정하고 각각 작동함을 증명. (1) VS Code + Claude Code 확장 — 설치·로그인 후 작은 스크립트를 설명시키고 수정시키기; (2) VS Code의 Codex — 같은 연습, 하나의 refactor로 두 에이전트 비교; (3) Google Colab — GPU 런타임 켜기, torch.cuda.is_available() 스크린샷, 사본 저장 습관; (4) Kaggle — 계정 + 전화 인증(주간 무료 GPU quota 해제), GPU notebook 1개 실행; (5) GitHub — 계정, SSH key, 강의 repo clone. 링크된 공식 영상/문서를 각자 속도로 진행 · 교수와 TA가 순회 지원",
+    "data": [],
+    "tools": [
+     "VS Code",
+     "Claude Code",
+     "Codex",
+     "Google Colab",
+     "Kaggle",
+     "git/GitHub"
+    ],
+    "deliverable": "AI Toolkit Report — 5-page PDF due Sun 9/6 23:59 on this site: for each tool, how you set it up, one real thing you made it do (screenshot), where it fits your weekly workflow, and one limitation you noticed.",
+    "deliverable_ko": "AI Toolkit Report — 5쪽 PDF, Sun 9/6 23:59까지 이 사이트에 제출: 도구별 설정 과정, 실제로 시켜본 작업 1가지(스크린샷), 주간 워크플로에서의 위치, 발견한 한계 1가지",
+    "homework": "Finish whatever didn't complete in class before the HW0 deadline — HW0 assumes all five tools work.",
+    "homework_ko": "수업에서 끝내지 못한 항목은 HW0 마감 전까지 완료 — HW0는 다섯 도구가 모두 작동한다는 전제",
+    "resources": [
+     {
+      "title": "Claude Code — official docs (install & VS Code)",
+      "link": "https://code.claude.com/docs"
+     },
+     {
+      "title": "OpenAI Codex — official docs (IDE setup)",
+      "link": "https://developers.openai.com/codex"
+     },
+     {
+      "title": "Google Colab — welcome notebook",
+      "link": "https://colab.research.google.com/"
+     },
+     {
+      "title": "Kaggle notebooks — docs (GPU quota)",
+      "link": "https://www.kaggle.com/docs/notebooks"
+     },
+     {
+      "title": "Mastering Claude Code in 30 minutes",
+      "link": "https://www.youtube.com/watch?v=6eBSHbLKuN0",
+      "minutes": 28
+     },
+     {
+      "title": "OpenAI Codex in your code editor",
+      "link": "https://www.youtube.com/watch?v=sd21Igx4HtA",
+      "minutes": 7
+     },
+     {
+      "title": "Making the most of Colab (TF Dev Summit '20)",
+      "link": "https://www.youtube.com/watch?v=pnClcwTCyc0",
+      "minutes": 7
+     },
+     {
+      "title": "How to use Kaggle Notebooks",
+      "link": "https://www.youtube.com/watch?v=BPQDZLPtgDc",
+      "minutes": 4
+     },
+     {
+      "title": "How to take advantage of GPUs and TPUs for your ML project (Coding TensorFlow)",
+      "link": "https://www.youtube.com/watch?v=tCYSce6l8gA",
+      "minutes": 4
+     },
+     {
+      "title": "HW0 — full spec & rubric (hw0/README.md in your semester repo)",
+      "link": "https://github.com/Hyunglok-Kim/en5425-student-template/blob/main/hw0/README.md"
+     }
+    ]
+   },
+   "reading": {
+    "memo": "standard",
+    "primary": [
+     {
+      "title": "Vaswani et al. 2017 — Attention Is All You Need",
+      "link": "https://arxiv.org/abs/1706.03762"
+     },
+     {
+      "title": "Dosovitskiy et al. 2020 — An Image is Worth 16x16 Words (ViT)",
+      "link": "https://arxiv.org/abs/2010.11929"
+     }
+    ],
+    "optional": [
+     {
+      "title": "He et al. 2021 — Masked Autoencoders (MAE), skim; returns in W7",
+      "link": "https://arxiv.org/abs/2111.06377"
+     }
+    ],
+    "questions": [
+     "Why does attention scale as O(n²) in tokens, and what does that imply for a 0.25° global weather grid (721×1440)?",
+     "ViT needs more data than CNNs to win — what inductive biases were traded away, and do satellite images restore any of them?",
+     "What exactly is a 'token' for a multispectral image cube?"
+    ]
+   },
+   "skills": [
+    "agent-driven development",
+    "repo/site hygiene",
+    "transformer fundamentals",
+    "verification discipline"
+   ],
+   "slides": true
+  },
+  {
+   "n": 2,
+   "phase": "Foundations",
+   "title": "Leakage-Safe Evaluation Design (and the Fundamentals Recap)",
+   "goal": "Design evaluations that survive spatial/temporal autocorrelation — the geoscience failure mode — with the optimization recipe compressed to a working recap.",
+   "title_ko": "Leakage 없는 평가 설계 (그리고 기초 복습)",
+   "goal_ko": "지구과학의 대표적 실패 요인인 공간·시간 자기상관을 견디는 평가를 설계하고, optimization 레시피를 실전용 복습으로 압축합니다.",
+   "date": "2026-09-07",
+   "concept": [
     {
-      "after": 5,
-      "date": "2026-10-05",
-      "kind": "noclass",
-      "title": "No class — substitute holiday (National Foundation Day)",
-      "title_ko": "휴강 — 개천절 대체공휴일"
+     "min": 10,
+     "topic": "Backprop as vector–Jacobian products; where activation memory goes (sets up gradient checkpointing in W12) — compressed recap, full derivation in the handout",
+     "topic_ko": "backprop을 vector–Jacobian product로 이해 · activation 메모리가 어디로 가는가(W12 gradient checkpointing의 밑작업) — 압축 복습, 전체 유도는 handout에"
     },
     {
-      "after": 6,
-      "date": "2026-10-19",
-      "kind": "exam",
-      "title": "Book Check — 60′ closed-book on the hand-summarized chapters (Goodfellow 5/6/9/10 + d2l 11) · counts as 2 quiz slots · TA-proctored, no lecture",
-      "title_ko": "교과서 점검 — 손으로 정리한 챕터(Goodfellow 5·6·9·10 + d2l 11) 범위 60분 closed-book · 퀴즈 2회분 반영 · 조교 감독, 강의 없음"
+     "min": 15,
+     "topic": "The optimizer recipe every FM in this course uses: AdamW, LR warmup + cosine schedule, weight decay vs L2, gradient clipping; regularization and early stopping in one pass",
+     "topic_ko": "이 과목의 모든 FM이 쓰는 optimizer 레시피: AdamW, LR warmup + cosine schedule, weight decay vs L2, gradient clipping · regularization과 early stopping 한 번에 정리"
+    },
+    {
+     "min": 25,
+     "topic": "HEADLINE — leakage in environmental data: spatial and temporal autocorrelation, why random splits lie, effective sample size under blocked CV; spatial-block and temporal-holdout design; train/test year separation as WeatherBench2 does it",
+     "topic_ko": "HEADLINE — 환경 데이터의 leakage: 공간·시간 autocorrelation, random split이 거짓말하는 이유, blocked CV에서의 유효 표본 크기 · spatial-block과 temporal-holdout 설계 · WeatherBench2 방식의 train/test 연도 분리"
+    },
+    {
+     "min": 10,
+     "topic": "Designing a split a reviewer cannot reject: worked example on a global soil-moisture model (holdout by region, by year, by station network)",
+     "topic_ko": "리뷰어가 기각할 수 없는 split 설계: 전 지구 soil-moisture 모델 실습 예제(지역별·연도별·관측망별 holdout)"
     }
-  ]
+   ],
+   "lab": {
+    "task": "Predict runoff ratio and mean annual streamflow from CAMELS-US catchment attributes (~671 basins, tabular). Agent builds MLP + gradient-boosting baseline; W&B sweep (LR, depth, dropout); then re-evaluate with spatial-block CV (holdout by HUC region) and quantify the optimism gap vs random splits.",
+    "task_ko": "CAMELS-US 유역 속성(~671개 유역, tabular)으로 runoff ratio와 연평균 streamflow 예측. 에이전트가 MLP + gradient-boosting baseline 구축 · W&B sweep(LR, depth, dropout) · 이후 spatial-block CV(HUC 지역별 holdout)로 재평가하고 random split 대비 낙관 편향 정량화",
+    "data": [
+     "CAMELS-US catchment attributes (~671 basins)"
+    ],
+    "tools": [
+     "PyTorch",
+     "scikit-learn",
+     "W&B"
+    ],
+    "deliverable": "Note 02 with sweep parallel-coordinates plot + a 'random split vs spatial split' table; one-paragraph leakage post-mortem.",
+    "deliverable_ko": "Note 02: sweep parallel-coordinates plot + 'random split vs spatial split' 표 · 한 문단짜리 leakage post-mortem",
+    "homework": null
+   },
+   "reading": {
+    "memo": "standard",
+    "video": {
+     "title": "Backpropagation, intuitively | Deep Learning Chapter 3",
+     "channel": "3Blue1Brown",
+     "link": "https://www.youtube.com/watch?v=Ilg3gGewQ5U",
+     "minutes": 13
+    },
+    "primary": [
+     {
+      "title": "Reichstein et al. 2019 — Deep learning and process understanding for data-driven Earth system science (Nature)",
+      "link": "https://doi.org/10.1038/s41586-019-0912-1"
+     }
+    ],
+    "optional": [
+     {
+      "title": "Schultz et al. 2021 — Can deep learning beat NWP?",
+      "link": "https://doi.org/10.1098/rsta.2020.0097"
+     },
+     {
+      "title": "(Optional) Goodfellow Ch. 8 §8.1–8.3 — Optimization; the lecture covers the working recipe",
+      "link": "https://www.deeplearningbook.org/contents/optimization.html"
+     }
+    ],
+    "questions": [
+     "Which of Reichstein's five challenges have FMs since addressed, and which have they dodged?",
+     "Design a split for a global soil-moisture model that a reviewer couldn't reject — what do you hold out?",
+     "Is 'hybrid physics-ML' (their vision) winning in 2026, given NeuralGCM vs pure-ML GraphCast?"
+    ],
+    "book": {
+     "title": "Goodfellow, Deep Learning — Ch. 6 (Deep Feedforward Networks, §6.1–6.5)",
+     "link": "https://www.deeplearningbook.org/contents/mlp.html",
+     "short": "Goodfellow Ch. 6"
+    }
+   },
+   "skills": [
+    "optimization recipes",
+    "LR schedules",
+    "experiment tracking (W&B)",
+    "leakage-safe evaluation design"
+   ],
+   "slides": true
+  },
+  {
+   "n": 3,
+   "phase": "Foundations",
+   "title": "Environmental Big Data and Cloud-Native Pipelines",
+   "goal": "Fluently move satellite, reanalysis, and in-situ data through cloud-native formats; meet ERA5 and cos-latitude weighting.",
+   "title_ko": "환경 빅데이터와 Cloud-Native 파이프라인",
+   "goal_ko": "위성·재분석·현장 관측 데이터를 cloud-native 포맷으로 자유롭게 다루고, ERA5와 cos-latitude 가중을 처음 만납니다.",
+   "date": "2026-09-14",
+   "concept": [
+    {
+     "min": 15,
+     "topic": "The data zoo: SMAP L3/L4, ERA5/MERRA-2 (reanalysis ≠ observation ≠ analysis), MODIS, GPM IMERG, HLS, Sentinel-1/2; spatial/temporal resolutions, latencies, error characteristics.",
+     "topic_ko": "데이터 동물원: SMAP L3/L4, ERA5/MERRA-2(reanalysis ≠ observation ≠ analysis), MODIS, GPM IMERG, HLS, Sentinel-1/2 · 시공간 해상도, latency, 오차 특성"
+    },
+    {
+     "min": 15,
+     "topic": "Cloud-native geospatial: COG, Zarr, STAC, chunking and why it dominates throughput; NASA Earthdata/earthaccess, Copernicus Data Space, Google/AWS public buckets, WeatherBench2's public ERA5 Zarr.",
+     "topic_ko": "Cloud-native geospatial: COG, Zarr, STAC, chunking과 그것이 throughput을 지배하는 이유 · NASA Earthdata/earthaccess, Copernicus Data Space, Google/AWS 공개 버킷, WeatherBench2의 공개 ERA5 Zarr"
+    },
+    {
+     "min": 15,
+     "topic": "ERA5 as a pretraining corpus: equiangular grids, pressure levels, why area weighting exists — derive the cos-lat weighted mean; anomalies vs climatology (sets up ACC in W11); regridding: conservative vs bilinear remapping and when each is correct.",
+     "topic_ko": "pretraining corpus로서의 ERA5: 등각 격자, pressure level, 면적 가중이 존재하는 이유 — cos-lat weighted mean 직접 유도 · anomaly vs climatology(W11 ACC의 밑작업) · regridding: conservative vs bilinear remapping과 각각이 맞는 경우"
+    },
+    {
+     "min": 10,
+     "topic": "Designing dataset objects for pretraining: chips, tiles, per-pixel time series; normalization statistics done right (per-band, train-set-only).",
+     "topic_ko": "pretraining용 dataset 객체 설계: chip, tile, per-pixel 시계열 · 제대로 된 normalization 통계(per-band, train-set-only)"
+    },
+    {
+     "min": 5,
+     "topic": "Lab briefing: what the agent will scaffold vs what you must verify.",
+     "topic_ko": "lab 브리핑: 에이전트가 scaffold할 것 vs 직접 검증해야 할 것"
+    }
+   ],
+   "lab": {
+    "task": "Agent-built ETL, two pipes: (a) open WeatherBench2's public ERA5 Zarr (5.625° subset) with xarray, compute a Z500 climatology and anomaly field, verify a cos-lat weighted global mean of T2m against a naive mean; (b) pull ~200 Sentinel-2 L2A chips (64×64, 4 bands) over South Korea via STAC (Earth Search on AWS) or HLS via earthaccess, with SCL-based cloud/QA filtering applied when selecting chips, and write a local Zarr/NPZ chip store with per-band stats.",
+    "task_ko": "에이전트가 만드는 ETL, 파이프 2개: (a) WeatherBench2 공개 ERA5 Zarr(5.625° subset)를 xarray로 열어 Z500 climatology와 anomaly field 계산, T2m의 cos-lat weighted 전 지구 평균을 naive 평균과 대조 검증; (b) STAC(Earth Search on AWS) 또는 earthaccess의 HLS로 남한 지역 Sentinel-2 L2A chip ~200개(64×64, 4 band) 수집 — chip 선정 시 SCL 기반 구름/QA 필터링 적용 — 후 per-band 통계와 함께 로컬 Zarr/NPZ chip store 작성",
+    "data": [
+     "WeatherBench2 ERA5 Zarr (5.625°)",
+     "Sentinel-2 L2A chips (STAC/Earth Search)",
+     "HLS via earthaccess"
+    ],
+    "tools": [
+     "xarray",
+     "zarr",
+     "gcsfs",
+     "pystac-client/stackstac",
+     "earthaccess"
+    ],
+    "deliverable": "Reusable data/ module + Note 03 (chip gallery, anomaly map, weighted-vs-naive mean table). This chip store is reused in W7.",
+    "deliverable_ko": "재사용 가능한 data/ 모듈 + Note 03(chip 갤러리, anomaly 지도, weighted vs naive 평균 표) · 이 chip store는 W7에서 재사용",
+    "homework": null
+   },
+   "reading": {
+    "memo": "standard",
+    "video": {
+     "title": "The ERA5 and ERA6 | Hans Hersbach and Bill Bell",
+     "channel": "Copernicus ECMWF",
+     "link": "https://www.youtube.com/watch?v=wEZsbiiysZo",
+     "minutes": 15
+    },
+    "primary": [
+     {
+      "title": "Rolf et al. 2024 — Position: Satellite data is a distinct modality in ML",
+      "link": "https://arxiv.org/abs/2402.01444"
+     }
+    ],
+    "optional": [
+     {
+      "title": "Bauer, Thorpe & Brunet 2015 — The quiet revolution of NWP (Nature)",
+      "link": "https://doi.org/10.1038/nature14956"
+     }
+    ],
+    "questions": [
+     "Which of Rolf's claimed distinctions actually change architecture choices (cite SatMAE/Scale-MAE design decisions)?",
+     "Reanalysis is a model product — what does that mean for 'ground truth' when we evaluate a weather FM against ERA5?",
+     "Why is chunking layout a scientific issue, not just an engineering one?"
+    ],
+    "book": {
+     "title": "Goodfellow, Deep Learning — Ch. 5 (Machine Learning Basics, §5.1–5.5)",
+     "link": "https://www.deeplearningbook.org/contents/ml.html",
+     "short": "Goodfellow Ch. 5"
+    }
+   },
+   "skills": [
+    "cloud-native ETL (Zarr/STAC/COG)",
+    "ERA5 handling",
+    "cos-lat weighting",
+    "regridding",
+    "dataset/normalization design"
+   ],
+   "slides": true
+  },
+  {
+   "n": 4,
+   "phase": "Foundations",
+   "title": "CNNs and Spatiotemporal Modeling on Gridded Data",
+   "goal": "Master the convolutional toolbox and dense-prediction craft that every FM is benchmarked against.",
+   "title_ko": "격자 데이터에서의 CNN과 시공간 모델링",
+   "goal_ko": "모든 FM의 비교 기준이 되는 convolution 도구상자와 dense prediction 기법을 익힙니다.",
+   "date": "2026-09-21",
+   "concept": [
+    {
+     "min": 15,
+     "topic": "Convolutions, receptive fields, encoder–decoder U-Net; skip connections as multi-scale fusion.",
+     "topic_ko": "convolution, receptive field, encoder–decoder U-Net · multi-scale fusion으로서의 skip connection"
+    },
+    {
+     "min": 15,
+     "topic": "Dense prediction craft: segmentation losses (CE, Dice, focal), class imbalance, boundary effects, tiling/overlap inference.",
+     "topic_ko": "dense prediction 기법: segmentation loss(CE, Dice, focal), class imbalance, 경계 효과, tiling/overlap inference"
+    },
+    {
+     "min": 15,
+     "topic": "Spatiotemporal extensions: ConvLSTM, 3D conv, factorized space–time; when convolution beats attention (small data, strong locality).",
+     "topic_ko": "시공간 확장: ConvLSTM, 3D conv, factorized space–time · convolution이 attention을 이기는 조건(작은 데이터, 강한 locality)"
+    },
+    {
+     "min": 10,
+     "topic": "The humbling PANGAEA preview: well-tuned supervised U-Nets still beat many GFMs on many tasks — your capstone baselines must include one.",
+     "topic_ko": "겸손해지는 PANGAEA 예고편: 잘 튜닝된 supervised U-Net이 여전히 많은 task에서 많은 GFM을 이김 — capstone baseline에 반드시 하나 포함"
+    },
+    {
+     "min": 5,
+     "topic": "Multispectral input handling: >3 channels, per-band normalization, band dropout as augmentation.",
+     "topic_ko": "multispectral 입력 처리: 3채널 초과 입력, per-band normalization, augmentation으로서의 band dropout"
+    }
+   ],
+   "lab": {
+    "task": "Flood extent segmentation on a Sen1Floods11 subset (~200 hand-labeled Sentinel-1/Sentinel-2 chips, via TorchGeo). Agent scaffolds U-Net (segmentation-models-pytorch); student defines the eval (IoU, precision/recall, spatially disjoint split) and runs an ablation: S1-only vs S2-only vs fused input.",
+    "task_ko": "Sen1Floods11 subset(hand-label된 Sentinel-1/Sentinel-2 chip ~200개, TorchGeo 경유)으로 홍수 범위 segmentation. 에이전트가 U-Net(segmentation-models-pytorch) scaffold · 학생이 eval을 정의(IoU, precision/recall, 공간적으로 분리된 split)하고 ablation 수행: S1-only vs S2-only vs fused 입력",
+    "data": [
+     "Sen1Floods11 subset (~200 chips)"
+    ],
+    "tools": [
+     "TorchGeo",
+     "segmentation-models-pytorch",
+     "W&B"
+    ],
+    "deliverable": "Note 04 with IoU table (3 input configs vs 'always-dry' baseline) + 4 prediction panels. This U-Net becomes the standing supervised baseline for capstone comparisons.",
+    "deliverable_ko": "Note 04: IoU 표(입력 구성 3종 vs 'always-dry' baseline) + 예측 패널 4장 · 이 U-Net이 capstone 비교의 상설 supervised baseline이 됨",
+    "homework": null
+   },
+   "reading": {
+    "memo": "standard",
+    "video": {
+     "title": "The moment we stopped understanding AI [AlexNet]",
+     "channel": "Welch Labs",
+     "link": "https://www.youtube.com/watch?v=UZDiGooFs54",
+     "minutes": 18
+    },
+    "primary": [
+     {
+      "title": "Ronneberger et al. 2015 — U-Net",
+      "link": "https://arxiv.org/abs/1505.04597"
+     }
+    ],
+    "optional": [
+     {
+      "title": "Shi et al. 2015 — ConvLSTM for precipitation nowcasting",
+      "link": "https://arxiv.org/abs/1506.04214"
+     }
+    ],
+    "questions": [
+     "Exactly what information do skip connections carry that the bottleneck destroys, and why does that matter more at 10 m GSD than on ImageNet?",
+     "Where should a pretrained FM plug into a U-Net-style decoder (this is what TerraTorch/Prithvi do)?",
+     "Why did ConvLSTM lose to transformers for global weather but survive for nowcasting (MetNet-3)?"
+    ],
+    "book": {
+     "title": "Goodfellow, Deep Learning — Ch. 9 (Convolutional Networks, §9.1–9.5)",
+     "link": "https://www.deeplearningbook.org/contents/convnets.html",
+     "short": "Goodfellow Ch. 9"
+    }
+   },
+   "skills": [
+    "dense prediction heads",
+    "segmentation metrics",
+    "multispectral input handling",
+    "supervised baselines"
+   ]
+  },
+  {
+   "n": 5,
+   "phase": "Pretraining Core",
+   "title": "Sequence Models, Autoregressive Forecasting, and Rollout Stability",
+   "goal": "LSTMs for hydrologic time series, and the autoregressive rollout mechanics that all ML weather models live or die by.",
+   "title_ko": "시퀀스 모델, Autoregressive 예측, Rollout 안정성",
+   "goal_ko": "수문 시계열을 위한 LSTM과, 모든 ML 기상 모델의 성패를 가르는 autoregressive rollout 메커니즘을 배웁니다.",
+   "date": "2026-09-28",
+   "concept": [
+    {
+     "min": 15,
+     "topic": "RNN/LSTM/GRU mechanics; gradients through time; why LSTMs still rule rainfall–runoff (the CAMELS story, NSE/KGE metrics).",
+     "topic_ko": "RNN/LSTM/GRU 동작 원리 · 시간을 거슬러 흐르는 gradient · LSTM이 여전히 rainfall–runoff를 지배하는 이유(CAMELS 이야기, NSE/KGE metric)"
+    },
+    {
+     "min": 20,
+     "topic": "Autoregressive forecasting as a discipline: teacher forcing vs free-running, exposure bias, error accumulation, multi-step (rollout) training curricula — exactly GraphCast's 1→12-step curriculum and Pangu's hierarchical 1/3/6/24-h models, previewed on 1-D problems.",
+     "topic_ko": "규율로서의 autoregressive 예측: teacher forcing vs free-running, exposure bias, 오차 누적, multi-step(rollout) 학습 curriculum — 정확히 GraphCast의 1→12-step curriculum과 Pangu의 계층적 1/3/6/24-h 모델을 1-D 문제로 미리 체험"
+    },
+    {
+     "min": 10,
+     "topic": "Stability and blurring: why MSE-trained autoregressive models regress to the mean at long lead times; first look at the double-penalty problem.",
+     "topic_ko": "안정성과 blurring: MSE로 학습한 autoregressive 모델이 긴 lead time에서 평균으로 회귀하는 이유 · double-penalty 문제 첫 만남"
+    },
+    {
+     "min": 10,
+     "topic": "Probabilistic outputs on time series: quantile loss, NLL heads — CRPS foreshadowed.",
+     "topic_ko": "시계열의 확률적 출력: quantile loss, NLL head — CRPS 예고"
+    },
+    {
+     "min": 5,
+     "topic": "Lab briefing.",
+     "topic_ko": "lab 브리핑"
+    }
+   ],
+   "lab": {
+    "task": "Train an LSTM on CAMELS-US forcing→streamflow for ~30 basins (NeuralHydrology or plain PyTorch). Key experiment: compare 1-step-ahead teacher-forced skill vs free-running 15-day rollout; plot NSE vs lead time; add a 3-step rollout loss and show the stability gain. Close with a 20-min ERA5 teaser: single-variable next-step prediction on the WeatherBench2 5.625° Zarr — the weather-direction seed.",
+    "task_ko": "CAMELS-US forcing→streamflow로 ~30개 유역에서 LSTM 학습(NeuralHydrology 또는 순수 PyTorch). 핵심 실험: 1-step-ahead teacher-forced skill vs free-running 15일 rollout 비교 · NSE vs lead time 플롯 · 3-step rollout loss 추가 후 안정성 향상 확인. 마무리 20분은 ERA5 티저: WeatherBench2 5.625° Zarr에서 단일 변수 next-step 예측 — weather 방향의 씨앗",
+    "data": [
+     "CAMELS-US (forcing + streamflow, ~30 basins)",
+     "WeatherBench2 ERA5 Zarr (single-variable teaser)"
+    ],
+    "tools": [
+     "NeuralHydrology (or PyTorch)",
+     "xarray",
+     "W&B"
+    ],
+    "deliverable": "Note 05 with NSE-vs-lead-time curves for both training regimes + hydrograph panels + the ERA5 next-step teaser result.",
+    "deliverable_ko": "Note 05: 두 학습 방식의 NSE vs lead time 곡선 + hydrograph 패널 + ERA5 next-step 티저 결과",
+    "homework": null
+   },
+   "reading": {
+    "memo": "standard",
+    "video": {
+     "title": "Stanford CS231N | Spring 2025 | Lecture 7: Recurrent Neural Networks",
+     "channel": "Stanford Online",
+     "link": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
+     "minutes": 72
+    },
+    "primary": [
+     {
+      "title": "Kratzert et al. 2019 — Towards learning universal, regional, and local hydrological behaviors (HESS)",
+      "link": "https://doi.org/10.5194/hess-23-5089-2019"
+     }
+    ],
+    "optional": [
+     {
+      "title": "Nearing et al. 2024 — Global prediction of extreme floods in ungauged watersheds (Nature)",
+      "link": "https://doi.org/10.1038/s41586-024-07145-1"
+     }
+    ],
+    "questions": [
+     "Map Kratzert's 'regional model + static attributes' onto FM vocabulary: what is pretraining, what is conditioning?",
+     "Derive why 1-step MSE training produces unstable long rollouts; what are three remedies (curriculum, multi-step loss, noise injection)?",
+     "Is streamflow prediction in ungauged basins a 'fine-tuning' or 'zero-shot' problem?"
+    ],
+    "book": {
+     "title": "Goodfellow, Deep Learning — Ch. 10 (Sequence Modeling, §10.1–10.7)",
+     "link": "https://www.deeplearningbook.org/contents/rnn.html",
+     "short": "Goodfellow Ch. 10"
+    }
+   },
+   "skills": [
+    "autoregressive rollout",
+    "rollout-curriculum training",
+    "exposure bias",
+    "hydrologic metrics (NSE)",
+    "time-series heads"
+   ]
+  },
+  {
+   "n": 6,
+   "phase": "Pretraining Core",
+   "title": "Attention and the Transformer, Built From Scratch (With an Agent You Verify)",
+   "goal": "Own every line of a Transformer/ViT implementation; understand the positional-encoding choices EO and weather models hinge on.",
+   "title_ko": "Attention과 Transformer, 밑바닥부터 구현 (에이전트와 함께, 직접 검증)",
+   "goal_ko": "Transformer/ViT 구현의 모든 줄을 직접 책임지고, EO·기상 모델의 핵심인 positional encoding 선택을 이해합니다.",
+   "date": "2026-10-12",
+   "concept": [
+    {
+     "min": 20,
+     "topic": "Attention from first principles: QKV, multi-head, masking, complexity; pre-norm vs post-norm; residual stream intuition.",
+     "topic_ko": "제1원리에서 출발하는 attention: QKV, multi-head, masking, 복잡도 · pre-norm vs post-norm · residual stream 직관"
+    },
+    {
+     "min": 15,
+     "topic": "Positional encodings as the geoscience battleground: sincos, learned, RoPE (one slide); then the ones that matter here — SatMAE's temporal+spectral encodings, Prithvi-EO-2.0's lat/lon+date embeddings, Scale-MAE's GSD encoding, ClimaX's variable tokenization.",
+     "topic_ko": "지구과학의 격전지가 된 positional encoding: sincos, learned, RoPE(한 슬라이드) · 그리고 여기서 중요한 것들 — SatMAE의 temporal+spectral encoding, Prithvi-EO-2.0의 lat/lon+date embedding, Scale-MAE의 GSD encoding, ClimaX의 variable tokenization"
+    },
+    {
+     "min": 10,
+     "topic": "ViT anatomy: patchify as tokenization; patch size vs sequence length vs resolution trade-offs (why weather models at 0.25° need tricks).",
+     "topic_ko": "ViT 해부: tokenization으로서의 patchify · patch size vs sequence length vs 해상도 trade-off(0.25° 기상 모델에 트릭이 필요한 이유)"
+    },
+    {
+     "min": 10,
+     "topic": "Windowed/shifted attention (Swin) and why Pangu, FuXi, and Aurora are Swin-based; 3D windows for pressure levels.",
+     "topic_ko": "windowed/shifted attention(Swin)과 Pangu, FuXi, Aurora가 Swin 기반인 이유 · pressure level을 위한 3D window"
+    },
+    {
+     "min": 5,
+     "topic": "Mixed-precision and FlashAttention as \"why your lab fits in 60 minutes.\"",
+     "topic_ko": "\"lab이 60분 안에 끝나는 이유\"로서의 mixed precision과 FlashAttention"
+    }
+   ],
+   "lab": {
+    "task": "Implement mini_vit.py (attention, MHA, block, patchify, ViT) from scratch with the agent — test-driven: student specifies shape tests, causal-mask tests, a gradient-flow test, and an equivalence test against torch.nn.MultiheadAttention before the agent writes code. Train the tiny ViT (~1M params) on EuroSAT-MS (13-band Sentinel-2) with per-band-group patch embedding.",
+    "task_ko": "mini_vit.py(attention, MHA, block, patchify, ViT)를 에이전트와 함께 밑바닥부터 구현 — test-driven: 에이전트가 코드를 쓰기 전에 학생이 shape 테스트, causal-mask 테스트, gradient-flow 테스트, torch.nn.MultiheadAttention 대비 동등성 테스트를 먼저 명세. 이후 tiny ViT(~1M params)를 per-band-group patch embedding으로 EuroSAT-MS(13-band Sentinel-2)에서 학습",
+    "data": [
+     "EuroSAT-MS (13-band Sentinel-2)"
+    ],
+    "tools": [
+     "PyTorch",
+     "pytest",
+     "W&B"
+    ],
+    "deliverable": "Note 06 + mini_vit.py with passing test suite committed; accuracy vs the W1 CNN. This file is the backbone of the W7 MAE and, for many students, the capstone.",
+    "deliverable_ko": "Note 06 + 테스트 스위트 통과 상태로 commit된 mini_vit.py · W1 CNN 대비 정확도 · 이 파일이 W7 MAE의 backbone이 되고, 많은 학생에게는 capstone의 backbone",
+    "homework": null
+   },
+   "reading": {
+    "memo": "standard",
+    "video": {
+     "title": "Attention in transformers, step-by-step | Deep Learning Chapter 6",
+     "channel": "3Blue1Brown",
+     "link": "https://www.youtube.com/watch?v=eMlx5fFNoYc",
+     "minutes": 26
+    },
+    "primary": [
+     {
+      "title": "Liu et al. 2021 — Swin Transformer",
+      "link": "https://arxiv.org/abs/2103.14030"
+     }
+    ],
+    "optional": [
+     {
+      "title": "Tseng et al. 2023 — Presto",
+      "link": "https://arxiv.org/abs/2304.14065"
+     }
+    ],
+    "questions": [
+     "Why does shifted windowing recover cross-window information flow — and what is the weather-model analog at the poles/dateline?",
+     "For a 13-band image, argue for/against: one patch embed for all bands vs band-group embeds vs wavelength-conditioned embeds (DOFA's answer).",
+     "Presto has 400K params and competes with giants on pixel time series — what does that say about scale vs inductive fit?"
+    ],
+    "book": {
+     "title": "Dive into Deep Learning (d2l.ai) — Ch. 11 (Attention Mechanisms & Transformers)",
+     "link": "https://d2l.ai/chapter_attention-mechanisms-and-transformers/index.html",
+     "short": "d2l Ch. 11"
+    }
+   },
+   "skills": [
+    "transformer implementation",
+    "positional/metadata encodings",
+    "patchify/tokenization",
+    "test-driven agent verification"
+   ]
+  },
+  {
+   "n": 7,
+   "phase": "Pretraining Core",
+   "title": "Self-Supervised Learning: Pretrain Your First Model",
+   "goal": "Understand the SSL design space and actually pretrain a mini-MAE on satellite imagery — everyone's hands-on pretraining experience and the capstone seed.",
+   "title_ko": "Self-Supervised Learning: 첫 모델 Pretraining",
+   "goal_ko": "SSL 설계 공간을 이해하고 위성 영상으로 mini-MAE를 실제로 pretraining합니다 — 전원이 직접 해보는 pretraining 경험이자 capstone의 씨앗입니다.",
+   "date": "2026-10-26",
+   "concept": [
+    {
+     "min": 20,
+     "topic": "SSL taxonomy with lineage map: masked reconstruction (MAE → SatMAE/Prithvi), contrastive (SimCLR), self-distillation (DINO → DINOv3-satellite), latent prediction (I-JEPA → Galileo, AnySat, OlmoEarth's Latent MIM Lite); collapse and how each family avoids it.",
+     "topic_ko": "계보 지도와 함께 보는 SSL 분류: masked reconstruction(MAE → SatMAE/Prithvi), contrastive(SimCLR), self-distillation(DINO → DINOv3-satellite), latent prediction(I-JEPA → Galileo, AnySat, OlmoEarth의 Latent MIM Lite) · collapse와 각 계열의 회피법"
+    },
+    {
+     "min": 15,
+     "topic": "MAE mechanics in detail: 75% masking, asymmetric encoder/decoder, normalized-pixel targets, why high masking works for images and what changes for EO (spatial redundancy, cloud pixels).",
+     "topic_ko": "MAE 동작 원리 상세: 75% masking, 비대칭 encoder/decoder, normalized-pixel target · 이미지에서 높은 masking이 통하는 이유와 EO에서 달라지는 것(공간 중복성, 구름 픽셀)"
+    },
+    {
+     "min": 10,
+     "topic": "Structured masking for EO/weather: spatial, spectral/band-group, temporal, and modality masking (SatMAE, SpectralGPT, Galileo); Prithvi-WxC's mixed masked+forecast objective as the bridge to W11.",
+     "topic_ko": "EO/weather를 위한 구조화된 masking: spatial, spectral/band-group, temporal, modality masking(SatMAE, SpectralGPT, Galileo) · W11로 이어주는 다리인 Prithvi-WxC의 masked+forecast 혼합 objective"
+    },
+    {
+     "min": 10,
+     "topic": "Evaluating SSL: linear probe vs kNN vs full fine-tune; why probe rankings mislead (GEO-Bench-2 evidence).",
+     "topic_ko": "SSL 평가: linear probe vs kNN vs full fine-tune · probe 순위가 오도하는 이유(GEO-Bench-2 근거)"
+    },
+    {
+     "min": 5,
+     "topic": "Mixed precision (torch.amp) introduced hands-on in the lab today.",
+     "topic_ko": "mixed precision(torch.amp)은 오늘 lab에서 실습으로 도입"
+    }
+   ],
+   "lab": {
+    "task": "In-class core: pretrain a mini-MAE (~2M params, from your W6 ViT) on the W3 Sentinel-2/HLS chip store (or a ~5k-chip SSL4EO-S12 subset), bf16 autocast, ~15 min on one GPU; then linear probe on EuroSAT vs (a) random init and (b) supervised-from-scratch at equal epochs; visualize reconstructions.",
+    "task_ko": "수업 내 핵심: W3 Sentinel-2/HLS chip store(또는 ~5k-chip SSL4EO-S12 subset)로 mini-MAE(~2M params, W6 ViT 기반) pretraining, bf16 autocast, GPU 1장에서 ~15분 · 이후 EuroSAT에서 linear probe로 (a) random init, (b) 동일 epoch의 supervised-from-scratch와 비교 · reconstruction 시각화",
+    "data": [
+     "W3 Sentinel-2/HLS chip store",
+     "SSL4EO-S12 subset (~5k chips, alternative)",
+     "EuroSAT (probe)"
+    ],
+    "tools": [
+     "PyTorch AMP (bf16)",
+     "W&B"
+    ],
+    "deliverable": "Note 07 with probe-accuracy table (pretrained vs random vs supervised) and reconstruction grids. This checkpoint and codebase are every student's hands-on pretraining experience and the capstone seed — reused in the W9 scaling sweep and the W10 leaderboard; the HydroAI lab's Hydro-FM team builds on it directly.",
+    "deliverable_ko": "Note 07: probe 정확도 표(pretrained vs random vs supervised)와 reconstruction grid · 이 checkpoint와 codebase가 전원의 실전 pretraining 경험이자 capstone의 씨앗 — W9 scaling sweep과 W10 leaderboard에서 재사용, HydroAI lab의 Hydro-FM 팀은 이를 직접 기반으로 삼음",
+    "homework": "Masking-ratio ablation: rerun pretraining at 50/75/90% masking; add reconstruction grids and the probe mini-ablation table to Note 07.",
+    "homework_ko": "masking-ratio ablation: 50/75/90% masking으로 pretraining 재실행 · reconstruction grid와 probe mini-ablation 표를 Note 07에 추가"
+   },
+   "reading": {
+    "memo": "standard",
+    "video": {
+     "title": "Stanford CS231N | Spring 2025 | Lecture 12: Self-Supervised Learning",
+     "channel": "Stanford Online",
+     "link": "https://www.youtube.com/watch?v=4howBU7THbM",
+     "minutes": 75
+    },
+    "primary": [
+     {
+      "title": "He et al. 2021 — Masked Autoencoders Are Scalable Vision Learners",
+      "link": "https://arxiv.org/abs/2111.06377"
+     }
+    ],
+    "optional": [
+     {
+      "title": "Caron et al. 2021 — DINO",
+      "link": "https://arxiv.org/abs/2104.14294"
+     },
+     {
+      "title": "Chen et al. 2020 — SimCLR",
+      "link": "https://arxiv.org/abs/2002.05709"
+     }
+    ],
+    "questions": [
+     "Why can MAE mask 75% while BERT masks 15% — and what ratio would you predict for cloud-free Sentinel-2 vs ERA5 fields (compare Prithvi-WxC's choice)?",
+     "What exactly does the decoder learn, and why throw it away?",
+     "Propose one EO-specific masking structure and the invariance it would induce."
+    ],
+    "book": {
+     "title": "Goodfellow, Deep Learning — Ch. 14 (Autoencoders, §14.1–14.5)",
+     "link": "https://www.deeplearningbook.org/contents/autoencoders.html",
+     "short": "Goodfellow Ch. 14"
+    }
+   },
+   "skills": [
+    "masking strategies",
+    "MAE pretraining",
+    "SSL evaluation (probe/kNN/FT)",
+    "mixed precision (bf16/AMP)"
+   ]
+  },
+  {
+   "n": 8,
+   "phase": "Pretraining Core",
+   "title": "Midterm: Portfolio Review and Capstone Proposal Pitches",
+   "goal": "Convert seven weeks of labs into a credible, compute-budgeted capstone proposal.",
+   "title_ko": "중간 점검: 포트폴리오 리뷰와 Capstone 제안 발표",
+   "goal_ko": "지난 7주의 실습을 compute 예산까지 갖춘 설득력 있는 capstone 제안서로 완성합니다.",
+   "date": "2026-11-02",
+   "concept": [
+    {
+     "min": 15,
+     "topic": "How to write a capstone proposal: data → objective → architecture → compute budget → evaluation-first design (name your baselines and metrics before training anything).",
+     "topic_ko": "capstone 제안서 쓰는 법: data → objective → architecture → compute 예산 → evaluation-first 설계(무엇이든 학습하기 전에 baseline과 metric부터 명명)"
+    },
+    {
+     "min": 10,
+     "topic": "Compute budgeting at course scale: back-of-envelope FLOPs, tokens-seen, GPU-hours; Chinchilla logic previewed (formalized in W9).",
+     "topic_ko": "과목 규모의 compute 예산 수립: 어림 계산 FLOPs, tokens-seen, GPU-hours · Chinchilla 논리 예고(W9에서 정식화)"
+    },
+    {
+     "min": 10,
+     "topic": "Track briefing: default track for everyone = fine-tune and rigorously evaluate a public FM (LoRA, free-tier compute); pretraining is experienced by all in the W7/W9 labs; from-scratch development is reserved for the HydroAI lab team's joint Hydro-FM project. Weather-direction proposals are provisional, with a revision gate after W11. Scope ladders for EV4240 vs EN5425.",
+     "topic_ko": "트랙 브리핑: 전원의 기본 트랙 = 공개 FM을 fine-tuning하고 엄밀히 평가(LoRA, 무료 티어 compute) · pretraining은 W7/W9 lab에서 전원이 경험 · from-scratch 개발은 HydroAI lab 팀의 공동 Hydro-FM 프로젝트 전용 · weather 방향 제안은 잠정 승인, W11 이후 수정 게이트 · EV4240 vs EN5425 범위 사다리"
+    },
+    {
+     "min": 40,
+     "topic": "Proposal pitches, round 1: 5-min pitch + 3-min hostile-but-kind Q&A per student/team (instructor + one assigned peer discussant each).",
+     "topic_ko": "제안 발표 1라운드: 학생/팀당 5분 pitch + 3분의 까칠하지만 친절한 Q&A(교수 + 지정 peer discussant 1명)"
+    }
+   ],
+   "lab": {
+    "task": "Pitches continue; every student files written feedback (GitHub issues) on two peers' proposals; instructor sign-off queue. Portfolio spot-check: instructor clones two random repos and re-runs a lab note live — a reproducibility culture moment.",
+    "task_ko": "발표 계속 진행 · 모든 학생이 동료 제안 2건에 서면 피드백 제출(GitHub issue) · 교수 승인 대기열. 포트폴리오 불시 점검: 교수가 무작위 repo 2개를 clone해 lab note를 현장에서 재실행 — 재현성 문화의 순간",
+    "data": [],
+    "tools": [
+     "GitHub (issues, PR review)"
+    ],
+    "deliverable": "2-page proposal (data, objective, base model, compute budget, downstream tasks, eval protocol, risk plan) — PDF submitted on this site by Sun 11/1 13:00; pitched in class 11/2.",
+    "deliverable_ko": "2쪽 제안서(data, objective, base model, compute 예산, downstream task, eval protocol, risk plan) — PDF를 Sun 11/1 13:00까지 이 사이트에 제출 · 11/2 수업에서 발표",
+    "homework": null
+   },
+   "reading": {
+    "memo": "none",
+    "primary": [],
+    "optional": [],
+    "questions": []
+   },
+   "skills": [
+    "eval-first experimental design",
+    "compute budgeting",
+    "scientific communication"
+   ]
+  },
+  {
+   "n": 9,
+   "phase": "Foundation Models",
+   "title": "Foundation Models and Scaling Laws",
+   "goal": "The intellectual frame — what makes a model a foundation model, and how scaling laws let you budget a tiny one honestly.",
+   "title_ko": "Foundation Model과 Scaling Law",
+   "goal_ko": "무엇이 모델을 foundation model로 만드는지라는 지적 틀과, scaling law로 작은 모델의 예산을 정직하게 세우는 법을 다룹니다.",
+   "date": "2026-11-09",
+   "concept": [
+    {
+     "min": 15,
+     "topic": "Foundation-model definition (Bommasani): emergence and homogenization; what transfers from the LLM playbook to EO/weather and what doesn't (no internet-scale text; data is spatially correlated and physically constrained).",
+     "topic_ko": "foundation model의 정의(Bommasani): emergence와 homogenization · LLM playbook에서 EO/weather로 이전되는 것과 아닌 것(인터넷 규모 텍스트 부재 · 데이터는 공간적으로 상관되고 물리적으로 제약됨)"
+    },
+    {
+     "min": 20,
+     "topic": "Scaling laws: Kaplan power laws, Chinchilla compute-optimal N vs D, data-constrained scaling; worked example live: 'you have 10 GPU-hours and 50 GB of chips — solve for model size'.",
+     "topic_ko": "scaling law: Kaplan power law, Chinchilla compute-optimal N vs D, data-constrained scaling · 라이브 실습 예제: '10 GPU-hours와 50 GB chip이 있다 — 모델 크기를 구하라'"
+    },
+    {
+     "min": 10,
+     "topic": "When pretraining pays: transfer gap vs supervised baselines; PANGAEA/GEO-Bench-2 evidence that it often doesn't — framing your capstone claim honestly.",
+     "topic_ko": "pretraining이 수지맞는 조건: supervised baseline 대비 transfer gap · 흔히 그렇지 않다는 PANGAEA/GEO-Bench-2 근거 — capstone 주장을 정직하게 세우기"
+    },
+    {
+     "min": 10,
+     "topic": "Emergence skepticism and evaluation-metric artifacts; what 'emergent' could even mean for a weather model.",
+     "topic_ko": "emergence 회의론과 평가 metric의 artifact · 기상 모델에서 'emergent'가 도대체 무엇을 뜻할 수 있는가"
+    },
+    {
+     "min": 5,
+     "topic": "Lab briefing: you will fit your own scaling law today.",
+     "topic_ko": "lab 브리핑: 오늘 본인의 scaling law를 직접 fitting"
+    }
+   ],
+   "lab": {
+    "task": "Fit a mini scaling law for your own model family. The 4-size sweep (launched pre-class as homework) is already done; the 60 in-class minutes go to fitting and diagnosing the power law: plot reconstruction loss (and probe accuracy) vs params on log–log, fit the power law, stress-test where the fit breaks, and extrapolate to your capstone budget — writing the prediction into your proposal.",
+    "task_ko": "본인 모델 계열의 mini scaling law fitting. 4개 크기 sweep(수업 전 homework로 launch)은 이미 완료 · 수업 내 60분은 power law fitting과 진단에 사용: reconstruction loss(와 probe 정확도)를 params 대비 log–log로 플롯, power law fitting, fit이 깨지는 지점 스트레스 테스트, capstone 예산으로 외삽 — 그 예측을 제안서에 기록",
+    "data": [
+     "W3 chip corpus (fixed)",
+     "W7 mini-MAE at 4 sizes (~0.1M/0.5M/2M/8M params)"
+    ],
+    "tools": [
+     "W&B sweeps",
+     "agent-orchestrated multi-run script",
+     "matplotlib"
+    ],
+    "deliverable": "Note 09 with the log–log fit reported as a prediction interval plus enumerated failure modes (not a point prediction) + a one-paragraph capstone budget memo (chosen N, D, GPU-hours, predicted loss range).",
+    "deliverable_ko": "Note 09: log–log fit을 (점 예측이 아니라) 예측 구간 + 열거된 실패 모드로 보고 + 한 문단짜리 capstone 예산 메모(선택한 N, D, GPU-hours, 예측 loss 범위)",
+    "homework": "Pre-class: launch the 4-size scaling sweep (~0.1M/0.5M/2M/8M params, fixed wall-clock on the fixed chip corpus) so all runs finish before the lab.",
+    "homework_ko": "수업 전: 4개 크기 scaling sweep(~0.1M/0.5M/2M/8M params, 고정 chip corpus에서 고정 wall-clock) launch — lab 전에 모든 run이 끝나도록"
+   },
+   "reading": {
+    "memo": "standard",
+    "video": {
+     "title": "AI can't cross this line and we don't know why.",
+     "channel": "Welch Labs",
+     "link": "https://www.youtube.com/watch?v=5eqRuVp65eY",
+     "minutes": 24
+    },
+    "primary": [
+     {
+      "title": "Hoffmann et al. 2022 — Training Compute-Optimal Large Language Models (Chinchilla)",
+      "link": "https://arxiv.org/abs/2203.15556"
+     }
+    ],
+    "optional": [
+     {
+      "title": "Kaplan et al. 2020 — Scaling Laws for Neural Language Models",
+      "link": "https://arxiv.org/abs/2001.08361"
+     },
+     {
+      "title": "Bommasani et al. 2021 — Opportunities and Risks of Foundation Models (Secs. 1–2)",
+      "link": "https://arxiv.org/abs/2108.07258"
+     }
+    ],
+    "questions": [
+     "Chinchilla says balance N and D — what is 'a token' of ERA5, and how many does 40 years of 0.25° reanalysis contain?",
+     "Why might scaling exponents differ for satellite imagery vs text?",
+     "Given your W9 lab fit: is your capstone compute-optimal, over-parameterized, or data-starved?"
+    ],
+    "book": {
+     "title": "Goodfellow, Deep Learning — Ch. 11 (Practical Methodology)",
+     "link": "https://www.deeplearningbook.org/contents/guidelines.html",
+     "short": "Goodfellow Ch. 11"
+    }
+   },
+   "skills": [
+    "scaling-law fitting",
+    "compute-optimal budgeting",
+    "transfer-learning framing",
+    "automated sweep orchestration"
+   ]
+  },
+  {
+   "n": 10,
+   "phase": "Foundation Models",
+   "title": "Earth Observation Foundation Models (EO-FM Week)",
+   "goal": "Command the GFM design space — from SatMAE to embedding fields — and how to evaluate them without fooling yourself.",
+   "title_ko": "지구관측 Foundation Model (EO-FM 주간)",
+   "goal_ko": "SatMAE부터 embedding field까지 GFM 설계 공간을 장악하고, 스스로를 속이지 않고 평가하는 법을 배웁니다.",
+   "date": "2026-11-16",
+   "concept": [
+    {
+     "min": 15,
+     "topic": "Generation 1: SatMAE (temporal/spectral tokens, band-group masking), Scale-MAE (GSD positional encoding, Laplacian decoder), Prithvi-EO-1.0/2.0 (HLS, 3D geolocation+date embeddings, TerraTorch fine-tuning stack — the closest published blueprint to your capstone).",
+     "topic_ko": "1세대: SatMAE(temporal/spectral token, band-group masking), Scale-MAE(GSD positional encoding, Laplacian decoder), Prithvi-EO-1.0/2.0(HLS, 3D geolocation+date embedding, TerraTorch fine-tuning 스택 — capstone에 가장 가까운 공개 청사진)"
+    },
+    {
+     "min": 15,
+     "topic": "Generation 2, sensor-agnostic and multimodal: DOFA/Copernicus-FM (wavelength-conditioned hypernetwork patch embeds), TerraMind (any-to-any generation, Thinking-in-Modalities), Galileo (dual global+local latent objectives, structured space/time/modality masking), SpectralGPT, SkySense.",
+     "topic_ko": "2세대, sensor-agnostic·멀티모달: DOFA/Copernicus-FM(wavelength-conditioned hypernetwork patch embed), TerraMind(any-to-any 생성, Thinking-in-Modalities), Galileo(global+local 이중 latent objective, 구조화된 space/time/modality masking), SpectralGPT, SkySense"
+    },
+    {
+     "min": 15,
+     "topic": "Generation 3, embeddings as the product: AlphaEarth Foundations (64-D annual 10 m embeddings in GEE — a 'virtual satellite', not a backbone), TESSERA (open competitor), Major-TOM embeddings; OlmoEarth as the fully open small-model + platform exemplar; DINOv3-satellite as the outsider that wins on high-res RGB.",
+     "topic_ko": "3세대, 제품으로서의 embedding: AlphaEarth Foundations(GEE의 64-D 연간 10 m embedding — backbone이 아니라 'virtual satellite'), TESSERA(공개 경쟁자), Major-TOM embedding · 완전 공개 소형 모델 + 플랫폼 모범인 OlmoEarth · 고해상도 RGB에서 이기는 외부자 DINOv3-satellite"
+    },
+    {
+     "min": 10,
+     "topic": "Honest evaluation: GEO-Bench → GEO-Bench-2 capability groups ('no model dominates'), PANGAEA's U-Net reality check, the 89-GFM usability study; what your capstone eval must therefore include.",
+     "topic_ko": "정직한 평가: GEO-Bench → GEO-Bench-2 capability group('지배적 모델은 없다'), PANGAEA의 U-Net 현실 점검, 89개 GFM usability 연구 · 따라서 capstone eval에 반드시 들어가야 할 것"
+    },
+    {
+     "min": 5,
+     "topic": "Lab briefing.",
+     "topic_ko": "lab 브리핑"
+    }
+   ],
+   "lab": {
+    "task": "Mini-GFM leaderboard, in-class core: linear-probe three frozen encoders — (a) your W7 mini-MAE, (b) OlmoEarth-Nano (HF checkpoint), (c) Presto — on ONE classification task with the same split: EuroSAT-MS.",
+    "task_ko": "mini-GFM leaderboard, 수업 내 핵심: frozen encoder 3종 — (a) W7 mini-MAE, (b) OlmoEarth-Nano(HF checkpoint), (c) Presto — 를 같은 split의 단일 분류 task에서 linear probe: EuroSAT-MS",
+    "data": [
+     "EuroSAT-MS",
+     "OlmoEarth-Nano checkpoint (HF Hub)",
+     "Presto checkpoint"
+    ],
+    "tools": [
+     "HF Hub",
+     "TorchGeo",
+     "GEE (optional)",
+     "W&B"
+    ],
+    "deliverable": "Note 10 — leaderboard table + 200-word 'which encoder for which task and why', citing GEO-Bench-2's capability-group logic.",
+    "deliverable_ko": "Note 10 — leaderboard 표 + GEO-Bench-2 capability-group 논리를 인용한 200단어짜리 '어떤 task에 어떤 encoder를, 왜'",
+    "homework": "Optional extensions: a dense-task probe (Sen1Floods11 with a 1×1-conv head) and a fourth AlphaEarth Satellite Embeddings column from GEE over a Korean AOI. Required: capstone corpus curation — assemble and document your fine-tuning dataset (default track) or pretraining chip corpus (Hydro-FM team).",
+    "homework_ko": "선택 확장: dense-task probe(1×1-conv head를 단 Sen1Floods11)와 한국 AOI에 대한 GEE의 AlphaEarth Satellite Embeddings 네 번째 열. 필수: capstone corpus 큐레이션 — fine-tuning dataset(기본 트랙) 또는 pretraining chip corpus(Hydro-FM 팀)를 구성하고 문서화"
+   },
+   "reading": {
+    "memo": "standard",
+    "video": {
+     "title": "Earth Observation Foundation Models and their Applications: Casper Fibæk (The ESA Phi-Lab)",
+     "channel": "SFI Visual Intelligence",
+     "link": "https://www.youtube.com/watch?v=H8zAOMpA_-c",
+     "minutes": 34
+    },
+    "primary": [
+     {
+      "title": "Szwarcman et al. 2024 — Prithvi-EO-2.0",
+      "link": "https://arxiv.org/abs/2412.02732"
+     }
+    ],
+    "optional": [
+     {
+      "title": "Cong et al. 2022 — SatMAE",
+      "link": "https://arxiv.org/abs/2207.08051"
+     },
+     {
+      "title": "Herzog et al. 2025 — OlmoEarth",
+      "link": "https://arxiv.org/abs/2511.13655"
+     }
+    ],
+    "questions": [
+     "Which Prithvi-EO-2.0 design choices survive at 1/1000th scale, and which are pointless below 100M params?",
+     "Are location/date embeddings a feature or a leakage channel for downstream tasks?",
+     "If AlphaEarth-style embedding fields keep improving, who still needs to fine-tune a backbone — and what does that mean for your capstone's claim?"
+    ]
+   },
+   "skills": [
+    "multi-sensor/multispectral architectures",
+    "metadata conditioning",
+    "GFM benchmarking (GEO-Bench/PANGAEA)",
+    "frozen-embedding workflows",
+    "HF checkpoint reuse"
+   ]
+  },
+  {
+   "n": 11,
+   "phase": "Foundation Models",
+   "title": "Weather and Climate Foundation Models (Weather-FM Week)",
+   "goal": "The full ML-weather stack: paradigms, spherical geometry, rollout stability, and WeatherBench2-grade evaluation — then train your own tiny forecaster.",
+   "title_ko": "기상·기후 Foundation Model (Weather-FM 주간)",
+   "goal_ko": "ML 기상의 전체 스택 — 패러다임, 구면 기하, rollout 안정성, WeatherBench2급 평가 — 을 다룬 뒤, 직접 작은 forecaster를 학습합니다.",
+   "date": "2026-11-23",
+   "concept": [
+    {
+     "min": 10,
+     "topic": "Problem setup: atmospheric state as a tensor (variables × levels × lat × lon), ERA5 as corpus, initial-condition provenance (ERA5 vs operational analysis — an evaluation trap), 2026 operational status (AIFS, NOAA AIGFS, WeatherNext 2).",
+     "topic_ko": "문제 설정: 대기 상태를 tensor로(variables × levels × lat × lon), corpus로서의 ERA5, 초기조건 출처(ERA5 vs 현업 analysis — 평가의 함정), 2026 현업 운영 현황(AIFS, NOAA AIGFS, WeatherNext 2)"
+    },
+    {
+     "min": 20,
+     "topic": "Paradigm tour, one architecture slide each: deterministic transformers (Pangu's 3D Earth-specific attention, Stormer, FuXi/FengWu), graph/mesh (GraphCast's icosahedral encode-process-decode, AIFS), spherical operators (SFNO — why FFTs on lat-lon grids are wrong at the poles), probabilistic/generative (GenCast diffusion, FGN/WeatherNext 2, FourCastNet 3), hybrid (NeuralGCM), obs-direct (Aardvark, GraphDOP), and the pretrain→fine-tune FMs proper (ClimaX variable tokenization, Aurora, Prithvi-WxC).",
+     "topic_ko": "패러다임 투어, 아키텍처당 슬라이드 한 장: deterministic transformer(Pangu의 3D Earth-specific attention, Stormer, FuXi/FengWu), graph/mesh(GraphCast의 icosahedral encode-process-decode, AIFS), spherical operator(SFNO — lat-lon 격자의 FFT가 극에서 틀리는 이유), probabilistic/generative(GenCast diffusion, FGN/WeatherNext 2, FourCastNet 3), hybrid(NeuralGCM), obs-direct(Aardvark, GraphDOP), 그리고 진짜 pretrain→fine-tune FM(ClimaX variable tokenization, Aurora, Prithvi-WxC)"
+    },
+    {
+     "min": 15,
+     "topic": "Rollout stability engineering: multi-step loss curricula (GraphCast's schedule), fine-tuning horizon, blurring/double-penalty, power-spectra diagnostics, effective resolution.",
+     "topic_ko": "rollout 안정성 엔지니어링: multi-step loss curriculum(GraphCast의 schedule), fine-tuning horizon, blurring/double-penalty, power-spectra 진단, effective resolution"
+    },
+    {
+     "min": 15,
+     "topic": "Metrics you must be able to derive: lat-weighted RMSE, ACC vs climatology (and the 0.6 'useful skill' convention), bias; probabilistic: CRPS as generalized MAE, spread–skill, rank histograms; the WeatherBench2 protocol (test years, headline scorecard).",
+     "topic_ko": "직접 유도할 줄 알아야 하는 metric: lat-weighted RMSE, climatology 대비 ACC(그리고 0.6 'useful skill' 관례), bias · 확률적 metric: generalized MAE로서의 CRPS, spread–skill, rank histogram · WeatherBench2 protocol(test 연도, headline scorecard)"
+    }
+   ],
+   "lab": {
+    "task": "Train a tiny weather emulator on the WeatherBench2 ERA5 5.625° Zarr (Z500 + T850, 6-h steps, ~1979–2015 train / 2018–2019 test): small U-Net or your W6 ViT (~1–3M params) predicting residual (Δstate) targets, with per-variable-per-level normalization and static input channels (orography, land–sea mask). Write the lat-weighted MSE loss yourself and test it against analytic values (agent writes the test). Evaluate lat-weighted RMSE and ACC vs persistence and climatology baselines at 1–5-day leads via autoregressive rollout; plot the zonal power spectrum at day 1 vs day 5 to see blurring.",
+    "task_ko": "WeatherBench2 ERA5 5.625° Zarr(Z500 + T850, 6-h step, train ~1979–2015 / test 2018–2019)로 tiny weather emulator 학습: 작은 U-Net 또는 W6 ViT(~1–3M params)로 residual(Δstate) target 예측, per-variable-per-level normalization과 static 입력 채널(orography, land–sea mask) 사용. lat-weighted MSE loss를 직접 작성하고 해석값 대비 테스트(테스트는 에이전트가 작성). autoregressive rollout으로 1–5일 lead에서 persistence·climatology baseline 대비 lat-weighted RMSE와 ACC 평가 · day 1 vs day 5의 zonal power spectrum을 그려 blurring 확인",
+    "data": [
+     "WeatherBench2 ERA5 5.625° Zarr (Z500 + T850)"
+    ],
+    "tools": [
+     "xarray + gcsfs (WB2 public bucket)",
+     "PyTorch",
+     "W&B",
+     "ClimateLearn (optional scaffold)"
+    ],
+    "deliverable": "Note 11 — WB2-style scorecard table (model vs persistence vs climatology), ACC-vs-lead-time plot, spectra figure, rollout animation GIF. This is the weather-direction capstone seed; provisional W8 weather proposals hit their revision gate after this week.",
+    "deliverable_ko": "Note 11 — WB2 스타일 scorecard 표(model vs persistence vs climatology), ACC vs lead time 플롯, spectra 그림, rollout 애니메이션 GIF · 이것이 weather 방향 capstone의 씨앗 · W8의 잠정 weather 제안은 이번 주 이후 수정 게이트 통과",
+    "homework": null
+   },
+   "reading": {
+    "memo": "standard",
+    "video": {
+     "title": "The AI Weather Forecasting Revolution",
+     "channel": "ECMWF",
+     "link": "https://www.youtube.com/watch?v=JUsFvifyZeM",
+     "minutes": 68
+    },
+    "primary": [
+     {
+      "title": "Lam et al. 2023 — GraphCast",
+      "link": "https://arxiv.org/abs/2212.12794"
+     }
+    ],
+    "optional": [
+     {
+      "title": "Bi et al. 2023 — Pangu-Weather",
+      "link": "https://arxiv.org/abs/2211.02556"
+     },
+     {
+      "title": "Price et al. 2025 — GenCast",
+      "link": "https://arxiv.org/abs/2312.15796"
+     }
+    ],
+    "questions": [
+     "Derive why unweighted MSE on a lat-lon grid over-weights the poles, and by how much at 60°N.",
+     "GraphCast beats HRES on RMSE partly by blurring — how would CRPS-trained GenCast change that comparison, and what does the double-penalty argument say?",
+     "Is an ERA5 emulator forecasting the atmosphere or forecasting ECMWF's data assimilation system? Defend both readings."
+    ]
+   },
+   "skills": [
+    "lat-weighted loss",
+    "ACC/RMSE/CRPS",
+    "spherical/mesh representations",
+    "rollout curriculum & stability",
+    "WeatherBench2 evaluation",
+    "spectra diagnostics"
+   ]
+  },
+  {
+   "n": 12,
+   "phase": "Foundation Models",
+   "title": "Scaling the Pipeline: Training Engineering, Fine-Tuning, and Release",
+   "goal": "Every remaining capstone skill: efficient training at your compute ceiling, PEFT fine-tuning, ablation design, and a real HF Hub release — after this week you have 100% of the capstone skill set.",
+   "title_ko": "파이프라인 확장: Training 엔지니어링, Fine-Tuning, 릴리스",
+   "goal_ko": "capstone에 필요한 나머지 기술 전부 — compute 한도 내 효율적 학습, PEFT fine-tuning, ablation 설계, 실제 HF Hub 릴리스 — 를 익혀 이번 주로 capstone 기술 세트를 100% 갖춥니다.",
+   "date": "2026-11-30",
+   "concept": [
+    {
+     "min": 15,
+     "topic": "Training engineering: bf16/AMP recap, gradient accumulation, activation/gradient checkpointing (memory math from W2 revisited), DDP concepts (all-reduce, effective batch size, LR scaling) and when FSDP matters; streaming dataloaders (WebDataset/streaming Zarr) so GPUs never starve.",
+     "topic_ko": "training 엔지니어링: bf16/AMP 복습, gradient accumulation, activation/gradient checkpointing(W2의 메모리 계산 재방문), DDP 개념(all-reduce, effective batch size, LR scaling)과 FSDP가 중요해지는 시점 · GPU가 굶지 않게 하는 streaming dataloader(WebDataset/streaming Zarr)"
+    },
+    {
+     "min": 15,
+     "topic": "Fine-tuning spectrum: linear probe → decoder-only → LoRA/PEFT (derive the low-rank update, rank/alpha choices) → full FT; decoder heads for dense EO tasks (UperNet-style, TerraTorch conventions) and forecast heads for weather.",
+     "topic_ko": "fine-tuning 스펙트럼: linear probe → decoder-only → LoRA/PEFT(low-rank update 유도, rank/alpha 선택) → full FT · dense EO task용 decoder head(UperNet 스타일, TerraTorch 관례)와 weather용 forecast head"
+    },
+    {
+     "min": 15,
+     "topic": "Evaluation and ablation design for the capstone: minimum honest set = {random-init control, supervised baseline (your W4 U-Net or persistence/climatology), frozen probe, fine-tuned}, one ablation axis (masking ratio, data volume, or model size), seeds and error bars.",
+     "topic_ko": "capstone을 위한 평가·ablation 설계: 최소한의 정직한 세트 = {random-init control, supervised baseline(W4 U-Net 또는 persistence/climatology), frozen probe, fine-tuned}, ablation 축 1개(masking ratio, 데이터 양, 또는 모델 크기), seed와 error bar"
+    },
+    {
+     "min": 15,
+     "topic": "Significance testing for forecast and benchmark comparisons: paired block bootstrap over time (and space), why naive per-sample tests lie under autocorrelation, error bars for scorecard tables.",
+     "topic_ko": "예보·벤치마크 비교를 위한 유의성 검정: 시간(그리고 공간)에 대한 paired block bootstrap, autocorrelation 아래에서 naive per-sample 검정이 거짓말하는 이유, scorecard 표의 error bar"
+    },
+    {
+     "min": 10,
+     "topic": "Release engineering: HF Hub mechanics (weights, config, README.md model card), semantic versioning, licenses for models and data (Copernicus, NASA open-data terms), W&B reports as the lab notebook of record.",
+     "topic_ko": "릴리스 엔지니어링: HF Hub 메커니즘(weights, config, README.md model card), semantic versioning, 모델·데이터 라이선스(Copernicus, NASA 공개 데이터 약관), 공식 lab notebook으로서의 W&B report"
+    }
+   ],
+   "lab": {
+    "task": "Capstone dress rehearsal, in-class core: (a) attach LoRA adapters (peft) to your W7/W9 pretrained mini-MAE (or OlmoEarth-Nano) and fine-tune on Sen1Floods11 (geo rehearsal) or fine-tune the W11 emulator on a Korea-region T2m patch (weather rehearsal); (b) build a CRPS mini-ensemble via MC-dropout and score it; (c) push the checkpoint to HF Hub with an agent-drafted, human-corrected model card; run DDP on 2 GPUs on the shared server if available (otherwise simulate with accumulation).",
+    "task_ko": "capstone 총연습, 수업 내 핵심: (a) W7/W9 pretrained mini-MAE(또는 OlmoEarth-Nano)에 LoRA adapter(peft)를 붙여 Sen1Floods11에서 fine-tuning(geo 리허설) 또는 W11 emulator를 한국 지역 T2m patch에서 fine-tuning(weather 리허설); (b) MC-dropout으로 CRPS mini-ensemble 구축·채점; (c) 에이전트 초안 + 사람 교정 model card와 함께 checkpoint를 HF Hub에 push · 공유 서버 GPU 2장이 가능하면 DDP 실행(아니면 accumulation으로 시뮬레이션)",
+    "data": [
+     "Sen1Floods11 (geo rehearsal)",
+     "WeatherBench2 ERA5 Korea-region T2m patch (weather rehearsal)"
+    ],
+    "tools": [
+     "peft",
+     "accelerate",
+     "HF Hub",
+     "W&B"
+    ],
+    "deliverable": "Note 12 — LoRA fine-tune result, CRPS mini-ensemble score, live HF Hub link with model card; homework adds the three-way fine-tuning table and memory/throughput mini-benchmark.",
+    "deliverable_ko": "Note 12 — LoRA fine-tune 결과, CRPS mini-ensemble 점수, model card가 달린 라이브 HF Hub 링크 · homework에서 3-way fine-tuning 표와 메모리/throughput 미니 벤치마크 추가",
+    "homework": "Probe vs LoRA vs full-FT three-way comparison in one W&B report; enable gradient checkpointing + accumulation and measure the memory/throughput trade-off.",
+    "homework_ko": "probe vs LoRA vs full-FT 3-way 비교를 W&B report 하나로 · gradient checkpointing + accumulation을 켜고 메모리/throughput trade-off 측정"
+   },
+   "reading": {
+    "memo": "standard",
+    "video": {
+     "title": "Stanford CS224N: NLP w/ DL | Spring 2024 | Lecture 12 - Efficient Training, Shikhar Murty",
+     "channel": "Stanford Online",
+     "link": "https://www.youtube.com/watch?v=UVX7SYGCKkA",
+     "minutes": 63
+    },
+    "primary": [
+     {
+      "title": "Hu et al. 2021 — LoRA",
+      "link": "https://arxiv.org/abs/2106.09685"
+     }
+    ],
+    "optional": [
+     {
+      "title": "Marsocci et al. 2024 — PANGAEA",
+      "link": "https://arxiv.org/abs/2412.04204"
+     },
+     {
+      "title": "GEO-Bench-2 (skim)",
+      "link": "https://arxiv.org/abs/2511.15658"
+     }
+    ],
+    "questions": [
+     "Why can rank-8 updates match full fine-tuning — what does that imply about the geometry of task adaptation?",
+     "For a 2M-param model, is PEFT ever worth it, or is it purely a big-model technology? Test your answer in the lab.",
+     "PANGAEA shows GFMs losing to U-Nets — list three experimental-design choices that could flip such a comparison dishonestly."
+    ]
+   },
+   "skills": [
+    "PEFT/LoRA",
+    "gradient checkpointing & accumulation",
+    "DDP concepts",
+    "streaming dataloaders",
+    "significance testing (block bootstrap)",
+    "HF Hub release",
+    "model cards",
+    "ablation design"
+   ]
+  },
+  {
+   "n": 13,
+   "phase": "Capstone Sprints",
+   "title": "Agentic ML Engineering + Capstone Sprint 1",
+   "goal": "Turn your AI agent from code generator into experiment orchestrator; launch the capstone run. Milestone M1 due.",
+   "title_ko": "Agentic ML 엔지니어링 + Capstone Sprint 1",
+   "goal_ko": "AI 에이전트를 코드 생성기에서 실험 orchestrator로 격상시키고, capstone 학습 run을 시작합니다. Milestone M1 제출.",
+   "date": "2026-12-07",
+   "concept": [
+    {
+     "min": 15,
+     "topic": "Agentic engineering for ML: multi-agent patterns (planner/implementer/reviewer), MCP servers for W&B and HF, agent-run ablation loops with guardrails (immutable eval script, human-approved config diffs).",
+     "topic_ko": "ML을 위한 agentic 엔지니어링: multi-agent 패턴(planner/implementer/reviewer), W&B·HF용 MCP server, guardrail을 갖춘 에이전트 주도 ablation 루프(불변 eval 스크립트, 사람이 승인하는 config diff)"
+    },
+    {
+     "min": 10,
+     "topic": "CI for research code: smoke-test on 1 batch, deterministic seeds, config-as-code (hydra/yaml); pre-registration of the capstone eval protocol (frozen this week, before results exist).",
+     "topic_ko": "연구 코드를 위한 CI: 1 batch smoke-test, deterministic seed, config-as-code(hydra/yaml) · capstone eval protocol의 사전 등록(결과가 나오기 전, 이번 주에 freeze)"
+    },
+    {
+     "min": 10,
+     "topic": "Chinchilla applied: each team defends its N/D/GPU-hour triple against its W9 scaling fit in 60 seconds.",
+     "topic_ko": "Chinchilla 실전 적용: 각 팀이 자기 N/D/GPU-hour 조합을 W9 scaling fit에 비추어 60초 안에 방어"
+    }
+   ],
+   "lab": {
+    "task": "Capstone sprint studio, led by Dr. Budamala: freeze data pipeline and eval protocol; launch fine-tuning/eval runs (checkpoint-resumable); design reviews at the bench. The instructor is at AGU — Dr. Budamala runs the session.",
+    "task_ko": "capstone sprint 스튜디오, Dr. Budamala 진행: 데이터 파이프라인과 eval protocol freeze · fine-tuning/eval run launch(checkpoint에서 재개 가능) · 벤치별 설계 리뷰. 교수는 AGU 출장 — Dr. Budamala가 세션 진행",
+    "data": [],
+    "tools": [
+     "W&B (alerts, MCP)",
+     "GitHub Actions CI",
+     "hydra/yaml configs",
+     "Claude Code/Codex"
+    ],
+    "deliverable": "M1 (PDF on this site, due Fri 12/4 23:59): frozen data/ + eval/ modules with CI green; runs launched with public W&B link; pre-registered eval protocol.",
+    "deliverable_ko": "M1(PDF, 이 사이트에 Fri 12/4 23:59까지): CI green인 frozen data/ + eval/ 모듈 · 공개 W&B 링크와 함께 launch된 run · 사전 등록된 eval protocol",
+    "homework": null
+   },
+   "reading": {
+    "memo": "none",
+    "primary": [],
+    "optional": [
+     {
+      "title": "Price et al. 2024 — GenCast",
+      "link": "https://arxiv.org/abs/2312.15796"
+     },
+     {
+      "title": "FGN / WeatherNext 2",
+      "link": "https://arxiv.org/abs/2506.10772"
+     }
+    ],
+    "questions": [
+     "CRPS-trained GenCast redefines what a 'better' forecast means vs RMSE-optimized deterministic models — which metric should headline your capstone eval, and why?",
+     "Your data is capped — what does data-constrained (Chinchilla-with-epoching) scaling say about repeating epochs vs shrinking the model?",
+     "What can an agent safely automate in your capstone loop, and what must remain human-gated? Write the gate list into your repo."
+    ]
+   },
+   "skills": [
+    "multi-agent/MCP workflows",
+    "experiment automation",
+    "CI for ML",
+    "pre-registered evaluation",
+    "compute-optimal execution"
+   ],
+   "instructor": "Dr. Budamala (HydroAI postdoc)"
+  },
+  {
+   "n": 14,
+   "phase": "Capstone Sprints",
+   "title": "Capstone Sprint 2 + Peer Code Review; Model Cards and Reproducibility",
+   "goal": "Fine-tune and evaluate the model; subject your code to structured peer review. Milestone M2 due.",
+   "title_ko": "Capstone Sprint 2 + 동료 코드 리뷰; Model Card와 재현성",
+   "goal_ko": "모델을 fine-tuning하고 평가하며, 코드를 구조화된 동료 리뷰에 부칩니다. Milestone M2 제출.",
+   "date": "2026-12-14",
+   "concept": [
+    {
+     "min": 15,
+     "topic": "Model cards and data cards done properly: intended use, out-of-scope use, eval disaggregation (by region/biome/lead time), limitations that are specific, not liability boilerplate.",
+     "topic_ko": "제대로 쓰는 model card와 data card: 의도된 용도, 범위 밖 용도, eval 세분화(지역/biome/lead time별), 면책 보일러플레이트가 아닌 구체적 한계"
+    },
+    {
+     "min": 10,
+     "topic": "Reproducibility checklist: seeds, environment lockfiles, data versioning/DOIs, exact commit for every number in the report; license compatibility of your release.",
+     "topic_ko": "재현성 체크리스트: seed, 환경 lockfile, 데이터 버저닝/DOI, 보고서의 모든 숫자에 대한 정확한 commit · 릴리스의 라이선스 호환성"
+    },
+    {
+     "min": 5,
+     "topic": "Peer-review protocol: assigned reviewer pairs (geo↔weather cross-track), review = run their smoke test + read eval code + file ≥3 substantive GitHub issues.",
+     "topic_ko": "peer-review protocol: 지정 리뷰어 페어(geo↔weather 교차 트랙), 리뷰 = 상대 smoke test 실행 + eval 코드 읽기 + 실질적 GitHub issue 3건 이상 제출"
+    }
+   ],
+   "lab": {
+    "task": "Capstone sprint studio, led by Dr. Budamala: downstream fine-tuning with the mandatory baseline set; structured peer code review in session (>=3 substantive issues given and received).",
+    "task_ko": "capstone sprint 스튜디오, Dr. Budamala 진행: 필수 baseline 세트와 함께 downstream fine-tuning · 세션 내 구조화된 동료 코드 리뷰(실질적 issue 3건 이상 주고받기)",
+    "data": [],
+    "tools": [
+     "GitHub (issues, review)",
+     "W&B",
+     "peft/HF Hub"
+    ],
+    "deliverable": "M2: checkpoint archived; ≥1 fine-tuned downstream result with baselines table; peer review given and received (issue links); draft model card in repo.",
+    "deliverable_ko": "M2: checkpoint 보관 완료 · baseline 표를 갖춘 fine-tuned downstream 결과 1건 이상 · 주고받은 peer review(issue 링크) · repo 내 model card 초안",
+    "homework": null
+   },
+   "reading": {
+    "memo": "none",
+    "primary": [],
+    "optional": [
+     {
+      "title": "Mitchell et al. 2019 — Model Cards for Model Reporting",
+      "link": "https://arxiv.org/abs/1810.03993"
+     },
+     {
+      "title": "How Usable Are Geospatial Foundation Models?",
+      "link": "https://arxiv.org/abs/2608.03804"
+     }
+    ],
+    "questions": [
+     "Write the 'out-of-scope uses' section for your own model in three honest sentences.",
+     "Of the usability failures found across 89 GFMs, which three are cheapest to prevent — and does your repo prevent them?"
+    ]
+   },
+   "skills": [
+    "model/data cards",
+    "reproducibility engineering",
+    "code review",
+    "licensing"
+   ],
+   "instructor": "Dr. Budamala (HydroAI postdoc)"
+  },
+  {
+   "n": 15,
+   "phase": "Capstone Sprints",
+   "title": "Wrap-up: evaluation, documentation, release candidate — final polish week",
+   "goal": "Finish evaluation and ablation, harden documentation, cut a release candidate. Milestone M3 due.",
+   "title_ko": "마무리: 평가·문서화·릴리스 후보 — 최종 정리 주간",
+   "goal_ko": "평가와 ablation을 마무리하고 문서를 다듬어 release candidate를 만듭니다. Milestone M3 제출.",
+   "date": "2026-12-15",
+   "concept": [
+    {
+     "min": 10,
+     "topic": "Release engineering final pass: HF Hub versioned release, GitHub tag, W&B report as appendix, GitHub Pages project page.",
+     "topic_ko": "릴리스 엔지니어링 최종 점검: HF Hub 버전 릴리스, GitHub tag, 부록으로서의 W&B report, GitHub Pages 프로젝트 페이지"
+    },
+    {
+     "min": 10,
+     "topic": "Recorded-demo rubric: what the ~8-minute video must show (problem, data, evidence, baselines, ablation, limitations, live quickstart run).",
+     "topic_ko": "녹화 데모 rubric: ~8분 영상이 반드시 보여줄 것(문제, 데이터, 근거, baseline, ablation, 한계, 라이브 quickstart 실행)"
+    }
+   ],
+   "lab": {
+    "task": "Final polish on your own schedule: complete the ablation, finalize eval tables with seeds/error bars, finish model card and README quickstart, tag the release candidate. Questions via GitHub issues.",
+    "task_ko": "각자 일정에 맞춘 최종 정리: ablation 완료, seed/error bar가 있는 eval 표 확정, model card와 README quickstart 마무리, release candidate tag. 질문은 GitHub issue로",
+    "data": [],
+    "tools": [
+     "HF Hub",
+     "GitHub (tags, Pages)",
+     "W&B"
+    ],
+    "deliverable": "M3: full results + ablation tables; complete model card; release candidate tagged on HF Hub + GitHub; draft slides.",
+    "deliverable_ko": "M3: 전체 결과 + ablation 표 · 완성된 model card · HF Hub + GitHub에 tag된 release candidate · 슬라이드 초안",
+    "homework": null
+   },
+   "reading": {
+    "memo": "none",
+    "primary": [],
+    "optional": [
+     {
+      "title": "AlphaEarth Foundations",
+      "link": "https://arxiv.org/abs/2507.22291"
+     },
+     {
+      "title": "TESSERA",
+      "link": "https://arxiv.org/abs/2506.20380"
+     },
+     {
+      "title": "Aardvark Weather (Nature 2025)",
+      "link": "https://arxiv.org/abs/2404.00411"
+     },
+     {
+      "title": "ACE2",
+      "link": "https://arxiv.org/abs/2411.11268"
+     },
+     {
+      "title": "DINOv3",
+      "link": "https://arxiv.org/abs/2508.10104"
+     },
+     {
+      "title": "EO-FMs for Terrestrial Ecohydrology",
+      "link": "https://arxiv.org/abs/2608.15282"
+     }
+    ],
+    "questions": [
+     "What would this paper's authors say is wrong with your capstone?",
+     "What is the smallest experiment that would extend your capstone toward this frontier?"
+    ]
+   },
+   "skills": [
+    "benchmark reporting with uncertainty",
+    "ablation completion",
+    "release packaging",
+    "scientific presentation"
+   ],
+   "async": true
+  },
+  {
+   "n": 16,
+   "phase": "Capstone Sprints",
+   "title": "Demo Week: recorded presentations + public release (no class meeting)",
+   "goal": "Ship it.",
+   "title_ko": "데모 주간: 녹화 발표 + 공개 릴리스 (수업 없음)",
+   "goal_ko": "완성하고, 공개합니다.",
+   "date": "2026-12-16",
+   "concept": [
+    {
+     "min": 120,
+     "topic": "Recorded demo (~8 min video): problem, data, evidence, downstream results vs baselines, ablation, limitations, HF Hub + project page walk-through.",
+     "topic_ko": "녹화 데모(~8분 영상): 문제, 데이터, 근거, baseline 대비 downstream 결과, ablation, 한계, HF Hub + 프로젝트 페이지 워크스루"
+    },
+    {
+     "min": 15,
+     "topic": "Release verification (async): an assigned peer + the instructor clone your repo fresh and run the README quickstart; it must work.",
+     "topic_ko": "릴리스 검증(async): 지정 peer + 교수가 repo를 새로 clone해 README quickstart 실행 — 반드시 작동해야 함"
+    },
+    {
+     "min": 15,
+     "topic": "Course retrospective: what the 2026 landscape will look like in 2027; how to turn a capstone into a workshop paper (AGU/EGU, NeurIPS CCAI, ICLR ML4RS).",
+     "topic_ko": "과목 회고: 2026 지형도는 2027년에 어떤 모습일까 · capstone을 workshop 논문으로 만드는 법(AGU/EGU, NeurIPS CCAI, ICLR ML4RS)"
+    }
+   ],
+   "lab": {
+    "task": "No lab — recorded demo + public release week. Everything due Wed 12/16 23:59 KST, report PDF submitted on this site.",
+    "task_ko": "lab 없음 — 녹화 데모 + 공개 릴리스 주간. 모든 제출물은 Wed 12/16 23:59 KST까지, 보고서 PDF는 이 사이트에 제출",
+    "data": [],
+    "tools": [],
+    "deliverable": "Final package due Wed 12/16 23:59 KST: HF Hub release with model card, tagged GitHub repo with working quickstart, 6-page report (PDF on this site), W&B report link, recorded demo video link.",
+    "deliverable_ko": "최종 패키지, Wed 12/16 23:59 KST까지: model card를 갖춘 HF Hub 릴리스, 작동하는 quickstart가 있는 tag된 GitHub repo, 6쪽 보고서(이 사이트에 PDF), W&B report 링크, 녹화 데모 영상 링크",
+    "homework": null
+   },
+   "reading": {
+    "memo": "none",
+    "primary": [],
+    "optional": [],
+    "questions": []
+   },
+   "skills": [
+    "scientific presentation",
+    "release verification",
+    "shipping a public model"
+   ],
+   "async": true
+  }
+ ],
+ "events": [
+  {
+   "after": 5,
+   "date": "2026-10-05",
+   "kind": "noclass",
+   "title": "No class — substitute holiday (National Foundation Day)",
+   "title_ko": "휴강 — 개천절 대체공휴일"
+  },
+  {
+   "after": 6,
+   "date": "2026-10-19",
+   "kind": "exam",
+   "title": "Book Check — 60′ closed-book on the hand-summarized chapters (Goodfellow 5/6/9/10 + d2l 11) · counts as 2 quiz slots · TA-proctored, no lecture",
+   "title_ko": "교과서 점검 — 손으로 정리한 챕터(Goodfellow 5·6·9·10 + d2l 11) 범위 60분 closed-book · 퀴즈 2회분 반영 · 조교 감독, 강의 없음"
+  }
+ ]
 }
