@@ -78,27 +78,31 @@ function injectNav() {
   const nav = document.createElement("nav");
   nav.className = "site-nav";
   nav.innerHTML = `<div class="in">
-    <span class="brand">
-      <a class="logo-chip" href="https://env1.gist.ac.kr/env1/" target="_blank" rel="noopener"
-         title="GIST School of Environment and Energy Engineering"><img src="${P}assets/img/gist.png" alt="GIST"></a>
-      <a class="logo-link" href="https://hydroai.net" target="_blank" rel="noopener" title="HydroAI Lab">
-        <img class="logo-ha ha-light" src="${P}assets/img/hydroai_logo_black.png" alt="HydroAI Lab">
-        <img class="logo-ha ha-dark" src="${P}assets/img/hydroai_logo_white.png" alt="HydroAI Lab">
-      </a>
-      <a class="brand-t" href="${P}index.html">EN5425 / EV4240<small>Fall 2026</small></a>
-    </span>
-    ${NAV.map(([id, en, ko, href]) =>
-      `<a class="item${id === page ? " on" : ""}" href="${href.startsWith("/") ? P + href.slice(1) : P + href}">${lang === "ko" ? ko : en}</a>`).join("")}
-    <span class="nav-date tnum">${navDateChip(lang)}</span>
-    <span id="navAuth" style="display:flex;gap:10px;align-items:center;white-space:nowrap">
-      <a class="item" href="${P}portal/login.html">${lang === "ko" ? "로그인" : "Sign in"}</a>
-    </span>
-    <button class="btn lang-btn" id="themeBtn" type="button" title="${THEME.effectiveDark()
-      ? (lang === "ko" ? "라이트 모드로" : "Switch to light mode")
-      : (lang === "ko" ? "다크 모드로" : "Switch to dark mode")}"
-      aria-label="Toggle dark mode">${THEME.effectiveDark() ? "☀" : "☾"}</button>
-    <button class="btn lang-btn" id="langBtn" type="button"
-      aria-label="Switch language">${lang === "ko" ? "EN" : "한국어"}</button>
+    <div class="row row1">
+      <span class="brand">
+        <a class="logo-chip" href="https://env1.gist.ac.kr/env1/" target="_blank" rel="noopener"
+           title="GIST School of Environment and Energy Engineering"><img src="${P}assets/img/gist.png" alt="GIST"></a>
+        <a class="logo-link" href="https://hydroai.net" target="_blank" rel="noopener" title="HydroAI Lab">
+          <img class="logo-ha ha-light" src="${P}assets/img/hydroai_logo_black.png" alt="HydroAI Lab">
+          <img class="logo-ha ha-dark" src="${P}assets/img/hydroai_logo_white.png" alt="HydroAI Lab">
+        </a>
+        <a class="brand-t" href="${P}index.html">EN5425 / EV4240<small>Fall 2026</small></a>
+      </span>
+      <span class="menu">${NAV.map(([id, en, ko, href]) =>
+        `<a class="item${id === page ? " on" : ""}" href="${href.startsWith("/") ? P + href.slice(1) : P + href}">${lang === "ko" ? ko : en}</a>`).join("")}</span>
+    </div>
+    <div class="row row2">
+      <span class="nav-date tnum">${navDateChip(lang)}</span>
+      <span id="navAuth" style="display:flex;gap:10px;align-items:center;white-space:nowrap">
+        <a class="item" href="${P}portal/login.html">${lang === "ko" ? "로그인" : "Sign in"}</a>
+      </span>
+      <button class="btn lang-btn" id="themeBtn" type="button" title="${THEME.effectiveDark()
+        ? (lang === "ko" ? "라이트 모드로" : "Switch to light mode")
+        : (lang === "ko" ? "다크 모드로" : "Switch to dark mode")}"
+        aria-label="Toggle dark mode">${THEME.effectiveDark() ? "☀" : "☾"}</button>
+      <button class="btn lang-btn" id="langBtn" type="button"
+        aria-label="Switch language">${lang === "ko" ? "EN" : "한국어"}</button>
+    </div>
   </div>`;
   document.body.prepend(nav);
   nav.querySelector("#themeBtn").addEventListener("click", () => {
