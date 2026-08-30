@@ -2,6 +2,10 @@
 /* EN5425 deck framework — keyboard-driven slide navigation, no dependencies.
    Keys: → ↓ Space PgDn next · ← ↑ PgUp prev · Home/End · N toggles speaker notes.
    URL hash (#7) addresses a slide directly and survives reload. */
+try {
+  const th = localStorage.getItem("en5425-theme");
+  if (th) document.documentElement.dataset.theme = th;
+} catch {}
 document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("deck");
   const slides = [...document.querySelectorAll("section.slide")];

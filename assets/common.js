@@ -22,6 +22,23 @@ const LANG = {
 };
 const t = (en, ko) => (document.body.dataset.lang === "ko" && ko) ? ko : en;
 
+/* Manual theme override: null = follow system, "dark"/"light" = explicit. */
+const THEME = {
+  get: () => { try { return localStorage.getItem("en5425-theme"); } catch { return null; } },
+  set: (v) => { try { v ? localStorage.setItem("en5425-theme", v) : localStorage.removeItem("en5425-theme"); } catch {} },
+  apply: () => {
+    const v = THEME.get();
+    if (v) document.documentElement.dataset.theme = v;
+    else delete document.documentElement.dataset.theme;
+  },
+  effectiveDark: () => {
+    const v = THEME.get();
+    if (v) return v === "dark";
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  },
+};
+THEME.apply();
+
 /* Nav is injected so every page stays in sync. body[data-page] marks the active item. */
 const NAV = [
   ["index", "Home", "Home", "index.html"],
@@ -74,10 +91,18 @@ function injectNav() {
     <span id="navAuth" style="display:flex;gap:10px;align-items:center;white-space:nowrap">
       <a class="item" href="${P}portal/login.html">${lang === "ko" ? "로그인" : "Sign in"}</a>
     </span>
+    <button class="btn lang-btn" id="themeBtn" type="button" title="${THEME.effectiveDark()
+      ? (lang === "ko" ? "라이트 모드로" : "Switch to light mode")
+      : (lang === "ko" ? "다크 모드로" : "Switch to dark mode")}"
+      aria-label="Toggle dark mode">${THEME.effectiveDark() ? "☀" : "☾"}</button>
     <button class="btn lang-btn" id="langBtn" type="button"
       aria-label="Switch language">${lang === "ko" ? "EN" : "한국어"}</button>
   </div>`;
   document.body.prepend(nav);
+  nav.querySelector("#themeBtn").addEventListener("click", () => {
+    THEME.set(THEME.effectiveDark() ? "light" : "dark");
+    location.reload();
+  });
   nav.querySelector("#langBtn").addEventListener("click", () => {
     LANG.set(lang === "ko" ? "en" : "ko");
     location.reload();
