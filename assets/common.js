@@ -72,7 +72,7 @@ const fmtDate = (d) => {
   return `${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][m-1]} ${day}`;
 };
 function currentWeek(weeks) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); // KST-anchored
   const dated = weeks.filter((w) => w.date);
   if (!dated.length) return weeks[0];
   return dated.filter((w) => w.date <= today).pop() || dated[0];

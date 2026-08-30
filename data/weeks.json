@@ -24,11 +24,11 @@
         },
         {
           "min": 10,
-          "topic": "Logistics: grading (10/30/60), weekly memos, discussion-lead rotation, GitHub Pages site requirement, compute accounts. Explicit self-selection statement: if this week's two papers took more than ~6 hours and still feel opaque, the course will feel like that every week."
+          "topic": "Logistics + honest self-selection: grading (10/30/60), site sign-in (id = student number), lead-pair sign-up. Explicit statement: \"the two papers assigned today are due as tickets before Week 2 — if they take you more than ~6 hours and still feel opaque, this course will feel like that every week.\""
         },
         {
           "min": 15,
-          "topic": "Reading discussion: Attention Is All You Need + ViT — cold-called derivation of scaled dot-product attention shapes; why patchify is tokenization."
+          "topic": "Assigning the Week 1 readings in class: a guided walkthrough of Attention Is All You Need + ViT — what to look for, how to read them; both tickets (W1+W2) due Sun 9/6 13:00 on this site. First journal club is W2, instructor-moderated."
         },
         {
           "min": 5,
@@ -36,7 +36,7 @@
         }
       ],
       "lab": {
-        "task": "(a) Environment: Python + PyTorch on Colab and/or the shared GPU server, uv/conda, GPU sanity check. (b) Create personal course repo with GitHub Pages (Quarto or MkDocs-Material) and publish Research Note 00. (c) With the agent, build and train a small CNN classifier on EuroSAT (RGB), ~10 epochs, and manually verify one gradient with a finite-difference check the agent writes tests for.",
+        "task": "(a) Environment: Python + PyTorch on Colab and/or the shared GPU server, uv/conda, GPU sanity check. (b) Create personal course repo with GitHub Pages (Quarto or MkDocs-Material) and publish Research Note 01. (c) With the agent, build and train a small CNN classifier on EuroSAT (RGB), ~10 epochs, and manually verify one gradient with a finite-difference check the agent writes tests for.",
         "data": [
           "EuroSAT (RGB, via TorchGeo/HF Datasets)"
         ],
@@ -46,7 +46,7 @@
           "TorchGeo",
           "GitHub Pages (Quarto/MkDocs)"
         ],
-        "deliverable": "Live course site URL + Note 01 (loss curve, accuracy, one paragraph on what the agent got wrong and how you caught it) pushed to git.",
+        "deliverable": "Live course-site account activated (password changed), environment verified, first CNN trained; Research Note 01 drafted in the repo — PDF submitted on this site by Sun 9/6 23:59 as part of HW0.",
         "homework": null
       },
       "reading": {
@@ -393,7 +393,7 @@
         },
         {
           "min": 5,
-          "topic": "Mixed-precision and FlashAttention as 'why your lab fits in 75 minutes'."
+          "topic": "Mixed-precision and FlashAttention as \"why your lab fits in 60 minutes.\""
         }
       ],
       "lab": {
@@ -543,7 +543,7 @@
         "tools": [
           "GitHub (issues, PR review)"
         ],
-        "deliverable": "2-page proposal (data, objective, model size, GPU-hour budget, downstream tasks, eval protocol, risk plan) merged to repo via reviewed PR; weather-direction proposals filed as provisional pending the post-W11 revision gate.",
+        "deliverable": "2-page proposal (data, objective, base model, compute budget, downstream tasks, eval protocol, risk plan) — PDF submitted on this site by Sun 11/1 13:00; pitched in class 11/2.",
         "homework": null
       },
       "reading": {
@@ -589,7 +589,7 @@
         }
       ],
       "lab": {
-        "task": "Fit a mini scaling law for your own model family. The 4-size sweep (launched pre-class as homework) is already done; the 75 in-class minutes go to fitting and diagnosing the power law: plot reconstruction loss (and probe accuracy) vs params on log–log, fit the power law, stress-test where the fit breaks, and extrapolate to your capstone budget — writing the prediction into your proposal.",
+        "task": "Fit a mini scaling law for your own model family. The 4-size sweep (launched pre-class as homework) is already done; the 60 in-class minutes go to fitting and diagnosing the power law: plot reconstruction loss (and probe accuracy) vs params on log–log, fit the power law, stress-test where the fit breaks, and extrapolate to your capstone budget — writing the prediction into your proposal.",
         "data": [
           "W3 chip corpus (fixed)",
           "W7 mini-MAE at 4 sizes (~0.1M/0.5M/2M/8M params)"
@@ -887,7 +887,7 @@
         }
       ],
       "lab": {
-        "task": "Sprint 1 (100 min): freeze data pipeline and eval protocol; launch the capstone run — default track: LoRA fine-tuning of a public FM on free-tier compute; Hydro-FM team: pretraining launch (background on shared server or checkpoint-resumable Colab); set up agent-monitored W&B alerts. Instructor circulates for design reviews.",
+        "task": "ASYNC SPRINT (no meeting): freeze data pipeline and eval protocol; launch the fine-tuning/eval runs (checkpoint-resumable); set up W&B alerts. Feedback via GitHub issues.",
         "data": [],
         "tools": [
           "W&B (alerts, MCP)",
@@ -895,7 +895,7 @@
           "hydra/yaml configs",
           "Claude Code/Cursor"
         ],
-        "deliverable": "M1 (end of week, pushed to repo): frozen data/ + eval/ modules with CI badge green; capstone run launched with public W&B link; pre-registered eval protocol document.",
+        "deliverable": "M1 (PDF on this site, due Fri 12/4 23:59): frozen data/ + eval/ modules with CI green; runs launched with public W&B link; pre-registered eval protocol.",
         "homework": null
       },
       "reading": {
@@ -949,7 +949,7 @@
         }
       ],
       "lab": {
-        "task": "Sprint 2 (105 min): downstream fine-tuning and evaluation (≥1 task, with the mandatory baseline quartet from W12); 30-min structured peer code-review block mid-session; triage reviewer issues.",
+        "task": "ASYNC SPRINT (no meeting): downstream fine-tuning with the mandatory baseline set; structured peer code review conducted asynchronously on GitHub (>=3 substantive issues given and received).",
         "data": [],
         "tools": [
           "GitHub (issues, review)",
@@ -1000,11 +1000,11 @@
         },
         {
           "min": 10,
-          "topic": "Demo-day rubric walkthrough + how to present a negative result honestly (pretraining or fine-tuning that didn't beat the baseline is publishable if the eval is airtight)."
+          "topic": "Recorded-demo rubric: what the ~8-minute video must show (problem, data, evidence, baselines, ablation, limitations, live quickstart run)."
         }
       ],
       "lab": {
-        "task": "Sprint 3 (110 min): complete the ablation axis; finalize eval tables with seeds/error bars; finish model card, README quickstart (pip install → inference in <5 min), project page; tag release candidate. Instructor does pre-flight checks on demand.",
+        "task": "ASYNC SPRINT (no meeting): complete the ablation; finalize eval tables with seeds/error bars; finish model card, README quickstart, project page; tag the release candidate.",
         "data": [],
         "tools": [
           "HF Hub",
@@ -1067,11 +1067,11 @@
       "concept": [
         {
           "min": 120,
-          "topic": "Demo talks: 8-min talk + 4-min Q&A per student/team — problem, data, training evidence (loss curves + scaling context), downstream results vs the full baseline quartet, ablation, limitations, live HF Hub + project page."
+          "topic": "Recorded demo (~8 min video): problem, data, evidence, downstream results vs baselines, ablation, limitations, HF Hub + project page walk-through."
         },
         {
           "min": 15,
-          "topic": "Live release verification: instructor (or a peer, agent-assisted) clones one randomly selected repo and runs the README quickstart during the session — it must work."
+          "topic": "Release verification (async): an assigned peer + the instructor clone your repo fresh and run the README quickstart; it must work."
         },
         {
           "min": 15,
@@ -1079,10 +1079,10 @@
         }
       ],
       "lab": {
-        "task": "No lab — demo day.",
+        "task": "No lab — recorded demo + public release week. Everything due Wed 12/16 23:59 KST, report PDF submitted on this site.",
         "data": [],
         "tools": [],
-        "deliverable": "Final artifacts due 48 h after class: HF Hub model card, tagged GitHub repo with working quickstart, 6-page report on the GitHub Pages site, W&B report.",
+        "deliverable": "Final package due Wed 12/16 23:59 KST: HF Hub release with model card, tagged GitHub repo with working quickstart, 6-page report (PDF on this site), W&B report link, recorded demo video link.",
         "homework": null
       },
       "reading": {
@@ -1093,7 +1093,7 @@
       },
       "skills": [
         "scientific presentation",
-        "live release verification",
+        "release verification",
         "shipping a public model"
       ],
       "async": true

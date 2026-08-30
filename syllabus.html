@@ -29,7 +29,7 @@
       <span><span class="lang-en">Prof. Hyunglok Kim · <a href="https://hydroai.net">HydroAI Lab</a></span><span
         class="lang-ko">김형록 교수 · <a href="https://hydroai.net">HydroAI Lab</a></span></span></div>
     <div class="row"><span style="flex:none;width:130px;color:var(--muted)"><span class="lang-en">Format</span><span class="lang-ko">수업 형식</span></span>
-      <span><span class="lang-en">One 3-hour session per week, 16 weeks. Weeks 2–15 run on a fixed rhythm:
+      <span><span class="lang-en">One 3-hour session per week (12 in-person sessions). Weeks 2–7 and 9–12 run on a fixed rhythm:
         closed-book reading quiz (0:00–0:05) · lecture (0:05–1:15) · break (1:15–1:30) · journal club
         (1:30–2:00 — groups of 4–5, seeded by the week's entrance tickets, moderated by the week's lead pair) ·
         lab (2:00–3:00). Week 1 is orientation day; Week 8 is proposal day (no quiz or journal club).
@@ -37,7 +37,7 @@
         week)</b> — the last three weeks of the capstone run as <b>asynchronous sprints</b> with
         feedback through GitHub, and the final presentation is a <b>recorded demo + public release</b>
         due in finals week, so this course never competes with your other exams.</span><span
-        class="lang-ko">주 1회 3시간 수업, 16주 과정입니다. 2–15주차는 고정된 리듬으로 진행합니다:
+        class="lang-ko">주 1회 3시간 수업(대면 12회)입니다. 2–7주차와 9–12주차는 고정된 리듬으로 진행합니다:
         closed-book reading quiz (0:00–0:05) · 강의 (0:05–1:15) · 휴식 (1:15–1:30) · journal club
         (1:30–2:00 — 4–5명 그룹, 그 주의 entrance ticket을 재료로 해당 주 lead 조가 진행) ·
         lab (2:00–3:00). 1주차는 오리엔테이션, 8주차는 제안서 발표일(quiz·journal club 없음)입니다.
@@ -64,7 +64,7 @@
     Plan for <b>8–12 hours per week outside of class, every week</b>: one assigned research paper weekly with a written
     response due 24 hours before class and active participation in discussion (30% of your grade); hands-on labs whose
     threads continue between sessions; and a semester project (60%) in which you will fine-tune, evaluate, document, and
-    publicly release a small geospatial or weather/climate foundation model, with graded milestones beginning in Week&nbsp;4.
+    publicly release a small geospatial or weather/climate foundation model — graded milestones start with the Week&nbsp;8 proposal (M1&ndash;M3 follow in December).
     The material compounds: each week's lab is a component of your capstone, and falling one week behind means falling
     behind on your own model. Week 1 includes an ungraded readiness diagnostic and a pass/fail gate assignment (HW0) that
     together give you an honest measurement of what this course will cost you; I ask you to trust that measurement and
@@ -75,7 +75,7 @@
     <b>매주 수업 외 8–12시간</b>을 계획하시기 바랍니다: 매주 지정된 연구 논문 한 편에 대한 서면 응답을 수업 24시간 전까지
     제출하고 토론에 적극적으로 참여해야 하며(성적의 30%), lab의 흐름은 수업 사이에도 이어지고, 학기 프로젝트(60%)에서는
     소형 지리공간 또는 기상/기후 foundation model을 fine-tuning하고 평가하고 문서화하여 공개 release하게 되며,
-    채점되는 milestone은 4주차부터 시작됩니다. 이 과목의 내용은 누적됩니다: 매주의 lab이 capstone의 구성 요소이므로,
+    채점되는 milestone은 8주차 proposal부터 시작됩니다 (M1–M3는 12월). 이 과목의 내용은 누적됩니다: 매주의 lab이 capstone의 구성 요소이므로,
     한 주 뒤처지는 것은 곧 자신의 모델에서 뒤처지는 것입니다. 1주차에는 무채점 준비도 진단과 pass/fail 관문 과제(HW0)가 있으며,
     이 둘은 이 강의가 여러분에게 요구할 비용을 정직하게 측정해 줍니다. 그 측정을 신뢰하고 수강정정 기한 전에
     결정해 주시기 바랍니다. 끝까지 해내는 학생은 release된 모델, 공개 엔지니어링 포트폴리오, 연구 수준의 습관을 얻게 됩니다.
@@ -170,14 +170,14 @@
     </table>
   </div>
   <div class="note"><span class="lang-en"><b>Entrance ticket format</b> (max 1 page): a 3-sentence summary · 1 substantive critique · 1 connection to your
-    capstone · 1 question you actually want answered. The file convention is unchanged: tickets live at
+    capstone · 1 question you actually want answered. The name convention is unchanged — each ticket is titled
     <code>memos/weekNN.md</code> in your repo. Tickets are <b>public by design</b> — each one is published on the course
     site's <a href="journal.html">Journal Club</a> tab alongside your cohort card photo, so the whole class reads each
     other's takes before discussion, consistent with the course's work-in-public philosophy. Agents may be used to
     interrogate the paper, but the critique must be specific enough that it could not have been written without reading —
     spot-checked by cold-calling in class.</span><span
     class="lang-ko"><b>Entrance ticket 형식</b> (최대 1페이지): 3문장 요약 · 실질적 비판 1개 · 자신의 capstone과의 연결 1개 ·
-    정말로 답을 알고 싶은 질문 1개. 파일 규칙은 그대로입니다: ticket은 자신의 repo의 <code>memos/weekNN.md</code>에 둡니다.
+    정말로 답을 알고 싶은 질문 1개. 이름 규칙은 그대로입니다 — 각 ticket의 제목은 <code>weekNN.md</code>입니다. 제출은 git push가 아니라 이 사이트에 로그인해서 합니다.
     Ticket은 <b>설계상 공개</b>입니다 — 각 ticket은 cohort 카드 사진과 함께 강의 사이트의
     <a href="journal.html">Journal Club</a> 탭에 게시되어, 토론 전에 학급 전체가 서로의 관점을 읽습니다. 이는 이 강의의
     work-in-public 철학과 일치하는 방식입니다. 논문을 파고드는 데 에이전트를 사용해도 되지만, 비판은 논문을 읽지 않고는
@@ -200,13 +200,13 @@
     <a href="capstone.html">Capstone</a>.</span></p>
 
   <h2><span class="lang-en">HW0 — the gate</span><span class="lang-ko">HW0 — 관문 과제</span></h2>
-  <div class="note"><span class="pill acc">pass/fail</span> <span class="lang-en"><b>HW0 is due 48 h before the Week 2 class</b> (Sunday 23:59 KST).
+  <div class="note"><span class="pill acc">pass/fail</span> <span class="lang-en"><b>HW0 (PDF report, submitted on this site) is due Sunday 9/6, 23:59 KST</b> — the night before the Week 2 class.
     It is a compressed sample of an ordinary week — environment, repo, a small trained model with baselines, a report, a
     research note, clean git history — and it is designed to take 4–8 hours with an AI agent if your prerequisites are in
     place. <b>Project milestones will not be accepted without a passed HW0.</b> One borderline criterion earns a single
     48-hour resubmission window. If HW0 takes you 20 hours, this course will take you 20 hours a week: use that
     information before add/drop closes.</span><span
-    class="lang-ko"><b>HW0는 2주차 수업 48시간 전까지 제출해야 합니다</b> (일요일 23:59 KST).
+    class="lang-ko"><b>HW0(PDF 보고서, 이 사이트에서 제출)는 9/6(일) 23:59 KST까지입니다</b> — 2주차 수업 전날 밤입니다.
     HW0는 평범한 한 주를 압축한 표본입니다 — 환경 설정, repo, baseline이 있는 소형 학습 모델, 보고서,
     research note, 깨끗한 git 히스토리 — 그리고 선수 요건이 갖춰져 있다면 AI 에이전트와 함께 4–8시간이 걸리도록
     설계되었습니다. <b>HW0를 통과하지 않으면 프로젝트 milestone을 접수하지 않습니다.</b> 경계선에 걸린 기준이
@@ -217,15 +217,15 @@
 
   <h3><span class="lang-en">Late work</span><span class="lang-ko">지각 제출</span></h3>
   <p><span class="lang-en">Entrance tickets and lab research notes may be submitted up to <b>48 hours late at a 25% deduction</b> (a late ticket
-    can therefore score at most ~0.94 of 1.25; a late note at most 1.5 of 2). After 48 hours the item scores zero — this
-    is what the drop allowances (best 12 of 14 tickets, best 10 of 11 notes) exist to absorb, so spend them deliberately.
+    can therefore score at most ~1.125 of 1.5; a late note at most 1.5 of 2). After 48 hours the item scores zero — this
+    is what the drop allowances (best 10 of 11 tickets, best 10 of 11 notes) exist to absorb, so spend them deliberately.
     A ticket submitted after its class session still earns late credit but cannot inform the discussion, which is its
     actual purpose. <b>Milestones (proposal, M1–M3, final deliverable) are not covered by the late window</b>: they anchor
     in-class events and peer review, and are accepted late only by arrangement made with the instructor <i>before</i> the
     deadline. HW0 follows its own gate rules above.</span><span
     class="lang-ko">Entrance ticket과 lab research note는 <b>48시간까지 25% 감점</b>으로 늦게 제출할 수 있습니다
-    (따라서 늦은 ticket은 최대 약 0.94/1.25점, 늦은 note는 최대 1.5/2점입니다). 48시간이 지나면 0점이 됩니다 —
-    drop 허용(ticket 14개 중 상위 12개, note 11개 중 상위 10개)이 바로 이를 흡수하기 위해 존재하므로, 신중하게
+    (따라서 늦은 ticket은 최대 약 1.125/1.5점, 늦은 note는 최대 1.5/2점입니다). 48시간이 지나면 0점이 됩니다 —
+    drop 허용(ticket 11개 중 상위 10개, note 11개 중 상위 10개)이 바로 이를 흡수하기 위해 존재하므로, 신중하게
     사용하시기 바랍니다. 수업이 끝난 뒤 제출된 ticket은 지각 점수는 받을 수 있지만 토론에 기여할 수 없습니다 —
     토론이 ticket의 본래 목적입니다. <b>Milestone(proposal, M1–M3, 최종 산출물)은 지각 제출 대상이 아닙니다</b>:
     수업 내 행사와 동료 평가의 기준점이므로, 마감 <i>전에</i> 담당교수와 사전에 합의한 경우에만 늦게 접수합니다.
