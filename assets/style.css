@@ -65,8 +65,8 @@ body:not([data-lang]) .lang-ko { display:none !important; } /* pre-JS fallback: 
 h1 { font-family:var(--serif); font-size:32px; line-height:1.2; margin:0 0 10px; text-wrap:balance; }
 h2 { font-family:var(--serif); font-size:22px; margin:44px 0 8px; }
 h3 { font-family:var(--serif); font-size:17px; margin:26px 0 8px; }
-.lede { color:var(--ink-2); max-width:66ch; margin:0 0 6px; }
-.sub { color:var(--ink-2); font-size:13.5px; margin:0 0 16px; max-width:70ch; }
+.lede { color:var(--ink-2); margin:0 0 6px; }
+.sub { color:var(--ink-2); font-size:13.5px; margin:0 0 16px; }
 .meta { display:flex; flex-wrap:wrap; gap:6px 18px; margin:14px 0 0; font-size:12.5px; color:var(--muted); }
 .meta b { color:var(--ink-2); font-weight:600; }
 
