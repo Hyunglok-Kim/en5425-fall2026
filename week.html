@@ -158,6 +158,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         <span>${next ? `<a class="btn primary" href="week.html?w=${next.n}">${t(`Week ${next.n} &#8594;`, `${next.n}주차 &#8594;`)}</a>` : ""}</span>
       </div>`;
     if (typeof initSubmitBoxes === "function") initSubmitBoxes();
+    if (location.hash === "#submit") setTimeout(() => {
+      const b = document.querySelector(".subbox");
+      if (b) b.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 350);
   } catch {
     el.innerHTML = `<p class="eyebrow">${t("Schedule", "주차별 일정")}</p><h1>${t("Week plan coming soon", "주차 계획을 곧 공개합니다")}</h1>
       <p class="lede">${t("This week's plan has not been published yet.", "이번 주 계획이 아직 게시되지 않았습니다.")}</p>
