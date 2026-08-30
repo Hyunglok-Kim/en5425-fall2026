@@ -11,12 +11,12 @@
 <body>
 
 <!-- ============================ TITLE ============================ -->
-<section class="slide title">
-  <p class="kicker">EN5425 / EV4240 · Week 2 · Fall 2026</p>
-  <h1>Leakage-Safe Evaluation Design</h1>
-  <p class="big muted">The fundamentals recap is the price of admission; the split design is the point.</p>
-  <div class="foot"><span>Deep Learning Applications in Environmental Big Data</span><span>Prof. Hyunglok Kim · GIST</span></div>
-  <aside class="notes">Open: last week we asked what a foundation model is; this week we ask a sharper question — how do you know an environmental model is good at all? Two compressed recaps (backprop, the optimizer recipe), then the headline: leakage. Total 75 min; keep the recaps brutal and fast.</aside>
+<section class="slide title" style="background:linear-gradient(rgba(10,12,18,.45),rgba(10,12,18,.78)),url('img/lena-delta.jpg') center 40%/cover no-repeat">
+  <p class="kicker" style="color:#e8a07a">EN5425 / EV4240 · Week 2 · Fall 2026</p>
+  <h1 style="color:#f4efe5;text-shadow:0 2px 24px rgba(0,0,0,.6)">Leakage-Safe Evaluation Design</h1>
+  <p class="big" style="color:#e8e2d8;text-shadow:0 1px 16px rgba(0,0,0,.6)">The fundamentals — backpropagation and the optimizer recipe — derived in full. Then the skill this course grades you on: an evaluation a reviewer cannot reject.</p>
+  <div class="foot" style="color:#cfc8bc"><span>Deep Learning Applications in Environmental Big Data · Prof. Hyunglok Kim · GIST</span><span>Image: the Lena River delta, Landsat 7 false color (NASA / USGS)</span></div>
+  <aside class="notes">Open: last week we asked what a foundation model is; this week we ask a sharper question — how do you know an environmental model is good at all? Two fully-derived recaps (backpropagation, the optimizer recipe), then the headline: leakage. Total 75 min. The derivations are on the slides this year — walk them at speaking pace for the class, and they double as complete self-study notes.</aside>
 </section>
 
 <!-- ============================ READING QUIZ ============================ -->
@@ -25,12 +25,12 @@
   <h2>Quiz first — 5 minutes, closed book</h2>
   <ul>
     <li>3 questions on this week’s paper (Reichstein et al. 2019).</li>
-    <li>No AI, no notes.</li>
+    <li>No artificial-intelligence tools, no notes.</li>
     <li>Swap with your neighbor to grade.</li>
     <li>Pass = 2 of 3.</li>
     <li>Best 8 of 10 count (6% of grade).</li>
   </ul>
-  <aside class="notes">Distribute at 0:00 sharp, collect at 0:05.</aside>
+  <aside class="notes">Distribute at 0:00 sharp, collect at 0:05. Release the paper and key on the Quizzes tab during the break.</aside>
 </section>
 
 <!-- ============================ ROADMAP ============================ -->
@@ -38,39 +38,116 @@
   <p class="kicker">Week 2 · 75 min</p>
   <h2>Today in five moves</h2>
   <ul>
-    <li><b>1 · Backprop as vector–Jacobian products</b> — and where the memory goes <span class="muted">(10 min)</span></li>
-    <li><b>2 · The optimizer recipe</b> — AdamW + warmup/cosine, the recipe every foundation model uses <span class="muted">(15 min)</span></li>
+    <li><b>1 · Backpropagation, derived</b> — chain rule to vector–Jacobian products, and where the memory goes <span class="muted">(10 min)</span></li>
+    <li><b>2 · The optimizer recipe, derived</b> — AdamW + warmup and cosine, the recipe every foundation model uses <span class="muted">(15 min)</span></li>
     <li><b>3 · Leakage-safe evaluation</b> — why random splits lie, and by how much <span class="accent">(25 min · headline)</span></li>
     <li><b>4 · Worked example</b> — a reviewer-proof split for global soil moisture <span class="muted">(10 min)</span></li>
     <li><b>5 · Journal club</b> — Reichstein et al. 2019, in groups after break <span class="muted">(30 min)</span></li>
   </ul>
-  <div class="foot"><span>Lab after break: CAMELS-US MLP + W&amp;B sweep + the random-vs-spatial split experiment</span></div>
-  <aside class="notes">Frame the asymmetry explicitly: parts 1–2 are recaps of things they nominally know — we compress to what a practitioner actually uses. Part 3 is new for most and is the skill this course will grade them on all semester. Transition: "start the clock — 10 minutes of backprop."</aside>
+  <div class="foot"><span>Lab after break: CAMELS-US network + sweep + the random-versus-spatial split experiment · every derivation today is on these slides — nothing is deferred</span></div>
+  <aside class="notes">Frame the asymmetry explicitly: parts 1–2 are things they nominally know — but this time every equation is derived on screen, one step at a time, so the deck stands alone as study notes. Part 3 is new for most and is the skill this course will grade them on all semester. Transition: "start the clock — ten minutes of backpropagation."</aside>
 </section>
 
 <!-- ============================ PART 1 ============================ -->
 <section class="slide section">
   <p class="kicker">Part 1 · 10 min</p>
-  <h2>Backprop as vector–Jacobian products</h2>
-  <aside class="notes">Timing: minutes 0–10. Promise up front: no derivation theater — the full chain-rule → VJP derivation is in the handout. Here we take the operational view: what backprop computes, what it costs, and where the memory goes — because that memory bill is why gradient checkpointing exists in Week 12.</aside>
+  <h2>Backpropagation, derived</h2>
+  <p class="big muted">Three steps of the chain rule, then the general rule — and the memory bill it creates.</p>
+  <aside class="notes">Timing: minutes 0–10. The derivation is four slides; at lecture pace that is ~5 minutes — read the equations aloud slowly and point at each symbol. The remaining slides give the cost and the memory story, which is why gradient checkpointing exists in Week 12.</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 1 · 10 min</p>
-  <h2>Backprop never builds a Jacobian</h2>
-  <ul>
-    <li>Layer f: ℝⁿ → ℝᵐ has Jacobian J ∈ ℝᵐˣⁿ. For one transformer layer, m·n ≈ 10⁸ — you never materialize it.</li>
-    <li>Reverse mode propagates a <span class="accent">vector–Jacobian product</span>: the row vector ḡᵀ·J, layer by layer, from scalar loss back to parameters.</li>
-    <li>One backward pass costs ≈ 2× the forward FLOPs — <b>independent of parameter count</b>. That is why 10⁹-parameter gradients are affordable.</li>
-    <li>Autograd = forward pass records the graph + operand tensors; backward replays it in reverse, one VJP per node.</li>
-    <li class="muted">Full derivation (chain rule → VJP recursion, with shapes) in this week's handout.</li>
+  <p class="kicker">Part 1 · Derivation · step 0</p>
+  <h2>The network we will differentiate</h2>
+  <div class="card">
+    <p style="line-height:2.1">
+      input&emsp;<b>x</b> ∈ ℝ<sup>d₀</sup><br>
+      layer 1&emsp;<b>z₁</b> = W₁x + b₁,&emsp;W₁ ∈ ℝ<sup>d₁×d₀</sup>&emsp;→&emsp;<b>h</b> = σ(z₁) <span class="muted">(σ applied to each entry)</span><br>
+      layer 2&emsp;<b>z₂</b> = W₂h + b₂,&emsp;W₂ ∈ ℝ<sup>d₂×d₁</sup><br>
+      loss&emsp;<b>L</b> = ½‖z₂ − y‖²&ensp;= ½ Σ<sub>i</sub> (z₂<sub>i</sub> − y<sub>i</sub>)²&emsp;<span class="muted">(one scalar)</span>
+    </p>
+  </div>
+  <ul class="small">
+    <li>Goal: <b>∂L/∂W₂, ∂L/∂b₂, ∂L/∂W₁, ∂L/∂b₁</b> — the gradient of one scalar with respect to every parameter.</li>
+    <li>Everything that follows is the chain rule applied three times, keeping careful track of shapes.</li>
   </ul>
-  <div class="foot"><span>Handout: backprop derivation · Griewank &amp; Walther, Evaluating Derivatives (2008)</span></div>
-  <aside class="notes">~3 min. The one sentence to land: "gradient of a scalar w.r.t. everything costs about two forward passes." Ask them: what does the forward pass have to keep around to make the backward replay possible? That question is the next slide.</aside>
+  <div class="foot"><span>Read: Goodfellow §6.5, pp. 200–220 · Dive into Deep Learning §5.3 · CS231n “Backpropagation, Intuitions” + Johnson’s “Derivatives” handout — linked on the Week 2 page</span></div>
+  <aside class="notes">~1 min. Fix the notation and shapes on this slide and the rest is mechanical. Squared-error loss keeps the algebra clean; swapping in cross-entropy changes only step 1. Emphasize: L is ONE number — that fact is what makes the whole reverse pass cheap.</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 1 · 10 min</p>
+  <p class="kicker">Part 1 · Derivation · step 1 of 3</p>
+  <h2>Output layer: one entry at a time, then in matrix form</h2>
+  <div class="card">
+    <p style="line-height:2.1">
+      ∂L/∂z₂<sub>i</sub> = z₂<sub>i</sub> − y<sub>i</sub>&emsp;⟹&emsp;<b>g₂ ≔ ∂L/∂z₂ = z₂ − y</b> ∈ ℝ<sup>d₂</sup><br>
+      z₂<sub>i</sub> = Σ<sub>j</sub> W₂[i,j]·h<sub>j</sub> + b₂<sub>i</sub>&emsp;⟹&emsp;∂z₂<sub>i</sub>/∂W₂[i,j] = h<sub>j</sub> <span class="muted">(and no other row of W₂ touches z₂<sub>i</sub>)</span><br>
+      chain rule:&emsp;∂L/∂W₂[i,j] = <span class="accent">g₂<sub>i</sub> · h<sub>j</sub></span>&emsp;⟹&emsp;<b>∂L/∂W₂ = g₂ hᵀ</b> <span class="muted">(outer product, d₂×d₁)</span>&emsp;·&emsp;<b>∂L/∂b₂ = g₂</b>
+    </p>
+  </div>
+  <ul class="small">
+    <li>Each weight W₂[i,j] influences the loss through exactly one number, z₂<sub>i</sub> — so its gradient is one product: (how much L cares about z₂<sub>i</sub>) × (how much z₂<sub>i</sub> moves per unit of W₂[i,j]).</li>
+    <li class="accent">Note what the formula needs: g₂, and <b>h — the layer’s input, saved from the forward pass</b>. Remember this.</li>
+  </ul>
+  <aside class="notes">~1.5 min. Do the middle line slowly: differentiate the sum, everything with j′ ≠ j dies, h_j survives. The outer-product form is just all (i,j) pairs at once. The bolded observation — "gradient with respect to weights = (incoming gradient) times (stored input)" — is the punchline the memory slide will collect on.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 1 · Derivation · step 2 of 3</p>
+  <h2>Backward through the hidden layer — sum over every path</h2>
+  <div class="card">
+    <p style="line-height:2.1">
+      h<sub>j</sub> feeds <i>every</i> z₂<sub>i</sub>&emsp;⟹&emsp;∂L/∂h<sub>j</sub> = Σ<sub>i</sub> g₂<sub>i</sub>·W₂[i,j]&emsp;⟹&emsp;<b>∂L/∂h = W₂ᵀ g₂</b> ∈ ℝ<sup>d₁</sup><br>
+      h<sub>j</sub> = σ(z₁<sub>j</sub>)&emsp;⟹&emsp;∂L/∂z₁<sub>j</sub> = σ′(z₁<sub>j</sub>) · (W₂ᵀg₂)<sub>j</sub>&emsp;⟹&emsp;<b>g₁ ≔ σ′(z₁) ⊙ W₂ᵀg₂</b> <span class="muted">(⊙ = entrywise)</span><br>
+      same pattern as step 1:&emsp;<b>∂L/∂W₁ = g₁ xᵀ</b>&emsp;·&emsp;<b>∂L/∂b₁ = g₁</b>
+    </p>
+  </div>
+  <ul class="small">
+    <li>The Σ<sub>i</sub> is the multivariable chain rule: h<sub>j</sub> reaches the loss through d₂ separate paths, and their contributions add.</li>
+    <li>The recursion is now visible — every layer repeats two moves: <span class="accent">pass back Wᵀg · turn gradient into weights with (g)(stored input)ᵀ</span>.</li>
+  </ul>
+  <aside class="notes">~1.5 min. The Σ-over-paths line is where students who memorized backprop actually learn it — one hidden unit, many downstream consumers, contributions add. Then point at the symmetry with step 1: the algorithm is two alternating moves, all the way down, however deep the network is.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 1 · Derivation · step 3 of 3</p>
+  <h2>The general rule: vector–Jacobian products, right to left</h2>
+  <div class="card">
+    <p style="line-height:2.1">
+      for any map f: ℝⁿ → ℝᵐ, the Jacobian is J[i,j] = ∂f<sub>i</sub>/∂x<sub>j</sub> ∈ ℝ<sup>m×n</sup><br>
+      chain over the whole network:&emsp;∂L/∂x = J₁ᵀ J₂ᵀ ⋯ J<sub>k</sub>ᵀ · ∇<sub>out</sub>L<br>
+      computed <b>right to left</b>, each step is&ensp;<span class="accent">ḡ ← Jᵀḡ</span> — a <b>vector</b>–Jacobian product, never matrix × matrix
+    </p>
+  </div>
+  <ul class="small">
+    <li>Right to left works because L is a scalar: the running quantity ḡ stays a vector the whole way down.</li>
+    <li>The Jacobian of z = Wh with respect to <b>W</b> has shape m×(m·n) — for one transformer layer that is ~10⁸ entries. You never build it: the product Jᵀḡ collapses to the outer product ḡhᵀ from step 1.</li>
+    <li>Automatic differentiation = the forward pass records the graph and saves each operand; the backward pass replays it in reverse, one vector–Jacobian product per node. That is the whole of PyTorch’s <code>loss.backward()</code>.</li>
+  </ul>
+  <div class="foot"><span>Read: Goodfellow §6.5.2 (chain rule) · Carnegie Mellon “Deep Learning Systems”, lecture 4: Automatic Differentiation · Griewank &amp; Walther, Evaluating Derivatives (2008)</span></div>
+  <aside class="notes">~1.5 min. The order-of-multiplication point deserves the emphasis: left-to-right would be Jacobian-times-Jacobian (huge matrices); right-to-left keeps everything vector-sized because the thing we differentiate is one scalar. Forward-mode exists too and wins when outputs outnumber inputs — never our case in training.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 1 · Cost</p>
+  <h2>Counting the operations: backward ≈ two forwards</h2>
+  <div class="card">
+    <p style="line-height:2.1">
+      forward through one linear layer&emsp;W h&emsp;(W ∈ ℝ<sup>m×n</sup>):&emsp;≈ 2mn floating-point operations<br>
+      backward, same layer:&emsp;∂L/∂h = Wᵀg&ensp;(≈ 2mn)&emsp;+&emsp;∂L/∂W = g hᵀ&ensp;(≈ 2mn over a batch)<br>
+      ⟹&emsp;<b>backward ≈ 2 × forward,&ensp;whole training step ≈ 3 × forward — at any parameter count</b>
+    </p>
+  </div>
+  <ul class="small">
+    <li>This is why gradients of a 10⁹-parameter model are affordable: the price of knowing ∂L/∂(everything) is two extra forward passes, not 10⁹ extra evaluations.</li>
+    <li>Contrast with finite differences: one loss evaluation <i>per parameter</i> — 10⁹ forward passes for the same information.</li>
+  </ul>
+  <div class="foot"><span>Same count in Roger Grosse’s University of Toronto lecture notes on backpropagation: one multiply–add per weight forward, two backward.</span></div>
+  <aside class="notes">~1 min. The 3× rule is worth committing to memory — it is how you estimate training cost from inference cost on any model, and it reappears in every scaling-law discussion later in the course (the 6·N·D approximation for transformer training FLOPs is this same bookkeeping).</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 1 · Memory</p>
   <h2>The forward pass buys the backward pass by saving activations</h2>
   <div class="figure">
     <svg viewBox="0 0 720 270" role="img" aria-label="Computational graph: forward pass stores activations, backward pass consumes them as vector-Jacobian products" style="width:min(92%,780px)">
@@ -78,7 +155,6 @@
         <marker id="af" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
         <marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker>
       </defs>
-      <!-- forward row -->
       <g fill="none" stroke="currentColor" stroke-width="1.5">
         <rect x="20"  y="70" width="90"  height="52" rx="10"/>
         <rect x="175" y="70" width="110" height="52" rx="10"/>
@@ -90,13 +166,11 @@
         <path d="M440 88 H497" marker-end="url(#af)"/>
         <path d="M615 88 H638" marker-end="url(#af)"/>
       </g>
-      <!-- stored-activation tags -->
       <g fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 4" opacity="0.75">
         <rect x="175" y="140" width="110" height="34" rx="7"/>
         <rect x="350" y="140" width="90"  height="34" rx="7"/>
         <rect x="505" y="140" width="110" height="34" rx="7"/>
       </g>
-      <!-- backward row -->
       <g fill="none" stroke="var(--accent)" stroke-width="1.5">
         <path d="M660 130 Q640 210 570 212" marker-end="url(#ab)"/>
         <path d="M497 212 H448" marker-end="url(#ab)"/>
@@ -114,63 +188,144 @@
         <text x="560" y="163" font-size="12.5" opacity="0.8">stored: h</text>
       </g>
       <g font-family="var(--sans)" font-size="13" fill="var(--accent)" text-anchor="middle">
-        <text x="470" y="238">ḡᵀJ</text>
-        <text x="320" y="238">ḡᵀJ</text>
-        <text x="145" y="238">ḡᵀJ</text>
-        <text x="655" y="250" font-size="12">backward = one VJP per node</text>
+        <text x="470" y="238">ḡ ← Jᵀḡ</text>
+        <text x="320" y="238">ḡ ← Jᵀḡ</text>
+        <text x="145" y="238">ḡ ← Jᵀḡ</text>
+        <text x="655" y="250" font-size="12">backward = one product per node</text>
       </g>
       <g font-family="var(--sans)" font-size="12" fill="currentColor" opacity="0.65" text-anchor="middle">
         <text x="330" y="40">forward — records graph + saves operands</text>
       </g>
     </svg>
   </div>
-  <div class="foot"><span>Each VJP needs the tensors the node saw going forward — they must sit in memory until the backward pass reaches them.</span></div>
-  <aside class="notes">~3 min. Walk the diagram left→right (forward, dashed boxes = tensors autograd stashes), then right→left (each accent arrow is one VJP, consuming a stashed tensor). Punchline: nothing dashed can be freed until backward consumes it. That's the memory story on the next slide.</aside>
+  <div class="foot"><span>Look back at steps 1–2: ∂L/∂W₂ needed h, ∂L/∂W₁ needed x, σ′ needed z₁ — every dashed box is one of those saved tensors.</span></div>
+  <aside class="notes">~2 min. Walk the diagram left→right (forward, dashed boxes = tensors autograd stashes), then right→left (each accent arrow consumes a stashed tensor — and now the class has personally derived WHY each one is needed). Punchline: nothing dashed can be freed until backward consumes it.</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 1 · 10 min</p>
+  <p class="kicker">Part 1 · Memory</p>
   <h2>Activations, not weights, dominate training memory</h2>
   <ul>
-    <li>Every saved tensor is a debt the backward pass collects: activation memory ∝ depth × batch × tokens × width.</li>
-    <li>A large Vision Transformer (ViT-Large, 0.3 billion parameters), batch 256: weights + Adam states ≈ 3.6 GB — <span class="accent">activations ≈ tens of GB</span>. Activations set your batch-size ceiling, not parameters.</li>
-    <li><b>Gradient checkpointing</b>: keep ~O(√L) of the activations, recompute the rest during backward — ≈30% extra FLOPs for 5–10× less activation memory.</li>
-    <li class="muted">When you run out of GPU memory fine-tuning a foundation model in Week 12, the fix is checkpointing / batch / precision — not a smaller model. Remember this slide.</li>
+    <li>Every saved tensor is a debt the backward pass collects: activation memory ∝ depth × batch size × sequence length × width.</li>
+    <li>A large Vision Transformer (ViT-Large, 0.3 billion parameters), batch 256: weights + Adam’s two moment tensors ≈ 3.6 GB — <span class="accent">activations ≈ tens of gigabytes</span>. Activations set your batch-size ceiling, not parameters.</li>
+    <li><b>Gradient checkpointing</b>: keep only ~√(number of layers) of the activations, recompute the rest segment-by-segment during backward — ≈ one extra forward pass (+33% step cost) for 5–10× less activation memory.</li>
+    <li class="muted">When you run out of graphics-card memory fine-tuning a foundation model in Week 12, the fix is checkpointing / batch size / numeric precision — not a smaller model. Remember this slide.</li>
   </ul>
-  <div class="foot"><span>Chen et al. 2016, arXiv:1604.06174 (checkpointing) · callback target: W12 fine-tuning lab</span></div>
-  <aside class="notes">~3 min, then transition. Quick mental arithmetic on the ViT-L numbers: 0.3B params × 4 bytes ≈ 1.2 GB, Adam doubles it with m and v. Then point at batch×tokens×width×depth and let them see it dwarfs 3.6 GB. Transition: "so we can compute gradients cheaply — what do we do with them? The recipe. Minute 10, Part 2."</aside>
+  <div class="foot"><span>Chen et al. 2016, arXiv:1604.06174 (checkpointing) · callback target: Week 12 fine-tuning lab</span></div>
+  <aside class="notes">~2 min, then the video slide. Quick mental arithmetic on the ViT-Large numbers: 0.3 billion × 4 bytes ≈ 1.2 GB; Adam keeps m and v, tripling it. Then point at batch × tokens × width × depth and let them see it dwarfs 3.6 GB. The √L trick: split the net into √L segments, keep only segment boundaries, recompute inside one segment at a time — memory √L, extra compute one forward.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 1 · Watch at home</p>
+  <h2>The same derivation, animated — watch both before Sunday</h2>
+  <div style="display:flex;gap:1.4vw;margin-top:1.6vh;align-items:flex-start">
+    <a href="https://www.youtube.com/watch?v=Ilg3gGewQ5U" class="yt" data-id="Ilg3gGewQ5U" style="flex:1;max-width:42%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-3b1b-backprop.jpg" alt="3Blue1Brown backpropagation video thumbnail" style="width:100%;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">3Blue1Brown · Backpropagation, intuitively · 13 min — <span class="accent">click to play here</span> · this is also this week’s assigned video (0.5-page summary due Sunday)</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=tIeHLnjs5U8" class="yt" data-id="tIeHLnjs5U8" style="flex:1;max-width:42%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-3b1b-calculus.jpg" alt="3Blue1Brown backpropagation calculus video thumbnail" style="width:100%;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">3Blue1Brown · Backpropagation calculus · 10 min — the exact chain-rule walk we just did, animated</p>
+    </a>
+  </div>
+  <aside class="notes">~30 seconds — do not play these in class; the derivation is already done. Tell them: the second video is literally slides 5–8 of today with animation; watching it after deriving it by hand is when it sticks. Transition: "so we can compute gradients cheaply — what do we do with them? The recipe. Minute 10, Part 2."</aside>
 </section>
 
 <!-- ============================ PART 2 ============================ -->
 <section class="slide section">
   <p class="kicker">Part 2 · 15 min</p>
-  <h2>The optimizer recipe</h2>
+  <h2>The optimizer recipe, derived</h2>
   <p class="big muted">AdamW · warmup + cosine · decoupled decay · clipping — one recipe, every foundation model.</p>
-  <aside class="notes">Timing: minutes 10–25. Framing: this is not a menu, it is THE recipe — by the end of this part they should be able to read the optimization paragraph of any foundation-model paper in 30 seconds. Five content slides, ~2.5 min each.</aside>
+  <aside class="notes">Timing: minutes 10–25. Framing: this is not a menu, it is THE recipe — by the end of this part they should be able to read the optimization paragraph of any foundation-model paper in thirty seconds, and derive each ingredient if pressed. Eight content slides, ~2 min each.</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 2 · 15 min</p>
-  <h2>AdamW: normalize by gradient history, decay the weights separately</h2>
+  <p class="kicker">Part 2 · Derivation</p>
+  <h2>Gradient descent falls out of one line of calculus</h2>
   <div class="card">
-    <p style="line-height:2">
-      m<sub>t</sub> = β₁·m<sub>t−1</sub> + (1−β₁)·g<sub>t</sub>&emsp;&emsp;
-      v<sub>t</sub> = β₂·v<sub>t−1</sub> + (1−β₂)·g<sub>t</sub>²<br>
-      m̂ = m<sub>t</sub> / (1−β₁ᵗ)&emsp;&emsp;v̂ = v<sub>t</sub> / (1−β₂ᵗ)<br>
-      θ<sub>t</sub> = θ<sub>t−1</sub> − η<sub>t</sub> · ( <span class="accent">m̂ / (√v̂ + ε)</span> + <span class="accent">λ·θ<sub>t−1</sub></span> )
+    <p style="line-height:2.1">
+      first-order Taylor:&emsp;L(θ + Δ) ≈ L(θ) + ∇L(θ)ᵀΔ<br>
+      choose&ensp;Δ = −η·∇L(θ):&emsp;L(θ − η∇L) ≈ L(θ) − η‖∇L‖² &lt; L(θ)&emsp;<span class="muted">for small enough η</span><br>
+      ⟹&emsp;<b>θ ← θ − η ∇L</b>&emsp;— the steepest step that first-order information can justify
     </p>
   </div>
   <ul class="small">
-    <li>The ratio m̂/√v̂ makes the step size ≈ η<sub>t</sub> per parameter, whatever the raw gradient scale — a signal-to-noise step.</li>
-    <li>Bias correction (1−βᵗ) only matters for the first ~1/(1−β) steps — exactly when training is most fragile.</li>
-    <li>Typical foundation-model settings: β₁ = 0.9, β₂ = 0.95, ε = 10⁻⁸, λ = 0.05–0.1.</li>
+    <li>Everything in this part is a repair to this rule for the realities of deep networks: noisy gradients, curvature that varies by 10⁶ across parameters, and budgets fixed in advance.</li>
+    <li><b>Minibatches</b>: the batch gradient ĝ = (1/B)Σ∇ℓ<sub>i</sub> over B random samples has E[ĝ] = ∇L (unbiased) and variance ∝ 1/B — noise falls like √B while cost grows like B, so moderate batches + many steps win.</li>
   </ul>
-  <div class="foot"><span>Kingma &amp; Ba 2015 (Adam) · Loshchilov &amp; Hutter 2019, arXiv:1711.05101 (AdamW)</span></div>
-  <aside class="notes">~3 min. Read the update aloud once, slowly: momentum in the numerator, running second moment in the denominator, and — separately, outside the adaptive ratio — the decay term. That "outside" is the entire AdamW point; flag it and promise the distinction in two slides. Note β₂ = 0.95 (not 0.999) is the large-model convention: shorter variance memory tolerates noisy spikes better.</aside>
+  <div class="foot"><span>Read: Goodfellow §8.3, pp. 290–296 · Dive into Deep Learning §12.3–12.5 (gradient descent → stochastic → minibatch)</span></div>
+  <aside class="notes">~2 min. The Taylor line is the entire theory a practitioner needs: gradient descent is not mystical, it is "the linear approximation says downhill is this way, take a small step." The unbiasedness of the minibatch gradient is one line — expectation of a mean of random samples — say it, don't write it.</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 2 · 15 min</p>
+  <p class="kicker">Part 2 · Derivation</p>
+  <h2>Momentum is an exponential moving average — unroll it once</h2>
+  <div class="card">
+    <p style="line-height:2.1">
+      definition:&emsp;m<sub>t</sub> = β·m<sub>t−1</sub> + (1−β)·g<sub>t</sub>,&emsp;m₀ = 0<br>
+      unroll:&emsp;m<sub>t</sub> = (1−β)·( g<sub>t</sub> + β·g<sub>t−1</sub> + β²·g<sub>t−2</sub> + ⋯ + β<sup>t−1</sup>·g₁ )<br>
+      ⟹&emsp;a weighted average of past gradients, weights decaying by β per step — <b>effective window ≈ 1/(1−β)</b>
+    </p>
+  </div>
+  <ul class="small">
+    <li>β = 0.9 → averages roughly the last 10 gradients; β = 0.95 → last 20; β = 0.999 → last 1000.</li>
+    <li>Averaging cancels minibatch noise in directions that flip sign and accumulates speed in directions that persist — a low-pass filter on the gradient signal.</li>
+    <li class="accent">Keep the unrolled line in view — the bias-correction derivation two slides ahead reads directly off it.</li>
+  </ul>
+  <div class="foot"><span>Read: Goodfellow §8.3.2 (momentum, from p. 292) · Dive into Deep Learning §12.6 (momentum as leaky averages)</span></div>
+  <aside class="notes">~2 min. Do the unroll live in one substitution: m_t = (1−β)g_t + β·m_{t−1}, expand m_{t−1} once, spot the geometric pattern, wave the rest. The 1/(1−β) window: weights drop by factor e after about 1/(1−β) steps — the practical translation students should carry.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 2 · Derivation</p>
+  <h2>Adam: the same trick twice — momentum for the mean, and for the scale</h2>
+  <div class="card">
+    <p style="line-height:2.1">
+      first moment:&emsp;m<sub>t</sub> = β₁·m<sub>t−1</sub> + (1−β₁)·g<sub>t</sub>&emsp;<span class="muted">(the direction, denoised)</span><br>
+      second moment:&emsp;v<sub>t</sub> = β₂·v<sub>t−1</sub> + (1−β₂)·g<sub>t</sub>²&emsp;<span class="muted">(the typical squared size, per parameter)</span><br>
+      update:&emsp;<b>θ<sub>t</sub> = θ<sub>t−1</sub> − η<sub>t</sub> · m̂<sub>t</sub> / (√v̂<sub>t</sub> + ε)</b>&emsp;<span class="muted">(m̂, v̂ = bias-corrected, next slide)</span>
+    </p>
+  </div>
+  <ul class="small">
+    <li>Thought experiment — constant gradient g: then m̂ → g, v̂ → g², and the step is η·g/|g| = <b>η·sign(g)</b>. The raw gradient scale cancels entirely.</li>
+    <li>So every parameter moves ≈ η<sub>t</sub> per step regardless of whether its gradients are 10⁻⁶ or 10³ — one learning rate serves layers with wildly different curvature. That is the whole reason Adam took over.</li>
+    <li>Foundation-model settings: β₁ = 0.9, β₂ = 0.95, ε = 10⁻⁸ — note β₂ = 0.95, not the old default 0.999: a ~20-step variance memory reacts faster to loss spikes at scale.</li>
+  </ul>
+  <div class="foot"><span>Kingma &amp; Ba 2015 (Adam) · Read: Goodfellow §8.5.3, pp. 305–306 · Dive into Deep Learning §12.10</span></div>
+  <aside class="notes">~2 min. The constant-gradient thought experiment is the fastest honest way to see what the ratio does — run it aloud. Real gradients are noisy, so the step becomes roughly η × (signal / total magnitude) ≤ η: big confident steps where the gradient is consistent, small ones where it thrashes.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 2 · Derivation</p>
+  <h2>Bias correction: why m̂ divides by (1 − β₁ᵗ), exactly</h2>
+  <div class="card">
+    <p style="line-height:2.1">
+      take expectations of the unrolled average, assuming E[g<sub>k</sub>] = μ:<br>
+      E[m<sub>t</sub>] = (1−β)·(1 + β + β² + ⋯ + β<sup>t−1</sup>)·μ&emsp;=&emsp;(1−β)·<span class="accent">(1−βᵗ)/(1−β)</span>·μ&emsp;=&emsp;<b>(1−βᵗ)·μ</b><br>
+      ⟹&emsp;m̂<sub>t</sub> ≔ m<sub>t</sub>/(1−βᵗ)&ensp;has&ensp;E[m̂<sub>t</sub>] = μ&emsp;<span class="muted">(same argument gives v̂<sub>t</sub> = v<sub>t</sub>/(1−β₂ᵗ))</span>
+    </p>
+  </div>
+  <ul class="small">
+    <li>The accent step is the finite geometric series Σ<sub>k=0</sub><sup>t−1</sup> βᵏ = (1−βᵗ)/(1−β) — the only identity in the whole derivation.</li>
+    <li>Sanity check at t = 1: m₁ = (1−β)g₁ and 1−β¹ = 1−β, so m̂₁ = g₁ exactly — the correction undoes the zero initialization completely on step one.</li>
+    <li>It matters precisely when training is most fragile: for t ≪ 1/(1−β₂), uncorrected v is far too small → the step η·m/√v would be far too big. After ~1/(1−β) steps, βᵗ → 0 and the correction fades away.</li>
+  </ul>
+  <div class="foot"><span>The same three lines, with runnable code: Dive into Deep Learning §12.10.1</span></div>
+  <aside class="notes">~2 min. This is the derivation students pretend to know — it is three lines, do all three. Emphasize what it is NOT: not a heuristic warm-start, but an exact unbiasing of an exponentially-weighted average that was initialized at zero. It still doesn't fix the early VARIANCE of v̂ — which is why warmup exists anyway, next slide.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 2 · Schedule</p>
   <h2>Warmup protects the noisy start; cosine anneals the finish</h2>
   <div class="figure">
     <svg viewBox="0 0 660 250" role="img" aria-label="Learning-rate schedule: linear warmup then cosine decay" style="width:min(88%,720px)">
@@ -195,66 +350,86 @@
       </g>
     </svg>
   </div>
-  <ul class="small">
-    <li>Warmup: η ramps 0 → η<sub>max</sub> while v̂ statistics are still garbage — skip it and step 50 diverges.</li>
-    <li>Cosine: η<sub>t</sub> = η<sub>min</sub> + ½(η<sub>max</sub> − η<sub>min</sub>)(1 + cos(π·t/T)) — long quiet tail, no step-schedule cliffs; T = total steps, fixed in advance.</li>
-  </ul>
-  <aside class="notes">~3 min. Intuition for warmup: Adam divides by √v̂; with 10 samples of variance, that denominator is noise, so early steps can be huge in random directions. Intuition for cosine: most of the decay budget is spent slowly in the middle, and the tail lets the model settle into a basin. Note T is a commitment — cosine requires deciding the compute budget up front, which is very foundation-model culture.</aside>
-</section>
-
-<section class="slide">
-  <p class="kicker">Part 2 · 15 min</p>
-  <h2>In Adam, an L2 penalty is not weight decay</h2>
-  <div class="cols">
-    <div>
-      <h3>L2 penalty (Adam + λ‖θ‖²)</h3>
-      <ul class="small">
-        <li>λθ is added to g<sub>t</sub> → enters m and v → gets divided by √v̂.</li>
-        <li>Parameters with large gradient history are barely decayed at all.</li>
-        <li>Regularization strength entangled with the adaptive state — λ and η can't be tuned independently.</li>
-      </ul>
-    </div>
-    <div>
-      <h3>Decoupled decay (AdamW)</h3>
-      <ul class="small">
-        <li>−η<sub>t</sub>·λ·θ applied directly, outside the adaptive ratio.</li>
-        <li>Uniform multiplicative shrinkage of every weight, every step.</li>
-        <li>Empirically recovers the generalization of plain stochastic gradient descent; this is why "AdamW" is in every foundation-model paper and plain Adam is not.</li>
-      </ul>
-    </div>
+  <div class="card">
+    <p style="line-height:2">η<sub>t</sub> = η<sub>min</sub> + ½·(η<sub>max</sub> − η<sub>min</sub>)·(1 + cos(π·t/T))&emsp;<span class="muted">check: t = 0 → cos 0 = 1 → η<sub>max</sub>&ensp;·&ensp;t = T → cos π = −1 → η<sub>min</sub>; slope ≈ 0 at both ends</span></p>
   </div>
-  <div class="foot"><span>Loshchilov &amp; Hutter 2019, arXiv:1711.05101</span></div>
-  <aside class="notes">~2.5 min. This is the classic subtle bug: PyTorch Adam(weight_decay=...) implements the LEFT column; AdamW implements the right. Same argument name, different mathematics. Quick check question: which parameters does L2-in-Adam fail to regularize? (The ones with the largest v̂ — often exactly the ones overfitting.)</aside>
-</section>
-
-<section class="slide">
-  <p class="kicker">Part 2 · 15 min</p>
-  <h2>Gradient clipping is loss-spike insurance, not a tuning knob</h2>
-  <ul>
-    <li>Global-norm clipping: g ← g · min(1, c/‖g‖₂) — direction preserved, magnitude capped.</li>
-    <li>Rare batches (an unusual storm, a corrupted chip, an fp16 edge) give ‖g‖ 10–100× typical; one unclipped step can undo hours of training.</li>
-    <li>GraphCast clips at c = 32; most LLM recipes use c = 1.0 — the presence of clipping matters far more than the value.</li>
-    <li class="accent">Monitor the clipped fraction in W&amp;B: if &gt;5% of steps clip, your LR is too high or your data has a problem.</li>
+  <ul class="small">
+    <li><b>Warmup</b>: bias correction fixed the mean of v̂, not its variance — with ~10 samples, √v̂ is still noise, and dividing by noise makes huge steps in random directions. Ramping η from 0 keeps those early steps harmless. Skip it and step 50 diverges.</li>
+    <li><b>Cosine</b>: gentle leaving of η<sub>max</sub>, long quiet tail for settling into a basin — and T is fixed in advance: the schedule is a commitment to a compute budget, very foundation-model culture.</li>
   </ul>
-  <div class="foot"><span>Lam et al. 2023, Science 382:1416 (GraphCast supplement)</span></div>
-  <aside class="notes">~2 min. Emphasize the diagnostic use: clipping silently hides pathologies, so log the clip rate. This is the first of many "what to watch in W&B" habits — W&B becomes mandatory today, in the lab.</aside>
+  <div class="foot"><span>Read: Dive into Deep Learning §12.11 (cosine scheduler §12.11.3.3, warmup §12.11.3.4 — the one course resource that covers both)</span></div>
+  <aside class="notes">~2 min. Connect backward explicitly: "the previous slide proved the correction fixes E[v]; it cannot fix Var[v] with ten samples — that residual noise is what warmup absorbs." Endpoint check of the cosine formula takes ten seconds and inoculates against sign errors when they implement it in the lab.</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 2 · 15 min</p>
+  <p class="kicker">Part 2 · Derivation</p>
+  <h2>An ℓ₂ penalty and weight decay: identical in plain gradient descent…</h2>
+  <div class="card">
+    <p style="line-height:2.1">
+      penalized loss:&emsp;L̃(θ) = L(θ) + (λ/2)·‖θ‖²&emsp;⟹&emsp;∇L̃ = g + λθ<br>
+      gradient-descent step:&emsp;θ ← θ − η(g + λθ) = <b>(1 − ηλ)·θ − ηg</b><br>
+      ⟹ “add λθ to the gradient” and “shrink weights by (1−ηλ) each step” are <b>the same rule</b>
+    </p>
+  </div>
+  <div class="card" style="margin-top:1.2vh">
+    <p style="line-height:2.1">
+      …but in Adam the λθ term rides through the adaptive ratio:&emsp;step ∝ m̂(g + λθ) / √v̂(g + λθ)<br>
+      a parameter with a large gradient history (large v̂) has its decay term <span class="accent">divided by √v̂ → barely decayed</span> —<br>
+      often exactly the weights that are overfitting. The equivalence is <b>broken</b>.
+    </p>
+  </div>
+  <aside class="notes">~2 min. Two boards: derive the SGD equivalence completely (it is two lines), then show where Adam breaks it — the decay term gets normalized along with everything else, so regularization strength silently varies per parameter and entangles with η. Cliffhanger: "the fix is embarrassingly simple," next slide.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 2 · Derivation</p>
+  <h2>…so AdamW moves the decay outside the ratio</h2>
+  <div class="card">
+    <p style="line-height:2.1">
+      <b>AdamW:</b>&emsp;θ<sub>t</sub> = θ<sub>t−1</sub> − η<sub>t</sub>·m̂<sub>t</sub>/(√v̂<sub>t</sub> + ε) <span class="accent">− η<sub>t</sub>·λ·θ<sub>t−1</sub></span><br>
+      the adaptive ratio sees only the data gradient; the decay is a uniform multiplicative shrink (1 − η<sub>t</sub>λ) again
+    </p>
+  </div>
+  <ul class="small">
+    <li>Restores the plain-gradient-descent behaviour the derivation promised: every weight decays at the same rate, and λ and η can be tuned independently.</li>
+    <li>Empirically recovers the generalization gap between Adam and well-tuned stochastic gradient descent — this is why every foundation-model paper writes “AdamW” and none write “Adam + ℓ₂”.</li>
+    <li class="accent">The classic silent bug: PyTorch <code>Adam(weight_decay=…)</code> implements the broken left-hand version; <code>AdamW(weight_decay=…)</code> implements this slide. Same argument name, different mathematics.</li>
+    <li>Typical foundation-model value: λ = 0.05–0.1 (with η ~ 10⁻³–10⁻⁴).</li>
+  </ul>
+  <div class="foot"><span>Loshchilov &amp; Hutter 2019, arXiv:1711.05101 · Read: Goodfellow §7.1, pp. 226–230 · Dive into Deep Learning §3.7 (the (1−ηλ) shrinkage derivation)</span></div>
+  <aside class="notes">~1.5 min. Check question for the room: which parameters does ℓ₂-inside-Adam fail to regularize? (Largest v̂ — the busiest weights.) Then the PyTorch trap — worth a full sentence because half of them will hit it this semester in their own sweeps.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 2 · Recipe</p>
+  <h2>Gradient clipping is loss-spike insurance, not a tuning knob</h2>
+  <div class="card">
+    <p style="line-height:2">g ← g · min(1, c/‖g‖₂)&emsp;<span class="muted">if ‖g‖₂ ≤ c: untouched · else: same direction, norm exactly c</span></p>
+  </div>
+  <ul>
+    <li>Rare batches (an unusual storm in the data, a corrupted file, a 16-bit floating-point edge case) give ‖g‖ 10–100× typical; one unclipped step can undo hours of training.</li>
+    <li>GraphCast clips at c = 32; most large-language-model recipes use c = 1.0 — the <i>presence</i> of clipping matters far more than the value.</li>
+    <li class="accent">Monitor the clipped fraction in Weights &amp; Biases: if more than ~5% of steps clip, your learning rate is too high or your data has a problem.</li>
+  </ul>
+  <div class="foot"><span>Lam et al. 2023, Science 382:1416 (GraphCast supplement) · Read: Goodfellow §8.2.4 (cliffs, p. 285) and §10.11.1 (clipping, pp. 409–410)</span></div>
+  <aside class="notes">~1.5 min. Emphasize the diagnostic use: clipping silently hides pathologies, so log the clip rate. This is the first of many "what to watch in Weights &amp; Biases" habits — the tool becomes mandatory today, in the lab.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 2 · Recipe</p>
   <h2>Regularization, compressed to one pass</h2>
   <ul>
-    <li><b>Early stopping</b> on a validation metric is the one regularizer you always use — patience in epochs, restore the best checkpoint, never the last.</li>
-    <li><b>Augmentation</b> encodes invariances — but physical fields have preferred directions: never N–S flip a wind field; Coriolis is not flip-invariant.</li>
+    <li><b>Early stopping</b> on a validation metric is the one regularizer you always use — patience measured in epochs, restore the best checkpoint, never the last.</li>
+    <li><b>Augmentation</b> encodes invariances — but physical fields have preferred directions: never flip a wind field north–south; the Coriolis force is not flip-invariant.</li>
     <li><b>Dropout / weight decay</b> trade variance for bias; at pretraining scale, decay does most of the work and dropout often goes to 0.</li>
     <li class="muted"><b>Double descent</b>, in one line: past the interpolation threshold, bigger models can generalize better — part of why foundation models are big at all.</li>
   </ul>
-  <div class="foot"><span>Belkin et al. 2019, PNAS 116:15849 (double descent)</span></div>
-  <aside class="notes">~2.5 min. The augmentation bullet is the geoscience twist — invariances are physical claims, not free lunch. Early stopping foreshadows Part 3: "early stopping is only as honest as the validation set it watches — hold that thought."</aside>
+  <div class="foot"><span>Belkin et al. 2019, PNAS 116:15849 (double descent) · Read: Goodfellow §7.8, pp. 241–249 — it proves early stopping ≈ an ℓ₂ penalty whose strength is set by the stopping time</span></div>
+  <aside class="notes">~2 min. The augmentation bullet is the geoscience twist — invariances are physical claims, not free lunch. Early stopping foreshadows Part 3: "early stopping is only as honest as the validation set it watches — hold that thought."</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 2 · 15 min</p>
+  <p class="kicker">Part 2 · Recipe</p>
   <h2>This exact recipe trains every foundation model in this course</h2>
   <div class="scroll">
     <table>
@@ -266,9 +441,35 @@
       </tbody>
     </table>
   </div>
-  <p class="small muted" style="margin-top:2vh">When you read a foundation-model paper from now on, the optimization section should take you thirty seconds. The interesting choices are elsewhere — data, objective, and evaluation.</p>
+  <p class="small muted" style="margin-top:2vh">When you read a foundation-model paper from now on, the optimization section should take you thirty seconds — and you can now derive every term in it. The interesting choices are elsewhere: data, objective, and evaluation.</p>
   <div class="foot"><span>Lam et al. 2023, Science · He et al. 2022, CVPR · Jakubik et al. 2023, arXiv:2310.18660</span></div>
-  <aside class="notes">~2 min, end of Part 2 at minute 25. Let the table land: three domains — weather, natural images, satellite imagery — one recipe. Then pivot hard: "so if everyone trains the same way, what separates a credible result from a mirage? The evaluation. This is the headline." </aside>
+  <aside class="notes">~1.5 min, end of Part 2 at minute 25. Let the table land: three domains — weather, natural images, satellite imagery — one recipe. Then pivot hard: "so if everyone trains the same way, what separates a credible result from a mirage? The evaluation. This is the headline."</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 2 · Watch at home</p>
+  <h2>Two videos that retell this part — one deep, one surgical</h2>
+  <div style="display:flex;gap:1.4vw;margin-top:1.6vh;align-items:flex-start">
+    <a href="https://www.youtube.com/watch?v=MD2fYip6QsQ" class="yt" data-id="MD2fYip6QsQ" style="flex:1;max-width:42%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-adam.jpg" alt="Video thumbnail: deep dive into optimizers for machine learning" style="width:100%;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Sourish Kundu · Who’s Adam and What’s He Optimizing? · 23 min — <span class="accent">click to play here</span> · the full stochastic-gradient-descent → momentum → Adam arc, animated</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=oWZbcq_figk" class="yt" data-id="oWZbcq_figk" style="flex:1;max-width:42%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-adamw.jpg" alt="Video thumbnail: AdamW, L2 regularization versus weight decay" style="width:100%;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">DataMListic · AdamW — ℓ₂ Regularization vs Weight Decay · 3.5 min — exactly the two derivation slides you just saw</p>
+    </a>
+  </div>
+  <aside class="notes">~20 seconds — point, don't play. The 23-minute video is the one to assign informally to anyone who felt Part 2 went fast; the 3.5-minute one is a spaced-repetition dose of the AdamW distinction before Sunday's note.</aside>
 </section>
 
 <!-- ============================ PART 3 (HEADLINE) ============================ -->
@@ -276,20 +477,20 @@
   <p class="kicker">Part 3 · 25 min</p>
   <h2>Leakage-safe evaluation</h2>
   <p class="big muted">The geoscience failure mode: your test set is not new data — it's your training set, shifted 5 km or 1 day.</p>
-  <aside class="notes">Timing: minutes 25–50 — the headline block; protect it. Claim to establish: in environmental data, random splits do not measure generalization, and the error is not small or subtle — it flips paper conclusions. Everything this course grades — memos, labs, projects — will be held to the standard set in the next eight slides.</aside>
+  <aside class="notes">Timing: minutes 25–50 — the headline block; protect it. Claim to establish: in environmental data, random splits do not measure generalization, and the error is not small or subtle — it flips paper conclusions. Everything this course grades — research notes, labs, projects — will be held to the standard set in the next ten slides.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 3 · 25 min</p>
-  <h2>Environmental samples are not i.i.d. — nearby pixels share their cause</h2>
+  <h2>Environmental samples are not independent — nearby pixels share their cause</h2>
   <ul>
-    <li>Tobler's law, quantified: soil moisture, biomass, temperature have spatial correlation ranges of 10–1000 km, set by rainfall, terrain, and climate zones.</li>
-    <li>Every ML split assumes test points are independent draws. A test pixel 5 km from a training pixel is, statistically, <span class="accent">the same draw</span>.</li>
-    <li>The variogram range — the distance where correlation dies — is the scale your split must respect.</li>
+    <li>Tobler’s law, quantified: soil moisture, biomass, and temperature have spatial correlation ranges of 10–1000 km, set by rainfall, terrain, and climate zones.</li>
+    <li>Every machine-learning split assumes test points are <b>independent, identically distributed</b> draws. A test pixel 5 km from a training pixel is, statistically, <span class="accent">the same draw</span>.</li>
+    <li>The variogram range — the distance where correlation dies — is the scale your split must respect (measured two slides ahead).</li>
     <li class="muted">The model is not cheating; the evaluation is: memorized geography scores as skill.</li>
   </ul>
   <div class="foot"><span>Tobler 1970 · Roberts et al. 2017, Ecography 40:913</span></div>
-  <aside class="notes">~3 min. Anchor with a concrete pair: two ISMN stations 8 km apart in Iowa see the same rain, same soil, same season — knowing one IS knowing the other. Then the i.i.d. sentence: every off-the-shelf train_test_split call encodes an independence assumption the atmosphere refuses to satisfy.</aside>
+  <aside class="notes">~2.5 min. Anchor with a concrete pair: two soil-moisture stations 8 km apart in Iowa see the same rain, same soil, same season — knowing one IS knowing the other. Then the independence sentence: every off-the-shelf train_test_split call encodes an independence assumption the atmosphere refuses to satisfy.</aside>
 </section>
 
 <section class="slide">
@@ -301,12 +502,10 @@
         <rect x="20"  y="48" width="330" height="220" rx="12"/>
         <rect x="390" y="48" width="330" height="220" rx="12"/>
       </g>
-      <!-- right panel: block grid + held-out block -->
       <rect x="610" y="48" width="110" height="110" rx="0" fill="var(--accent)" opacity="0.13"/>
       <g stroke="var(--hairline)" stroke-width="1.5">
         <path d="M500 48 V268 M610 48 V268 M390 158 H720"/>
       </g>
-      <!-- left panel: interleaved clusters -->
       <g stroke="currentColor" stroke-width="1.4">
         <circle cx="80"  cy="110" r="7" fill="var(--hairline)"/>
         <circle cx="100" cy="126" r="7" fill="var(--accent)"/>
@@ -321,7 +520,6 @@
         <circle cx="262" cy="112" r="7" fill="var(--hairline)"/>
       </g>
       <path d="M80 110 L100 126" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 3"/>
-      <!-- right panel: same clusters, block-assigned -->
       <g stroke="currentColor" stroke-width="1.4">
         <circle cx="450" cy="110" r="7" fill="var(--hairline)"/>
         <circle cx="470" cy="126" r="7" fill="var(--hairline)"/>
@@ -358,69 +556,129 @@
   <p class="kicker">Part 3 · 25 min</p>
   <h2>Time leaks the same way: today is mostly yesterday</h2>
   <ul>
-    <li>Daily surface soil moisture: lag-1 autocorrelation ≈ 0.9–0.95; drydowns persist for days to weeks. Streamflow and LST behave the same way.</li>
+    <li>Daily surface soil moisture: correlation between one day and the next ≈ 0.9–0.95; drydowns persist for days to weeks. Streamflow and land-surface temperature behave the same way.</li>
     <li>Random split over days: a test day sandwiched between two training days is scored on <span class="accent">interpolating memory, not modeling physics</span>.</li>
     <li>Seasonality is a second leak channel — the same phase of the annual cycle recurs in training even when the exact day is held out.</li>
     <li>Consequence: temporal splits must be contiguous blocks (whole years), with a gap at the seam.</li>
   </ul>
-  <aside class="notes">~2.5 min. Concrete test: "predict soil moisture for July 15 given July 14 and July 16 in training" — persistence alone scores brilliantly, no model needed. Whenever a paper reports random-in-time CV on daily data, its skill ceiling is set by autocorrelation, not by the model.</aside>
+  <aside class="notes">~2 min. Concrete test: "predict soil moisture for July 15 given July 14 and July 16 in training" — persistence alone scores brilliantly, no model needed. Whenever a paper reports random-in-time cross-validation on daily data, its skill ceiling is set by autocorrelation, not by the model.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 3 · 25 min</p>
   <h2>Random splits lie — and the lie is large</h2>
   <ul>
-    <li>Ploton et al. 2020, tropical forest biomass from satellite features: <span class="accent">R² ≈ 0.53 under random CV → R² ≈ 0.14 under spatial CV</span>. Same model, same data.</li>
-    <li>The pattern replicates across geo-ML: species distribution, air quality, hydrology (basin models collapse on ungauged basins).</li>
-    <li><b>Optimism gap</b> ≔ score(random split) − score(blocked split). Report it; don't hide it.</li>
-    <li class="muted">A high random-split score is a claim about interpolation near your stations — nothing more. Today's lab measures this gap on CAMELS-US.</li>
+    <li>Ploton et al. 2020, tropical forest biomass from satellite features: <span class="accent">explained variance ≈ 0.53 under random cross-validation → ≈ 0.14 under spatial cross-validation</span>. Same model, same data.</li>
+    <li>The pattern replicates across geospatial machine learning: species distribution, air quality, hydrology (basin models collapse on ungauged basins).</li>
+    <li><b>Optimism gap</b> ≔ score(random split) − score(blocked split). Report it; don’t hide it.</li>
+    <li class="muted">A high random-split score is a claim about interpolation near your stations — nothing more. Today’s lab measures this gap on CAMELS-US.</li>
   </ul>
   <div class="foot"><span>Ploton et al. 2020, Nat. Commun. 11:4540 · Meyer &amp; Pebesma 2022, Nat. Commun. 13:2208</span></div>
-  <aside class="notes">~3 min. The Ploton numbers are the slide — 0.53 to 0.14 is not a correction, it's a different conclusion; the mapped product looked publishable and was largely geography memorization. Define the optimism gap on the board and tell them it is a required row in today's lab table and in every project report this semester.</aside>
+  <aside class="notes">~2.5 min. The Ploton numbers are the slide — 0.53 to 0.14 is not a correction, it's a different conclusion; the mapped product looked publishable and was largely geography memorization. Define the optimism gap on the board and tell them it is a required row in today's lab table and in every project report this semester.</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 3 · 25 min</p>
-  <h2>Autocorrelation shrinks your effective sample size</h2>
-  <div class="card">
-    <p>AR(1) with autocorrelation ρ:&emsp;<b>n<sub>eff</sub> = n · (1−ρ) / (1+ρ)</b>&emsp;&emsp;ρ = 0.9 → n/19&emsp;·&emsp;ρ = 0.95 → n/39</p>
+  <p class="kicker">Part 3 · Measure the leak</p>
+  <h2>The variogram measures how far the leak reaches</h2>
+  <div class="cols" style="grid-template-columns:1.05fr 1fr;align-items:center">
+    <div>
+      <div class="card">
+        <p style="line-height:2">γ(d) = ½·E[ (Z(s) − Z(s+d))² ]&emsp;<span class="muted">— half the mean squared difference between points a distance d apart</span></p>
+      </div>
+      <ul class="small">
+        <li>Close points agree → γ small; distant points are unrelated → γ flattens at the <b>sill</b> (the field’s total variance).</li>
+        <li><b>Range</b> = the distance where the curve reaches the sill — beyond it, points are effectively independent.</li>
+        <li class="accent">The range is the number your split needs: blocks smaller than the range still leak.</li>
+        <li>Estimate it from the target itself, or better, from your model’s residuals.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 260" role="img" aria-label="Variogram: semivariance rising with distance from a small nugget to a sill; the range marks where it flattens" style="width:100%">
+        <g fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55">
+          <path d="M45 20 V215 H345"/>
+        </g>
+        <g fill="none" stroke="var(--hairline)" stroke-width="1.2">
+          <path d="M45 60 H330" stroke-dasharray="5 5"/>
+          <path d="M215 20 V215" stroke-dasharray="5 5"/>
+        </g>
+        <path d="M45 190 C 90 175, 160 90, 215 63 C 240 55, 290 60, 330 60" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+        <g font-family="var(--sans)" font-size="12.5" fill="currentColor">
+          <text x="14" y="30">γ(d)</text>
+          <text x="330" y="238" text-anchor="end">distance d →</text>
+          <text x="52" y="205">nugget</text>
+          <text x="55" y="52">sill = total variance</text>
+          <text x="215" y="238" text-anchor="middle" fill="var(--accent)">range</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul>
-    <li>Ten years of daily observations at one station: n = 3650, ρ ≈ 0.95 → <span class="accent">≈ 94 independent samples</span>.</li>
-    <li>Error bars computed with n are far too tight — "significant" model improvements evaporate under blocked resampling.</li>
-    <li>Blocked CV is the honest approximation: folds separated at the correlation scale behave like independent draws of size ≈ n<sub>eff</sub>.</li>
-  </ul>
-  <div class="foot"><span>Wilks 2011, Statistical Methods in the Atmospheric Sciences, §5 (serial correlation)</span></div>
-  <aside class="notes">~3 min. Do the arithmetic live: 3650/39 ≈ 94 — a decade of daily data carries about three months of information. Then connect back: leakage inflates the score, autocorrelation inflates the confidence — random splits get BOTH wrong at once.</aside>
+  <div class="foot"><span>Read: Pebesma &amp; Bivand, Spatial Data Science, ch. 12 (variograms) — free online · estimate with scikit-gstat or gstat; today’s lab computes one for CAMELS residuals.</span></div>
+  <aside class="notes">~2.5 min. One formula, one picture. Read γ aloud: "average squared disagreement between points d apart, halved." Nugget = measurement noise + sub-grid variability; sill = variance of the whole field; range = where knowing one point stops telling you about another. That range becomes the block size on the next design slide.</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 3 · 25 min</p>
+  <p class="kicker">Part 3 · Derivation · 1 of 2</p>
+  <h2>How much does correlation cost? Variance of a correlated mean</h2>
+  <div class="card">
+    <p style="line-height:2.1">
+      n observations, each Var = σ², neighbors correlated:&emsp;Corr(x<sub>i</sub>, x<sub>i+k</sub>) = ρᵏ&emsp;<span class="muted">(first-order autoregressive form)</span><br>
+      Var(x̄) = (1/n²)·Σ<sub>i</sub>Σ<sub>j</sub> Cov(x<sub>i</sub>,x<sub>j</sub>)&emsp;=&emsp;(σ²/n²)·[ n&ensp;+&ensp;2·Σ<sub>k=1</sub><sup>n−1</sup> (n−k)·ρᵏ ]<br>
+      <span class="muted">— n diagonal terms, and for each lag k there are (n−k) pairs, each counted twice</span>
+    </p>
+  </div>
+  <ul class="small">
+    <li>If ρ = 0 this collapses to the textbook σ²/n. Every ρ &gt; 0 term adds variance the independent formula doesn’t see.</li>
+    <li>The double sum is just bookkeeping: count how many pairs sit at each lag, weight by their covariance σ²ρᵏ.</li>
+  </ul>
+  <aside class="notes">~2 min. Write the double sum as a matrix picture if the room hesitates: an n×n covariance matrix, σ² on the diagonal, σ²ρ on the first off-diagonals, σ²ρ² on the next, and Var(x̄) is the average of ALL its entries. Counting the off-diagonals by lag gives the (n−k) factor. Next slide: close the sum.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 3 · Derivation · 2 of 2</p>
+  <h2>Close the sum: the effective sample size</h2>
+  <div class="card">
+    <p style="line-height:2.1">
+      for n ≫ correlation length, (1 − k/n) ≈ 1:&emsp;Σ<sub>k=1</sub><sup>n−1</sup>(1−k/n)·ρᵏ&ensp;≈&ensp;Σ<sub>k≥1</sub> ρᵏ = ρ/(1−ρ)&emsp;<span class="muted">(geometric series again)</span><br>
+      ⟹&emsp;Var(x̄) ≈ (σ²/n)·[1 + 2ρ/(1−ρ)] = (σ²/n)·<span class="accent">(1+ρ)/(1−ρ)</span><br>
+      define n<sub>eff</sub> by Var(x̄) ≕ σ²/n<sub>eff</sub>:&emsp;<b>n<sub>eff</sub> = n·(1−ρ)/(1+ρ)</b>&emsp;&emsp;ρ = 0.9 → n/19&emsp;·&emsp;ρ = 0.95 → n/39
+    </p>
+  </div>
+  <ul class="small">
+    <li>Ten years of daily observations at one station: n = 3650, ρ ≈ 0.95 → <span class="accent">≈ 94 independent samples</span>. A decade of data carries about three months of information.</li>
+    <li>Error bars computed with n are ~√39 ≈ 6× too tight — “significant” model improvements evaporate under blocked resampling.</li>
+    <li>Blocked cross-validation is the honest approximation: folds separated at the correlation scale behave like independent draws of size ≈ n<sub>eff</sub>.</li>
+  </ul>
+  <div class="foot"><span>Read: Wilks, Statistical Methods in the Atmospheric Sciences, ch. 5 §5.2.4 · Hartmann, Objective Analysis notes §6.1.5 (same formula, eq. 6.13b) — linked on the Week 2 page</span></div>
+  <aside class="notes">~2.5 min. Same geometric series as the Adam bias correction — point that out, it earns a laugh and cements both. Do the 3650/39 ≈ 94 arithmetic live. Then connect: leakage inflates the score, autocorrelation inflates the confidence — random splits get BOTH wrong at once.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 3 · Design</p>
   <h2>Spatial-block design: block at or beyond the correlation range</h2>
   <ul>
     <li>Estimate the range from a variogram of the target (or model residuals); block size ≥ range.</li>
     <li>Assign <b>whole blocks</b> to folds; add a buffer strip around test blocks if the range is uncertain.</li>
-    <li>Match block geometry to the deployment question: random blocks → "new nearby areas"; leave-region-out → "new climates" (extrapolation).</li>
+    <li>Match block geometry to the deployment question: random blocks → “new nearby areas”; leave-region-out → “new climates” (extrapolation).</li>
     <li class="muted">Too-small blocks re-admit leakage; too-large blocks starve training. There is no free choice — report the block size with the result.</li>
   </ul>
-  <div class="foot"><span>Roberts et al. 2017, Ecography 40:913 · Meyer et al. 2019 (spatial variable selection)</span></div>
-  <aside class="notes">~2.5 min. The third bullet is the intellectual center: the split IS the scientific question. "How well does this model do?" is ill-posed — do you mean 10 km away or on a new continent? Choose the split that matches the claim you intend to publish.</aside>
+  <div class="foot"><span>Roberts et al. 2017, Ecography 40:913 · Meyer et al. 2019 (spatial variable selection) · hands-on tutorials: the CAST package site (hannameyer.github.io/CAST)</span></div>
+  <aside class="notes">~2 min. The third bullet is the intellectual center: the split IS the scientific question. "How well does this model do?" is ill-posed — do you mean 10 km away or on a new continent? Choose the split that matches the claim you intend to publish.</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 3 · 25 min</p>
+  <p class="kicker">Part 3 · Design</p>
   <h2>Temporal holdout: whole years, and mind the seams</h2>
   <ul>
     <li>Hold out contiguous years — never shuffled days, never shuffled months.</li>
-    <li>Leave a gap at the seam ≥ the system's memory: days for weather, weeks for soil moisture, months for groundwater.</li>
+    <li>Leave a gap at the seam ≥ the system’s memory: days for weather, weeks for soil moisture, months for groundwater.</li>
     <li>Nonstationarity is a feature of the test: held-out years should contain unseen extremes (e.g., a drought year the model never trained on).</li>
     <li><span class="accent">Normalization statistics from training years only</span> — computing the climatology over all years is the classic silent leak.</li>
   </ul>
-  <aside class="notes">~2.5 min. The fourth bullet catches real papers: standardizing with the full-period mean quietly hands the model the test years' climate. In today's lab and every lab after, normalization stats are computed inside the training fold — the agent will scaffold it; you must verify it.</aside>
+  <aside class="notes">~2 min. The fourth bullet catches real papers: standardizing with the full-period mean quietly hands the model the test years' climate. In today's lab and every lab after, normalization statistics are computed inside the training fold — the agent will scaffold it; you must verify it.</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 3 · 25 min</p>
+  <p class="kicker">Part 3 · The standard</p>
   <h2>WeatherBench2: year separation as the professional standard</h2>
   <div class="figure">
     <svg viewBox="0 0 720 150" role="img" aria-label="Timeline of the WeatherBench2 protocol: training years through 2017, validation 2018 to 2019, test on 2020" style="width:min(90%,760px)">
@@ -444,15 +702,37 @@
     </svg>
   </div>
   <ul class="small">
-    <li>Common ERA5 ground truth, fixed metrics (RMSE, ACC on Z500/T850/…), strict train/val/test year separation — every model on the leaderboard obeys it.</li>
-    <li>GraphCast, Pangu, NeuralGCM, and the IFS baseline are all scored on the same held-out year: <b>that</b> is why the comparison is believable.</li>
+    <li>Common ERA5 ground truth, fixed metrics (root-mean-square error and anomaly correlation on standard fields), strict train/validation/test year separation — every model on the leaderboard obeys it.</li>
+    <li>GraphCast, Pangu-Weather, NeuralGCM, and the European operational forecast are all scored on the same held-out year: <b>that</b> is why the comparison is believable.</li>
   </ul>
   <div class="foot"><span>Rasp et al. 2024, arXiv:2308.15560 · weatherbench2.readthedocs.io</span></div>
-  <aside class="notes">~3 min. This is the aspirational example: an entire subfield agreed on one leakage-safe protocol, and suddenly cross-paper comparison works. Contrast with fields where every paper invents its own split. The dashed line is the discipline: no tuning decision — not even "which checkpoint to submit" — may look at 2020.</aside>
+  <aside class="notes">~2.5 min. This is the aspirational example: an entire subfield agreed on one leakage-safe protocol, and suddenly cross-paper comparison works. The dashed line is the discipline: no tuning decision — not even "which checkpoint to submit" — may look at 2020.</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 3 · 25 min</p>
+  <p class="kicker">Part 3 · Watch at home</p>
+  <h2>The researcher who measured the damage — 25 minutes, worth it</h2>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr;align-items:start">
+    <ul class="small" style="margin:0">
+      <li>Hanna Meyer leads the group whose papers (with Pebesma and colleagues) quantified how badly random cross-validation overstates global map accuracy.</li>
+      <li>This plenary is the argument of today’s Part 3 from the source: spatial autocorrelation, why random cross-validation fails, and what spatial validation and the “area of applicability” look like in practice.</li>
+      <li class="muted">Optional but recommended before your capstone evaluation design — you will cite this line of work in your final report.</li>
+    </ul>
+    <a href="https://www.youtube.com/watch?v=mkHlmYEzsVQ" class="yt" data-id="mkHlmYEzsVQ" style="display:block;text-decoration:none;color:inherit;min-width:0">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-meyer.jpg" alt="Hanna Meyer OpenGeoHub plenary video thumbnail" style="width:100%;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Hanna Meyer · OpenGeoHub plenary on machine learning for spatial prediction · 25 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <aside class="notes">~30 seconds — point at it, don't play it. Framing: "you just heard my version; here is the researcher whose group proved it, for your commute." Her CAST R package and the area-of-applicability idea return in the capstone evaluation-design session.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 3 · The rubric</p>
   <h2>The leakage checklist you will run on every project</h2>
   <ul>
     <li>1 · Does the split match the deployment claim (interpolation vs new region vs new year)?</li>
@@ -461,29 +741,38 @@
     <li>4 · Are <b>all</b> preprocessing statistics (normalization, climatology, feature selection) computed on training folds only?</li>
     <li>5 · Is the optimism gap (random vs blocked) measured and reported?</li>
   </ul>
-  <div class="foot"><span>This checklist is the rubric for the lab post-mortem and for project evaluations in W14–16.</span></div>
-  <aside class="notes">Minute ~48. Read it once, then say: this is not advice, it is the grading rubric — memos, labs, and final projects are checked against these five lines. Transition: "let's run the checklist forward on a real design problem — global soil moisture, ten minutes."</aside>
+  <div class="foot"><span>This checklist is the rubric for the lab post-mortem and for project evaluations in Weeks 14–16.</span></div>
+  <aside class="notes">Minute ~48. Read it once, then say: this is not advice, it is the grading rubric — research notes, labs, and final projects are checked against these five lines. Transition: "let's run the checklist forward on a real design problem — global soil moisture, ten minutes."</aside>
 </section>
 
 <!-- ============================ PART 4 ============================ -->
 <section class="slide section">
   <p class="kicker">Part 4 · 10 min</p>
   <h2>Worked example: a reviewer-proof split for global soil moisture</h2>
-  <aside class="notes">Timing: minutes 50–60. Format: pose the design problem, expose the three leak paths, then build the three-way holdout. This is also literally DQ2 in tonight's entrance ticket — tell them so at the end of the part.</aside>
+  <aside class="notes">Timing: minutes 50–60. Format: pose the design problem, expose the three leak paths, then build the three-way holdout. This is also literally discussion question 2 in tonight's entrance ticket — tell them so at the end of the part.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 4 · 10 min</p>
+  <h2>The target: what the satellite actually gives us</h2>
+  <div class="figure"><img src="img/fig-smap-sm.jpg" alt="Global surface soil moisture map from the NASA Soil Moisture Active Passive satellite, August 2015" style="max-width:100%;max-height:100%;border-radius:10px;border:1px solid var(--hairline);background:#fff"></div>
+  <p class="small muted" style="margin:.8vh 0 0;text-align:center">Three days of surface soil moisture from NASA’s Soil Moisture Active Passive satellite (August 2015, m³/m³). Wet monsoon belts, dry subtropics — and every pixel correlated with its neighbors. Image: NASA/JPL-Caltech/GSFC.</p>
+  <div class="foot"><span>The task: learn this map from precipitation, temperature, vegetation, soil, and terrain — and prove the skill is real.</span></div>
+  <aside class="notes">~1.5 min. Let them look: the spatial structure that makes the map beautiful is exactly the autocorrelation that makes evaluating it treacherous. Wet/dry belts span thousands of kilometers — a random split scatters test pixels straight into them.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 4 · 10 min</p>
   <h2>The setup — and three ways the model can cheat</h2>
   <ul>
-    <li><b>Task</b>: daily surface soil moisture from precipitation, LST, NDVI, soil texture, terrain. <b>Labels</b>: ~2,800 ISMN stations, heavily clustered in CONUS and Europe.</li>
+    <li><b>Task</b>: daily surface soil moisture from precipitation, land-surface temperature, vegetation index, soil texture, terrain. <b>Labels</b>: ~2,800 stations of the International Soil Moisture Network, heavily clustered in the United States and Europe.</li>
     <li><b>Leak 1 · space</b>: many station pairs sit &lt;10 km apart — well inside the correlation range.</li>
-    <li><b>Leak 2 · time</b>: lag-1 autocorrelation ≈ 0.95 — any shuffled-day split is persistence in disguise.</li>
+    <li><b>Leak 2 · time</b>: day-to-day autocorrelation ≈ 0.95 — any shuffled-day split is persistence in disguise.</li>
     <li><b>Leak 3 · instrument</b>: each network (SCAN, USCRN, SNOTEL, …) has its own sensors and calibration — network-specific bias is learnable and looks like skill.</li>
     <li class="muted">A random split leaves all three open. A competent reviewer rejects in one paragraph.</li>
   </ul>
-  <div class="foot"><span>ISMN: Dorigo et al. 2021, HESS 25:5749</span></div>
-  <aside class="notes">~3 min. Leak 3 is the one students miss: hold out stations but not networks, and the model still recognizes "this reads like a SCAN sensor" and exploits the network's calibration offset. Instrument identity is a feature you did not mean to provide.</aside>
+  <div class="foot"><span>International Soil Moisture Network: Dorigo et al. 2021, HESS 25:5749 · validation good practice: Gruber et al. 2020, Remote Sens. Environ. 244:111806</span></div>
+  <aside class="notes">~2.5 min. Leak 3 is the one students miss: hold out stations but not networks, and the model still recognizes "this reads like a SCAN sensor" and exploits the network's calibration offset. Instrument identity is a feature you did not mean to provide.</aside>
 </section>
 
 <section class="slide">
@@ -493,8 +782,8 @@
     <div>
       <h3>By region</h3>
       <ul class="small">
-        <li>Leave whole continents / Köppen zones out.</li>
-        <li>Tests spatial transfer: "does it work where we have no stations?"</li>
+        <li>Leave whole continents / climate zones out.</li>
+        <li>Tests spatial transfer: “does it work where we have no stations?”</li>
         <li>Kills Leak 1.</li>
       </ul>
     </div>
@@ -525,8 +814,8 @@
     <li><b>Primary score</b>: held-out regions × held-out years <em>simultaneously</em> — unseen place in an unseen year.</li>
     <li><b>Secondary</b>: network-holdout to bound the instrument-bias contribution.</li>
     <li>All tuning (sweeps, early stopping, checkpoint choice) inside training folds; the test partition is touched once.</li>
-    <li>Report a per-region table, not one global mean — the model's failures in data-sparse regions are the scientific result.</li>
-    <li class="accent">This is DQ2 in tonight's entrance ticket. Use today's vocabulary: range, block, gap, optimism gap.</li>
+    <li>Report a per-region table, not one global mean — the model’s failures in data-sparse regions are the scientific result.</li>
+    <li class="accent">This is discussion question 2 in tonight’s entrance ticket. Use today’s vocabulary: range, block, gap, optimism gap.</li>
   </ul>
   <aside class="notes">~3 min, end at minute 60. Stress "touched once": the test set is spent the moment it influences any decision. And the per-region table point previews the foundation-model evaluation weeks — global means hide exactly the regions environmental science cares about. Transition to the reading discussion.</aside>
 </section>
@@ -535,34 +824,34 @@
 <section class="slide section">
   <p class="kicker">Part 5 · 10 min</p>
   <h2>Reading framing</h2>
-  <p class="big muted">Reichstein et al. 2019 — where has DL for Earth system science delivered since, and where hasn't it?</p>
-  <aside class="notes">Timing: minutes ~65–75. Framing only — the three DQs run in the 30-minute journal club after the break, moderated by the instructor (this first one models the format; lead-pair rotation starts W3). Here: set the 2019 context so the tickets land on prepared ground.</aside>
+  <p class="big muted">Reichstein et al. 2019 — where has deep learning for Earth system science delivered since, and where hasn’t it?</p>
+  <aside class="notes">Timing: minutes ~65–75. Framing only — the three discussion questions run in the 30-minute journal club after the break, moderated by the instructor (this first one models the format; lead-pair rotation starts Week 3). Here: set the 2019 context so the tickets land on prepared ground.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 5 · 10 min</p>
   <h2>The 2019 agenda we are grading seven years later</h2>
   <ul>
-    <li>Reichstein's five challenges for DL in Earth system science: <b>interpretability</b> · <b>physical consistency</b> · <b>complex, uncertain data</b> · <b>limited labels</b> · <b>computational demand</b>.</li>
-    <li>Their bet: the future is <span class="accent">hybrid physics–ML</span> — process models and learning fused, not learning alone.</li>
+    <li>Reichstein’s five challenges for deep learning in Earth system science: <b>interpretability</b> · <b>physical consistency</b> · <b>complex, uncertain data</b> · <b>limited labels</b> · <b>computational demand</b>.</li>
+    <li>Their bet: the future is <span class="accent">hybrid physics + machine learning</span> — process models and learning fused, not learning alone.</li>
     <li>Written before transformers reached the Earth sciences: no foundation models, no GraphCast, no self-supervised pretraining at scale.</li>
-    <li class="muted">Tonight's question is an audit: which challenges did scale solve, which did it dodge, and did the hybrid bet pay off?</li>
+    <li class="muted">Tonight’s question is an audit: which challenges did scale solve, which did it dodge, and did the hybrid bet pay off?</li>
   </ul>
   <div class="foot"><span>Reichstein et al. 2019, Nature 566:195 · doi:10.1038/s41586-019-0912-1</span></div>
-  <aside class="notes">~3 min of shared context before the questions. Point out the paper's Figure 2 (the hybrid-modeling spectrum) as the intellectual frame the course keeps returning to — NeuralGCM in W11 is that figure made real. Then put the DQs up.</aside>
+  <aside class="notes">~3 min of shared context before the questions. Point out the paper's Figure 2 (the hybrid-modeling spectrum) as the intellectual frame the course keeps returning to — NeuralGCM in Week 11 is that figure made real. Then put the discussion questions up.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Journal club · 30 min · after break</p>
   <h2>Reichstein et al. 2019 — discussion questions</h2>
   <ol>
-    <li>Which of Reichstein's five challenges have foundation models since addressed, and which have they dodged?</li>
-    <li>Design a split for a global soil-moisture model that a reviewer couldn't reject — what do you hold out?</li>
-    <li>Is 'hybrid physics-ML' (their vision) winning in 2026, given NeuralGCM vs pure-ML GraphCast?</li>
+    <li>Which of Reichstein’s five challenges have foundation models since addressed, and which have they dodged?</li>
+    <li>Design a split for a global soil-moisture model that a reviewer couldn’t reject — what do you hold out?</li>
+    <li>Is “hybrid physics + machine learning” (their vision) winning in 2026, given NeuralGCM versus pure-learning GraphCast?</li>
   </ol>
   <p class="small muted">Groups of 4–5, working from your published entrance tickets (Journal Club tab on the course site) · this week’s lead pair moderates · these three questions are the agenda.</p>
-  <div class="foot"><span>Instructor-moderated this week (rotation starts W3) · opens with one reproduced figure · entrance tickets due 24 h before class</span></div>
-  <aside class="notes">Journal club: 30 min in groups of 4–5, lead pair moderating; keep DQ2 short (we built the answer in Part 4 — ask a student to reconstruct the three axes from memory). For DQ1, push past "computational demand is solved" — is physical consistency addressed or merely benchmarked? For DQ3, seed the tension: GraphCast beat physics-free, yet NeuralGCM's differentiable-physics core wins on long rollouts and conservation. Close: lab briefing, 1 min.</aside>
+  <div class="foot"><span>Instructor-moderated this week (rotation starts Week 3) · opens with one reproduced figure · entrance tickets due 24 h before class</span></div>
+  <aside class="notes">Journal club: 30 min in groups of 4–5, lead pair moderating; keep question 2 short (we built the answer in Part 4 — ask a student to reconstruct the three axes from memory). For question 1, push past "computational demand is solved" — is physical consistency addressed or merely benchmarked? For question 3, seed the tension: GraphCast beat physics-free, yet NeuralGCM's differentiable-physics core wins on long rollouts and conservation. Close: lab briefing, 1 min.</aside>
 </section>
 
 <!-- ============================ LAB ============================ -->
@@ -570,15 +859,15 @@
   <p class="kicker">Lab briefing · after journal club</p>
   <h2>Today's lab: measure the optimism gap yourself</h2>
   <div class="card">
-    <p><b>Task.</b> Predict runoff ratio and mean annual streamflow from catchment attributes; agent builds an MLP + gradient-boosting baseline. <b>Data.</b> <span class="pill">CAMELS-US · ~671 basins · tabular</span></p>
-    <p><b>Sweep.</b> W&amp;B sweep over LR, depth, dropout — then re-evaluate the winner with <b>spatial-block CV (holdout by HUC region)</b> and quantify the optimism gap vs the random split.</p>
-    <p><b>Deliverable.</b> <code>notes/week02.md</code>: sweep parallel-coordinates plot + a "random split vs spatial split" table + a one-paragraph leakage post-mortem.</p>
+    <p><b>Task.</b> Predict runoff ratio and mean annual streamflow from catchment attributes; your agent builds a small neural network + a gradient-boosting baseline. <b>Data.</b> <span class="pill">CAMELS-US · ~671 basins · tabular</span></p>
+    <p><b>Sweep.</b> Weights &amp; Biases sweep over learning rate, depth, dropout — then re-evaluate the winner with <b>spatial-block cross-validation (holdout by hydrologic region)</b> and quantify the optimism gap versus the random split.</p>
+    <p><b>Deliverable.</b> <code>notes/week02.md</code>: sweep parallel-coordinates plot + a “random split vs spatial split” table + a one-paragraph leakage post-mortem.</p>
   </div>
   <ul class="small">
-    <li class="accent">W&amp;B logging is mandatory from today — every run, every week, no exceptions.</li>
-    <li>Tools: PyTorch · scikit-learn · W&amp;B. Verify yourself: normalization stats computed inside training folds only (checklist item 4).</li>
+    <li class="accent">Weights &amp; Biases logging is mandatory from today — every run, every week, no exceptions.</li>
+    <li>Tools: PyTorch · scikit-learn · Weights &amp; Biases. Verify yourself: normalization statistics computed inside training folds only (checklist item 4).</li>
   </ul>
-  <aside class="notes">1 min, then dismiss to lab (60 min). Predict the result out loud so they can falsify it: the sweep winner's random-split score will drop when basins are held out by HUC region — their first personally measured optimism gap. The post-mortem paragraph should cite which checklist item the random split violated.</aside>
+  <aside class="notes">1 min, then dismiss to lab (60 min). Predict the result out loud so they can falsify it: the sweep winner's random-split score will drop when basins are held out by region — their first personally measured optimism gap. The post-mortem paragraph should cite which checklist item the random split violated.</aside>
 </section>
 
 </body>

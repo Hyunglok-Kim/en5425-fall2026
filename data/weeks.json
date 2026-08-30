@@ -204,6 +204,30 @@
      {
       "title": "(Optional) Goodfellow Ch. 8 §8.1–8.3 — Optimization; the lecture covers the working recipe",
       "link": "https://www.deeplearningbook.org/contents/optimization.html"
+     },
+     {
+      "title": "(Reference) Stanford CS231n notes — Backpropagation, Intuitions",
+      "link": "https://cs231n.github.io/optimization-2/"
+     },
+     {
+      "title": "(Reference) Justin Johnson — Derivatives, Backpropagation, and Vectorization (handout)",
+      "link": "https://cs231n.stanford.edu/handouts/derivatives.pdf"
+     },
+     {
+      "title": "(Reference) Roger Grosse — Backpropagation lecture notes (Univ. of Toronto)",
+      "link": "https://www.cs.toronto.edu/~rgrosse/courses/csc321_2017/readings/L06%20Backpropagation.pdf"
+     },
+     {
+      "title": "(Reference) Hartmann — Objective Analysis notes §6.1.5: effective sample size for autocorrelated data",
+      "link": "https://atmos.uw.edu/~dennis/552_Notes_6a.pdf"
+     },
+     {
+      "title": "(Reference) Pebesma & Bivand — Spatial Data Science ch. 12: variograms",
+      "link": "https://r-spatial.org/book/12-Interpolation.html"
+     },
+     {
+      "title": "(Reference) CAST — hands-on spatial validation tutorials (Hanna Meyer)",
+      "link": "https://hannameyer.github.io/CAST/"
      }
     ],
     "questions": [
