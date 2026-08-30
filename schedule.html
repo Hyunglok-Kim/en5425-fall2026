@@ -74,9 +74,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       const lab = w.lab || {};
       const rd = w.reading || {};
       const primary = Array.isArray(rd.primary) ? rd.primary : [];
+      const optional = Array.isArray(rd.optional) ? rd.optional : [];
       const dataPills = (lab.data || []).map((d) => `<span class="pill">${esc(d)}</span>`).join("");
-      const readLinks = primary.map((r) =>
-        r.link ? `<a href="${esc(r.link)}">${esc(r.title)}</a>` : esc(r.title)).join("<br>");
+      const linkOf = (r) => r.link ? `<a href="${esc(r.link)}">${esc(r.title)}</a>` : esc(r.title);
+      let readLinks = primary.map(linkOf).join("<br>");
+      if (!readLinks && optional.length) {
+        const shown = optional.slice(0, 3).map(linkOf).join("<br>");
+        const more = optional.length > 3
+          ? `<br><a href="week.html?w=${w.n}" class="sub" style="margin:0">${t(`+${optional.length - 3} more…`, `+${optional.length - 3}편 더…`)}</a>` : "";
+        readLinks = `<span class="sub" style="margin:0">${t("optional:", "선택:")}</span><br>${shown}${more}`;
+      }
       const memoPill = w.n === 1
         ? ` <span class="pill">${t("assigned in class &#183; ticket due with W2", "수업에서 배정 &#183; 티켓은 W2와 함께")}</span>`
         : rd.memo && rd.memo !== "none"
