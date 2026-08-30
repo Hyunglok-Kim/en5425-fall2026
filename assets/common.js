@@ -87,10 +87,52 @@ function injectFooter() {
     Fall 2026 · Prof. Hyunglok Kim · <a href="https://hydroai.net">HydroAI Lab</a>, GIST`;
   ($(".wrap") || document.body).appendChild(f);
 }
+
+/* ---- class gate: shared password wall (client-side — keeps outsiders/crawlers out;
+   it is a curtain, not a vault. Real auth lives behind /portal sign-in). ---- */
+const GATE_HASH = "4c0d0a6332aca7bac1ba8ef0dad4e1f305d9897fc595a84f37332718cb57b57f";
+async function _sha256hex(txt) {
+  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt));
+  return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
+}
+function gatePassed() {
+  try { return localStorage.getItem("en5425-gate") === GATE_HASH; } catch { return false; }
+}
+function showGate() {
+  const ov = document.createElement("div");
+  ov.id = "gateOverlay";
+  ov.innerHTML = `<div class="gate-card">
+    <p class="eyebrow" style="margin-top:0">EN5425 / EV4240 · Fall 2026</p>
+    <h2 style="margin:0 0 6px">${t("Class members only", "수강생 전용 페이지")}</h2>
+    <p class="sub">${t("Enter the class password from the first session.",
+      "첫 수업에서 안내한 수업 비밀번호를 입력하세요.")}</p>
+    <form id="gateForm">
+      <input id="gatePw" type="password" autocomplete="off" autofocus
+        placeholder="${t("Class password", "수업 비밀번호")}">
+      <button class="btn primary" type="submit">${t("Enter", "입장")}</button>
+    </form>
+    <p class="sub" id="gateErr" style="min-height:18px;margin:8px 0 0;color:var(--warn)"></p>
+  </div>`;
+  document.body.appendChild(ov);
+  const form = ov.querySelector("#gateForm");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const h = await _sha256hex(ov.querySelector("#gatePw").value);
+    if (h === GATE_HASH) {
+      try { localStorage.setItem("en5425-gate", GATE_HASH); } catch {}
+      ov.remove();
+    } else {
+      ov.querySelector("#gateErr").textContent =
+        t("Wrong password — ask a classmate or the instructor.", "비밀번호가 달라요 — 동료나 교수님께 확인하세요.");
+      ov.querySelector("#gatePw").select();
+    }
+  });
+}
 document.addEventListener("DOMContentLoaded", () => {
   document.body.dataset.lang = LANG.get();
   injectNav();
   injectFooter();
+  if (!gatePassed()) showGate();
 });
 
 /* Date helpers — weeks.json carries "date": "YYYY-MM-DD" (class day) or null until the

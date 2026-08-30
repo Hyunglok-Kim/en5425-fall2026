@@ -125,3 +125,11 @@ footer.site { margin-top:64px; padding-top:18px; border-top:1px solid var(--hair
   .site-nav, footer.site { display:none; }
   body { background:#fff; color:#000; }
 }
+
+/* ---- class gate overlay ---- */
+#gateOverlay { position:fixed; inset:0; z-index:1000; background:var(--page);
+  display:flex; align-items:center; justify-content:center; padding:24px; }
+#gateOverlay .gate-card { background:var(--surface); border:1px solid var(--hairline);
+  border-radius:14px; padding:26px 28px; width:min(400px, 94vw); }
+#gateOverlay input { width:100%; padding:9px 11px; border:1px solid var(--hairline);
+  border-radius:10px; background:var(--page); color:var(--ink); font-size:14px; margin:0 0 10px; }
