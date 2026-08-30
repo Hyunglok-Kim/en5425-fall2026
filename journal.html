@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     const [{ weeks }, journal] = await Promise.all([loadJSON("weeks"), loadJSON("journal")]);
     const jw = journal.weeks || {};
-    const jcWeeks = weeks.filter((w) => w.n >= 1 && w.n <= 15 && w.n !== 8);
+    const jcWeeks = weeks.filter((w) => w.n >= 2 && w.n <= 12 && w.n !== 8);
     const has = (n) => (jw[pad(n)] || jw[String(n)] || []).length > 0;
 
     let n = parseInt(new URLSearchParams(location.search).get("w"), 10);
@@ -89,7 +89,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       n = withTickets.length ? Math.max(...withTickets) : jcWeeks[0].n;
     }
     const w = jcWeeks.find((x) => x.n === n);
-    const tickets = jw[pad(n)] || jw[String(n)] || [];
+    let tickets = jw[pad(n)] || jw[String(n)] || [];
+    if (n === 2) {  // the first journal club discusses Week 1 + Week 2 tickets together
+      const w1 = (jw["01"] || []).map((tk) => ({ ...tk, w1: true }));
+      tickets = [...w1, ...tickets];
+    }
     const title = (ko && w.title_ko) ? w.title_ko : w.title;
     document.title = t(`EN5425 · Journal Club · Week ${n}`, `EN5425 · 저널클럽 · ${n}주차`);
 
@@ -132,7 +136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         `아직 ${n}주차 티켓이 없어요 — 포털에서 제출되는 대로 (수업 24시간 전 마감) 여기에 나타나요.`))}</p>`;
     } else {
       html += tickets.map((tk) => {
-        const name = tk.display || tk.gh;
+        const name = (tk.display || tk.gh) + (tk.w1 ? " · W1 ticket" : "");
         /* gh may be empty in the new data shape — link only when present;
            show the submitted time (and a late badge) when the export has it. */
         const at = tk.at ? String(tk.at) : "";
