@@ -66,8 +66,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       ${questions.length && n !== 1 && !w.async ? `<h2>${t("Journal club (30 min)", "저널클럽 (30분)")}</h2>
       <div class="card">
         <p style="margin:0" class="small">${t(
-          "Bring your entrance ticket (submitted on the student portal 24 h before class). Groups of 4&#8211;5, the week's lead pair moderates; the class opens with a 5-minute closed-book reading quiz.",
-          "입장 티켓(수업 24시간 전까지 학생 포털에서 제출)을 가지고 4&#8211;5명씩 토론합니다. 이번 주 리드 조가 진행하고, 수업 시작은 5분 closed-book 리딩 퀴즈입니다.")}</p>
+          "Bring your entrance ticket (submitted on the sign-in area of this site 24 h before class). Groups of 4&#8211;5, the week's lead pair moderates; the class opens with a 5-minute closed-book reading quiz.",
+          "입장 티켓(수업 24시간 전까지 이 사이트 로그인에서 제출)을 가지고 4&#8211;5명씩 토론합니다. 이번 주 리드 조가 진행하고, 수업 시작은 5분 closed-book 리딩 퀴즈입니다.")}</p>
         <p class="kv">${t("Discussion questions", "토론 질문")}</p>
         <ol style="margin-top:4px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>
         <p style="margin:10px 0 0"><a class="btn" href="journal.html?w=${n}">${t("Read this week's tickets &#8594;", "이번 주 티켓 보기 &#8594;")}</a></p>
@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         ${rd.memo && rd.memo !== "none"
           ? `<p class="sub" style="margin:10px 0 0">${t("Ticket type:", "티켓 유형:")} <span class="pill acc">${esc(rd.memo)}</span> ${n === 1
               ? t("— assigned in class; due together with the Week 2 ticket, 24 h before the Week 2 session (non-droppable).", "— 수업에서 배정. 2주차 티켓과 함께 2주차 수업 24시간 전까지 제출합니다 (드롭 불가).")
-              : t("— your entrance ticket, due 24 h before class, submitted on the student portal.", "— 입장 티켓입니다. 수업 24시간 전까지 학생 포털에서 제출합니다.")}</p>`
+              : t("— your entrance ticket, due 24 h before class, submitted on this site (sign in from the top menu).", "— 입장 티켓입니다. 수업 24시간 전까지 이 사이트에 로그인해 제출합니다.")}</p>`
           : (primary.length ? `<p class="sub" style="margin:10px 0 0">${t("No ticket due this week.", "이번 주는 티켓이 없습니다.")}</p>`
                             : `<p class="sub" style="margin:0">${t("No assigned reading this week.", "이번 주는 지정 읽기자료가 없습니다.")}</p>`)}
       </div>

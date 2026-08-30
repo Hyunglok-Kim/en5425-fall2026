@@ -91,8 +91,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     </div>`;
   };
   const empty = () => { cohortEl.innerHTML = `<p class="sub">${esc(t(
-    "Cards appear here after HW0 — set your display name and bio (photo optional) on the student portal.",
-    "HW0 이후에 카드가 나타납니다 — 학생 포털에서 표시 이름과 한 줄 소개를 설정해 주세요 (사진은 선택)."))}</p>`; };
+    "Cards appear here after HW0 — sign in on this site to set your display name and bio (photo optional).",
+    "HW0 이후에 카드가 나타납니다 — 이 사이트에 로그인해 표시 이름과 한 줄 소개를 설정해 주세요 (사진은 선택)."))}</p>`; };
   try {
     const d = await loadJSON("status");
     const assignments = Array.isArray(d.assignments) ? d.assignments : [];

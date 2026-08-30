@@ -31,6 +31,7 @@ const NAV = [
   ["capstone", "Capstone", "프로젝트", "capstone.html"],
   ["setup", "Setup", "환경 설정", "setup.html"],
   ["students", "Students", "수강생", "students.html"],
+  ["submit", "Sign in / Submit", "로그인 · 제출", "/portal/login.html"],
 ];
 function injectNav() {
   const page = document.body.dataset.page || "";

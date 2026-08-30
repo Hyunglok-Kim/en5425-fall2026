@@ -50,12 +50,11 @@
   <p class="lede">
     <span class="lang-en">Every class opens with a 5-minute reading quiz; after the lecture we hold
       a 30-minute discussion in groups of 4&ndash;5, moderated by the week's lead pair. Your entrance
-      ticket &mdash; submitted on the <a href="/portal/login.html">student portal</a> 24&nbsp;h before
+      ticket &mdash; <a href="/portal/login.html">signed in on this site</a> and submitted 24&nbsp;h before
       class &mdash; is published here, face and all, so the whole class reads each other's takes
       before we talk.</span>
     <span class="lang-ko">매주 수업은 5분 리딩 퀴즈로 시작하고, 강의 후에는 4&ndash;5명씩 30분 토론을
-      해요. 이번 주 리드 조가 진행합니다. 수업 24시간 전까지 <a href="/portal/login.html">학생
-      포털</a>에서 제출한 entrance ticket은 얼굴 카드와 함께 이 페이지에 공개되어, 토론 전에 서로의
+      해요. 이번 주 리드 조가 진행합니다. 수업 24시간 전까지 <a href="/portal/login.html">이 사이트에 로그인해</a> 제출한 entrance ticket은 얼굴 카드와 함께 이 페이지에 공개되어, 토론 전에 서로의
       생각을 미리 읽을 수 있어요.</span>
   </p>
 
@@ -132,8 +131,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     html += `<h2>${t("Entrance tickets", "Entrance tickets")}</h2>`;
     if (!tickets.length) {
       html += `<p class="sub">${esc(t(
-        `No tickets for Week ${n} yet — tickets appear here as classmates submit them on the portal (due 24 h before class).`,
-        `아직 ${n}주차 티켓이 없어요 — 포털에서 제출되는 대로 (수업 24시간 전 마감) 여기에 나타나요.`))}</p>`;
+        `No tickets for Week ${n} yet — tickets appear here as classmates submit them — due Sunday 13:00. The prep board below shows who is in.`,
+        `아직 ${n}주차 티켓이 없어요 — 제출되는 대로 여기에 실려요 — 마감은 일요일 13:00. 아래 준비 현황판에서 누가 있는지 볼 수 있어요.`))}</p>`;
     } else {
       html += tickets.map((tk) => {
         const name = (tk.display || tk.gh) + (tk.w1 ? " · W1 ticket" : "");
