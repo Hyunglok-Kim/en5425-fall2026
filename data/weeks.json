@@ -867,11 +867,11 @@
     {
       "n": 13,
       "phase": "Capstone Sprints",
-      "title": "Agentic ML Engineering + Capstone Sprint 1 — async sprint (no class meeting)",
+      "title": "Agentic ML Engineering + Capstone Sprint 1",
       "goal": "Turn your AI agent from code generator into experiment orchestrator; launch the capstone run. Milestone M1 due.",
-      "title_ko": "Agentic ML 엔지니어링 + Capstone Sprint 1 — 원격 스프린트 (수업 없음)",
+      "title_ko": "Agentic ML 엔지니어링 + Capstone Sprint 1",
       "goal_ko": "AI 에이전트를 코드 생성기에서 실험 orchestrator로 격상시키고, capstone 학습 run을 시작합니다. Milestone M1 제출.",
-      "date": "2026-12-01",
+      "date": "2026-12-07",
       "concept": [
         {
           "min": 15,
@@ -887,7 +887,7 @@
         }
       ],
       "lab": {
-        "task": "ASYNC SPRINT (no meeting): freeze data pipeline and eval protocol; launch the fine-tuning/eval runs (checkpoint-resumable); set up W&B alerts. Feedback via GitHub issues.",
+        "task": "Capstone sprint studio, led by Dr. Budamala: freeze data pipeline and eval protocol; launch fine-tuning/eval runs (checkpoint-resumable); design reviews at the bench. The instructor is at AGU — Dr. Budamala runs the session.",
         "data": [],
         "tools": [
           "W&B (alerts, MCP)",
@@ -924,16 +924,16 @@
         "pre-registered evaluation",
         "compute-optimal execution"
       ],
-      "async": true
+      "instructor": "Dr. Budamala (HydroAI postdoc)"
     },
     {
       "n": 14,
       "phase": "Capstone Sprints",
-      "title": "Capstone Sprint 2 + Peer Code Review; Model Cards and Reproducibility — async sprint (no class meeting)",
+      "title": "Capstone Sprint 2 + Peer Code Review; Model Cards and Reproducibility",
       "goal": "Fine-tune and evaluate the model; subject your code to structured peer review. Milestone M2 due.",
-      "title_ko": "Capstone Sprint 2 + 동료 코드 리뷰; Model Card와 재현성 — 원격 스프린트 (수업 없음)",
+      "title_ko": "Capstone Sprint 2 + 동료 코드 리뷰; Model Card와 재현성",
       "goal_ko": "모델을 fine-tuning하고 평가하며, 코드를 구조화된 동료 리뷰에 부칩니다. Milestone M2 제출.",
-      "date": "2026-12-08",
+      "date": "2026-12-14",
       "concept": [
         {
           "min": 15,
@@ -949,7 +949,7 @@
         }
       ],
       "lab": {
-        "task": "ASYNC SPRINT (no meeting): downstream fine-tuning with the mandatory baseline set; structured peer code review conducted asynchronously on GitHub (>=3 substantive issues given and received).",
+        "task": "Capstone sprint studio, led by Dr. Budamala: downstream fine-tuning with the mandatory baseline set; structured peer code review in session (>=3 substantive issues given and received).",
         "data": [],
         "tools": [
           "GitHub (issues, review)",
@@ -983,16 +983,16 @@
         "code review",
         "licensing"
       ],
-      "async": true
+      "instructor": "Dr. Budamala (HydroAI postdoc)"
     },
     {
       "n": 15,
       "phase": "Capstone Sprints",
-      "title": "Capstone Sprint 3: Evaluation, Ablation, Documentation, Release Candidate — async sprint (no class meeting)",
+      "title": "Wrap-up: evaluation, documentation, release candidate — final polish week",
       "goal": "Finish evaluation and ablation, harden documentation, cut a release candidate. Milestone M3 due.",
-      "title_ko": "Capstone Sprint 3: 평가, Ablation, 문서화, Release Candidate — 원격 스프린트 (수업 없음)",
+      "title_ko": "마무리: 평가·문서화·릴리스 후보 — 최종 정리 주간",
       "goal_ko": "평가와 ablation을 마무리하고 문서를 다듬어 release candidate를 만듭니다. Milestone M3 제출.",
-      "date": "2026-12-11",
+      "date": "2026-12-15",
       "concept": [
         {
           "min": 10,
@@ -1004,7 +1004,7 @@
         }
       ],
       "lab": {
-        "task": "ASYNC SPRINT (no meeting): complete the ablation; finalize eval tables with seeds/error bars; finish model card, README quickstart, project page; tag the release candidate.",
+        "task": "Final polish on your own schedule: complete the ablation, finalize eval tables with seeds/error bars, finish model card and README quickstart, tag the release candidate. Questions via GitHub issues.",
         "data": [],
         "tools": [
           "HF Hub",

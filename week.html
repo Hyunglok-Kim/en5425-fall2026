@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const prev = weeks.find((x) => x.n === n - 1), next = weeks.find((x) => x.n === n + 1);
 
     el.innerHTML = `
-      <p class="eyebrow">${t(`Week ${n}`, `${n}주차`)} · ${esc((ko && { "Foundations": "기초", "Pretraining Core": "프리트레이닝 핵심", "Foundation Models": "파운데이션 모델", "Capstone Sprints": "Capstone 스프린트" }[w.phase]) || w.phase || "")}${w.date ? " · " + esc(fmtDate(w.date)) : ""}</p>
+      <p class="eyebrow">${t(`Week ${n}`, `${n}주차`)} · ${esc((ko && { "Foundations": "기초", "Pretraining Core": "프리트레이닝 핵심", "Foundation Models": "파운데이션 모델", "Capstone Sprints": "Capstone 스프린트" }[w.phase]) || w.phase || "")}${w.date ? " · " + esc(fmtDate(w.date)) : ""}${w.instructor ? " · " + esc(w.instructor) : ""}</p>
       <h1>${esc(title)}</h1>
       <p class="lede">${esc(goal || "")}</p>
       ${w.slides ? `<p style="margin-top:10px"><a class="btn" href="slides/week${String(n).padStart(2, "0")}.html">${t("Lecture slides →", "강의 슬라이드 →")}</a></p>` : ""}
