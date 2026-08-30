@@ -120,6 +120,11 @@ function injectFooter() {
 
 /* ---- class gate: shared password wall (client-side — keeps outsiders/crawlers out;
    it is a curtain, not a vault. Real auth lives behind /portal sign-in). ---- */
+/* Embedded mode: the site is shown inside an iframe on hydroai.net (Webflow Code
+   Embed, same pattern as /data). Framed = our own shop window, so skip the curtain;
+   sign-in must escape the frame — session cookies are third-party inside an iframe
+   and Safari/Chrome drop them. */
+const EMBEDDED = (() => { try { return window.self !== window.top; } catch { return true; } })();
 const GATE_HASH = "4c0d0a6332aca7bac1ba8ef0dad4e1f305d9897fc595a84f37332718cb57b57f";
 async function _sha256hex(txt) {
   const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt));
@@ -288,7 +293,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.body.dataset.lang = LANG.get();
   injectNav();
   injectFooter();
-  if (!gatePassed()) showGate();
+  if (!gatePassed() && !EMBEDDED) showGate();
+  if (EMBEDDED) document.addEventListener("click", (e) => {
+    const a = e.target.closest ? e.target.closest("a[href]") : null;
+    if (a && /portal\/|trycloudflare\.com/.test(a.href)) a.target = "_top";
+  }, true);
   const st = await navSession();
   initSubmitBoxes(st);
 });
