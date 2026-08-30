@@ -48,6 +48,16 @@
     letter-spacing:.04em; text-transform:uppercase; vertical-align:1px; }
   .tk-body { font-size:13.8px; }
   .tk-body p { margin:9px 0 0; }
+  .mybox-in { background:var(--page); border:1px dashed var(--accent); border-radius:10px;
+    padding:12px 14px; margin:14px 0 4px; }
+  .mybox-t { font-weight:700; font-size:13.5px; margin:0 0 8px; font-family:var(--serif); }
+  .mybox-in textarea { width:100%; min-height:110px; resize:vertical; padding:10px 11px;
+    border:1px solid var(--hairline); border-radius:8px; background:var(--surface);
+    color:var(--ink); font-size:13.5px; font-family:var(--sans); line-height:1.6; }
+  .mybox-in .gform { display:flex; gap:8px; flex-wrap:wrap; }
+  .mybox-in .gform input { flex:1; min-width:120px; padding:8px 10px; border:1px solid var(--hairline);
+    border-radius:8px; background:var(--surface); color:var(--ink); font-size:13.5px; }
+  .mybox-foot { display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
   @media (max-width:520px) {
     .face { width:36px; height:36px; }
     .tk-card { padding:12px 13px; }
@@ -61,13 +71,13 @@
   <p class="lede">
     <span class="lang-en">Journal-club weeks (2&ndash;7, 9&ndash;12) open with a 5-minute reading quiz; after the lecture we hold
       a 30-minute discussion in groups of 4&ndash;5, moderated by the week's lead pair (Week 2 is moderated
-      by the instructor to model the format; the rotation starts Week 3). Your entrance
-      ticket &mdash; <a href="/portal/login.html">signed in on this site</a> and submitted by Sunday 13:00 &mdash;
-      is published here, face and all, so the whole class reads each other's takes before we talk.</span>
+      by the instructor to model the format; the rotation starts Week 3). Write and submit your entrance
+      ticket <b>right on this page</b> (sign in below; due Sunday 13:00) &mdash; it is published here,
+      face and all, so the whole class reads each other's takes before we talk.</span>
     <span class="lang-ko">저널클럽 주간(2&ndash;7, 9&ndash;12주차)은 5분 리딩 퀴즈로 시작하고, 강의 후에는 4&ndash;5명씩
       30분 토론을 해요. 리드 조가 진행합니다 (2주차는 포맷 시범을 위해 교수가 직접 진행하고, 로테이션은 3주차부터예요).
-      일요일 13:00까지 <a href="/portal/login.html">이 사이트에 로그인해</a> 제출한 entrance ticket은 얼굴 카드와 함께
-      이 페이지에 공개되어, 토론 전에 서로의 생각을 미리 읽을 수 있어요.</span>
+      entrance ticket은 <b>바로 이 페이지에서</b> 작성하고 제출해요 (아래에서 로그인 · 마감 일요일 13:00).
+      제출하면 얼굴 카드와 함께 여기에 공개되어, 토론 전에 서로의 생각을 미리 읽을 수 있어요.</span>
   </p>
 
   <div id="jc">
@@ -76,6 +86,100 @@
 </div>
 
 <script>
+
+/* ---- in-page ticket submission ----------------------------------------
+   Served by the app: full write/submit here. On the static mirror the API
+   does not exist; the boxes then point to the live class address (taken
+   from the pinned announcement). */
+const XH = { "X-EN5425": "1" };
+async function apiState() {
+  try {
+    const r = await fetch("/api/me", { cache: "no-store" });
+    if (r.ok) return { mode: "authed", me: await r.json() };
+    if (r.status === 401 || r.status === 403) return { mode: "anon" };
+  } catch {}
+  return { mode: "mirror" };
+}
+async function liveURL() {
+  try {
+    const anns = await loadJSON("announcements");
+    const a = anns.find((x) => x.live_url);
+    const m = a && a.text.match(/https:\/\/\S+/);
+    return m ? m[0] : null;
+  } catch { return null; }
+}
+async function initTicketBoxes() {
+  const boxes = $$(".mybox");
+  if (!boxes.length) return;
+  const st = await apiState();
+  if (st.mode === "authed" && st.me.must_change) { location.href = "/portal/login.html#change"; return; }
+
+  if (st.mode === "mirror") {
+    const live = await liveURL();
+    boxes.forEach((b) => { b.innerHTML = `<div class="mybox-in"><p class="sub" style="margin:0">
+      ${live ? `<a class="btn primary" href="${esc(live)}/journal.html">${t("Write your ticket on the live class site →", "수업용 주소에서 티켓 작성하기 →")}</a>`
+             : t("Ticket submission opens on the live class address (see the pinned announcement on Home).",
+                 "티켓 제출은 수업용 주소에서 열려요 (홈의 고정 공지 참고).")}</p></div>`; });
+    return;
+  }
+
+  for (const b of boxes) {
+    const aid = b.dataset.aid, label = b.dataset.label;
+    if (st.mode === "anon") {
+      b.innerHTML = `<div class="mybox-in">
+        <p class="mybox-t">${esc(label)}</p>
+        <form class="gform" data-aid="${aid}">
+          <input name="sid" placeholder="${t("Student no.", "학번")}" autocomplete="username">
+          <input name="password" type="password" placeholder="${t("Password", "비밀번호")}" autocomplete="current-password">
+          <button class="btn primary" type="submit">${t("Sign in to write", "로그인하고 작성")}</button>
+        </form>
+        <p class="sub gerr" style="min-height:16px;margin:6px 0 0;color:var(--warn)"></p></div>`;
+      b.querySelector("form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        try {
+          const r = await fetch("/api/login", { method: "POST", headers: XH, body: fd });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.detail || "login failed");
+          if (j.must_change) { location.href = "/portal/login.html#change"; return; }
+          initTicketBoxes();
+        } catch (err) { b.querySelector(".gerr").textContent = err.message; }
+      });
+      continue;
+    }
+    /* authed */
+    const row = (st.me.assignments || []).find((a) => a.id === aid);
+    if (!row) { b.innerHTML = ""; continue; }
+    let mine = { text: null };
+    try { mine = await (await fetch(`/api/mysub?aid=${aid}`)).json(); } catch {}
+    const dueD = row.due ? new Date(row.due) : null;
+    const dueTxt = dueD ? `${fmtDate(row.due.slice(0, 10))} ${row.due.slice(11, 16)}` : "";
+    b.innerHTML = `<div class="mybox-in">
+      <p class="mybox-t">${esc(label)} <span class="sub" style="margin:0;display:inline">
+        · ${t("due", "마감")} ${esc(dueTxt)}${row.late ? ` · <span class="tk-late">${t("late", "지각")}</span>` : ""}
+        ${mine.at ? " · " + t("submitted", "제출됨") + " " + esc(String(mine.at).slice(5, 16).replace("T", " ")) : ""}</span></p>
+      <textarea maxlength="20000" placeholder="${t("3-sentence summary · substantive critique · capstone connection · one real question",
+        "3문장 요약 · 실질 비판 · capstone 연결 · 진짜 궁금한 질문")}">${mine.text ? esc(mine.text) : ""}</textarea>
+      <div class="mybox-foot">
+        <button class="btn primary">${mine.at ? t("Resubmit", "다시 제출") : t("Submit ticket", "티켓 제출")}</button>
+        <span class="sub" style="margin:0">${t("Resubmission allowed; the latest one counts.", "다시 제출 가능 — 마지막 제출이 반영돼요.")}</span>
+      </div>
+      <p class="sub gerr" style="min-height:16px;margin:6px 0 0;color:var(--warn)"></p></div>`;
+    b.querySelector("button").addEventListener("click", async () => {
+      const txt = b.querySelector("textarea").value.trim();
+      const err = b.querySelector(".gerr");
+      if (!txt) { err.textContent = t("Write something first.", "내용을 먼저 적어 주세요."); return; }
+      const fd = new FormData(); fd.append("aid", aid); fd.append("text", txt);
+      try {
+        const r = await fetch("/api/submit", { method: "POST", headers: XH, body: fd });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.detail || "submit failed");
+        location.reload();   /* journal.json was republished — show the ticket in place */
+      } catch (e2) { err.textContent = e2.message; }
+    });
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const el = $("#jc");
   let ko = false; try { ko = localStorage.getItem("en5425-lang") === "ko"; } catch {}
@@ -132,6 +236,8 @@ document.addEventListener("DOMContentLoaded", async () => {
               ? "" : " — " + t("no ticket yet", "티켓 미제출")}">${face(name, s.photo)}</span>`;
           }).join("")}</div>`;
       }
+      h += `${w.n === 2 ? `<div class="mybox" data-aid="memo01" data-label="${t("My Week 1 ticket (Attention + ViT)", "내 1주차 티켓 (Attention + ViT)")}"></div>` : ""}
+        <div class="mybox" data-aid="memo${pad(w.n)}" data-label="${t("My ticket for this week", "내 이번 주 티켓")}"></div>`;
       h += `<h3>${t("Entrance tickets", "Entrance tickets")}</h3>`;
       if (!tickets.length) {
         h += `<p class="sub">${esc(t(
@@ -176,6 +282,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       </details>`;
     }).join("") + (journal.updated ? `<p class="sub" style="margin-top:14px">${esc(
       t("Updated ", "업데이트 ") + (fmtDate(String(journal.updated).slice(0, 10)) || journal.updated))}</p>` : "");
+
+    initTicketBoxes();
 
     if (new URLSearchParams(location.search).get("w")) {
       const target = document.getElementById("wk" + cur);
