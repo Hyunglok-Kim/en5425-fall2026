@@ -145,9 +145,8 @@ async function siteSession() {
 }
 async function liveClassURL() {
   try {
-    const anns = await loadJSON("announcements");
-    const a = anns.find((x) => x.live_url);
-    const m = a && a.text.match(/https:\/\/\S+/);
+    const html = await (await fetch("portal/login.html", { cache: "no-store" })).text();
+    const m = html.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
     return m ? m[0] : null;
   } catch { return null; }
 }

@@ -63,7 +63,7 @@
   .grp-t { font-family:var(--serif); font-weight:700; font-size:13px; margin:0 0 8px; }
   .grp-m { display:flex; align-items:center; gap:8px; font-size:13px; padding:3px 0; }
   .grp-m .face { width:28px; height:28px; font-size:12px; }
-  .grp-m.lead span { font-weight:700; }
+  .grp-m.lead span, .grp-m.pres span { font-weight:700; }
   .grp-star { color:var(--accent); font-size:11px; font-weight:700; }
   @media (max-width:520px) {
     .face { width:36px; height:36px; }
@@ -77,13 +77,19 @@
   <h1><span class="lang-en">Journal Club</span><span class="lang-ko">저널클럽</span></h1>
   <p class="lede">
     <span class="lang-en">Journal-club weeks (2&ndash;7, 9&ndash;12) open with a 5-minute reading quiz; after the lecture we hold
-      a 30-minute discussion in groups of 4&ndash;5, moderated by the week's lead pair (Week 2 is moderated
-      by the instructor to model the format; the rotation starts Week 3). Write and submit your entrance
+      a 30-minute discussion in groups of 4&ndash;5, shuffled every week. Each group has two randomly drawn
+      roles, revealed at 13:00 on class day: the <b>leader</b> runs the discussion (works through the
+      questions, draws everyone in, keeps time) and the <b>presenter</b> synthesizes the group's answers
+      to the discussion questions and presents them to the whole class in the closing minutes. Anyone can
+      be drawn &mdash; so everyone prepares. (Week 2: the instructor co-moderates to model the format.) Write and submit your entrance
       ticket <b>right on this page</b> (sign in below; due Sunday 13:00). Ticket text stays
       <b>private</b> &mdash; only the instructor and TA read it; classmates see just who has
       submitted on the prep board. You can withdraw and resubmit until it is graded.</span>
     <span class="lang-ko">저널클럽 주간(2&ndash;7, 9&ndash;12주차)은 5분 리딩 퀴즈로 시작하고, 강의 후에는 4&ndash;5명씩
-      30분 토론을 해요. 리드 조가 진행합니다 (2주차는 포맷 시범을 위해 교수가 직접 진행하고, 로테이션은 3주차부터예요).
+      30분 토론을 해요. 그룹은 매주 랜덤으로 섞이고, 그룹마다 두 역할이 랜덤 추첨되어 수업 당일 13:00에 공개돼요:
+      <b>리더</b>는 토론을 진행하고(질문 순서대로 이끌고, 전원이 말하게 하고, 시간을 관리), <b>발표자</b>는 그룹의
+      토론 질문 답변을 정리해 마지막에 전체 앞에서 발표해요. 누구든 뽑힐 수 있으니 모두가 준비해야 해요.
+      (2주차는 교수가 함께 진행하며 포맷을 시범 보여요.)
       entrance ticket은 <b>바로 이 페이지에서</b> 작성하고 제출해요 (아래에서 로그인 · 마감 일요일 13:00).
       티켓 내용은 <b>비공개</b>예요 — 교수·조교만 읽고, 동료들에게는 준비 현황판에 제출 여부만 보여요.
       채점 전까지는 삭제·재제출이 가능해요.</span>
@@ -109,14 +115,7 @@ async function apiState() {
   } catch {}
   return { mode: "mirror" };
 }
-async function liveURL() {
-  try {
-    const anns = await loadJSON("announcements");
-    const a = anns.find((x) => x.live_url);
-    const m = a && a.text.match(/https:\/\/\S+/);
-    return m ? m[0] : null;
-  } catch { return null; }
-}
+async function liveURL() { return liveClassURL(); }
 
 /* discussion groups: hidden until 13:00 on class day; leader starred */
 async function initGroupBoxes() {
@@ -131,17 +130,17 @@ async function initGroupBoxes() {
       const at = String(g.reveal_at || "");
       b.innerHTML = `<h3>${t("Discussion groups", "토론 그룹")}</h3>
         <p class="sub" style="margin:0">${t(
-          `Groups and each group's leader are revealed here at 13:00 on class day (${fmtDate(at.slice(0,10))}). Anyone can be drawn as leader — prepare accordingly.`,
-          `그룹과 각 그룹의 리더는 수업 당일 13:00에 여기서 공개돼요 (${fmtDate(at.slice(0,10))}). 누구든 리더로 뽑힐 수 있으니 모두 준비해 오세요.`)}</p>`;
+          `Groups, leaders, and presenters are revealed here at 13:00 on class day (${fmtDate(at.slice(0,10))}). Anyone can be drawn — prepare accordingly.`,
+          `그룹·리더·발표자는 수업 당일 13:00에 여기서 공개돼요 (${fmtDate(at.slice(0,10))}). 누구든 뽑힐 수 있으니 모두 준비해 오세요.`)}</p>`;
       continue;
     }
     b.innerHTML = `<h3>${t("Discussion groups", "토론 그룹")}</h3>
       <div class="grp-grid">${(g.groups || []).map((grp, i) => `
         <div class="grp-card"><p class="grp-t">${t("Group", "그룹")} ${i + 1}</p>
-          ${grp.members.map((m) => `<div class="grp-m${m.leader ? " lead" : ""}">
+          ${grp.members.map((m) => `<div class="grp-m${m.leader ? " lead" : ""}${m.presenter ? " pres" : ""}">
             ${m.photo ? `<img class="face" src="${esc(m.photo)}" alt="">`
                       : `<div class="face av">${esc((m.display || "?")[0].toUpperCase())}</div>`}
-            <span>${esc(m.display)}${m.leader ? ` <span class="grp-star">★ ${t("leader", "리더")}</span>` : ""}</span>
+            <span>${esc(m.display)}${m.leader ? ` <span class="grp-star">★ ${t("leader", "리더")}</span>` : ""}${m.presenter ? ` <span class="grp-star" style="color:var(--ok)">◆ ${t("presenter", "발표자")}</span>` : ""}</span>
           </div>`).join("")}
         </div>`).join("")}</div>`;
   }
