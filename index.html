@@ -72,8 +72,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       <h3 style="margin:0 0 6px">${esc((ko && w.title_ko) || w.title)}</h3>
       <p class="sub" style="margin-bottom:10px">${esc((ko && w.goal_ko) || w.goal || "")}</p>
       ${w.n === 1 ? `<p style="font-size:13.5px;margin:6px 0"><b>${t("No pre-work", "선행 과제 없음")}</b> — ${t(
-        "readings are assigned in class; the Week 1 ticket is due together with Week 2's.",
-        "읽기자료는 수업에서 배정됩니다. 1주차 티켓은 2주차 티켓과 함께 제출해요.")}</p>`
+        "this week's papers are assigned in class; the Week 1 ticket is due together with Week 2's (Sun 9/6, 13:00).",
+        "이번 주 논문은 수업에서 배정됩니다. 1주차 티켓은 2주차 티켓과 함께 제출해요 (9/6 일 13:00).")}<br>
+        <b>${t("This week's papers", "이번 주 논문")}</b>: ${(w.reading && w.reading.primary || []).map((r) =>
+          r.link ? `<a href="${esc(r.link)}">${esc(r.title)}</a>` : esc(r.title)).join(" · ")}</p>`
       : w.reading && w.reading.primary && w.reading.primary.length ? `<p style="font-size:13.5px;margin:6px 0">
         <b>${t("Reading due", "읽기자료 마감")}</b> ${t("(entrance ticket 24 h before class)", "(entrance ticket은 수업 24시간 전까지)")}: ${w.reading.primary.map((r) =>
           r.link ? `<a href="${esc(r.link)}">${esc(r.title)}</a>` : esc(r.title)).join(" · ")}</p>` : ""}
