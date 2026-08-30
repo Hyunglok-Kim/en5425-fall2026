@@ -73,7 +73,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const dataPills = (lab.data || []).map((d) => `<span class="pill">${esc(d)}</span>`).join("");
       const readLinks = primary.map((r) =>
         r.link ? `<a href="${esc(r.link)}">${esc(r.title)}</a>` : esc(r.title)).join("<br>");
-      const memoPill = rd.memo && rd.memo !== "none"
+      const memoPill = w.n === 1
+        ? ` <span class="pill">${t("assigned in class &#183; ticket due with W2", "수업에서 배정 &#183; 티켓은 W2와 함께")}</span>`
+        : rd.memo && rd.memo !== "none"
         ? ` <span class="pill acc">${esc(rd.memo)}</span>` : "";
       html += `<tr>
         <td class="num"><a href="week.html?w=${w.n}"><b>${w.n}</b></a></td>
