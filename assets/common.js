@@ -33,15 +33,41 @@ const NAV = [
   ["students", "Students", "수강생", "students.html"],
   ["submit", "Sign in / Submit", "로그인 · 제출", "/portal/login.html"],
 ];
+/* Semester tracker: W1 begins Mon 2026-08-31 (KST). */
+const SEMESTER_START = "2026-08-31";
+function todayKST() { return new Date(Date.now() + 9 * 3600 * 1000); }
+function weekOf(dateIso) {
+  const d = Math.floor((Date.parse(dateIso) - Date.parse(SEMESTER_START)) / (7 * 86400 * 1000)) + 1;
+  return d;
+}
+function navDateChip(lang) {
+  const k = todayKST();
+  const iso = k.toISOString().slice(0, 10);
+  const dayEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][k.getUTCDay()];
+  const dayKo = ["일", "월", "화", "수", "목", "금", "토"][k.getUTCDay()];
+  const day = lang === "ko" ? dayKo : dayEn;
+  const w = weekOf(iso);
+  let wtxt = "";
+  if (w < 1) wtxt = lang === "ko" ? "1주차는 8/31 시작" : "W1 starts 8/31";
+  else if (w <= 16) wtxt = lang === "ko" ? `${w}주차` : `Week ${w}`;
+  return `${fmtDate(iso)} (${day})${wtxt ? " · " + wtxt : ""}`;
+}
 function injectNav() {
   const page = document.body.dataset.page || "";
   const lang = document.body.dataset.lang;
+  const P = location.pathname.includes("/portal/") ? "../" : "";
   const nav = document.createElement("nav");
   nav.className = "site-nav";
   nav.innerHTML = `<div class="in">
-    <a class="brand" href="index.html">EN5425</a>
+    <a class="brand" href="${P}index.html">
+      <span class="logo-chip"><img src="${P}assets/img/gist.png" alt="GIST · School of Earth Sciences and Environmental Engineering"></span>
+      <img class="logo-ha ha-light" src="${P}assets/img/hydroai_logo_black.png" alt="HydroAI Lab">
+      <img class="logo-ha ha-dark" src="${P}assets/img/hydroai_logo_white.png" alt="HydroAI Lab">
+      <span class="brand-t">EN5425 / EV4240<small>Fall 2026</small></span>
+    </a>
     ${NAV.map(([id, en, ko, href]) =>
-      `<a class="item${id === page ? " on" : ""}" href="${href}">${lang === "ko" ? ko : en}</a>`).join("")}
+      `<a class="item${id === page ? " on" : ""}" href="${href.startsWith("/") ? P + href.slice(1) : P + href}">${lang === "ko" ? ko : en}</a>`).join("")}
+    <span class="nav-date tnum">${navDateChip(lang)}</span>
     <button class="btn lang-btn" id="langBtn" type="button"
       aria-label="Switch language">${lang === "ko" ? "EN" : "한국어"}</button>
   </div>`;

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T17:16:41+09:00",
+  "updated": "2026-08-30T17:24:49+09:00",
   "assignments": [
     {
       "id": "hw0",
@@ -187,7 +187,7 @@
       "gh": "",
       "sid_tag": "1057",
       "display": "Student 1057",
-      "photo": null,
+      "photo": "assets/students/d3ac08155dbd.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -234,7 +234,7 @@
       "gh": "",
       "sid_tag": "1211",
       "display": "Student 1211",
-      "photo": null,
+      "photo": "assets/students/52dd39751fca.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -281,7 +281,7 @@
       "gh": "",
       "sid_tag": "2038",
       "display": "Student 2038",
-      "photo": null,
+      "photo": "assets/students/af43c6a9282d.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -328,7 +328,7 @@
       "gh": "",
       "sid_tag": "4046",
       "display": "Student 4046",
-      "photo": null,
+      "photo": "assets/students/44766ad66201.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -375,7 +375,7 @@
       "gh": "",
       "sid_tag": "4049",
       "display": "Student 4049",
-      "photo": null,
+      "photo": "assets/students/9f50b1bfdc42.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -422,7 +422,7 @@
       "gh": "",
       "sid_tag": "4055",
       "display": "Student 4055",
-      "photo": null,
+      "photo": "assets/students/ad6cbabc8146.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -469,7 +469,7 @@
       "gh": "",
       "sid_tag": "4070",
       "display": "Student 4070",
-      "photo": null,
+      "photo": "assets/students/7492e7eb2974.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -516,7 +516,7 @@
       "gh": "",
       "sid_tag": "4099",
       "display": "Student 4099",
-      "photo": null,
+      "photo": "assets/students/c11b43e8ce4a.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -563,7 +563,7 @@
       "gh": "",
       "sid_tag": "5112",
       "display": "Student 5112",
-      "photo": null,
+      "photo": "assets/students/e77b512a125a.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -610,7 +610,7 @@
       "gh": "",
       "sid_tag": "5145",
       "display": "Student 5145",
-      "photo": null,
+      "photo": "assets/students/62781772eebc.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -657,7 +657,7 @@
       "gh": "",
       "sid_tag": "5195",
       "display": "Student 5195",
-      "photo": null,
+      "photo": "assets/students/14fd49b02487.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -704,7 +704,7 @@
       "gh": "",
       "sid_tag": "5218",
       "display": "Student 5218",
-      "photo": null,
+      "photo": "assets/students/ee1b6e4f6497.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -751,7 +751,7 @@
       "gh": "",
       "sid_tag": "5249",
       "display": "Student 5249",
-      "photo": null,
+      "photo": "assets/students/da437020340e.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -798,7 +798,7 @@
       "gh": "",
       "sid_tag": "8022",
       "display": "Student 8022",
-      "photo": null,
+      "photo": "assets/students/4c0a962cf1d1.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -845,7 +845,7 @@
       "gh": "",
       "sid_tag": "8024",
       "display": "Student 8024",
-      "photo": null,
+      "photo": "assets/students/2dd4dbb0a61a.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -892,7 +892,7 @@
       "gh": "",
       "sid_tag": "8026",
       "display": "Student 8026",
-      "photo": null,
+      "photo": "assets/students/ae7317e67aa7.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -939,7 +939,7 @@
       "gh": "",
       "sid_tag": "8034",
       "display": "Student 8034",
-      "photo": null,
+      "photo": "assets/students/5a398dd3e429.png",
       "bio": null,
       "status": {
         "hw0": "due",
@@ -986,7 +986,7 @@
       "gh": "",
       "sid_tag": "8035",
       "display": "Student 8035",
-      "photo": null,
+      "photo": "assets/students/04c828fe4cb1.png",
       "bio": null,
       "status": {
         "hw0": "due",

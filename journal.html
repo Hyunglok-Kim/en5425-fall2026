@@ -7,15 +7,25 @@
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/common.js" defer></script>
 <style>
-  .wksel { display:flex; flex-wrap:wrap; gap:6px; margin:22px 0 10px; }
-  .wksel a { cursor:pointer; }
-  .wksel a:hover { text-decoration:none; border-color:var(--accent); color:var(--accent); }
-  .wksel a.fill:hover { color:var(--accent-ink); }
-  #paper { font-size:13.5px; margin:0 0 6px; }
-  #paper b { font-family:var(--serif); }
+  /* accordion: one <details> per journal-club week; only the current week open */
+  details.jcweek { border:1px solid var(--hairline); border-radius:12px; background:var(--surface);
+    margin:12px 0; overflow:hidden; }
+  details.jcweek[open] { border-color:var(--accent); }
+  details.jcweek > summary { cursor:pointer; list-style:none; display:flex; align-items:baseline;
+    gap:10px 14px; flex-wrap:wrap; padding:13px 18px; }
+  details.jcweek > summary::-webkit-details-marker { display:none; }
+  details.jcweek > summary::before { content:"▸"; color:var(--muted); font-size:12px; }
+  details.jcweek[open] > summary::before { content:"▾"; color:var(--accent); }
+  .jc-wk { font-family:var(--serif); font-weight:700; font-size:15.5px; white-space:nowrap; }
+  .jc-date { font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .jc-title { font-size:13px; color:var(--ink-2); flex:1; min-width:200px; }
+  .jc-count { font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .jc-body { padding:2px 18px 18px; border-top:1px solid var(--hairline); }
+  .jc-body h3 { margin-top:18px; }
+  #paper, .jc-paper { font-size:13.5px; margin:12px 0 4px; }
 
   /* prep board — row of small faces, dimmed until the ticket lands */
-  .board { display:flex; flex-wrap:wrap; gap:9px; margin:12px 0 4px; }
+  .board { display:flex; flex-wrap:wrap; gap:9px; margin:10px 0 4px; }
   .face { width:42px; height:42px; border-radius:50%; object-fit:cover; flex:none;
     border:1px solid var(--hairline); }
   .face.av { display:flex; align-items:center; justify-content:center; background:var(--wash);
@@ -25,7 +35,8 @@
   .board .who.in .face { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent); }
 
   /* ticket cards */
-  #tickets .card { margin:14px 0; padding:16px 20px; }
+  .tk-card { background:var(--page); border:1px solid var(--hairline); border-radius:10px;
+    margin:12px 0; padding:14px 16px; }
   .tk-head { display:flex; align-items:center; gap:12px; padding-bottom:10px;
     border-bottom:1px solid var(--hairline); margin-bottom:4px; }
   .tk-head .face { width:46px; height:46px; }
@@ -39,7 +50,7 @@
   .tk-body p { margin:9px 0 0; }
   @media (max-width:520px) {
     .face { width:36px; height:36px; }
-    #tickets .card { padding:14px 15px; }
+    .tk-card { padding:12px 13px; }
   }
 </style>
 </head>
@@ -51,16 +62,16 @@
     <span class="lang-en">Journal-club weeks (2&ndash;7, 9&ndash;12) open with a 5-minute reading quiz; after the lecture we hold
       a 30-minute discussion in groups of 4&ndash;5, moderated by the week's lead pair (Week 2 is moderated
       by the instructor to model the format; the rotation starts Week 3). Your entrance
-      ticket &mdash; <a href="/portal/login.html">signed in on this site</a> and submitted 24&nbsp;h before
-      class &mdash; is published here, face and all, so the whole class reads each other's takes
-      before we talk.</span>
+      ticket &mdash; <a href="/portal/login.html">signed in on this site</a> and submitted by Sunday 13:00 &mdash;
+      is published here, face and all, so the whole class reads each other's takes before we talk.</span>
     <span class="lang-ko">저널클럽 주간(2&ndash;7, 9&ndash;12주차)은 5분 리딩 퀴즈로 시작하고, 강의 후에는 4&ndash;5명씩
-      30분 토론을 해요. 리드 조가 진행합니다 (2주차는 포맷 시범을 위해 교수가 직접 진행하고, 로테이션은 3주차부터예요). 수업 24시간 전까지 <a href="/portal/login.html">이 사이트에 로그인해</a> 제출한 entrance ticket은 얼굴 카드와 함께 이 페이지에 공개되어, 토론 전에 서로의
-      생각을 미리 읽을 수 있어요.</span>
+      30분 토론을 해요. 리드 조가 진행합니다 (2주차는 포맷 시범을 위해 교수가 직접 진행하고, 로테이션은 3주차부터예요).
+      일요일 13:00까지 <a href="/portal/login.html">이 사이트에 로그인해</a> 제출한 entrance ticket은 얼굴 카드와 함께
+      이 페이지에 공개되어, 토론 전에 서로의 생각을 미리 읽을 수 있어요.</span>
   </p>
 
   <div id="jc">
-    <p class="sub" style="margin-top:24px"><span class="lang-en">Loading tickets…</span><span class="lang-ko">티켓을 불러오는 중…</span></p>
+    <p class="sub" style="margin-top:24px"><span class="lang-en">Loading…</span><span class="lang-ko">불러오는 중…</span></p>
   </div>
 </div>
 
@@ -79,85 +90,97 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const [{ weeks }, journal] = await Promise.all([loadJSON("weeks"), loadJSON("journal")]);
+    let roster = [];
+    try { roster = ((await loadJSON("status")).students) || []; } catch {}
     const jw = journal.weeks || {};
     const jcWeeks = weeks.filter((w) => w.n >= 2 && w.n <= 12 && w.n !== 8);
-    const has = (n) => (jw[pad(n)] || jw[String(n)] || []).length > 0;
 
-    let n = parseInt(new URLSearchParams(location.search).get("w"), 10);
-    if (!jcWeeks.some((w) => w.n === n)) {
-      const withTickets = jcWeeks.filter((w) => has(w.n)).map((w) => w.n);
-      n = withTickets.length ? Math.max(...withTickets) : jcWeeks[0].n;
+    /* which week opens: ?w= if valid, else the next upcoming journal-club week (KST) */
+    const todayK = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+    let cur = parseInt(new URLSearchParams(location.search).get("w"), 10);
+    if (!jcWeeks.some((w) => w.n === cur)) {
+      const upcoming = jcWeeks.find((w) => w.date && w.date >= todayK);
+      cur = (upcoming || jcWeeks[jcWeeks.length - 1]).n;
     }
-    const w = jcWeeks.find((x) => x.n === n);
-    let tickets = jw[pad(n)] || jw[String(n)] || [];
-    if (n === 2) {  // the first journal club discusses Week 1 + Week 2 tickets together
-      const w1 = (jw["01"] || []).map((tk) => ({ ...tk, w1: true }));
-      tickets = [...w1, ...tickets];
-    }
-    const title = (ko && w.title_ko) ? w.title_ko : w.title;
-    document.title = t(`EN5425 · Journal Club · Week ${n}`, `EN5425 · 저널클럽 · ${n}주차`);
 
-    const primary = ((w.reading || {}).primary || []);
-    const papers = primary.map((r) => r.link
-      ? `<a href="${esc(r.link)}">${esc(r.title)}</a>` : esc(r.title)).join(" · ");
+    const ticketsOf = (n) => {
+      let tk = jw[pad(n)] || jw[String(n)] || [];
+      if (n === 2) {  /* the first journal club discusses Week 1 + Week 2 tickets together */
+        tk = [...(jw["01"] || []).map((x) => ({ ...x, w1: true })), ...tk];
+      }
+      return tk;
+    };
 
-    let html = `
-      <div class="wksel">${jcWeeks.map((x) =>
-        `<a class="pill${x.n === n ? " fill" : ""}" href="journal.html?w=${x.n}"
-           aria-current="${x.n === n ? "true" : "false"}">${t("W" + x.n, x.n + "주")}</a>`).join("")}</div>
-      <p id="paper"><b>${t(`Week ${n}`, `${n}주차`)}</b> · ${esc(title)}${w.date ? " · " + esc(fmtDate(w.date)) : ""}
-        ${papers ? `<br>${t("Paper:", "논문:")} ${papers}` : ""}</p>`;
-
-    /* prep board — whole roster; full color = ticket in, dimmed = not yet.
-       Matched on display name (gh may be empty in the new data shape). */
-    let readySet = new Set(tickets.map((tk) => tk.display || tk.gh));
-    try {
-      const { students = [] } = await loadJSON("status");
-      if (students.length) {
-        const ready = students.filter((s) => readySet.has(s.display || s.gh)).length;
-        html += `
-          <h2>${t("Prep board", "준비 현황판")}</h2>
-          <p class="sub" style="margin:0">${t(
-            `Who's ready for Week ${n} — entrance tickets ${ready}/${students.length}.`,
-            `${n}주차 준비 현황 — entrance ticket ${ready}/${students.length}명 제출.`)}</p>
-          <div class="board">${students.map((s) => {
+    const weekBody = (w, tickets) => {
+      const primary = ((w.reading || {}).primary || []);
+      const papers = primary.map((r) => r.link
+        ? `<a href="${esc(r.link)}">${esc(r.title)}</a>` : esc(r.title)).join(" · ");
+      const questions = ((w.reading || {}).questions || []);
+      let h = "";
+      if (papers) h += `<p class="jc-paper"><b>${t("Paper", "논문")}</b> · ${papers}
+        ${w.n === 2 ? `<br><span class="sub" style="margin:0">${t(
+          "Week 2 discusses the Week 1 papers (Attention + ViT) and Reichstein together — both tickets due Sun 9/6 13:00.",
+          "2주차에는 1주차 논문(Attention + ViT)과 Reichstein을 함께 다룹니다 — 두 티켓 모두 9/6(일) 13:00 마감.")}</span>` : ""}</p>`;
+      if (questions.length) h += `<h3>${t("Discussion questions", "토론 질문")}</h3>
+        <ol style="margin-top:4px;font-size:13.5px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>`;
+      if (roster.length) {
+        const ready = new Set(tickets.map((tk) => tk.display || tk.gh));
+        h += `<h3>${t("Prep board", "준비 현황판")} <span class="jc-count">${tickets.length}/${roster.length}</span></h3>
+          <div class="board">${roster.map((s) => {
             const name = s.display || s.gh;
-            const inOut = readySet.has(name) ? "in" : "off";
-            return `<span class="who ${inOut}" title="${esc(name)}${readySet.has(name)
+            return `<span class="who ${ready.has(name) ? "in" : "off"}" title="${esc(name)}${ready.has(name)
               ? "" : " — " + t("no ticket yet", "티켓 미제출")}">${face(name, s.photo)}</span>`;
           }).join("")}</div>`;
       }
-    } catch { /* roster unavailable — tickets still render below */ }
+      h += `<h3>${t("Entrance tickets", "Entrance tickets")}</h3>`;
+      if (!tickets.length) {
+        h += `<p class="sub">${esc(t(
+          "No tickets yet — they appear here as classmates submit them (due Sunday 13:00).",
+          "아직 티켓이 없어요 — 제출되는 대로 여기에 실려요 (마감: 일요일 13:00)."))}</p>`;
+      } else {
+        h += tickets.map((tk) => {
+          const name = (tk.display || tk.gh) + (tk.w1 ? t(" · W1 ticket", " · 1주차 티켓") : "");
+          const at = tk.at ? String(tk.at) : "";
+          const when = at ? [fmtDate(at.slice(0, 10)) || at.slice(0, 10),
+                             at.slice(11, 16)].filter(Boolean).join(" ") : "";
+          const meta = [
+            tk.gh ? `<a class="gh" href="https://github.com/${esc(tk.gh)}">@${esc(tk.gh)}</a>` : "",
+            when ? `<span class="tk-at">${esc(t("submitted ", "제출 ") + when)}</span>` : "",
+          ].filter(Boolean).join(" · ");
+          return `<div class="tk-card">
+            <div class="tk-head">${face(name, tk.photo)}
+              <span><b>${esc(name)}</b>${tk.late
+                ? ` <span class="tk-late">${t("late", "지각")}</span>` : ""}${meta ? `<br>${meta}` : ""}</span>
+            </div>
+            <div class="tk-body">${ticketHTML(tk.ticket)}</div>
+          </div>`;
+        }).join("");
+      }
+      return h;
+    };
 
-    html += `<h2>${t("Entrance tickets", "Entrance tickets")}</h2>`;
-    if (!tickets.length) {
-      html += `<p class="sub">${esc(t(
-        `No tickets for Week ${n} yet — tickets appear here as classmates submit them — due Sunday 13:00. The prep board below shows who is in.`,
-        `아직 ${n}주차 티켓이 없어요 — 제출되는 대로 여기에 실려요 — 마감은 일요일 13:00. 아래 준비 현황판에서 누가 있는지 볼 수 있어요.`))}</p>`;
-    } else {
-      html += tickets.map((tk) => {
-        const name = (tk.display || tk.gh) + (tk.w1 ? t(" · W1 ticket", " · 1주차 티켓") : "");
-        /* gh may be empty in the new data shape — link only when present;
-           show the submitted time (and a late badge) when the export has it. */
-        const at = tk.at ? String(tk.at) : "";
-        const when = at ? [fmtDate(at.slice(0, 10)) || at.slice(0, 10),
-                           at.slice(11, 16)].filter(Boolean).join(" ") : "";
-        const meta = [
-          tk.gh ? `<a class="gh" href="https://github.com/${esc(tk.gh)}">@${esc(tk.gh)}</a>` : "",
-          when ? `<span class="tk-at">${esc(t("submitted ", "제출 ") + when)}</span>` : "",
-        ].filter(Boolean).join(" · ");
-        return `<div class="card">
-          <div class="tk-head">${face(name, tk.photo)}
-            <span><b>${esc(name)}</b>${tk.late
-              ? ` <span class="tk-late">${t("late", "지각")}</span>` : ""}${meta ? `<br>${meta}` : ""}</span>
-          </div>
-          <div class="tk-body">${ticketHTML(tk.ticket)}</div>
-        </div>`;
-      }).join("");
+    el.innerHTML = jcWeeks.map((w) => {
+      const tickets = ticketsOf(w.n);
+      const title = (ko && w.title_ko) ? w.title_ko : w.title;
+      const open = w.n === cur;
+      return `<details class="jcweek" id="wk${w.n}" ${open ? "open" : ""}>
+        <summary>
+          <span class="jc-wk">${t("Week " + w.n, w.n + "주차")}</span>
+          <span class="jc-date">${esc(fmtDate(w.date))}</span>
+          <span class="jc-title">${esc(title)}</span>
+          <span class="jc-count">${tickets.length
+            ? t(`${tickets.length} tickets`, `티켓 ${tickets.length}`)
+            : (open ? t("this week", "이번 주") : "")}</span>
+        </summary>
+        <div class="jc-body">${weekBody(w, tickets)}</div>
+      </details>`;
+    }).join("") + (journal.updated ? `<p class="sub" style="margin-top:14px">${esc(
+      t("Updated ", "업데이트 ") + (fmtDate(String(journal.updated).slice(0, 10)) || journal.updated))}</p>` : "");
+
+    if (new URLSearchParams(location.search).get("w")) {
+      const target = document.getElementById("wk" + cur);
+      if (target) target.scrollIntoView({ block: "start" });
     }
-    if (journal.updated) html += `<p class="sub" style="margin-top:14px">${esc(
-      t("Updated ", "업데이트 ") + (fmtDate(String(journal.updated).slice(0, 10)) || journal.updated))}</p>`;
-    el.innerHTML = html;
   } catch {
     el.innerHTML = `<p class="sub" style="margin-top:24px">${esc(t(
       "Couldn't load the journal-club data — check your connection and refresh.",

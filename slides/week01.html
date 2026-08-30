@@ -23,7 +23,7 @@
 <section class="slide">
   <p class="kicker">Part 1 · Framing · 5 min</p>
   <div class="fill">
-    <p class="big">By Week 16 you will have <span class="accent">pretrained, fine-tuned, evaluated, documented, and publicly released</span> a small foundation model.</p>
+    <p class="big">By Week 16 you will have <span class="accent">fine-tuned, rigorously evaluated, documented, and publicly released</span> a foundation model — and pretrained one at lab scale with your own hands.</p>
     <p class="big muted">Today you decide whether that is what you want this semester.</p>
   </div>
   <div class="foot"><span>Course site: syllabus, diagnostic, HW0 — everything shown today is already posted</span></div>
@@ -41,13 +41,14 @@
 <section class="slide">
   <p class="kicker">Part 2 · Capstone · 6 min</p>
   <h2>The capstone: you release a model, individually</h2>
+  <p class="small muted">Default track for everyone — feasible on free compute (Kaggle/Colab). From-scratch FM development is the HydroAI lab team's joint project.</p>
   <ul>
-    <li><b>Pretrain</b> a small geospatial or weather/climate foundation model — yourself, not a team.</li>
-    <li><b>Fine-tune</b> it on a real downstream environmental task.</li>
-    <li><b>Evaluate</b> it against honest baselines; write a <b>model card</b>.</li>
+    <li><b>Fine-tune</b> a public foundation model (Prithvi, OlmoEarth, ClimaX lineage) on a real environmental task — yourself, not a team. (Everyone pretrains a mini-model in the W7/W9 labs.)</li>
+    <li><b>Evaluate</b> it against honest baselines — the PANGAEA question: does it really beat a tuned supervised model?</li>
+    <li><b>Document</b> it: model card, ablation, limitations you actually believe.</li>
     <li><b>Release</b> weights + code publicly: GitHub and Hugging Face, under your own name.</li>
   </ul>
-  <div class="foot"><span>Project = 60% of grade · milestones from Week 4 · gate = HW0</span></div>
+  <div class="foot"><span>Project = 60% of grade · proposal 11/1 &rarr; pitches 11/2 · M1&ndash;M3 in December · gate = HW0</span></div>
   <aside class="notes">Say "individually" twice. This is not a group deliverable and not a report — it is a public artifact. Transition: "So that 'released' is not abstract, here is exactly what it looks like." (0:05–0:11 total for this pair of slides)</aside>
 </section>
 
@@ -116,7 +117,7 @@
   <h2>Grading: 10 / 30 / 60</h2>
   <ul>
     <li><b>10% attendance.</b> You are here, prepared, on time.</li>
-    <li><b>30% paper discussion.</b> One paper <span class="accent">every week</span>: entrance tickets <b>15%</b> (public on the site’s Journal Club tab, due 24 h before class; best 12 × 1.25%), reading quizzes <b>6%</b> (5-min closed book, pass = 2/3; best 10 × 0.6%), discussion leadership <b>9%</b> (pairs — lead once + discussant once).</li>
+    <li><b>30% paper discussion.</b> One paper each teaching week (W1–7, W9–12): entrance tickets <b>15%</b> (public on the site’s Journal Club tab, due Sun 13:00 on this site; best 10 of 11 × 1.5%, W1 non-droppable), reading quizzes <b>6%</b> (10 quizzes, 5-min closed book, pass = 2/3; best 8 × 0.75%), discussion leadership <b>9%</b> (pairs — lead once + discussant once; rotation starts W3).</li>
     <li><b>60% project.</b> Milestones from Week 4 onward; the capstone gate is <b>HW0</b>. Public GitHub Pages site + weekly research notes are required infrastructure.</li>
   </ul>
   <div class="foot"><span>Logistics on the course site: entrance-ticket format, lead rotation, compute accounts</span></div>
@@ -149,7 +150,7 @@
   <p class="kicker">Part 3 · 10 min</p>
   <h2>What this course actually is</h2>
   <ul>
-    <li>Not a survey, not an intro to deep learning. A <b>build course</b>: sixteen weeks constructing, end to end, the skill set to pretrain and fine-tune foundation models for Earth observation and weather/climate data.</li>
+    <li>Not a survey, not an intro to deep learning. A <b>build course</b>: 12 in-person sessions plus three async sprint weeks constructing, end to end, the skill set to pretrain and fine-tune foundation models for Earth observation and weather/climate data.</li>
     <li>By December: a small FM pretrained by you, fine-tuned on a real environmental task, evaluated against honest baselines, <b>released publicly</b> with weights, code, and a model card under your name.</li>
     <li>Fixed weekly rhythm: one paper + public entrance ticket, one 3-hour session (quiz · lecture · 30-min journal club · 60-min lab), lab follow-through, project progress. 8–12 h outside class, every week.</li>
     <li>Everything is public-facing: notes, labs, capstone live on Git. You are building a portfolio a PhD advisor or employer can read — a feature, and a commitment.</li>
@@ -276,7 +277,7 @@
 <!-- 20 ▸ Section: the arc -->
 <section class="slide section">
   <p class="kicker">Part 6 · 2:05–2:20 · 15 min</p>
-  <h2>The 16-week arc — and the field you are entering</h2>
+  <h2>The semester arc — and the field you are entering</h2>
   <aside class="notes">One slide per phase, then a four-slide teaser of the 2026 landscape. Core message, said once here and once at the end: "Every lab is one brick of your capstone. Miss a week and your own project stalls."</aside>
 </section>
 
@@ -303,9 +304,9 @@
       </g>
       <g font-size="12" fill="currentColor" opacity="0.8" text-anchor="middle">
         <text x="60"  y="158">HW0 gate</text>
-        <text x="285" y="158">milestones from W4 · W8 midterm pitch</text>
+        <text x="285" y="158">proposal pitch 11/2 · no class 10/5 &amp; 10/19</text>
         <text x="471" y="178">fine-tune + evaluate</text>
-        <text x="700" y="158">W16 Demo Day: release</text>
+        <text x="700" y="158">W16: recorded demo, due 12/16</text>
       </g>
     </svg>
   </div>
@@ -334,7 +335,7 @@
   <ul>
     <li>Masked autoencoding on EO imagery; contrastive learning; tokenizing gridded climate fields.</li>
     <li>W7: you <b>pretrain your first model</b> — the seed of your capstone.</li>
-    <li>W8 midterm: portfolio review + capstone proposal pitch.</li>
+    <li>W8 (11/2): portfolio review + capstone proposal pitches — proposal due Sun 11/1 13:00. (Midterm week 10/19: no class.)</li>
     <li>Models you meet: <span class="accent">MAE, SimCLR, DINO, SatMAE, Presto</span>.</li>
   </ul>
   <div class="foot"><span>He 2021 (MAE) · Chen 2020 (SimCLR) · Cong 2022 (SatMAE) · Tseng 2023 (Presto)</span></div>
@@ -361,7 +362,7 @@
   <ul>
     <li>Three sprint weeks: agentic ML engineering, peer code review, evaluation + ablation.</li>
     <li>Release engineering as a subject: <b>model cards, reproducibility, public release</b> done properly.</li>
-    <li>W16 <b>Demo Day</b>: presentation + the public release itself — HF page live, repo tagged.</li>
+    <li>W13–15: <b>async sprints</b> — no meetings, feedback via GitHub. W16: <b>recorded demo</b> + the public release itself — HF page live, repo tagged, everything due Wed 12/16 23:59.</li>
   </ul>
   <div class="foot"><span>Templates and rubrics for model cards and release checklists on the course site from W12</span></div>
   <aside class="notes">By W13 there is no new theory — the course becomes a supervised research sprint. Transition: "Why is this a reasonable thing to demand of you in 2026? Because of where the field now is — four slides." (arc + teaser end at 2:20)</aside>
@@ -448,8 +449,8 @@
     <li>ViT needs more data than CNNs to win — what inductive biases were traded away, and do satellite images restore any of them?</li>
     <li>What exactly is a 'token' for a multispectral image cube?</li>
   </ol>
-  <div class="foot"><span>Lead pair moderates · opens with one reproduced figure · entrance ticket due 24 h before class, every week</span></div>
-  <aside class="notes">If the room has read the papers, run this as the first live discussion: derive scaled dot-product attention shapes at the board (Q·Kᵀ/√d over n tokens → an n×n map; 721×1440 ≈ 1.04×10⁶ grid points → ~10¹² pairwise scores — hence patching, windowing, meshes) and press on why patchify is tokenization. If not, these three questions are the entrance-ticket prompts and this slide is the preview of how every journal club will run: no summaries, derivations and design trade-offs only.</aside>
+  <div class="foot"><span>First journal club is W2, instructor-moderated · lead rotation from W3 (sign up today) · W1+W2 tickets both due Sun 9/6 13:00 on this site</span></div>
+  <aside class="notes">No one has read anything yet — that is by design. These three questions are the entrance-ticket prompts for the papers assigned today, and this slide previews how every journal club will run: no summaries, derivations and design trade-offs only. If energy allows, derive the attention-shapes teaser live (Q·Kᵀ/√d over n tokens → n×n; 721×1440 ≈ 10⁶ grid points → ~10¹² pairwise scores — hence patching, windowing, meshes).</aside>
 </section>
 
 <!-- 31 ▸ Lab 0 -->
@@ -470,7 +471,7 @@
 <!-- 32 ▸ HW0 -->
 <section class="slide">
   <p class="kicker">Part 8 · 2:55–3:00 · 5 min</p>
-  <h2>HW0: the gate — due 48 h before Week 2 (Sun 23:59 KST)</h2>
+  <h2>HW0: the gate — due Sun 9/6, 23:59 KST (PDF on this site)</h2>
   <ul class="small">
     <li><b>Pass/fail, and a hard gate</b> for the project (60%): milestones are not accepted without a passed HW0. Designed for 4–8 h with an AI agent if prerequisites are in place.</li>
     <li><b>Build:</b> fork the template repo; train a small MLP on ~10,000 rows of station soil-moisture data; temporal split (train ≤2018 / val 2019 / test 2020), scaling fit on train only; beat the mean-predictor baseline.</li>
@@ -487,9 +488,9 @@
   <h2>For Week 2: Reichstein et al. (2019), <i>Nature</i></h2>
   <ul>
     <li>“Deep learning and process understanding for data-driven Earth system science” — the paper that frames this whole field.</li>
-    <li><b>Entrance ticket:</b> <code>memos/week02.md</code> — 3-sentence summary · substantive critique · capstone connection · one real question — <b>due 24 h before Week 2 class</b>, published on the site’s <b>Journal Club tab</b>.</li>
+    <li><b>Entrance tickets (two):</b> today’s papers (Attention + ViT) and Reichstein — 3-sentence summary · substantive critique · capstone connection · one real question — <b>both due Sun 9/6, 13:00, submitted on this site</b>, published on the <b>Journal Club tab</b>. The W1 ticket is non-droppable.</li>
     <li>Your ticket appears next to your cohort card — the class reads each other before class.</li>
-    <li>The weekly ritual starting now: <b>5-min closed-book quiz</b> at 0:00 → lecture → <b>30-min journal club</b> on the paper → lab. Week 2’s lecture assumes you have read it.</li>
+    <li>The weekly ritual starting W2: <b>5-min closed-book quiz</b> at 0:00 → lecture → <b>30-min journal club</b> (W2 is moderated by me to model the format; lead pairs from W3) → <b>60-min lab</b>. Week 2’s lecture assumes you have read it.</li>
   </ul>
   <div class="foot"><span>Reichstein et al. 2019, Nature 566, 195–204 · doi:10.1038/s41586-019-0912-1</span></div>
   <aside class="notes">One sentence of framing only: "Reichstein asks what deep learning can and cannot do for Earth system science — you will spend 16 weeks answering him." Do not lecture the paper today. Show the Journal Club tab live so they see where their ticket will appear next to their cohort card — tickets are public by design; the syllabus states it.</aside>

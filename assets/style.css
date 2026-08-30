@@ -32,12 +32,27 @@ a:hover { text-decoration:underline; }
   position:sticky; top:0; z-index:20; }
 .site-nav .in { max-width:880px; margin:0 auto; padding:12px 24px;
   display:flex; align-items:baseline; gap:6px 18px; flex-wrap:wrap; }
-.site-nav .brand { font-family:var(--serif); font-size:16px; font-weight:700; color:var(--ink); margin-right:8px; }
-.site-nav .brand:hover { text-decoration:none; color:var(--accent); }
+.site-nav .brand { display:flex; align-items:center; gap:9px; margin-right:10px; color:var(--ink); }
+.site-nav .brand:hover { text-decoration:none; }
+.site-nav .brand:hover .brand-t { color:var(--accent); }
+.site-nav .logo-chip { background:#fff; border:1px solid var(--hairline); border-radius:6px;
+  padding:2px 6px; display:inline-flex; align-items:center; }
+.site-nav .logo-chip img { height:18px; width:auto; display:block; }
+.site-nav .logo-ha { height:15px; width:auto; }
+.site-nav .ha-dark { display:none; }
+@media (prefers-color-scheme: dark) {
+  .site-nav .ha-light { display:none; }
+  .site-nav .ha-dark { display:inline; }
+}
+.site-nav .brand-t { font-family:var(--serif); font-size:15px; font-weight:700; line-height:1.15;
+  display:flex; flex-direction:column; white-space:nowrap; }
+.site-nav .brand-t small { font-size:9.5px; font-weight:600; color:var(--muted);
+  letter-spacing:.12em; text-transform:uppercase; font-family:var(--sans); }
+.site-nav .nav-date { margin-left:auto; font-size:11.5px; color:var(--muted); align-self:center; white-space:nowrap; }
 .site-nav a.item { font-size:13px; color:var(--ink-2); }
 .site-nav a.item:hover { color:var(--accent); text-decoration:none; }
 .site-nav a.item.on { color:var(--accent); font-weight:600; }
-.site-nav .lang-btn { margin-left:auto; padding:3px 10px; font-size:12px; align-self:center; }
+.site-nav .lang-btn { padding:3px 10px; font-size:12px; align-self:center; }
 
 /* ---- bilingual blocks: body[data-lang] picks which one renders ---- */
 body[data-lang="en"] .lang-ko { display:none !important; }
