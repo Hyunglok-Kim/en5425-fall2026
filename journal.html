@@ -32,6 +32,8 @@
     color:var(--ink-2); font-family:var(--serif); font-size:17px; font-weight:700; }
   .board .who { position:relative; }
   .board .who.off { opacity:.35; }
+  .board .who.half { opacity:.75; }
+  .board .who.half .face { border:1px dashed var(--accent); }
   .board .who.in .face { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent); }
 
   /* ticket cards */
@@ -301,12 +303,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         <ol style="margin-top:4px;font-size:13.5px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>`;
       h += `<div class="grpbox" data-week="${w.n}"></div>`;
       if (roster.length) {
-        const ready = new Set(tickets.map((tk) => tk.display || tk.gh));
-        h += `<h3>${t("Prep board", "준비 현황판")} <span class="jc-count">${tickets.length}/${roster.length}</span></h3>
+        /* W2 has TWO ticket slots per student (W1 + W2) */
+        const perStudent = w.n === 2 ? 2 : 1;
+        const slots = roster.length * perStudent;
+        const cnt = {};
+        tickets.forEach((tk) => { const k = tk.display || tk.gh; cnt[k] = (cnt[k] || 0) + 1; });
+        h += `<h3>${t("Prep board", "준비 현황판")} <span class="jc-count">${tickets.length}/${slots}${w.n === 2 ? " (W1+W2)" : ""}</span></h3>
           <div class="board">${roster.map((s) => {
             const name = s.display || s.gh;
-            return `<span class="who ${ready.has(name) ? "in" : "off"}" title="${esc(name)}${ready.has(name)
-              ? "" : " — " + t("no ticket yet", "티켓 미제출")}">${face(name, s.photo)}</span>`;
+            const c = cnt[name] || 0;
+            const cls = c >= perStudent ? "in" : c > 0 ? "half" : "off";
+            const tip = perStudent === 2
+              ? `${name} — ${c}/2 ${t("tickets", "티켓")}`
+              : `${name}${c ? "" : " — " + t("no ticket yet", "티켓 미제출")}`;
+            return `<span class="who ${cls}" title="${esc(tip)}">${face(name, s.photo)}</span>`;
           }).join("")}</div>`;
       }
       h += `${w.n === 2 ? `<div class="mybox" data-aid="memo01" data-label="${t("My Week 1 ticket (Attention + ViT)", "내 1주차 티켓 (Attention + ViT)")}"></div>` : ""}
