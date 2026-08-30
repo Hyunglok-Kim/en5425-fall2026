@@ -122,6 +122,12 @@
       },
       "reading": {
         "memo": "standard",
+        "video": {
+          "title": "Backpropagation, intuitively | Deep Learning Chapter 3",
+          "channel": "3Blue1Brown",
+          "link": "https://www.youtube.com/watch?v=Ilg3gGewQ5U",
+          "minutes": 13
+        },
         "primary": [
           {
             "title": "Reichstein et al. 2019 — Deep learning and process understanding for data-driven Earth system science (Nature)",
@@ -132,6 +138,10 @@
           {
             "title": "Schultz et al. 2021 — Can deep learning beat NWP?",
             "link": "https://doi.org/10.1098/rsta.2020.0097"
+          },
+          {
+            "title": "(Optional) Goodfellow Ch. 8 §8.1–8.3 — Optimization; the lecture covers the working recipe",
+            "link": "https://www.deeplearningbook.org/contents/optimization.html"
           }
         ],
         "questions": [
@@ -140,9 +150,9 @@
           "Is 'hybrid physics-ML' (their vision) winning in 2026, given NeuralGCM vs pure-ML GraphCast?"
         ],
         "book": {
-          "title": "Goodfellow, Deep Learning — Ch. 6 (Deep Feedforward Networks, §6.1–6.5) + Ch. 8 (Optimization, §8.1–8.5)",
+          "title": "Goodfellow, Deep Learning — Ch. 6 (Deep Feedforward Networks, §6.1–6.5)",
           "link": "https://www.deeplearningbook.org/contents/mlp.html",
-          "short": "Goodfellow Ch. 6 + 8"
+          "short": "Goodfellow Ch. 6"
         }
       },
       "skills": [
@@ -202,6 +212,12 @@
       },
       "reading": {
         "memo": "standard",
+        "video": {
+          "title": "The ERA5 and ERA6 | Hans Hersbach and Bill Bell",
+          "channel": "Copernicus ECMWF",
+          "link": "https://www.youtube.com/watch?v=wEZsbiiysZo",
+          "minutes": 15
+        },
         "primary": [
           {
             "title": "Rolf et al. 2024 — Position: Satellite data is a distinct modality in ML",
@@ -279,6 +295,12 @@
       },
       "reading": {
         "memo": "standard",
+        "video": {
+          "title": "The moment we stopped understanding AI [AlexNet]",
+          "channel": "Welch Labs",
+          "link": "https://www.youtube.com/watch?v=UZDiGooFs54",
+          "minutes": 18
+        },
         "primary": [
           {
             "title": "Ronneberger et al. 2015 — U-Net",
@@ -355,6 +377,12 @@
       },
       "reading": {
         "memo": "standard",
+        "video": {
+          "title": "Stanford CS231N | Spring 2025 | Lecture 7: Recurrent Neural Networks",
+          "channel": "Stanford Online",
+          "link": "https://www.youtube.com/watch?v=kG2lAPBF7zA",
+          "minutes": 72
+        },
         "primary": [
           {
             "title": "Kratzert et al. 2019 — Towards learning universal, regional, and local hydrological behaviors (HESS)",
@@ -431,6 +459,12 @@
       },
       "reading": {
         "memo": "standard",
+        "video": {
+          "title": "Attention in transformers, step-by-step | Deep Learning Chapter 6",
+          "channel": "3Blue1Brown",
+          "link": "https://www.youtube.com/watch?v=eMlx5fFNoYc",
+          "minutes": 26
+        },
         "primary": [
           {
             "title": "Liu et al. 2021 — Swin Transformer",
@@ -507,6 +541,12 @@
       },
       "reading": {
         "memo": "standard",
+        "video": {
+          "title": "Stanford CS231N | Spring 2025 | Lecture 12: Self-Supervised Learning",
+          "channel": "Stanford Online",
+          "link": "https://www.youtube.com/watch?v=4howBU7THbM",
+          "minutes": 75
+        },
         "primary": [
           {
             "title": "He et al. 2021 — Masked Autoencoders Are Scalable Vision Learners",
@@ -634,6 +674,12 @@
       },
       "reading": {
         "memo": "standard",
+        "video": {
+          "title": "AI can't cross this line and we don't know why.",
+          "channel": "Welch Labs",
+          "link": "https://www.youtube.com/watch?v=5eqRuVp65eY",
+          "minutes": 24
+        },
         "primary": [
           {
             "title": "Hoffmann et al. 2022 — Training Compute-Optimal Large Language Models (Chinchilla)",
@@ -716,6 +762,12 @@
       },
       "reading": {
         "memo": "standard",
+        "video": {
+          "title": "Earth Observation Foundation Models and their Applications: Casper Fibæk (The ESA Phi-Lab)",
+          "channel": "SFI Visual Intelligence",
+          "link": "https://www.youtube.com/watch?v=H8zAOMpA_-c",
+          "minutes": 34
+        },
         "primary": [
           {
             "title": "Szwarcman et al. 2024 — Prithvi-EO-2.0",
@@ -788,6 +840,12 @@
       },
       "reading": {
         "memo": "standard",
+        "video": {
+          "title": "The AI Weather Forecasting Revolution",
+          "channel": "ECMWF",
+          "link": "https://www.youtube.com/watch?v=JUsFvifyZeM",
+          "minutes": 68
+        },
         "primary": [
           {
             "title": "Lam et al. 2023 — GraphCast",
@@ -866,6 +924,12 @@
       },
       "reading": {
         "memo": "standard",
+        "video": {
+          "title": "Stanford CS224N: NLP w/ DL | Spring 2024 | Lecture 12 - Efficient Training, Shikhar Murty",
+          "channel": "Stanford Online",
+          "link": "https://www.youtube.com/watch?v=UVX7SYGCKkA",
+          "minutes": 63
+        },
         "primary": [
           {
             "title": "Hu et al. 2021 — LoRA",
@@ -1146,8 +1210,8 @@
       "after": 6,
       "date": "2026-10-19",
       "kind": "exam",
-      "title": "Book Check — 60′ closed-book on the hand-summarized chapters (Goodfellow 5/6/8/9/10 + d2l 11) · counts as 2 quiz slots · TA-proctored, no lecture",
-      "title_ko": "교과서 점검 — 손으로 정리한 챕터(Goodfellow 5·6·8·9·10 + d2l 11) 범위 60분 closed-book · 퀴즈 2회분 반영 · 조교 감독, 강의 없음"
+      "title": "Book Check — 60′ closed-book on the hand-summarized chapters (Goodfellow 5/6/9/10 + d2l 11) · counts as 2 quiz slots · TA-proctored, no lecture",
+      "title_ko": "교과서 점검 — 손으로 정리한 챕터(Goodfellow 5·6·9·10 + d2l 11) 범위 60분 closed-book · 퀴즈 2회분 반영 · 조교 감독, 강의 없음"
     }
   ]
 }

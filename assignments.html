@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Assignments</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js" defer></script>
+<style>
+  .sumline { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:18px 0 4px; }
+  details.sec { border:1px solid var(--hairline); border-radius:12px; background:var(--surface);
+    padding:2px 18px 10px; margin:14px 0; }
+  details.sec > summary { cursor:pointer; padding:12px 0 10px; font-family:var(--serif);
+    font-weight:700; font-size:16.5px; list-style:none; display:flex; flex-wrap:wrap;
+    gap:6px 12px; align-items:baseline; }
+  details.sec > summary::-webkit-details-marker { display:none; }
+  details.sec > summary::before { content:"▸"; color:var(--muted); font-size:12px; }
+  details.sec[open] > summary::before { content:"▾"; }
+  details.sec > summary .sub { margin:0; font-family:var(--sans); font-weight:400; }
+  .duewrap { border:1px solid var(--accent); border-radius:12px; background:var(--surface);
+    padding:6px 18px 12px; margin:10px 0 6px; }
+  .duewrap .subbox + .subbox { margin-top:2px; }
+  .center-card { max-width:560px; margin:44px auto; text-align:center; padding:30px 26px; }
+  .center-card .btn { margin:8px 0 14px; }
+  .center-card ul { list-style:none; padding:0; margin:10px 0 0; font-size:13.5px; color:var(--ink-2); }
+</style>
+</head>
+<body data-page="assignments">
+<div class="wrap">
+  <p class="eyebrow">EN5425 / EV4240 · <span class="lang-en">Fall 2026</span><span class="lang-ko">2026 가을학기</span></p>
+  <h1><span class="lang-en">Assignments</span><span class="lang-ko">과제 제출</span></h1>
+  <p class="lede"><span class="lang-en">Every deliverable, its deadline, and a submit box — in one place.
+    Sign in from the top menu, submit here, and resubmit until graded. Each item also lives on its
+    week page, so you can submit from either side.</span><span class="lang-ko">모든 제출물과 마감,
+    그리고 제출 상자를 한 곳에 모았어요. 상단 메뉴에서 로그인하면 여기서 바로 제출하고, 채점 전까지
+    다시 제출할 수 있어요. 각 항목은 해당 주차 페이지에도 있으니 어느 쪽에서 제출해도 돼요.</span></p>
+
+  <div id="list"><p class="sub" style="margin-top:26px"><span class="lang-en">Loading…</span><span class="lang-ko">불러오는 중…</span></p></div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const el = $("#list");
+  const st = await siteSession();
+
+  const SECS = [
+    { p: "memo", en: "Entrance tickets", ko: "입장 티켓", sEn: "due 24 h before class", sKo: "수업 24시간 전 마감" },
+    { p: "note", en: "Research notes", ko: "연구노트", sEn: "weekly PDF", sKo: "주간 PDF" },
+    { p: "book", en: "Book summaries", ko: "북 정리", sEn: "handwritten scan, no AI", sKo: "손글씨 스캔, AI 금지" },
+    { p: "vid",  en: "Video summaries", ko: "영상 정리", sEn: "0.5-page PDF", sKo: "0.5페이지 PDF" },
+    { p: "",     en: "HW0 & Capstone", ko: "HW0 · Capstone", sEn: "reports & milestones", sKo: "보고서 · 마일스톤" },
+  ];
+
+  /* ---- mirror (static copy, no API): point to the live class address ---- */
+  if (st.mode === "mirror") {
+    const live = await liveClassURL();
+    el.innerHTML = `<div class="card center-card">
+      <h3 style="margin:0 0 6px">${t("Submission runs on the live class site", "제출은 수업용 주소에서 열려요")}</h3>
+      ${live
+        ? `<a class="btn primary" href="${esc(live)}/assignments.html">${t("Submit on the live class site →", "수업용 주소에서 제출하기 →")}</a>`
+        : `<p class="sub" style="margin:8px 0 0">${t("Submission opens on the live class address (pinned on Home).",
+            "제출은 수업용 주소에서 열려요 (홈 고정 공지 참고).")}</p>`}</div>`;
+    return;
+  }
+
+  /* ---- anonymous: one sign-in card + section names only ---- */
+  if (st.mode === "anon") {
+    el.innerHTML = `<div class="card center-card">
+      <h3 style="margin:0 0 4px">${t("Sign in to submit", "로그인하고 제출하기")}</h3>
+      <a class="btn primary" href="/portal/login.html?next=/assignments.html">${t("Sign in →", "로그인 →")}</a>
+      <p class="sub" style="margin:0">${t("Your deadlines, submit boxes, scores, and feedback appear here after you sign in.",
+        "로그인하면 마감, 제출 상자, 점수와 피드백이 여기에 나타나요.")}</p>
+      <ul>${SECS.map((s) => `<li>${t(s.en, s.ko)} <span class="sub" style="margin:0;display:inline">· ${t(s.sEn, s.sKo)}</span></li>`).join("")}</ul>
+    </div>`;
+    return;
+  }
+
+  /* ---- instructor: nothing to submit here ---- */
+  if (st.me.role === "pi") {
+    el.innerHTML = `<div class="note" style="margin-top:26px"><b>${t("Instructor account", "교수자 계정")}</b> —
+      ${t("students submit here; review and grade everything in", "학생 제출은 이 페이지에서 이루어지고, 확인과 채점은")}
+      <a href="/portal/admin.html">${t("Grades", "성적 관리")}</a>${t("", "에서 해요")}.</div>`;
+    return;
+  }
+
+  /* ---- authed student: group /api/me assignments into sections ---- */
+  const rows = (st.me.assignments || []).filter((a) => a.type !== "score" && a.type !== "slides");
+  const nowK = Date.now() + 9 * 3600e3;                       /* KST-anchored, like the rest of the site */
+  const dueK = (r) => {
+    if (!r.due) return null;
+    const s = String(r.due).replace(" ", "T");
+    const ms = Date.parse((s.length >= 16 ? s.slice(0, 16) : s.slice(0, 10) + "T23:59") + ":00Z");
+    return Number.isFinite(ms) ? ms : null;
+  };
+  const wkOf = (id) => parseInt(String(id).replace(/^[a-z]+/, ""), 10) || "";
+  const CAP = { hw0: ["HW0 — PDF report", "HW0 — PDF 보고서"], proposal: ["Capstone proposal (PDF)", "Capstone 제안서 (PDF)"],
+    m1: ["Milestone M1 (PDF)", "마일스톤 M1 (PDF)"], m2: ["Milestone M2 (PDF)", "마일스톤 M2 (PDF)"],
+    m3: ["Milestone M3 (PDF)", "마일스톤 M3 (PDF)"], final: ["Final deliverable (PDF)", "최종 산출물 (PDF)"] };
+  const labelOf = (r) => {
+    const w = wkOf(r.id);
+    let base = r.title
+      || (r.id.startsWith("memo") ? t(`Entrance ticket — Week ${w}`, `입장 티켓 — ${w}주차`)
+      : r.id.startsWith("note") ? t(`My research note — Week ${w} (PDF)`, `내 연구노트 — ${w}주차 (PDF)`)
+      : r.id.startsWith("book") ? t(`Book summary — Week ${w}`, `북 정리 — ${w}주차`)
+      : r.id.startsWith("vid") ? t(`Video summary — Week ${w}`, `영상 정리 — ${w}주차`)
+      : CAP[r.id] ? t(CAP[r.id][0], CAP[r.id][1]) : r.id);
+    if (r.id.startsWith("book")) base += t(" — HANDWRITTEN, scanned to PDF, no AI", " — 손글씨 작성 후 스캔 PDF, AI 금지");
+    if (r.id.startsWith("vid")) base += t(" — 0.5-page PDF", " — 0.5페이지 PDF");
+    return base;
+  };
+  const secOf = (id) => id.startsWith("memo") ? 0 : id.startsWith("note") ? 1
+    : id.startsWith("book") ? 2 : id.startsWith("vid") ? 3 : 4;
+  const submitted = (r) => r.status === "ok" || r.status === "late";
+  const bySec = SECS.map(() => []);
+  const dueNow = [];
+  for (const r of rows) {
+    const d = dueK(r);
+    const soon = d !== null && d >= nowK && d - nowK <= 8 * 86400e3;
+    const overdueMiss = d !== null && d < nowK && !submitted(r) && !r.submitted_at;
+    if (soon || overdueMiss) dueNow.push(r); else bySec[secOf(r.id)].push(r);
+  }
+  const cmp = (a, b) => (dueK(a) ?? Infinity) - (dueK(b) ?? Infinity);
+  dueNow.sort(cmp); bySec.forEach((l) => l.sort(cmp));
+
+  const total = rows.filter((r) => r.due).length;
+  const ok = rows.filter(submitted).length;
+  const late = rows.filter((r) => r.status === "late").length;
+  const boxes = (list) => list.map((r) =>
+    `<div class="subbox" data-aid="${esc(r.id)}" data-label="${esc(labelOf(r))}"></div>`).join("");
+
+  el.innerHTML = `
+    <div class="sumline tnum">
+      <span class="pill acc">${t(`Submitted ${ok}/${total}`, `제출 ${ok}/${total}`)}</span>
+      <span class="pill">${t(`late ${late}`, `지각 ${late}`)}</span>
+      <span class="sub" style="margin:0">${t("Counts every dated deliverable this semester.", "이번 학기 마감이 있는 전체 제출물 기준이에요.")}</span>
+    </div>
+
+    <h2 style="margin-top:26px">${t("Due now", "이번 주 마감")}</h2>
+    ${dueNow.length
+      ? `<div class="duewrap">${boxes(dueNow)}</div>`
+      : `<p class="sub">${t("Nothing due in the next 8 days — and nothing overdue. Nice.",
+          "앞으로 8일 안에 마감되는 과제도, 밀린 과제도 없어요. 좋아요.")}</p>`}
+
+    ${SECS.map((s, i) => bySec[i].length ? `
+      <details class="sec"${i === 4 ? " open" : ""}>
+        <summary>${t(s.en, s.ko)}
+          <span class="sub tnum">${bySec[i].length}${t(" items · ", "개 · ")}${bySec[i].filter(submitted).length}${t(" submitted · ", "개 제출 · ")}${t(s.sEn, s.sKo)}</span>
+        </summary>
+        ${boxes(bySec[i])}
+      </details>` : "").join("")}
+
+    ${rows.length ? "" : `<p class="sub" style="margin-top:20px">${t("No assignments have been assigned to you yet.", "아직 배정된 과제가 없어요.")}</p>`}
+    <p class="sub" style="margin-top:22px">${t("Each item also appears on its week page — either place works.",
+      "각 항목은 해당 주차 페이지에도 있어요 — 어디서 제출해도 똑같이 반영돼요.")}</p>`;
+
+  initSubmitBoxes(st);
+});
+</script>
+</body>
+</html>

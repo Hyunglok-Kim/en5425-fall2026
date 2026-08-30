@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · My Space</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js" defer></script>
+<style>
+  .stats { display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 12px; }
+  .stat { border:1px solid var(--hairline); border-radius:10px; background:var(--surface);
+    padding:10px 16px; min-width:96px; font-size:12.5px; color:var(--ink-2); }
+  .stat b { display:block; font-size:22px; font-family:var(--serif); color:var(--ink); }
+  .bar { height:6px; border-radius:999px; background:var(--wash); overflow:hidden; margin:8px 0 4px; }
+  .bar i { display:block; height:100%; background:var(--accent); border-radius:999px; }
+  #subs td, #subs th { white-space:nowrap; }
+  #subs td:first-child { white-space:normal; min-width:140px; }
+  #subs td.fb { max-width:260px; overflow:hidden; text-overflow:ellipsis; color:var(--ink-2); }
+  #subs .ghd td { font-family:var(--serif); font-weight:700; font-size:13.5px;
+    color:var(--accent); padding-top:14px; }
+  .in-txt { width:100%; border:1px solid var(--hairline); background:var(--page); color:var(--ink);
+    border-radius:8px; padding:7px 10px; font:inherit; font-size:13.5px; }
+  .pf { display:flex; gap:22px; flex-wrap:wrap; align-items:flex-start; }
+  .pf .fields { flex:1; min-width:230px; display:grid; gap:10px; }
+  .pf label { font-size:12px; color:var(--ink-2); display:block; margin-bottom:3px; }
+  .avbox { display:flex; flex-direction:column; gap:8px; align-items:center; max-width:190px; }
+  .avw { width:76px; height:76px; border-radius:50%; overflow:hidden; border:1px solid var(--hairline);
+    background:var(--wash); display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-size:26px; color:var(--muted); }
+  .avw img { width:100%; height:100%; object-fit:cover; display:none; }
+  #cohort .cards { grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }
+  .card.student { display:flex; flex-direction:column; align-items:center; text-align:center;
+    gap:3px; padding:20px 16px 16px; transition:transform .15s ease, box-shadow .15s ease; }
+  .card.student:hover { transform:translateY(-2px); box-shadow:0 4px 14px var(--wash); }
+  @media (prefers-reduced-motion: reduce) {
+    .card.student { transition:none; } .card.student:hover { transform:none; } }
+  .card.student .ph { width:72px; height:72px; border-radius:50%; object-fit:cover;
+    border:1px solid var(--hairline); margin-bottom:7px; }
+  .card.student .av { display:flex; align-items:center; justify-content:center;
+    background:var(--wash); color:var(--ink-2); font-family:var(--serif); font-size:26px; font-weight:700; }
+  .card.student b { font-size:14.5px; }
+  .card.student .bio { margin:0; font-size:12.5px; color:var(--muted); }
+  .card.student .gh { font-size:12px; font-family:var(--mono); }
+  #board th.a { max-width:110px; white-space:normal; }
+  #board td, #board th { text-align:center; }
+  #board td:first-child, #board th:first-child { text-align:left; white-space:nowrap; }
+  .legend { display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:12px;
+    font-size:12.5px; color:var(--ink-2); align-items:center; }
+</style>
+</head>
+<body data-page="myspace">
+<div class="wrap">
+  <p class="eyebrow">EN5425 / EV4240 · <span class="lang-en">Fall 2026</span><span class="lang-ko">2026 가을학기</span></p>
+  <h1><span class="lang-en">My Space</span><span class="lang-ko">내 공간</span></h1>
+  <p class="lede">
+    <span class="lang-en">Your personal dashboard — progress at a glance, every submission with its
+      score and feedback, and the profile card you show the cohort.</span>
+    <span class="lang-ko">개인 대시보드예요 — 진행 상황 한눈에 보기, 점수·피드백이 붙은 모든 제출 내역,
+      그리고 cohort에 보여줄 내 프로필 카드까지.</span>
+  </p>
+
+  <div id="gate" hidden></div>
+
+  <div id="mine" hidden>
+    <h2><span class="lang-en">My progress</span><span class="lang-ko">내 진행 상황</span></h2>
+    <div id="progress"></div>
+
+    <h2><span class="lang-en">My submissions</span><span class="lang-ko">내 제출 내역</span></h2>
+    <p class="sub">
+      <span class="lang-en">This table is read-only — submit on each week's page or the Assignments tab.</span>
+      <span class="lang-ko">이 표는 확인용이에요 — 제출은 각 주차 페이지나 과제 제출 탭에서 해 주세요.</span>
+    </p>
+    <div id="subs"></div>
+
+    <h2><span class="lang-en">My profile</span><span class="lang-ko">내 프로필</span></h2>
+    <div class="card" id="profileCard">
+      <p class="sub" style="margin:0 0 14px">
+        <span class="lang-en"><b>This card is public</b> — the name, bio, and photo you set here appear
+          on the cohort grid below. All three are optional and entirely self-chosen.</span>
+        <span class="lang-ko"><b>이 카드는 공개돼요</b> — 여기서 정한 이름, 소개, 사진이 아래 cohort
+          그리드에 표시됩니다. 셋 다 선택 사항이고 본인이 직접 정해요.</span>
+      </p>
+      <div class="pf">
+        <div class="fields">
+          <div>
+            <label for="display"><span class="lang-en">Display name (max 80)</span><span class="lang-ko">표시 이름 (최대 80자)</span></label>
+            <input class="in-txt" id="display" maxlength="80">
+          </div>
+          <div>
+            <label for="bio"><span class="lang-en">Short bio (max 200)</span><span class="lang-ko">짧은 소개 (최대 200자)</span></label>
+            <textarea class="in-txt" id="bio" maxlength="200" rows="3"></textarea>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button class="btn primary" id="saveProfile" type="button">
+              <span class="lang-en">Save profile</span><span class="lang-ko">프로필 저장</span></button>
+            <span class="sub" id="pfMsg" style="margin:0;min-height:16px"></span>
+          </div>
+        </div>
+        <div class="avbox">
+          <div class="avw"><span id="avPh">?</span><img id="avatar" alt=""></div>
+          <input type="file" id="avFile" accept="image/png,image/jpeg" style="font-size:12px;max-width:180px">
+          <button class="btn" id="avUp" type="button">
+            <span class="lang-en">Upload avatar</span><span class="lang-ko">아바타 업로드</span></button>
+          <span class="sub" style="margin:0">PNG/JPG · ≤ 1 MB</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2><span class="lang-en">Cohort — Fall 2026</span><span class="lang-ko">Fall 2026 수강생</span></h2>
+  <div id="cohort">
+    <p class="sub"><span class="lang-en">Loading cohort…</span><span class="lang-ko">수강생 정보를 불러오는 중…</span></p>
+  </div>
+  <p class="sub" id="updated" style="margin-top:10px"></p>
+
+  <div id="board-sec" hidden>
+    <h2><span class="lang-en">Submission board</span><span class="lang-ko">제출 현황</span></h2>
+    <div class="note">
+      <span class="lang-en"><b>Submission status only</b> — grades and feedback stay in your private repo.</span>
+      <span class="lang-ko"><b>제출 여부만 공개합니다</b> — 성적과 피드백은 각자의 private repo에만 남습니다.</span>
+    </div>
+    <div id="board-wrap"></div>
+    <div class="legend">
+      <span><span class="st ok">&#10003;</span> <span class="lang-en">submitted</span><span class="lang-ko">제출 완료</span></span>
+      <span><span class="st late">!</span> <span class="lang-en">late</span><span class="lang-ko">지각</span></span>
+      <span><span class="st due">&#183;</span> <span class="lang-en">due / in progress</span><span class="lang-ko">진행 중 · 마감 전</span></span>
+      <span><span class="st miss">&#8212;</span> <span class="lang-en">missing</span><span class="lang-ko">미제출</span></span>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const st = await siteSession();        /* also awaited: lets common.js set body lang first */
+  renderCohort();
+  if (st.mode === "authed" && !st.me.must_change) {
+    if (st.me.role === "pi") {
+      $("#gate").hidden = false;
+      $("#gate").innerHTML = `<div class="card" style="border-style:dashed;border-color:var(--accent)">
+        <b>${t("PI account", "PI 계정")}</b>
+        <p class="sub" style="margin:6px 0 10px">${t("Students see their personal dashboard here. Your view is the grade console.",
+          "학생들은 여기서 개인 대시보드를 봐요. 교수님 화면은 성적 관리 콘솔이에요.")}</p>
+        <a class="btn primary" href="/portal/admin.html">${t("Open Grades →", "성적 관리 열기 →")}</a></div>`;
+    } else renderMine(st.me);
+  } else renderGate(st);
+});
+
+/* ---- 1 · signed-out / mirror card ---- */
+async function renderGate(st) {
+  const g = $("#gate"); g.hidden = false;
+  const box = (inner) => `<div class="card" style="border-style:dashed;border-color:var(--accent)">${inner}</div>`;
+  if (st.mode === "mirror") {
+    const live = await liveClassURL();
+    g.innerHTML = box(`<b>${t("This is the static mirror", "여기는 정적 mirror예요")}</b>
+      <p class="sub" style="margin:6px 0 10px">${t(
+        "Your personal dashboard — progress, submissions, profile — lives on the live class site.",
+        "진행 상황·제출 내역·프로필 같은 개인 대시보드는 수업용 주소에서 볼 수 있어요.")}</p>
+      ${live ? `<a class="btn primary" href="${esc(live)}/myspace.html">${t("Open on the live class site →", "수업용 주소에서 열기 →")}</a>`
+             : `<span class="sub" style="margin:0">${t("The live class address is pinned on Home.", "수업용 주소는 홈 고정 공지에 있어요.")}</span>`}`);
+  } else {
+    g.innerHTML = box(`<b>${t("Sign in to see your space", "로그인하면 내 공간이 열려요")}</b>
+      <p class="sub" style="margin:6px 0 10px">${t(
+        "Progress at a glance, every submission with score and feedback, and your public profile card.",
+        "진행 상황 한눈에 보기, 점수·피드백이 붙은 제출 내역, 그리고 공개 프로필 카드까지.")}</p>
+      <a class="btn primary" href="/portal/login.html?next=/myspace.html">${t("Sign in →", "로그인 →")}</a>`);
+  }
+}
+
+/* ---- shared bits for the authed sections ---- */
+const chip = (s) =>
+  s === "ok"   ? `<span class="st ok" title="${t("submitted", "제출 완료")}">&#10003;</span>` :
+  s === "late" ? `<span class="st late" title="${t("submitted late", "지각 제출")}">!</span>` :
+  s === "due"  ? `<span class="st due" title="${t("due", "진행 중")}">&#183;</span>` :
+  s === "miss" ? `<span class="st miss" title="${t("missing", "미제출")}">&#8212;</span>` : "";
+function fmtDT(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return esc(iso);
+  const wd = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()];
+  return `${fmtDate(iso.slice(0, 10))} (${wd}) ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+const relLeft = (ms) => {
+  const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5), mi = Math.floor(ms / 6e4);
+  return d >= 2 ? t(`in ${d} days`, `${d}일 남음`) : h >= 2 ? t(`in ${h} hours`, `${h}시간 남음`)
+    : mi >= 1 ? t(`in ${mi} min`, `${mi}분 남음`) : t("due now", "마감 직전");
+};
+
+function renderMine(me) {
+  $("#mine").hidden = false;
+  const off = me.now ? Date.parse(me.now) - Date.now() : 0;
+  const now = Date.now() + off;
+  const rows = (me.assignments || []).filter((a) => a.type !== "score" && a.type !== "slides");
+
+  /* ---- 2 · progress ---- */
+  const c = { ok: 0, late: 0, miss: 0, due: 0 };
+  rows.forEach((a) => { if (c[a.status] !== undefined) c[a.status]++; });
+  const dueSoFar = rows.filter((a) => a.due && Date.parse(a.due) <= now);
+  const done = dueSoFar.filter((a) => a.submitted_at).length;
+  const pct = dueSoFar.length ? Math.min(100, Math.round(100 * done / dueSoFar.length)) : 0;
+  const upcoming = rows.filter((a) => a.due && !a.submitted_at && Date.parse(a.due) > now)
+    .sort((x, y) => x.due.localeCompare(y.due)).slice(0, 3);
+  $("#progress").innerHTML = `
+    <div class="stats">
+      <div class="stat"><b style="color:var(--ok)">${c.ok}</b>${t("on time", "제시간 제출")}</div>
+      <div class="stat"><b style="color:var(--warn)">${c.late}</b>${t("late", "지각 제출")}</div>
+      <div class="stat"><b style="color:var(--warn)">${c.miss}</b>${t("missing", "미제출")}</div>
+      <div class="stat"><b>${c.due}</b>${t("still open", "마감 전")}</div>
+    </div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <p class="sub tnum">${done} / ${dueSoFar.length} ${t("submitted of items due so far", "— 지금까지 마감된 항목 중 제출")} (${pct}%)</p>
+    <h3 style="margin:18px 0 4px;font-size:15px">${t("Next 3 deadlines", "다음 마감 3개")}</h3>
+    ${upcoming.length ? `<div class="rows">${upcoming.map((a) => `
+      <div class="row"><span class="tnum" style="color:var(--muted);flex:none">${fmtDT(a.due)}</span>
+        <span>${esc(a.title)}</span>
+        <span class="tnum" style="margin-left:auto;color:var(--warn)">${relLeft(Date.parse(a.due) - now)}</span></div>`).join("")}</div>`
+      : `<p class="sub">${t("No upcoming deadlines.", "다가오는 마감이 없어요.")}</p>`}`;
+
+  /* ---- 3 · submissions table, grouped by category ---- */
+  const GROUPS = [
+    [t("Entrance tickets", "입장 티켓"), (a) => /^memo\d+$/.test(a.id)],
+    [t("Research notes", "연구 노트"), (a) => /^note\d+$/.test(a.id)],
+    [t("Book summaries", "책 요약"), (a) => /^book\d+$/.test(a.id)],
+    [t("Video summaries", "영상 요약"), (a) => /^vid\d+$/.test(a.id)],
+    [t("HW0 & capstone", "HW0 & 캡스톤"), () => true],
+  ];
+  const tr = (a) => {
+    const graded = a.score !== null && a.score !== undefined;
+    const fb = String(a.feedback || "");
+    return `<tr>
+      <td>${esc(a.title)}</td>
+      <td class="tnum">${a.due ? esc(fmtDate(a.due.slice(0, 10)) + " " + a.due.slice(11, 16)) : "–"}</td>
+      <td>${chip(a.status)}</td>
+      <td class="tnum">${a.submitted_at ? esc(String(a.submitted_at).slice(5, 16).replace("T", " ")) : "–"}</td>
+      <td class="tnum">${graded ? esc(a.score) : "–"}</td>
+      <td class="fb" title="${esc(fb)}">${esc(fb.length > 80 ? fb.slice(0, 80) + "…" : fb)}</td></tr>`;
+  };
+  const used = new Set(); let body = "";
+  for (const [label, test] of GROUPS) {
+    const g = rows.filter((a) => !used.has(a.id) && test(a));
+    g.forEach((a) => used.add(a.id));
+    if (g.length) body += `<tr class="ghd"><td colspan="6">${esc(label)}</td></tr>` + g.map(tr).join("");
+  }
+  $("#subs").innerHTML = `<div class="scroll"><table>
+    <thead><tr><th>${t("Item", "과제")}</th><th>${t("Due", "마감")}</th><th>${t("Status", "상태")}</th>
+      <th>${t("Submitted", "제출 시각")}</th><th>${t("Score", "점수")}</th><th>${t("Feedback", "피드백")}</th></tr></thead>
+    <tbody>${body}</tbody></table></div>`;
+
+  /* ---- 4 · profile ---- */
+  $("#display").value = me.display || "";
+  $("#bio").value = me.bio || "";
+  $("#avPh").textContent = (String(me.display || me.name || "?").trim()[0] || "?").toUpperCase();
+  const setAvatar = (photo, bust) => {
+    const img = $("#avatar"), ph = $("#avPh");
+    if (!photo) { img.style.display = "none"; ph.style.display = ""; return; }
+    ph.style.display = "none"; img.style.display = "block";
+    img.onerror = () => { img.style.display = "none"; ph.style.display = ""; };
+    img.src = photo + (bust ? "?t=" + Date.now() : "");
+  };
+  setAvatar(me.photo, false);
+  const msg = (s, ok) => { const el = $("#pfMsg"); el.textContent = s; el.style.color = ok ? "var(--ok)" : "var(--warn)"; };
+  $("#saveProfile").addEventListener("click", async () => {
+    msg("");
+    const fd = new FormData();
+    fd.append("display", $("#display").value); fd.append("bio", $("#bio").value);
+    try {
+      const r = await fetch("/api/profile", { method: "POST", headers: XHDR, body: fd });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) throw new Error((j && j.detail) || "HTTP " + r.status);
+      msg(t("Saved — your cohort card is updated.", "저장됐어요 — cohort 카드에 반영돼요."), true);
+    } catch (e) { msg(e.message); }
+  });
+  $("#avFile").addEventListener("change", () => {
+    const f = $("#avFile").files[0];
+    if (f) { const img = $("#avatar"); img.onerror = null; $("#avPh").style.display = "none";
+      img.style.display = "block"; img.src = URL.createObjectURL(f); }
+  });
+  $("#avUp").addEventListener("click", async () => {
+    msg("");
+    const f = $("#avFile").files[0];
+    if (!f) return msg(t("Choose a PNG or JPG first.", "먼저 PNG나 JPG를 골라 주세요."));
+    if (!/^image\/(png|jpeg)$/.test(f.type) && !/\.(png|jpe?g)$/i.test(f.name))
+      return msg(t("PNG or JPEG only.", "PNG나 JPEG만 올릴 수 있어요."));
+    if (f.size > 1024 * 1024) return msg(t("Over the 1 MB limit.", "1 MB 제한을 넘었어요."));
+    const fd = new FormData(); fd.append("file", f);
+    try {
+      const r = await fetch("/api/avatar", { method: "POST", headers: XHDR, body: fd });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) throw new Error((j && j.detail) || "HTTP " + r.status);
+      msg(t("Avatar uploaded.", "아바타가 업로드됐어요."), true);
+      try { const me2 = await (await fetch("/api/me", { cache: "no-store" })).json();
+        setAvatar(me2.photo, true); } catch {}
+    } catch (e) { msg(e.message); }
+  });
+}
+
+/* ---- 5 · cohort — same rendering as the (retired) Students page, from public data/status.json ---- */
+async function renderCohort() {
+  const cohortEl = $("#cohort");
+  const card = (s) => {
+    const name = s.display || s.gh || "";
+    const photo = s.photo
+      ? `<img class="ph" src="${esc(s.photo)}" alt="" loading="lazy">`
+      : `<div class="ph av" aria-hidden="true">${esc((String(name).trim()[0] || "?").toUpperCase())}</div>`;
+    return `<div class="card student">${photo}
+      <b>${esc(name)}</b>
+      ${s.bio ? `<span class="sub bio">${esc(s.bio)}</span>` : ""}
+      ${s.gh ? `<a class="gh" href="https://github.com/${esc(s.gh)}">@${esc(s.gh)}</a>` : ""}
+    </div>`;
+  };
+  const empty = () => { cohortEl.innerHTML = `<p class="sub">${esc(t(
+    "Cards appear here after HW0 — sign in on this site to set your display name and bio (photo optional).",
+    "HW0 이후에 카드가 나타납니다 — 이 사이트에 로그인해 표시 이름과 한 줄 소개를 설정해 주세요 (사진은 선택)."))}</p>`; };
+  try {
+    const d = await loadJSON("status");
+    const assignments = Array.isArray(d.assignments) ? d.assignments : [];
+    const students = Array.isArray(d.students) ? d.students : [];
+    if (!students.length) {
+      empty();
+    } else {
+      cohortEl.innerHTML = `<div class="cards">${students.map(card).join("")}</div>`;
+      if (assignments.length) {
+        $("#board-wrap").innerHTML = `<div class="scroll"><table id="board">
+          <thead><tr><th>${t("Student", "수강생")}</th>${assignments.map((a) =>
+            `<th class="a" title="${esc(a.due ? t("due ", "마감 ") + fmtDate(String(a.due).slice(0, 10)) : "")}">${esc(a.title || a.id)}</th>`).join("")}
+          </tr></thead>
+          <tbody>${students.map((s) => `<tr>
+            <td>${s.gh ? `<a href="https://github.com/${esc(s.gh)}">${esc(s.display || s.gh)}</a>` : esc(s.display || "")}</td>
+            ${assignments.map((a) => `<td>${chip((s.status || {})[a.id])}</td>`).join("")}
+          </tr>`).join("")}</tbody></table></div>`;
+        $("#board-sec").hidden = false;
+      }
+    }
+    if (d.updated) $("#updated").textContent =
+      t("Updated ", "업데이트 ") + (fmtDate(String(d.updated).slice(0, 10)) || d.updated);
+  } catch {
+    empty();
+  }
+}
+</script>
+</body>
+</html>
