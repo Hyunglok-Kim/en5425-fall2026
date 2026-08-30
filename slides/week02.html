@@ -59,90 +59,266 @@
 <section class="slide">
   <p class="kicker">Part 1 · Derivation · step 0</p>
   <h2>The network we will differentiate</h2>
-  <div class="card">
-    <p style="line-height:2.1">
-      input&emsp;<b>x</b> ∈ ℝ<sup>d₀</sup><br>
-      layer 1&emsp;<b>z₁</b> = W₁x + b₁,&emsp;W₁ ∈ ℝ<sup>d₁×d₀</sup>&emsp;→&emsp;<b>h</b> = σ(z₁) <span class="muted">(σ applied to each entry)</span><br>
-      layer 2&emsp;<b>z₂</b> = W₂h + b₂,&emsp;W₂ ∈ ℝ<sup>d₂×d₁</sup><br>
-      loss&emsp;<b>L</b> = ½‖z₂ − y‖²&ensp;= ½ Σ<sub>i</sub> (z₂<sub>i</sub> − y<sub>i</sub>)²&emsp;<span class="muted">(one scalar)</span>
-    </p>
+  <div class="cols" style="grid-template-columns:1.25fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2.1">
+          input&emsp;<b>x</b> ∈ ℝ<sup>d₀</sup><br>
+          layer 1&emsp;<b>z₁</b> = W₁x + b₁,&emsp;W₁ ∈ ℝ<sup>d₁×d₀</sup>&emsp;→&emsp;<b>h</b> = σ(z₁) <span class="muted">(σ applied to each entry)</span><br>
+          layer 2&emsp;<b>z₂</b> = W₂h + b₂,&emsp;W₂ ∈ ℝ<sup>d₂×d₁</sup><br>
+          loss&emsp;<b>L</b> = ½‖z₂ − y‖²&ensp;= ½ Σ<sub>i</sub> (z₂<sub>i</sub> − y<sub>i</sub>)²&emsp;<span class="muted">(one scalar)</span>
+        </p>
+      </div>
+      <ul class="small">
+        <li>Goal: <b>∂L/∂W₂, ∂L/∂b₂, ∂L/∂W₁, ∂L/∂b₁</b> — the gradient of one scalar with respect to every parameter.</li>
+        <li>Everything that follows is the chain rule applied three times, keeping careful track of shapes.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 268" role="img" aria-label="The two-layer network as a vertical chain from input x to scalar loss L" style="width:min(100%,420px)">
+        <defs><marker id="nf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker></defs>
+        <g fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="30" y="8"   width="160" height="34" rx="8"/>
+          <rect x="30" y="66"  width="160" height="34" rx="8"/>
+          <rect x="30" y="124" width="160" height="34" rx="8"/>
+          <rect x="30" y="182" width="160" height="34" rx="8"/>
+          <circle cx="110" cy="250" r="16" stroke="var(--accent)"/>
+          <path d="M110 42 V58" marker-end="url(#nf)"/>
+          <path d="M110 100 V116" marker-end="url(#nf)"/>
+          <path d="M110 158 V174" marker-end="url(#nf)"/>
+          <path d="M110 216 V228" marker-end="url(#nf)"/>
+        </g>
+        <g font-family="var(--sans)" font-size="14" fill="currentColor" text-anchor="middle">
+          <text x="110" y="30">x</text>
+          <text x="110" y="88">z₁ = W₁x + b₁</text>
+          <text x="110" y="146">h = σ(z₁)</text>
+          <text x="110" y="204">z₂ = W₂h + b₂</text>
+          <text x="110" y="255" fill="var(--accent)">L</text>
+        </g>
+        <g font-family="var(--sans)" font-size="11.5" fill="currentColor" opacity="0.65">
+          <text x="205" y="30">ℝ<tspan font-size="9" dy="-4">d₀</tspan></text>
+          <text x="205" y="88">ℝ<tspan font-size="9" dy="-4">d₁</tspan></text>
+          <text x="205" y="146">ℝ<tspan font-size="9" dy="-4">d₁</tspan></text>
+          <text x="205" y="204">ℝ<tspan font-size="9" dy="-4">d₂</tspan></text>
+          <text x="205" y="255">one scalar</text>
+          <text x="253" y="235">vs target y</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul class="small">
-    <li>Goal: <b>∂L/∂W₂, ∂L/∂b₂, ∂L/∂W₁, ∂L/∂b₁</b> — the gradient of one scalar with respect to every parameter.</li>
-    <li>Everything that follows is the chain rule applied three times, keeping careful track of shapes.</li>
-  </ul>
-  <div class="foot"><span>Read: Goodfellow §6.5, pp. 200–220 · Dive into Deep Learning §5.3 · CS231n “Backpropagation, Intuitions” + Johnson’s “Derivatives” handout — linked on the Week 2 page</span></div>
+  <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/mlp.html">Goodfellow §6.5, pp. 200–220</a> · <a href="https://d2l.ai/chapter_multilayer-perceptrons/backprop.html">Dive into Deep Learning §5.3</a> · <a href="https://cs231n.github.io/optimization-2/">CS231n “Backpropagation, Intuitions”</a> + <a href="https://cs231n.stanford.edu/handouts/derivatives.pdf">Johnson’s “Derivatives” handout</a> — linked on the Week 2 page</span></div>
   <aside class="notes">~1 min. Fix the notation and shapes on this slide and the rest is mechanical. Squared-error loss keeps the algebra clean; swapping in cross-entropy changes only step 1. Emphasize: L is ONE number — that fact is what makes the whole reverse pass cheap.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 1 · Derivation · step 1 of 3</p>
   <h2>Output layer: one entry at a time, then in matrix form</h2>
-  <div class="card">
-    <p style="line-height:2.1">
-      ∂L/∂z₂<sub>i</sub> = z₂<sub>i</sub> − y<sub>i</sub>&emsp;⟹&emsp;<b>g₂ ≔ ∂L/∂z₂ = z₂ − y</b> ∈ ℝ<sup>d₂</sup><br>
-      z₂<sub>i</sub> = Σ<sub>j</sub> W₂[i,j]·h<sub>j</sub> + b₂<sub>i</sub>&emsp;⟹&emsp;∂z₂<sub>i</sub>/∂W₂[i,j] = h<sub>j</sub> <span class="muted">(and no other row of W₂ touches z₂<sub>i</sub>)</span><br>
-      chain rule:&emsp;∂L/∂W₂[i,j] = <span class="accent">g₂<sub>i</sub> · h<sub>j</sub></span>&emsp;⟹&emsp;<b>∂L/∂W₂ = g₂ hᵀ</b> <span class="muted">(outer product, d₂×d₁)</span>&emsp;·&emsp;<b>∂L/∂b₂ = g₂</b>
-    </p>
+  <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2.1">
+          ∂L/∂z₂<sub>i</sub> = z₂<sub>i</sub> − y<sub>i</sub>&emsp;⟹&emsp;<b>g₂ ≔ ∂L/∂z₂ = z₂ − y</b> ∈ ℝ<sup>d₂</sup><br>
+          z₂<sub>i</sub> = Σ<sub>j</sub> W₂[i,j]·h<sub>j</sub> + b₂<sub>i</sub>&emsp;⟹&emsp;∂z₂<sub>i</sub>/∂W₂[i,j] = h<sub>j</sub> <span class="muted">(and no other row of W₂ touches z₂<sub>i</sub>)</span><br>
+          chain rule:&emsp;∂L/∂W₂[i,j] = <span class="accent">g₂<sub>i</sub> · h<sub>j</sub></span>&emsp;⟹&emsp;<b>∂L/∂W₂ = g₂ hᵀ</b> <span class="muted">(outer product, d₂×d₁)</span>&emsp;·&emsp;<b>∂L/∂b₂ = g₂</b>
+        </p>
+      </div>
+      <ul class="small">
+        <li>Each weight W₂[i,j] influences the loss through exactly one number, z₂<sub>i</sub> — so its gradient is one product: (how much L cares about z₂<sub>i</sub>) × (how much z₂<sub>i</sub> moves per unit of W₂[i,j]).</li>
+        <li class="accent">Note what the formula needs: g₂, and <b>h — the layer’s input, saved from the forward pass</b>. Remember this.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 380 240" role="img" aria-label="The outer product: column vector g2 times row vector h-transpose fills the gradient matrix; entry i,j is g2i times hj" style="width:min(100%,440px)">
+        <g fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="20" y="60" width="34" height="150" rx="6"/>
+          <rect x="100" y="20" width="150" height="30" rx="6"/>
+          <rect x="100" y="60" width="150" height="150" rx="6"/>
+        </g>
+        <g stroke="var(--hairline)" stroke-width="1">
+          <path d="M20 110 H54 M20 160 H54"/>
+          <path d="M150 20 V50 M200 20 V50"/>
+          <path d="M100 110 H250 M100 160 H250 M150 60 V210 M200 60 V210"/>
+        </g>
+        <rect x="20" y="110" width="34" height="50" fill="var(--accent)" opacity="0.25"/>
+        <rect x="150" y="20" width="50" height="30" fill="var(--accent)" opacity="0.25"/>
+        <rect x="150" y="110" width="50" height="50" fill="var(--accent)" opacity="0.45"/>
+        <g font-family="var(--sans)" font-size="13" fill="currentColor" text-anchor="middle">
+          <text x="37" y="44">g₂</text>
+          <text x="76" y="140">×</text>
+          <text x="290" y="40">hᵀ</text>
+          <text x="37" y="139" font-size="11.5">g₂<tspan font-size="9" dy="2">i</tspan></text>
+          <text x="175" y="40" font-size="11.5">h<tspan font-size="9" dy="2">j</tspan></text>
+          <text x="175" y="139" font-size="12" fill="var(--accent)">g₂<tspan font-size="9" dy="2">i</tspan><tspan dy="-2">·h</tspan><tspan font-size="9" dy="2">j</tspan></text>
+          <text x="175" y="232" font-size="12" opacity="0.7">∂L/∂W₂ = g₂hᵀ&ensp;(d₂ × d₁)</text>
+          <text x="37" y="226" font-size="11" opacity="0.7">d₂ × 1</text>
+          <text x="303" y="66" font-size="11" opacity="0.7">1 × d₁</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul class="small">
-    <li>Each weight W₂[i,j] influences the loss through exactly one number, z₂<sub>i</sub> — so its gradient is one product: (how much L cares about z₂<sub>i</sub>) × (how much z₂<sub>i</sub> moves per unit of W₂[i,j]).</li>
-    <li class="accent">Note what the formula needs: g₂, and <b>h — the layer’s input, saved from the forward pass</b>. Remember this.</li>
-  </ul>
   <aside class="notes">~1.5 min. Do the middle line slowly: differentiate the sum, everything with j′ ≠ j dies, h_j survives. The outer-product form is just all (i,j) pairs at once. The bolded observation — "gradient with respect to weights = (incoming gradient) times (stored input)" — is the punchline the memory slide will collect on.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 1 · Derivation · step 2 of 3</p>
   <h2>Backward through the hidden layer — sum over every path</h2>
-  <div class="card">
-    <p style="line-height:2.1">
-      h<sub>j</sub> feeds <i>every</i> z₂<sub>i</sub>&emsp;⟹&emsp;∂L/∂h<sub>j</sub> = Σ<sub>i</sub> g₂<sub>i</sub>·W₂[i,j]&emsp;⟹&emsp;<b>∂L/∂h = W₂ᵀ g₂</b> ∈ ℝ<sup>d₁</sup><br>
-      h<sub>j</sub> = σ(z₁<sub>j</sub>)&emsp;⟹&emsp;∂L/∂z₁<sub>j</sub> = σ′(z₁<sub>j</sub>) · (W₂ᵀg₂)<sub>j</sub>&emsp;⟹&emsp;<b>g₁ ≔ σ′(z₁) ⊙ W₂ᵀg₂</b> <span class="muted">(⊙ = entrywise)</span><br>
-      same pattern as step 1:&emsp;<b>∂L/∂W₁ = g₁ xᵀ</b>&emsp;·&emsp;<b>∂L/∂b₁ = g₁</b>
-    </p>
+  <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2.1">
+          h<sub>j</sub> feeds <i>every</i> z₂<sub>i</sub>&emsp;⟹&emsp;∂L/∂h<sub>j</sub> = Σ<sub>i</sub> g₂<sub>i</sub>·W₂[i,j]&emsp;⟹&emsp;<b>∂L/∂h = W₂ᵀ g₂</b> ∈ ℝ<sup>d₁</sup><br>
+          h<sub>j</sub> = σ(z₁<sub>j</sub>)&emsp;⟹&emsp;∂L/∂z₁<sub>j</sub> = σ′(z₁<sub>j</sub>) · (W₂ᵀg₂)<sub>j</sub>&emsp;⟹&emsp;<b>g₁ ≔ σ′(z₁) ⊙ W₂ᵀg₂</b> <span class="muted">(⊙ = entrywise)</span><br>
+          same pattern as step 1:&emsp;<b>∂L/∂W₁ = g₁ xᵀ</b>&emsp;·&emsp;<b>∂L/∂b₁ = g₁</b>
+        </p>
+      </div>
+      <ul class="small">
+        <li>The Σ<sub>i</sub> is the multivariable chain rule: h<sub>j</sub> reaches the loss through d₂ separate paths, and their contributions add.</li>
+        <li>The recursion is now visible — every layer repeats two moves: <span class="accent">pass back Wᵀg · turn gradient into weights with (g)(stored input)ᵀ</span>.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 250" role="img" aria-label="One hidden unit hj fans out to every output z2i; its gradient sums the contributions flowing back along every path" style="width:min(100%,420px)">
+        <defs><marker id="pb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker></defs>
+        <g fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="60" cy="125" r="20"/>
+          <circle cx="230" cy="35"  r="18"/>
+          <circle cx="230" cy="95"  r="18"/>
+          <circle cx="230" cy="155" r="18"/>
+          <circle cx="230" cy="215" r="18"/>
+          <circle cx="322" cy="125" r="18" stroke="var(--accent)"/>
+        </g>
+        <g fill="none" stroke="var(--accent)" stroke-width="1.5">
+          <path d="M210 42 Q140 60 82 114" marker-end="url(#pb)"/>
+          <path d="M212 101 Q150 108 82 121" marker-end="url(#pb)"/>
+          <path d="M212 149 Q150 142 82 129" marker-end="url(#pb)"/>
+          <path d="M210 208 Q140 190 82 136" marker-end="url(#pb)"/>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5">
+          <path d="M248 42 Q290 60 306 112"/>
+          <path d="M248 100 Q285 108 304 120"/>
+          <path d="M248 150 Q285 142 304 130"/>
+          <path d="M248 208 Q290 190 306 138"/>
+        </g>
+        <g font-family="var(--sans)" font-size="13" fill="currentColor" text-anchor="middle">
+          <text x="60" y="130">h<tspan font-size="10" dy="2">j</tspan></text>
+          <text x="230" y="40">z₂₁</text>
+          <text x="230" y="100">z₂₂</text>
+          <text x="230" y="160">z₂₃</text>
+          <text x="230" y="220">z₂₄</text>
+          <text x="322" y="130" fill="var(--accent)">L</text>
+        </g>
+        <g font-family="var(--sans)" font-size="11.5" text-anchor="middle">
+          <text x="140" y="52" fill="var(--accent)">g₂₁·W₂[1,j]</text>
+          <text x="60" y="170" fill="currentColor" opacity="0.75">∂L/∂h<tspan font-size="9" dy="2">j</tspan><tspan dy="-2"> = Σ</tspan><tspan font-size="9" dy="2">i</tspan><tspan dy="-2"> g₂</tspan><tspan font-size="9" dy="2">i</tspan><tspan dy="-2">·W₂[i,j]</tspan></text>
+          <text x="150" y="243" fill="currentColor" opacity="0.6">d₂ paths — the contributions add</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul class="small">
-    <li>The Σ<sub>i</sub> is the multivariable chain rule: h<sub>j</sub> reaches the loss through d₂ separate paths, and their contributions add.</li>
-    <li>The recursion is now visible — every layer repeats two moves: <span class="accent">pass back Wᵀg · turn gradient into weights with (g)(stored input)ᵀ</span>.</li>
-  </ul>
   <aside class="notes">~1.5 min. The Σ-over-paths line is where students who memorized backprop actually learn it — one hidden unit, many downstream consumers, contributions add. Then point at the symmetry with step 1: the algorithm is two alternating moves, all the way down, however deep the network is.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 1 · Derivation · step 3 of 3</p>
   <h2>The general rule: vector–Jacobian products, right to left</h2>
-  <div class="card">
-    <p style="line-height:2.1">
-      for any map f: ℝⁿ → ℝᵐ, the Jacobian is J[i,j] = ∂f<sub>i</sub>/∂x<sub>j</sub> ∈ ℝ<sup>m×n</sup><br>
-      chain over the whole network:&emsp;∂L/∂x = J₁ᵀ J₂ᵀ ⋯ J<sub>k</sub>ᵀ · ∇<sub>out</sub>L<br>
-      computed <b>right to left</b>, each step is&ensp;<span class="accent">ḡ ← Jᵀḡ</span> — a <b>vector</b>–Jacobian product, never matrix × matrix
-    </p>
+  <div class="cols" style="grid-template-columns:1.4fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2.1">
+          for any map f: ℝⁿ → ℝᵐ, the Jacobian is J[i,j] = ∂f<sub>i</sub>/∂x<sub>j</sub> ∈ ℝ<sup>m×n</sup><br>
+          chain over the whole network:&emsp;∂L/∂x = J₁ᵀ J₂ᵀ ⋯ J<sub>k</sub>ᵀ · ∇<sub>out</sub>L<br>
+          computed <b>right to left</b>, each step is&ensp;<span class="accent">ḡ ← Jᵀḡ</span> — a <b>vector</b>–Jacobian product, never matrix × matrix
+        </p>
+      </div>
+      <ul class="small">
+        <li>Right to left works because L is a scalar: the running quantity ḡ stays a vector the whole way down.</li>
+        <li>The Jacobian of z = Wh with respect to <b>W</b> has shape m×(m·n) — for one transformer layer that is ~10⁸ entries. You never build it: the product Jᵀḡ collapses to the outer product ḡhᵀ from step 1.</li>
+        <li>Automatic differentiation = the forward pass records the graph and saves each operand; the backward pass replays it in reverse, one vector–Jacobian product per node. That is the whole of PyTorch’s <code>loss.backward()</code>.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 250" role="img" aria-label="Multiplication order: right-to-left keeps a running vector; left-to-right would multiply huge matrices" style="width:min(100%,420px)">
+        <g font-family="var(--sans)" font-size="13" fill="var(--accent)">
+          <text x="14" y="24">✓ right to left — a vector all the way</text>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="20"  y="46" width="52" height="52" rx="6"/>
+          <rect x="92"  y="46" width="52" height="52" rx="6"/>
+          <rect x="164" y="46" width="52" height="52" rx="6"/>
+        </g>
+        <rect x="236" y="66" width="52" height="12" rx="4" fill="var(--accent)" opacity="0.75"/>
+        <rect x="20" y="118" width="52" height="12" rx="4" fill="var(--accent)" opacity="0.75"/>
+        <g font-family="var(--sans)" font-size="12" fill="currentColor" text-anchor="middle">
+          <text x="46"  y="76">J₁ᵀ</text>
+          <text x="118" y="76">J₂ᵀ</text>
+          <text x="190" y="76">J₃ᵀ</text>
+          <text x="262" y="60" fill="var(--accent)">ḡ (1×m)</text>
+          <text x="46" y="145" fill="var(--accent)">result: still a vector</text>
+          <text x="300" y="98" opacity="0.7" font-size="16">⟲</text>
+        </g>
+        <g font-family="var(--sans)" font-size="13" fill="currentColor" opacity="0.6">
+          <text x="14" y="180">✗ left to right — matrix × matrix</text>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.5">
+          <rect x="20" y="192" width="52" height="52" rx="6"/>
+          <rect x="92" y="192" width="52" height="52" rx="6"/>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.55">
+          <rect x="176" y="186" width="64" height="64" rx="6"/>
+          <path d="M176 186 L240 250 M240 186 L176 250"/>
+        </g>
+        <g font-family="var(--sans)" font-size="11.5" fill="currentColor" opacity="0.65" text-anchor="middle">
+          <text x="82" y="222">×</text>
+          <text x="160" y="222">=</text>
+          <text x="300" y="215">m×n dense</text>
+          <text x="300" y="231">— never built</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul class="small">
-    <li>Right to left works because L is a scalar: the running quantity ḡ stays a vector the whole way down.</li>
-    <li>The Jacobian of z = Wh with respect to <b>W</b> has shape m×(m·n) — for one transformer layer that is ~10⁸ entries. You never build it: the product Jᵀḡ collapses to the outer product ḡhᵀ from step 1.</li>
-    <li>Automatic differentiation = the forward pass records the graph and saves each operand; the backward pass replays it in reverse, one vector–Jacobian product per node. That is the whole of PyTorch’s <code>loss.backward()</code>.</li>
-  </ul>
-  <div class="foot"><span>Read: Goodfellow §6.5.2 (chain rule) · Carnegie Mellon “Deep Learning Systems”, lecture 4: Automatic Differentiation · Griewank &amp; Walther, Evaluating Derivatives (2008)</span></div>
+  <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/mlp.html">Goodfellow §6.5.2 (chain rule)</a> · <a href="https://dlsyscourse.org/slides/4-automatic-differentiation.pdf">Carnegie Mellon “Deep Learning Systems”, lecture 4: Automatic Differentiation</a> · Griewank &amp; Walther, Evaluating Derivatives (2008)</span></div>
   <aside class="notes">~1.5 min. The order-of-multiplication point deserves the emphasis: left-to-right would be Jacobian-times-Jacobian (huge matrices); right-to-left keeps everything vector-sized because the thing we differentiate is one scalar. Forward-mode exists too and wins when outputs outnumber inputs — never our case in training.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 1 · Cost</p>
   <h2>Counting the operations: backward ≈ two forwards</h2>
-  <div class="card">
-    <p style="line-height:2.1">
-      forward through one linear layer&emsp;W h&emsp;(W ∈ ℝ<sup>m×n</sup>):&emsp;≈ 2mn floating-point operations<br>
-      backward, same layer:&emsp;∂L/∂h = Wᵀg&ensp;(≈ 2mn)&emsp;+&emsp;∂L/∂W = g hᵀ&ensp;(≈ 2mn over a batch)<br>
-      ⟹&emsp;<b>backward ≈ 2 × forward,&ensp;whole training step ≈ 3 × forward — at any parameter count</b>
-    </p>
+  <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2.1">
+          forward through one linear layer&emsp;W h&emsp;(W ∈ ℝ<sup>m×n</sup>):&emsp;≈ 2mn floating-point operations<br>
+          backward, same layer:&emsp;∂L/∂h = Wᵀg&ensp;(≈ 2mn)&emsp;+&emsp;∂L/∂W = g hᵀ&ensp;(≈ 2mn over a batch)<br>
+          ⟹&emsp;<b>backward ≈ 2 × forward,&ensp;whole training step ≈ 3 × forward — at any parameter count</b>
+        </p>
+      </div>
+      <ul class="small">
+        <li>This is why gradients of a 10⁹-parameter model are affordable: the price of knowing ∂L/∂(everything) is two extra forward passes, not 10⁹ extra evaluations.</li>
+        <li>Contrast with finite differences: one loss evaluation <i>per parameter</i> — 10⁹ forward passes for the same information.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 220" role="img" aria-label="Bar chart: forward pass one unit of compute, backward two units, whole step three; finite differences would need a billion" style="width:min(100%,420px)">
+        <g font-family="var(--sans)" font-size="12.5" fill="currentColor">
+          <text x="14" y="34">forward</text>
+          <text x="14" y="84">backward</text>
+          <text x="14" y="134">step total</text>
+          <text x="14" y="184" opacity="0.6">finite diff.</text>
+        </g>
+        <rect x="110" y="20"  width="70"  height="22" rx="5" fill="currentColor" opacity="0.45"/>
+        <rect x="110" y="70"  width="140" height="22" rx="5" fill="var(--accent)" opacity="0.8"/>
+        <rect x="110" y="120" width="210" height="22" rx="5" fill="currentColor" opacity="0.7"/>
+        <rect x="110" y="170" width="228" height="22" rx="5" fill="none" stroke="currentColor" stroke-dasharray="5 4" opacity="0.5"/>
+        <g font-family="var(--sans)" font-size="12" fill="currentColor">
+          <text x="188" y="36">1×</text>
+          <text x="258" y="86">2×  (Wᵀg  +  ghᵀ)</text>
+          <text x="328" y="136">3×</text>
+          <text x="118" y="185" opacity="0.6">~10⁹× … one pass per parameter</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul class="small">
-    <li>This is why gradients of a 10⁹-parameter model are affordable: the price of knowing ∂L/∂(everything) is two extra forward passes, not 10⁹ extra evaluations.</li>
-    <li>Contrast with finite differences: one loss evaluation <i>per parameter</i> — 10⁹ forward passes for the same information.</li>
-  </ul>
-  <div class="foot"><span>Same count in Roger Grosse’s University of Toronto lecture notes on backpropagation: one multiply–add per weight forward, two backward.</span></div>
+  <div class="foot"><span>Same count in <a href="https://www.cs.toronto.edu/~rgrosse/courses/csc321_2017/readings/L06%20Backpropagation.pdf">Roger Grosse’s University of Toronto lecture notes on backpropagation</a>: one multiply–add per weight forward, two backward.</span></div>
   <aside class="notes">~1 min. The 3× rule is worth committing to memory — it is how you estimate training cost from inference cost on any model, and it reappears in every scaling-law discussion later in the course (the 6·N·D approximation for transformer training FLOPs is this same bookkeeping).</aside>
 </section>
 
@@ -205,13 +381,34 @@
 <section class="slide">
   <p class="kicker">Part 1 · Memory</p>
   <h2>Activations, not weights, dominate training memory</h2>
-  <ul>
-    <li>Every saved tensor is a debt the backward pass collects: activation memory ∝ depth × batch size × sequence length × width.</li>
-    <li>A large Vision Transformer (ViT-Large, 0.3 billion parameters), batch 256: weights + Adam’s two moment tensors ≈ 3.6 GB — <span class="accent">activations ≈ tens of gigabytes</span>. Activations set your batch-size ceiling, not parameters.</li>
-    <li><b>Gradient checkpointing</b>: keep only ~√(number of layers) of the activations, recompute the rest segment-by-segment during backward — ≈ one extra forward pass (+33% step cost) for 5–10× less activation memory.</li>
-    <li class="muted">When you run out of graphics-card memory fine-tuning a foundation model in Week 12, the fix is checkpointing / batch size / numeric precision — not a smaller model. Remember this slide.</li>
-  </ul>
-  <div class="foot"><span>Chen et al. 2016, arXiv:1604.06174 (checkpointing) · callback target: Week 12 fine-tuning lab</span></div>
+  <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
+    <ul style="margin:0">
+      <li>Every saved tensor is a debt the backward pass collects: activation memory ∝ depth × batch size × sequence length × width.</li>
+      <li>A large Vision Transformer (ViT-Large, 0.3 billion parameters), batch 256: weights + Adam’s two moment tensors ≈ 3.6 GB — <span class="accent">activations ≈ tens of gigabytes</span>. Activations set your batch-size ceiling, not parameters.</li>
+      <li><b>Gradient checkpointing</b>: keep only ~√(number of layers) of the activations, recompute the rest segment-by-segment during backward — ≈ one extra forward pass (+33% step cost) for 5–10× less activation memory.</li>
+      <li class="muted">When you run out of graphics-card memory fine-tuning a foundation model in Week 12, the fix is checkpointing / batch size / numeric precision — not a smaller model. Remember this slide.</li>
+    </ul>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 210" role="img" aria-label="Memory bars: weights plus optimizer under four gigabytes; activations tens of gigabytes; checkpointing shrinks activations five to ten times" style="width:min(100%,420px)">
+        <g font-family="var(--sans)" font-size="12.5" fill="currentColor">
+          <text x="14" y="36">weights + Adam</text>
+          <text x="14" y="96">activations</text>
+          <text x="14" y="166">+ checkpointing</text>
+        </g>
+        <rect x="150" y="22" width="34"  height="22" rx="5" fill="currentColor" opacity="0.5"/>
+        <rect x="150" y="82" width="196" height="22" rx="5" fill="var(--accent)" opacity="0.8"/>
+        <rect x="150" y="152" width="30" height="22" rx="5" fill="var(--accent)" opacity="0.8"/>
+        <rect x="180" y="152" width="16" height="22" rx="4" fill="none" stroke="currentColor" stroke-dasharray="3 3" opacity="0.5"/>
+        <g font-family="var(--sans)" font-size="12" fill="currentColor">
+          <text x="192" y="38">≈ 3.6 GB</text>
+          <text x="212" y="76" fill="var(--accent)">tens of GB — the real ceiling</text>
+          <text x="204" y="167">÷ 5–10&ensp;<tspan opacity="0.6">(+33% compute)</tspan></text>
+        </g>
+        <path d="M346 108 Q 346 140 200 148" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="4 4" opacity="0.5"/>
+      </svg>
+    </div>
+  </div>
+  <div class="foot"><span><a href="https://arxiv.org/abs/1604.06174">Chen et al. 2016, arXiv:1604.06174 (checkpointing)</a> · callback target: Week 12 fine-tuning lab</span></div>
   <aside class="notes">~2 min, then the video slide. Quick mental arithmetic on the ViT-Large numbers: 0.3 billion × 4 bytes ≈ 1.2 GB; Adam keeps m and v, tripling it. Then point at batch × tokens × width × depth and let them see it dwarfs 3.6 GB. The √L trick: split the net into √L segments, keep only segment boundaries, recompute inside one segment at a time — memory √L, extra compute one forward.</aside>
 </section>
 
@@ -252,75 +449,177 @@
 <section class="slide">
   <p class="kicker">Part 2 · Derivation</p>
   <h2>Gradient descent falls out of one line of calculus</h2>
-  <div class="card">
-    <p style="line-height:2.1">
-      first-order Taylor:&emsp;L(θ + Δ) ≈ L(θ) + ∇L(θ)ᵀΔ<br>
-      choose&ensp;Δ = −η·∇L(θ):&emsp;L(θ − η∇L) ≈ L(θ) − η‖∇L‖² &lt; L(θ)&emsp;<span class="muted">for small enough η</span><br>
-      ⟹&emsp;<b>θ ← θ − η ∇L</b>&emsp;— the steepest step that first-order information can justify
-    </p>
+  <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2.1">
+          first-order Taylor:&emsp;L(θ + Δ) ≈ L(θ) + ∇L(θ)ᵀΔ<br>
+          choose&ensp;Δ = −η·∇L(θ):&emsp;L(θ − η∇L) ≈ L(θ) − η‖∇L‖² &lt; L(θ)&emsp;<span class="muted">for small enough η</span><br>
+          ⟹&emsp;<b>θ ← θ − η ∇L</b>&emsp;— the steepest step that first-order information can justify
+        </p>
+      </div>
+      <ul class="small">
+        <li>Everything in this part is a repair to this rule for the realities of deep networks: noisy gradients, curvature that varies by 10⁶ across parameters, and budgets fixed in advance.</li>
+        <li><b>Minibatches</b>: the batch gradient ĝ = (1/B)Σ∇ℓ<sub>i</sub> over B random samples has E[ĝ] = ∇L (unbiased) and variance ∝ 1/B — noise falls like √B while cost grows like B, so moderate batches + many steps win.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 230" role="img" aria-label="A loss curve with the tangent line at a point; the step moves against the slope, downhill" style="width:min(100%,420px)">
+        <defs><marker id="gd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker></defs>
+        <path d="M20 40 C 90 190, 180 205, 340 60" fill="none" stroke="currentColor" stroke-width="2"/>
+        <path d="M30 68 L200 178" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="5 4" opacity="0.55"/>
+        <circle cx="88" cy="106" r="6" fill="var(--accent)"/>
+        <circle cx="160" cy="158" r="6" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+        <path d="M96 112 Q 128 142 150 153" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#gd)"/>
+        <g font-family="var(--sans)" font-size="12.5" fill="currentColor">
+          <text x="70" y="90">θ</text>
+          <text x="206" y="188" opacity="0.6">tangent: L(θ) + ∇LᵀΔ</text>
+          <text x="120" y="120" fill="var(--accent)">−η∇L</text>
+          <text x="150" y="182">θ′</text>
+          <text x="20" y="222" opacity="0.7">the linear model says: downhill is this way — take a small step</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul class="small">
-    <li>Everything in this part is a repair to this rule for the realities of deep networks: noisy gradients, curvature that varies by 10⁶ across parameters, and budgets fixed in advance.</li>
-    <li><b>Minibatches</b>: the batch gradient ĝ = (1/B)Σ∇ℓ<sub>i</sub> over B random samples has E[ĝ] = ∇L (unbiased) and variance ∝ 1/B — noise falls like √B while cost grows like B, so moderate batches + many steps win.</li>
-  </ul>
-  <div class="foot"><span>Read: Goodfellow §8.3, pp. 290–296 · Dive into Deep Learning §12.3–12.5 (gradient descent → stochastic → minibatch)</span></div>
+  <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/optimization.html">Goodfellow §8.3, pp. 290–296</a> · <a href="https://d2l.ai/chapter_optimization/gd.html">Dive into Deep Learning §12.3–12.5 (gradient descent → stochastic → minibatch)</a></span></div>
   <aside class="notes">~2 min. The Taylor line is the entire theory a practitioner needs: gradient descent is not mystical, it is "the linear approximation says downhill is this way, take a small step." The unbiasedness of the minibatch gradient is one line — expectation of a mean of random samples — say it, don't write it.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 2 · Derivation</p>
   <h2>Momentum is an exponential moving average — unroll it once</h2>
-  <div class="card">
-    <p style="line-height:2.1">
-      definition:&emsp;m<sub>t</sub> = β·m<sub>t−1</sub> + (1−β)·g<sub>t</sub>,&emsp;m₀ = 0<br>
-      unroll:&emsp;m<sub>t</sub> = (1−β)·( g<sub>t</sub> + β·g<sub>t−1</sub> + β²·g<sub>t−2</sub> + ⋯ + β<sup>t−1</sup>·g₁ )<br>
-      ⟹&emsp;a weighted average of past gradients, weights decaying by β per step — <b>effective window ≈ 1/(1−β)</b>
-    </p>
+  <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2.1">
+          definition:&emsp;m<sub>t</sub> = β·m<sub>t−1</sub> + (1−β)·g<sub>t</sub>,&emsp;m₀ = 0<br>
+          unroll:&emsp;m<sub>t</sub> = (1−β)·( g<sub>t</sub> + β·g<sub>t−1</sub> + β²·g<sub>t−2</sub> + ⋯ + β<sup>t−1</sup>·g₁ )<br>
+          ⟹&emsp;a weighted average of past gradients, weights decaying by β per step — <b>effective window ≈ 1/(1−β)</b>
+        </p>
+      </div>
+      <ul class="small">
+        <li>β = 0.9 → averages roughly the last 10 gradients; β = 0.95 → last 20; β = 0.999 → last 1000.</li>
+        <li>Averaging cancels minibatch noise in directions that flip sign and accumulates speed in directions that persist — a low-pass filter on the gradient signal.</li>
+        <li class="accent">Keep the unrolled line in view — the bias-correction derivation two slides ahead reads directly off it.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 220" role="img" aria-label="Bar chart of the exponential weights on past gradients, decaying by beta per step; the effective window is about one over one minus beta" style="width:min(100%,420px)">
+        <g fill="var(--accent)">
+          <rect x="30"  y="40"  width="24" height="130" rx="4" opacity="0.9"/>
+          <rect x="60"  y="53"  width="24" height="117" rx="4" opacity="0.8"/>
+          <rect x="90"  y="65"  width="24" height="105" rx="4" opacity="0.72"/>
+          <rect x="120" y="76"  width="24" height="94"  rx="4" opacity="0.64"/>
+          <rect x="150" y="86"  width="24" height="84"  rx="4" opacity="0.56"/>
+          <rect x="180" y="95"  width="24" height="75"  rx="4" opacity="0.48"/>
+          <rect x="210" y="103" width="24" height="67"  rx="4" opacity="0.4"/>
+          <rect x="240" y="110" width="24" height="60"  rx="4" opacity="0.33"/>
+          <rect x="270" y="116" width="24" height="54"  rx="4" opacity="0.27"/>
+          <rect x="300" y="122" width="24" height="48"  rx="4" opacity="0.22"/>
+        </g>
+        <path d="M20 170 H344" stroke="currentColor" stroke-width="1.2" opacity="0.55" fill="none"/>
+        <path d="M30 192 H234" stroke="currentColor" stroke-width="1.1" fill="none" opacity="0.6"/>
+        <path d="M30 187 V197 M234 187 V197" stroke="currentColor" stroke-width="1.1" opacity="0.6" fill="none"/>
+        <g font-family="var(--sans)" font-size="12" fill="currentColor">
+          <text x="30" y="30">weight (1−β)·βᵏ</text>
+          <text x="30" y="184" opacity="0.7">g<tspan font-size="9" dy="2">t</tspan></text>
+          <text x="296" y="184" opacity="0.7">g<tspan font-size="9" dy="2">t−9</tspan></text>
+          <text x="80" y="212" opacity="0.75">window ≈ 1/(1−β) steps</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul class="small">
-    <li>β = 0.9 → averages roughly the last 10 gradients; β = 0.95 → last 20; β = 0.999 → last 1000.</li>
-    <li>Averaging cancels minibatch noise in directions that flip sign and accumulates speed in directions that persist — a low-pass filter on the gradient signal.</li>
-    <li class="accent">Keep the unrolled line in view — the bias-correction derivation two slides ahead reads directly off it.</li>
-  </ul>
-  <div class="foot"><span>Read: Goodfellow §8.3.2 (momentum, from p. 292) · Dive into Deep Learning §12.6 (momentum as leaky averages)</span></div>
+  <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/optimization.html">Goodfellow §8.3.2 (momentum, from p. 292)</a> · <a href="https://d2l.ai/chapter_optimization/momentum.html">Dive into Deep Learning §12.6 (momentum as leaky averages)</a></span></div>
   <aside class="notes">~2 min. Do the unroll live in one substitution: m_t = (1−β)g_t + β·m_{t−1}, expand m_{t−1} once, spot the geometric pattern, wave the rest. The 1/(1−β) window: weights drop by factor e after about 1/(1−β) steps — the practical translation students should carry.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 2 · Derivation</p>
   <h2>Adam: the same trick twice — momentum for the mean, and for the scale</h2>
-  <div class="card">
-    <p style="line-height:2.1">
-      first moment:&emsp;m<sub>t</sub> = β₁·m<sub>t−1</sub> + (1−β₁)·g<sub>t</sub>&emsp;<span class="muted">(the direction, denoised)</span><br>
-      second moment:&emsp;v<sub>t</sub> = β₂·v<sub>t−1</sub> + (1−β₂)·g<sub>t</sub>²&emsp;<span class="muted">(the typical squared size, per parameter)</span><br>
-      update:&emsp;<b>θ<sub>t</sub> = θ<sub>t−1</sub> − η<sub>t</sub> · m̂<sub>t</sub> / (√v̂<sub>t</sub> + ε)</b>&emsp;<span class="muted">(m̂, v̂ = bias-corrected, next slide)</span>
-    </p>
+  <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2.1">
+          first moment:&emsp;m<sub>t</sub> = β₁·m<sub>t−1</sub> + (1−β₁)·g<sub>t</sub>&emsp;<span class="muted">(the direction, denoised)</span><br>
+          second moment:&emsp;v<sub>t</sub> = β₂·v<sub>t−1</sub> + (1−β₂)·g<sub>t</sub>²&emsp;<span class="muted">(the typical squared size, per parameter)</span><br>
+          update:&emsp;<b>θ<sub>t</sub> = θ<sub>t−1</sub> − η<sub>t</sub> · m̂<sub>t</sub> / (√v̂<sub>t</sub> + ε)</b>&emsp;<span class="muted">(m̂, v̂ = bias-corrected, next slide)</span>
+        </p>
+      </div>
+      <ul class="small">
+        <li>Thought experiment — constant gradient g: then m̂ → g, v̂ → g², and the step is η·g/|g| = <b>η·sign(g)</b>. The raw gradient scale cancels entirely.</li>
+        <li>So every parameter moves ≈ η<sub>t</sub> per step regardless of whether its gradients are 10⁻⁶ or 10³ — one learning rate serves layers with wildly different curvature. That is the whole reason Adam took over.</li>
+        <li>Foundation-model settings: β₁ = 0.9, β₂ = 0.95, ε = 10⁻⁸ — note β₂ = 0.95, not the old default 0.999: a ~20-step variance memory reacts faster to loss spikes at scale.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 240" role="img" aria-label="Block diagram: the gradient feeds two exponential averages, the smoothed direction over the typical size, scaled by the learning rate" style="width:min(100%,420px)">
+        <defs><marker id="ad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker></defs>
+        <g fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="16" y="98" width="58" height="40" rx="8"/>
+          <rect x="130" y="34" width="120" height="40" rx="8"/>
+          <rect x="130" y="162" width="120" height="40" rx="8"/>
+          <rect x="286" y="98" width="60" height="40" rx="8" stroke="var(--accent)"/>
+          <path d="M74 108 Q100 80 124 58" marker-end="url(#ad)"/>
+          <path d="M74 128 Q100 156 124 178" marker-end="url(#ad)"/>
+          <path d="M250 58 Q272 80 288 100" marker-end="url(#ad)"/>
+          <path d="M250 178 Q272 156 288 136" marker-end="url(#ad)"/>
+        </g>
+        <g font-family="var(--sans)" font-size="13" fill="currentColor" text-anchor="middle">
+          <text x="45" y="122">g<tspan font-size="10" dy="2">t</tspan></text>
+          <text x="190" y="52">average (β₁)</text>
+          <text x="190" y="68" font-size="11.5" opacity="0.7">direction m̂ — denoised</text>
+          <text x="190" y="180">average of g² (β₂)</text>
+          <text x="190" y="196" font-size="11.5" opacity="0.7">typical size √v̂</text>
+          <text x="316" y="115" fill="var(--accent)" font-size="12.5">m̂ / √v̂</text>
+          <text x="316" y="131" fill="var(--accent)" font-size="11.5">≈ ±1 scale</text>
+          <text x="316" y="162" font-size="12" opacity="0.75">× η<tspan font-size="9" dy="2">t</tspan><tspan dy="-2"> → step</tspan></text>
+          <text x="180" y="230" font-size="12" opacity="0.7">signal ÷ magnitude — the raw gradient scale cancels</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul class="small">
-    <li>Thought experiment — constant gradient g: then m̂ → g, v̂ → g², and the step is η·g/|g| = <b>η·sign(g)</b>. The raw gradient scale cancels entirely.</li>
-    <li>So every parameter moves ≈ η<sub>t</sub> per step regardless of whether its gradients are 10⁻⁶ or 10³ — one learning rate serves layers with wildly different curvature. That is the whole reason Adam took over.</li>
-    <li>Foundation-model settings: β₁ = 0.9, β₂ = 0.95, ε = 10⁻⁸ — note β₂ = 0.95, not the old default 0.999: a ~20-step variance memory reacts faster to loss spikes at scale.</li>
-  </ul>
-  <div class="foot"><span>Kingma &amp; Ba 2015 (Adam) · Read: Goodfellow §8.5.3, pp. 305–306 · Dive into Deep Learning §12.10</span></div>
+  <div class="foot"><span><a href="https://arxiv.org/abs/1412.6980">Kingma &amp; Ba 2015 (Adam)</a> · Read: <a href="https://www.deeplearningbook.org/contents/optimization.html">Goodfellow §8.5.3, pp. 305–306</a> · <a href="https://d2l.ai/chapter_optimization/adam.html">Dive into Deep Learning §12.10</a></span></div>
   <aside class="notes">~2 min. The constant-gradient thought experiment is the fastest honest way to see what the ratio does — run it aloud. Real gradients are noisy, so the step becomes roughly η × (signal / total magnitude) ≤ η: big confident steps where the gradient is consistent, small ones where it thrashes.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 2 · Derivation</p>
   <h2>Bias correction: why m̂ divides by (1 − β₁ᵗ), exactly</h2>
-  <div class="card">
-    <p style="line-height:2.1">
-      take expectations of the unrolled average, assuming E[g<sub>k</sub>] = μ:<br>
-      E[m<sub>t</sub>] = (1−β)·(1 + β + β² + ⋯ + β<sup>t−1</sup>)·μ&emsp;=&emsp;(1−β)·<span class="accent">(1−βᵗ)/(1−β)</span>·μ&emsp;=&emsp;<b>(1−βᵗ)·μ</b><br>
-      ⟹&emsp;m̂<sub>t</sub> ≔ m<sub>t</sub>/(1−βᵗ)&ensp;has&ensp;E[m̂<sub>t</sub>] = μ&emsp;<span class="muted">(same argument gives v̂<sub>t</sub> = v<sub>t</sub>/(1−β₂ᵗ))</span>
-    </p>
+  <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2.1">
+          take expectations of the unrolled average, assuming E[g<sub>k</sub>] = μ:<br>
+          E[m<sub>t</sub>] = (1−β)·(1 + β + β² + ⋯ + β<sup>t−1</sup>)·μ&emsp;=&emsp;(1−β)·<span class="accent">(1−βᵗ)/(1−β)</span>·μ&emsp;=&emsp;<b>(1−βᵗ)·μ</b><br>
+          ⟹&emsp;m̂<sub>t</sub> ≔ m<sub>t</sub>/(1−βᵗ)&ensp;has&ensp;E[m̂<sub>t</sub>] = μ&emsp;<span class="muted">(same argument gives v̂<sub>t</sub> = v<sub>t</sub>/(1−β₂ᵗ))</span>
+        </p>
+      </div>
+      <ul class="small">
+        <li>The accent step is the finite geometric series Σ<sub>k=0</sub><sup>t−1</sup> βᵏ = (1−βᵗ)/(1−β) — the only identity in the whole derivation.</li>
+        <li>Sanity check at t = 1: m₁ = (1−β)g₁ and 1−β¹ = 1−β, so m̂₁ = g₁ exactly — the correction undoes the zero initialization completely on step one.</li>
+        <li>It matters precisely when training is most fragile: for t ≪ 1/(1−β₂), uncorrected v is far too small → the step η·m/√v would be far too big. After ~1/(1−β) steps, βᵗ → 0 and the correction fades away.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 225" role="img" aria-label="Uncorrected expectation rises like one minus beta to the t toward the true mean; the corrected estimate sits on the true mean from step one" style="width:min(100%,420px)">
+        <g fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55">
+          <path d="M40 20 V180 H340"/>
+        </g>
+        <path d="M40 60 H330" stroke="var(--accent)" stroke-width="2.2" fill="none"/>
+        <path d="M40 180 C 90 88, 150 68, 330 61" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4" opacity="0.7"/>
+        <rect x="46" y="24" width="86" height="120" fill="var(--accent)" opacity="0.07"/>
+        <g font-family="var(--sans)" font-size="12" fill="currentColor">
+          <text x="14" y="62">μ</text>
+          <text x="330" y="200" text-anchor="end">step t →</text>
+          <text x="150" y="120" opacity="0.7">E[m<tspan font-size="9" dy="2">t</tspan><tspan dy="-2">] = (1−βᵗ)·μ — starts at 0</tspan></text>
+          <text x="120" y="46" fill="var(--accent)">E[m̂<tspan font-size="9" dy="2">t</tspan><tspan dy="-2">] = μ from t = 1</tspan></text>
+          <text x="50" y="160" font-size="11" opacity="0.65">correction matters here</text>
+          <text x="50" y="174" font-size="11" opacity="0.65">(t ≲ 1/(1−β))</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul class="small">
-    <li>The accent step is the finite geometric series Σ<sub>k=0</sub><sup>t−1</sup> βᵏ = (1−βᵗ)/(1−β) — the only identity in the whole derivation.</li>
-    <li>Sanity check at t = 1: m₁ = (1−β)g₁ and 1−β¹ = 1−β, so m̂₁ = g₁ exactly — the correction undoes the zero initialization completely on step one.</li>
-    <li>It matters precisely when training is most fragile: for t ≪ 1/(1−β₂), uncorrected v is far too small → the step η·m/√v would be far too big. After ~1/(1−β) steps, βᵗ → 0 and the correction fades away.</li>
-  </ul>
-  <div class="foot"><span>The same three lines, with runnable code: Dive into Deep Learning §12.10.1</span></div>
+  <div class="foot"><span>The same three lines, with runnable code: <a href="https://d2l.ai/chapter_optimization/adam.html">Dive into Deep Learning §12.10.1</a></span></div>
   <aside class="notes">~2 min. This is the derivation students pretend to know — it is three lines, do all three. Emphasize what it is NOT: not a heuristic warm-start, but an exact unbiasing of an exponentially-weighted average that was initialized at zero. It still doesn't fix the early VARIANCE of v̂ — which is why warmup exists anyway, next slide.</aside>
 </section>
 
@@ -357,26 +656,55 @@
     <li><b>Warmup</b>: bias correction fixed the mean of v̂, not its variance — with ~10 samples, √v̂ is still noise, and dividing by noise makes huge steps in random directions. Ramping η from 0 keeps those early steps harmless. Skip it and step 50 diverges.</li>
     <li><b>Cosine</b>: gentle leaving of η<sub>max</sub>, long quiet tail for settling into a basin — and T is fixed in advance: the schedule is a commitment to a compute budget, very foundation-model culture.</li>
   </ul>
-  <div class="foot"><span>Read: Dive into Deep Learning §12.11 (cosine scheduler §12.11.3.3, warmup §12.11.3.4 — the one course resource that covers both)</span></div>
+  <div class="foot"><span>Read: <a href="https://d2l.ai/chapter_optimization/lr-scheduler.html">Dive into Deep Learning §12.11 (cosine scheduler §12.11.3.3, warmup §12.11.3.4 — the one course resource that covers both)</a></span></div>
   <aside class="notes">~2 min. Connect backward explicitly: "the previous slide proved the correction fixes E[v]; it cannot fix Var[v] with ten samples — that residual noise is what warmup absorbs." Endpoint check of the cosine formula takes ten seconds and inoculates against sign errors when they implement it in the lab.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 2 · Derivation</p>
   <h2>An ℓ₂ penalty and weight decay: identical in plain gradient descent…</h2>
-  <div class="card">
-    <p style="line-height:2.1">
-      penalized loss:&emsp;L̃(θ) = L(θ) + (λ/2)·‖θ‖²&emsp;⟹&emsp;∇L̃ = g + λθ<br>
-      gradient-descent step:&emsp;θ ← θ − η(g + λθ) = <b>(1 − ηλ)·θ − ηg</b><br>
-      ⟹ “add λθ to the gradient” and “shrink weights by (1−ηλ) each step” are <b>the same rule</b>
-    </p>
-  </div>
-  <div class="card" style="margin-top:1.2vh">
-    <p style="line-height:2.1">
-      …but in Adam the λθ term rides through the adaptive ratio:&emsp;step ∝ m̂(g + λθ) / √v̂(g + λθ)<br>
-      a parameter with a large gradient history (large v̂) has its decay term <span class="accent">divided by √v̂ → barely decayed</span> —<br>
-      often exactly the weights that are overfitting. The equivalence is <b>broken</b>.
-    </p>
+  <div class="cols" style="grid-template-columns:1.4fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2.1">
+          penalized loss:&emsp;L̃(θ) = L(θ) + (λ/2)·‖θ‖²&emsp;⟹&emsp;∇L̃ = g + λθ<br>
+          gradient-descent step:&emsp;θ ← θ − η(g + λθ) = <b>(1 − ηλ)·θ − ηg</b><br>
+          ⟹ “add λθ to the gradient” and “shrink weights by (1−ηλ) each step” are <b>the same rule</b>
+        </p>
+      </div>
+      <div class="card" style="margin-top:1.2vh">
+        <p style="line-height:2.1">
+          …but in Adam the λθ term rides through the adaptive ratio:&emsp;step ∝ m̂(g + λθ) / √v̂(g + λθ)<br>
+          a parameter with a large gradient history (large v̂) has its decay term <span class="accent">divided by √v̂ → barely decayed</span> —<br>
+          often exactly the weights that are overfitting. The equivalence is <b>broken</b>.
+        </p>
+      </div>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 240" role="img" aria-label="Where the decay term enters: injected before the adaptive ratio it gets divided by the gradient history; injected after the ratio it stays a clean shrink" style="width:min(100%,420px)">
+        <defs><marker id="wd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker></defs>
+        <g fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="120" y="88" width="120" height="52" rx="10"/>
+          <path d="M30 114 H112" marker-end="url(#wd)"/>
+          <path d="M240 114 H332" marker-end="url(#wd)"/>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1.6" opacity="0.55">
+          <path d="M62 34 Q 80 66 92 104" marker-end="url(#wd)" stroke-dasharray="5 4"/>
+        </g>
+        <g fill="none" stroke="var(--accent)" stroke-width="2">
+          <path d="M292 200 Q 280 168 268 132" marker-end="url(#wd)"/>
+        </g>
+        <g font-family="var(--sans)" font-size="12.5" fill="currentColor" text-anchor="middle">
+          <text x="60" y="104">g</text>
+          <text x="180" y="110">adaptive ratio</text>
+          <text x="180" y="127" font-size="11.5" opacity="0.75">m̂ / (√v̂ + ε)</text>
+          <text x="300" y="104">step</text>
+          <text x="62" y="24" opacity="0.65">ℓ₂: +λθ here → ÷√v̂ ✗</text>
+          <text x="292" y="222" fill="var(--accent)">AdamW: −ηλθ here ✓</text>
+          <text x="180" y="164" font-size="11.5" opacity="0.6">whatever enters on the left is rescaled per parameter</text>
+        </g>
+      </svg>
+    </div>
   </div>
   <aside class="notes">~2 min. Two boards: derive the SGD equivalence completely (it is two lines), then show where Adam breaks it — the decay term gets normalized along with everything else, so regularization strength silently varies per parameter and entangles with η. Cliffhanger: "the fix is embarrassingly simple," next slide.</aside>
 </section>
@@ -396,35 +724,78 @@
     <li class="accent">The classic silent bug: PyTorch <code>Adam(weight_decay=…)</code> implements the broken left-hand version; <code>AdamW(weight_decay=…)</code> implements this slide. Same argument name, different mathematics.</li>
     <li>Typical foundation-model value: λ = 0.05–0.1 (with η ~ 10⁻³–10⁻⁴).</li>
   </ul>
-  <div class="foot"><span>Loshchilov &amp; Hutter 2019, arXiv:1711.05101 · Read: Goodfellow §7.1, pp. 226–230 · Dive into Deep Learning §3.7 (the (1−ηλ) shrinkage derivation)</span></div>
+  <div class="foot"><span><a href="https://arxiv.org/abs/1711.05101">Loshchilov &amp; Hutter 2019, arXiv:1711.05101</a> · Read: <a href="https://www.deeplearningbook.org/contents/regularization.html">Goodfellow §7.1, pp. 226–230</a> · <a href="https://d2l.ai/chapter_linear-regression/weight-decay.html">Dive into Deep Learning §3.7 (the (1−ηλ) shrinkage derivation)</a></span></div>
   <aside class="notes">~1.5 min. Check question for the room: which parameters does ℓ₂-inside-Adam fail to regularize? (Largest v̂ — the busiest weights.) Then the PyTorch trap — worth a full sentence because half of them will hit it this semester in their own sweeps.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 2 · Recipe</p>
   <h2>Gradient clipping is loss-spike insurance, not a tuning knob</h2>
-  <div class="card">
-    <p style="line-height:2">g ← g · min(1, c/‖g‖₂)&emsp;<span class="muted">if ‖g‖₂ ≤ c: untouched · else: same direction, norm exactly c</span></p>
+  <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2">g ← g · min(1, c/‖g‖₂)&emsp;<span class="muted">if ‖g‖₂ ≤ c: untouched · else: same direction, norm exactly c</span></p>
+      </div>
+      <ul>
+        <li>Rare batches (an unusual storm in the data, a corrupted file, a 16-bit floating-point edge case) give ‖g‖ 10–100× typical; one unclipped step can undo hours of training.</li>
+        <li>GraphCast clips at c = 32; most large-language-model recipes use c = 1.0 — the <i>presence</i> of clipping matters far more than the value.</li>
+        <li class="accent">Monitor the clipped fraction in Weights &amp; Biases: if more than ~5% of steps clip, your learning rate is too high or your data has a problem.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 235" role="img" aria-label="A ball of radius c: a gradient inside the ball is untouched; a huge spike is scaled back to the ball's surface, direction preserved" style="width:min(100%,400px)">
+        <defs>
+          <marker id="ck" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+          <marker id="ca" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker>
+        </defs>
+        <circle cx="150" cy="120" r="80" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="6 5" opacity="0.6"/>
+        <path d="M150 120 L196 82" fill="none" stroke="currentColor" stroke-width="2" marker-end="url(#ck)"/>
+        <path d="M150 120 L330 196" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.45" marker-end="url(#ck)"/>
+        <path d="M150 120 L223 151" fill="none" stroke="var(--accent)" stroke-width="2.4" marker-end="url(#ca)"/>
+        <circle cx="150" cy="120" r="3.5" fill="currentColor"/>
+        <g font-family="var(--sans)" font-size="12" fill="currentColor">
+          <text x="196" y="66">‖g‖ ≤ c — untouched</text>
+          <text x="252" y="216" opacity="0.55">spike, 10–100×</text>
+          <text x="236" y="140" fill="var(--accent)">clipped to ‖·‖ = c</text>
+          <text x="66" y="206" opacity="0.7">radius c — direction kept,</text>
+          <text x="66" y="222" opacity="0.7">magnitude capped</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul>
-    <li>Rare batches (an unusual storm in the data, a corrupted file, a 16-bit floating-point edge case) give ‖g‖ 10–100× typical; one unclipped step can undo hours of training.</li>
-    <li>GraphCast clips at c = 32; most large-language-model recipes use c = 1.0 — the <i>presence</i> of clipping matters far more than the value.</li>
-    <li class="accent">Monitor the clipped fraction in Weights &amp; Biases: if more than ~5% of steps clip, your learning rate is too high or your data has a problem.</li>
-  </ul>
-  <div class="foot"><span>Lam et al. 2023, Science 382:1416 (GraphCast supplement) · Read: Goodfellow §8.2.4 (cliffs, p. 285) and §10.11.1 (clipping, pp. 409–410)</span></div>
+  <div class="foot"><span><a href="https://doi.org/10.1126/science.adi2336">Lam et al. 2023, Science 382:1416 (GraphCast supplement)</a> · Read: <a href="https://www.deeplearningbook.org/contents/optimization.html">Goodfellow §8.2.4 (cliffs, p. 285)</a> and <a href="https://www.deeplearningbook.org/contents/rnn.html">§10.11.1 (clipping, pp. 409–410)</a></span></div>
   <aside class="notes">~1.5 min. Emphasize the diagnostic use: clipping silently hides pathologies, so log the clip rate. This is the first of many "what to watch in Weights &amp; Biases" habits — the tool becomes mandatory today, in the lab.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 2 · Recipe</p>
   <h2>Regularization, compressed to one pass</h2>
-  <ul>
-    <li><b>Early stopping</b> on a validation metric is the one regularizer you always use — patience measured in epochs, restore the best checkpoint, never the last.</li>
-    <li><b>Augmentation</b> encodes invariances — but physical fields have preferred directions: never flip a wind field north–south; the Coriolis force is not flip-invariant.</li>
-    <li><b>Dropout / weight decay</b> trade variance for bias; at pretraining scale, decay does most of the work and dropout often goes to 0.</li>
-    <li class="muted"><b>Double descent</b>, in one line: past the interpolation threshold, bigger models can generalize better — part of why foundation models are big at all.</li>
-  </ul>
-  <div class="foot"><span>Belkin et al. 2019, PNAS 116:15849 (double descent) · Read: Goodfellow §7.8, pp. 241–249 — it proves early stopping ≈ an ℓ₂ penalty whose strength is set by the stopping time</span></div>
+  <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
+    <ul style="margin:0">
+      <li><b>Early stopping</b> on a validation metric is the one regularizer you always use — patience measured in epochs, restore the best checkpoint, never the last.</li>
+      <li><b>Augmentation</b> encodes invariances — but physical fields have preferred directions: never flip a wind field north–south; the Coriolis force is not flip-invariant.</li>
+      <li><b>Dropout / weight decay</b> trade variance for bias; at pretraining scale, decay does most of the work and dropout often goes to 0.</li>
+      <li class="muted"><b>Double descent</b>, in one line: past the interpolation threshold, bigger models can generalize better — part of why foundation models are big at all.</li>
+    </ul>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 225" role="img" aria-label="Training loss keeps falling while validation loss turns back up; early stopping restores the checkpoint at the validation minimum" style="width:min(100%,420px)">
+        <g fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55">
+          <path d="M40 15 V185 H340"/>
+        </g>
+        <path d="M40 55 C 110 140, 200 168, 335 176" fill="none" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+        <path d="M40 45 C 110 118, 165 128, 205 122 C 255 114, 300 84, 335 52" fill="none" stroke="var(--accent)" stroke-width="2.4"/>
+        <path d="M196 15 V185" stroke="currentColor" stroke-width="1.2" stroke-dasharray="5 4" opacity="0.6" fill="none"/>
+        <circle cx="196" cy="123" r="5.5" fill="var(--accent)"/>
+        <g font-family="var(--sans)" font-size="12" fill="currentColor">
+          <text x="252" y="166" opacity="0.7">training loss ↓ forever</text>
+          <text x="236" y="66" fill="var(--accent)">validation loss turns</text>
+          <text x="98" y="205" opacity="0.75">stop here — restore best, never last</text>
+          <text x="330" y="205" text-anchor="end" opacity="0.6">epochs →</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <div class="foot"><span><a href="https://doi.org/10.1073/pnas.1903070116">Belkin et al. 2019, PNAS 116:15849 (double descent)</a> · Read: <a href="https://www.deeplearningbook.org/contents/regularization.html">Goodfellow §7.8, pp. 241–249</a> — it proves early stopping ≈ an ℓ₂ penalty whose strength is set by the stopping time</span></div>
   <aside class="notes">~2 min. The augmentation bullet is the geoscience twist — invariances are physical claims, not free lunch. Early stopping foreshadows Part 3: "early stopping is only as honest as the validation set it watches — hold that thought."</aside>
 </section>
 
@@ -442,7 +813,7 @@
     </table>
   </div>
   <p class="small muted" style="margin-top:2vh">When you read a foundation-model paper from now on, the optimization section should take you thirty seconds — and you can now derive every term in it. The interesting choices are elsewhere: data, objective, and evaluation.</p>
-  <div class="foot"><span>Lam et al. 2023, Science · He et al. 2022, CVPR · Jakubik et al. 2023, arXiv:2310.18660</span></div>
+  <div class="foot"><span><a href="https://doi.org/10.1126/science.adi2336">Lam et al. 2023, Science</a> · <a href="https://arxiv.org/abs/2111.06377">He et al. 2022, CVPR</a> · <a href="https://arxiv.org/abs/2310.18660">Jakubik et al. 2023, arXiv:2310.18660</a></span></div>
   <aside class="notes">~1.5 min, end of Part 2 at minute 25. Let the table land: three domains — weather, natural images, satellite imagery — one recipe. Then pivot hard: "so if everyone trains the same way, what separates a credible result from a mirage? The evaluation. This is the headline."</aside>
 </section>
 
@@ -489,7 +860,7 @@
     <li>The variogram range — the distance where correlation dies — is the scale your split must respect (measured two slides ahead).</li>
     <li class="muted">The model is not cheating; the evaluation is: memorized geography scores as skill.</li>
   </ul>
-  <div class="foot"><span>Tobler 1970 · Roberts et al. 2017, Ecography 40:913</span></div>
+  <div class="foot"><span>Tobler 1970 · <a href="https://doi.org/10.1111/ecog.02881">Roberts et al. 2017, Ecography 40:913</a></span></div>
   <aside class="notes">~2.5 min. Anchor with a concrete pair: two soil-moisture stations 8 km apart in Iowa see the same rain, same soil, same season — knowing one IS knowing the other. Then the independence sentence: every off-the-shelf train_test_split call encodes an independence assumption the atmosphere refuses to satisfy.</aside>
 </section>
 
@@ -573,7 +944,7 @@
     <li><b>Optimism gap</b> ≔ score(random split) − score(blocked split). Report it; don’t hide it.</li>
     <li class="muted">A high random-split score is a claim about interpolation near your stations — nothing more. Today’s lab measures this gap on CAMELS-US.</li>
   </ul>
-  <div class="foot"><span>Ploton et al. 2020, Nat. Commun. 11:4540 · Meyer &amp; Pebesma 2022, Nat. Commun. 13:2208</span></div>
+  <div class="foot"><span><a href="https://www.nature.com/articles/s41467-020-18321-y">Ploton et al. 2020, Nat. Commun. 11:4540</a> · <a href="https://www.nature.com/articles/s41467-022-29838-9">Meyer &amp; Pebesma 2022, Nat. Commun. 13:2208</a></span></div>
   <aside class="notes">~2.5 min. The Ploton numbers are the slide — 0.53 to 0.14 is not a correction, it's a different conclusion; the mapped product looked publishable and was largely geography memorization. Define the optimism gap on the board and tell them it is a required row in today's lab table and in every project report this semester.</aside>
 </section>
 
@@ -612,43 +983,124 @@
       </svg>
     </div>
   </div>
-  <div class="foot"><span>Read: Pebesma &amp; Bivand, Spatial Data Science, ch. 12 (variograms) — free online · estimate with scikit-gstat or gstat; today’s lab computes one for CAMELS residuals.</span></div>
+  <div class="foot"><span>Read: <a href="https://r-spatial.org/book/12-Interpolation.html">Pebesma &amp; Bivand, Spatial Data Science, ch. 12 (variograms) — free online</a> · estimate with scikit-gstat or gstat; today’s lab computes one for CAMELS residuals.</span></div>
   <aside class="notes">~2.5 min. One formula, one picture. Read γ aloud: "average squared disagreement between points d apart, halved." Nugget = measurement noise + sub-grid variability; sill = variance of the whole field; range = where knowing one point stops telling you about another. That range becomes the block size on the next design slide.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 3 · Derivation · 1 of 2</p>
   <h2>How much does correlation cost? Variance of a correlated mean</h2>
-  <div class="card">
-    <p style="line-height:2.1">
-      n observations, each Var = σ², neighbors correlated:&emsp;Corr(x<sub>i</sub>, x<sub>i+k</sub>) = ρᵏ&emsp;<span class="muted">(first-order autoregressive form)</span><br>
-      Var(x̄) = (1/n²)·Σ<sub>i</sub>Σ<sub>j</sub> Cov(x<sub>i</sub>,x<sub>j</sub>)&emsp;=&emsp;(σ²/n²)·[ n&ensp;+&ensp;2·Σ<sub>k=1</sub><sup>n−1</sup> (n−k)·ρᵏ ]<br>
-      <span class="muted">— n diagonal terms, and for each lag k there are (n−k) pairs, each counted twice</span>
-    </p>
+  <div class="cols" style="grid-template-columns:1.4fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2.1">
+          n observations, each Var = σ², neighbors correlated:&emsp;Corr(x<sub>i</sub>, x<sub>i+k</sub>) = ρᵏ&emsp;<span class="muted">(first-order autoregressive form)</span><br>
+          Var(x̄) = (1/n²)·Σ<sub>i</sub>Σ<sub>j</sub> Cov(x<sub>i</sub>,x<sub>j</sub>)&emsp;=&emsp;(σ²/n²)·[ n&ensp;+&ensp;2·Σ<sub>k=1</sub><sup>n−1</sup> (n−k)·ρᵏ ]<br>
+          <span class="muted">— n diagonal terms, and for each lag k there are (n−k) pairs, each counted twice</span>
+        </p>
+      </div>
+      <ul class="small">
+        <li>If ρ = 0 this collapses to the textbook σ²/n. Every ρ &gt; 0 term adds variance the independent formula doesn’t see.</li>
+        <li>The double sum is just bookkeeping: count how many pairs sit at each lag, weight by their covariance σ²ρᵏ.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 312" role="img" aria-label="The covariance matrix: darkest on the diagonal, fading with distance from it; the variance of the mean is the average of every cell" style="width:min(100%,380px)">
+        <g>
+          <rect x="70" y="26" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.95"/>
+          <rect x="108" y="26" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.66"/>
+          <rect x="146" y="26" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.47"/>
+          <rect x="184" y="26" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.33"/>
+          <rect x="222" y="26" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.23"/>
+          <rect x="260" y="26" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.16"/>
+          <rect x="70" y="64" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.66"/>
+          <rect x="108" y="64" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.95"/>
+          <rect x="146" y="64" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.66"/>
+          <rect x="184" y="64" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.47"/>
+          <rect x="222" y="64" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.33"/>
+          <rect x="260" y="64" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.23"/>
+          <rect x="70" y="102" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.47"/>
+          <rect x="108" y="102" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.66"/>
+          <rect x="146" y="102" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.95"/>
+          <rect x="184" y="102" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.66"/>
+          <rect x="222" y="102" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.47"/>
+          <rect x="260" y="102" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.33"/>
+          <rect x="70" y="140" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.33"/>
+          <rect x="108" y="140" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.47"/>
+          <rect x="146" y="140" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.66"/>
+          <rect x="184" y="140" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.95"/>
+          <rect x="222" y="140" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.66"/>
+          <rect x="260" y="140" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.47"/>
+          <rect x="70" y="178" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.23"/>
+          <rect x="108" y="178" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.33"/>
+          <rect x="146" y="178" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.47"/>
+          <rect x="184" y="178" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.66"/>
+          <rect x="222" y="178" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.95"/>
+          <rect x="260" y="178" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.66"/>
+          <rect x="70" y="216" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.16"/>
+          <rect x="108" y="216" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.23"/>
+          <rect x="146" y="216" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.33"/>
+          <rect x="184" y="216" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.47"/>
+          <rect x="222" y="216" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.66"/>
+          <rect x="260" y="216" width="34" height="34" rx="4" fill="var(--accent)" opacity="0.95"/>
+        </g>
+        <g font-family="var(--sans)" font-size="12" fill="currentColor">
+          <text x="70" y="16" opacity="0.75">Cov(x<tspan font-size="9" dy="2">i</tspan><tspan dy="-2">, x</tspan><tspan font-size="9" dy="2">j</tspan><tspan dy="-2">) = σ²·ρ</tspan><tspan font-size="9" dy="-4">|i−j|</tspan></text>
+          <text x="322" y="52" opacity="0.7">σ²</text>
+          <text x="322" y="128" opacity="0.55">σ²ρ²</text>
+          <text x="322" y="204" opacity="0.4">σ²ρ⁴</text>
+          <text x="70" y="286" opacity="0.75">Var(x̄) = the average of <tspan fill="var(--accent)">every</tspan> cell —</text>
+          <text x="70" y="302" opacity="0.75">ρ = 0 keeps only the diagonal: σ²/n</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul class="small">
-    <li>If ρ = 0 this collapses to the textbook σ²/n. Every ρ &gt; 0 term adds variance the independent formula doesn’t see.</li>
-    <li>The double sum is just bookkeeping: count how many pairs sit at each lag, weight by their covariance σ²ρᵏ.</li>
-  </ul>
   <aside class="notes">~2 min. Write the double sum as a matrix picture if the room hesitates: an n×n covariance matrix, σ² on the diagonal, σ²ρ on the first off-diagonals, σ²ρ² on the next, and Var(x̄) is the average of ALL its entries. Counting the off-diagonals by lag gives the (n−k) factor. Next slide: close the sum.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 3 · Derivation · 2 of 2</p>
   <h2>Close the sum: the effective sample size</h2>
-  <div class="card">
-    <p style="line-height:2.1">
-      for n ≫ correlation length, (1 − k/n) ≈ 1:&emsp;Σ<sub>k=1</sub><sup>n−1</sup>(1−k/n)·ρᵏ&ensp;≈&ensp;Σ<sub>k≥1</sub> ρᵏ = ρ/(1−ρ)&emsp;<span class="muted">(geometric series again)</span><br>
-      ⟹&emsp;Var(x̄) ≈ (σ²/n)·[1 + 2ρ/(1−ρ)] = (σ²/n)·<span class="accent">(1+ρ)/(1−ρ)</span><br>
-      define n<sub>eff</sub> by Var(x̄) ≕ σ²/n<sub>eff</sub>:&emsp;<b>n<sub>eff</sub> = n·(1−ρ)/(1+ρ)</b>&emsp;&emsp;ρ = 0.9 → n/19&emsp;·&emsp;ρ = 0.95 → n/39
-    </p>
+  <div class="cols" style="grid-template-columns:1.4fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <div class="card">
+        <p style="line-height:2.1">
+          for n ≫ correlation length, (1 − k/n) ≈ 1:&emsp;Σ<sub>k=1</sub><sup>n−1</sup>(1−k/n)·ρᵏ&ensp;≈&ensp;Σ<sub>k≥1</sub> ρᵏ = ρ/(1−ρ)&emsp;<span class="muted">(geometric series again)</span><br>
+          ⟹&emsp;Var(x̄) ≈ (σ²/n)·[1 + 2ρ/(1−ρ)] = (σ²/n)·<span class="accent">(1+ρ)/(1−ρ)</span><br>
+          define n<sub>eff</sub> by Var(x̄) ≕ σ²/n<sub>eff</sub>:&emsp;<b>n<sub>eff</sub> = n·(1−ρ)/(1+ρ)</b>&emsp;&emsp;ρ = 0.9 → n/19&emsp;·&emsp;ρ = 0.95 → n/39
+        </p>
+      </div>
+      <ul class="small">
+        <li>Ten years of daily observations at one station: n = 3650, ρ ≈ 0.95 → <span class="accent">≈ 94 independent samples</span>. A decade of data carries about three months of information.</li>
+        <li>Error bars computed with n are ~√39 ≈ 6× too tight — “significant” model improvements evaporate under blocked resampling.</li>
+        <li>Blocked cross-validation is the honest approximation: folds separated at the correlation scale behave like independent draws of size ≈ n<sub>eff</sub>.</li>
+      </ul>
+    </div>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 240" role="img" aria-label="The fraction of samples that are effectively independent collapses as autocorrelation grows: about one in nineteen at rho 0.9, one in thirty-nine at rho 0.95" style="width:min(100%,420px)">
+        <g fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55">
+          <path d="M45 15 V190 H340"/>
+        </g>
+        <path d="M45 22 C 120 40, 200 78, 258 128 C 292 158, 318 178, 336 187" fill="none" stroke="var(--accent)" stroke-width="2.4"/>
+        <g fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="4 4" opacity="0.6">
+          <path d="M310 15 V190"/>
+          <path d="M324 15 V190" opacity="0.4"/>
+        </g>
+        <circle cx="310" cy="175" r="4.5" fill="var(--accent)"/>
+        <circle cx="324" cy="182" r="4.5" fill="var(--accent)"/>
+        <g font-family="var(--sans)" font-size="12" fill="currentColor">
+          <text x="10" y="26">1</text>
+          <text x="10" y="120" opacity="0.8">n<tspan font-size="9" dy="2">eff</tspan><tspan dy="-2">/n</tspan></text>
+          <text x="330" y="212" text-anchor="end">ρ →</text>
+          <text x="45" y="212" opacity="0.6">0</text>
+          <text x="292" y="212" opacity="0.8">0.9&ensp;0.95</text>
+          <text x="180" y="70" fill="var(--accent)">(1−ρ)/(1+ρ)</text>
+          <text x="205" y="152" font-size="11.5" opacity="0.8">1/19 ·&ensp;1/39</text>
+        </g>
+      </svg>
+    </div>
   </div>
-  <ul class="small">
-    <li>Ten years of daily observations at one station: n = 3650, ρ ≈ 0.95 → <span class="accent">≈ 94 independent samples</span>. A decade of data carries about three months of information.</li>
-    <li>Error bars computed with n are ~√39 ≈ 6× too tight — “significant” model improvements evaporate under blocked resampling.</li>
-    <li>Blocked cross-validation is the honest approximation: folds separated at the correlation scale behave like independent draws of size ≈ n<sub>eff</sub>.</li>
-  </ul>
-  <div class="foot"><span>Read: Wilks, Statistical Methods in the Atmospheric Sciences, ch. 5 §5.2.4 · Hartmann, Objective Analysis notes §6.1.5 (same formula, eq. 6.13b) — linked on the Week 2 page</span></div>
+  <div class="foot"><span>Read: Wilks, Statistical Methods in the Atmospheric Sciences, ch. 5 §5.2.4 · <a href="https://atmos.uw.edu/~dennis/552_Notes_6a.pdf">Hartmann, Objective Analysis notes §6.1.5 (same formula, eq. 6.13b)</a> — linked on the Week 2 page</span></div>
   <aside class="notes">~2.5 min. Same geometric series as the Adam bias correction — point that out, it earns a laugh and cements both. Do the 3650/39 ≈ 94 arithmetic live. Then connect: leakage inflates the score, autocorrelation inflates the confidence — random splits get BOTH wrong at once.</aside>
 </section>
 
@@ -661,19 +1113,40 @@
     <li>Match block geometry to the deployment question: random blocks → “new nearby areas”; leave-region-out → “new climates” (extrapolation).</li>
     <li class="muted">Too-small blocks re-admit leakage; too-large blocks starve training. There is no free choice — report the block size with the result.</li>
   </ul>
-  <div class="foot"><span>Roberts et al. 2017, Ecography 40:913 · Meyer et al. 2019 (spatial variable selection) · hands-on tutorials: the CAST package site (hannameyer.github.io/CAST)</span></div>
+  <div class="foot"><span><a href="https://doi.org/10.1111/ecog.02881">Roberts et al. 2017, Ecography 40:913</a> · <a href="https://doi.org/10.1016/j.ecolmodel.2019.108815">Meyer et al. 2019 (spatial variable selection)</a> · hands-on tutorials: <a href="https://hannameyer.github.io/CAST/">the CAST package site (hannameyer.github.io/CAST)</a></span></div>
   <aside class="notes">~2 min. The third bullet is the intellectual center: the split IS the scientific question. "How well does this model do?" is ill-posed — do you mean 10 km away or on a new continent? Choose the split that matches the claim you intend to publish.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 3 · Design</p>
   <h2>Temporal holdout: whole years, and mind the seams</h2>
-  <ul>
-    <li>Hold out contiguous years — never shuffled days, never shuffled months.</li>
-    <li>Leave a gap at the seam ≥ the system’s memory: days for weather, weeks for soil moisture, months for groundwater.</li>
-    <li>Nonstationarity is a feature of the test: held-out years should contain unseen extremes (e.g., a drought year the model never trained on).</li>
-    <li><span class="accent">Normalization statistics from training years only</span> — computing the climatology over all years is the classic silent leak.</li>
-  </ul>
+  <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
+    <ul style="margin:0">
+      <li>Hold out contiguous years — never shuffled days, never shuffled months.</li>
+      <li>Leave a gap at the seam ≥ the system’s memory: days for weather, weeks for soil moisture, months for groundwater.</li>
+      <li>Nonstationarity is a feature of the test: held-out years should contain unseen extremes (e.g., a drought year the model never trained on).</li>
+      <li><span class="accent">Normalization statistics from training years only</span> — computing the climatology over all years is the classic silent leak.</li>
+    </ul>
+    <div class="figure" style="margin:0">
+      <svg viewBox="0 0 360 190" role="img" aria-label="Timeline: contiguous training years, then a gap at least as long as the system's memory, then contiguous test years; normalization statistics come from the training side only" style="width:min(100%,420px)">
+        <g stroke="currentColor" stroke-width="1.3" fill="none">
+          <rect x="16" y="60" width="196" height="40" rx="7" fill="var(--hairline)"/>
+          <rect x="252" y="60" width="92" height="40" rx="7" fill="var(--accent)" opacity="0.85"/>
+        </g>
+        <rect x="212" y="60" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="4 4" opacity="0.6"/>
+        <path d="M16 128 H212" stroke="var(--accent)" stroke-width="1.4" fill="none"/>
+        <path d="M16 122 V134 M212 122 V134" stroke="var(--accent)" stroke-width="1.4" fill="none"/>
+        <g font-family="var(--sans)" font-size="12.5" fill="currentColor" text-anchor="middle">
+          <text x="114" y="84">train — whole years</text>
+          <text x="298" y="84" fill="var(--accent-ink)">test</text>
+          <text x="232" y="50" opacity="0.75">gap ≥ memory</text>
+          <text x="232" y="118" font-size="11" opacity="0.6">days–months</text>
+          <text x="114" y="150" fill="var(--accent)" font-size="11.5">mean, std, climatology from here only</text>
+          <text x="180" y="178" opacity="0.6" font-size="11.5">never shuffled days · never shuffled months</text>
+        </g>
+      </svg>
+    </div>
+  </div>
   <aside class="notes">~2 min. The fourth bullet catches real papers: standardizing with the full-period mean quietly hands the model the test years' climate. In today's lab and every lab after, normalization statistics are computed inside the training fold — the agent will scaffold it; you must verify it.</aside>
 </section>
 
@@ -705,7 +1178,7 @@
     <li>Common ERA5 ground truth, fixed metrics (root-mean-square error and anomaly correlation on standard fields), strict train/validation/test year separation — every model on the leaderboard obeys it.</li>
     <li>GraphCast, Pangu-Weather, NeuralGCM, and the European operational forecast are all scored on the same held-out year: <b>that</b> is why the comparison is believable.</li>
   </ul>
-  <div class="foot"><span>Rasp et al. 2024, arXiv:2308.15560 · weatherbench2.readthedocs.io</span></div>
+  <div class="foot"><span><a href="https://arxiv.org/abs/2308.15560">Rasp et al. 2024, arXiv:2308.15560</a> · <a href="https://weatherbench2.readthedocs.io">weatherbench2.readthedocs.io</a></span></div>
   <aside class="notes">~2.5 min. This is the aspirational example: an entire subfield agreed on one leakage-safe protocol, and suddenly cross-paper comparison works. The dashed line is the discipline: no tuning decision — not even "which checkpoint to submit" — may look at 2020.</aside>
 </section>
 
@@ -771,7 +1244,7 @@
     <li><b>Leak 3 · instrument</b>: each network (SCAN, USCRN, SNOTEL, …) has its own sensors and calibration — network-specific bias is learnable and looks like skill.</li>
     <li class="muted">A random split leaves all three open. A competent reviewer rejects in one paragraph.</li>
   </ul>
-  <div class="foot"><span>International Soil Moisture Network: Dorigo et al. 2021, HESS 25:5749 · validation good practice: Gruber et al. 2020, Remote Sens. Environ. 244:111806</span></div>
+  <div class="foot"><span>International Soil Moisture Network: <a href="https://doi.org/10.5194/hess-25-5749-2021">Dorigo et al. 2021, HESS 25:5749</a> · validation good practice: <a href="https://doi.org/10.1016/j.rse.2020.111806">Gruber et al. 2020, Remote Sens. Environ. 244:111806</a></span></div>
   <aside class="notes">~2.5 min. Leak 3 is the one students miss: hold out stations but not networks, and the model still recognizes "this reads like a SCAN sensor" and exploits the network's calibration offset. Instrument identity is a feature you did not mean to provide.</aside>
 </section>
 
@@ -837,7 +1310,7 @@
     <li>Written before transformers reached the Earth sciences: no foundation models, no GraphCast, no self-supervised pretraining at scale.</li>
     <li class="muted">Tonight’s question is an audit: which challenges did scale solve, which did it dodge, and did the hybrid bet pay off?</li>
   </ul>
-  <div class="foot"><span>Reichstein et al. 2019, Nature 566:195 · doi:10.1038/s41586-019-0912-1</span></div>
+  <div class="foot"><span><a href="https://doi.org/10.1038/s41586-019-0912-1">Reichstein et al. 2019, Nature 566:195 · doi:10.1038/s41586-019-0912-1</a></span></div>
   <aside class="notes">~3 min of shared context before the questions. Point out the paper's Figure 2 (the hybrid-modeling spectrum) as the intellectual frame the course keeps returning to — NeuralGCM in Week 11 is that figure made real. Then put the discussion questions up.</aside>
 </section>
 
