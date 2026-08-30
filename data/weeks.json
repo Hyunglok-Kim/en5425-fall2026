@@ -180,7 +180,33 @@
     ],
     "deliverable": "Note 02 with sweep parallel-coordinates plot + a 'random split vs spatial split' table; one-paragraph leakage post-mortem.",
     "deliverable_ko": "Note 02: sweep parallel-coordinates plot + 'random split vs spatial split' 표 · 한 문단짜리 leakage post-mortem",
-    "homework": null
+    "homework": null,
+    "resources": [
+     {
+      "title": "CAMELS-US — catchment attributes & hydrology dataset (download here)",
+      "link": "https://ral.ucar.edu/solutions/products/camels"
+     },
+     {
+      "title": "Weights & Biases — quickstart (make your account before class)",
+      "link": "https://docs.wandb.ai/quickstart"
+     },
+     {
+      "title": "Weights & Biases — sweeps guide (the lab's hyperparameter search)",
+      "link": "https://docs.wandb.ai/guides/sweeps"
+     },
+     {
+      "title": "scikit-learn — cross-validation guide (GroupKFold does the spatial blocking)",
+      "link": "https://scikit-learn.org/stable/modules/cross_validation.html"
+     },
+     {
+      "title": "SciKit-GStat — variogram estimation in Python",
+      "link": "https://scikit-gstat.readthedocs.io/"
+     },
+     {
+      "title": "PyTorch — Learn the Basics tutorial",
+      "link": "https://docs.pytorch.org/tutorials/beginner/basics/intro.html"
+     }
+    ]
    },
    "reading": {
     "memo": "standard",
