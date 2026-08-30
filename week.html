@@ -78,6 +78,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         <p style="margin:0">${esc(lab.task || t("Lab details coming soon.", "실습 세부 내용을 곧 공개합니다."))}</p>
         ${(lab.data || []).length ? `<p class="kv">${t("Data", "데이터")}</p><div class="pillrow">${pills(lab.data)}</div>` : ""}
         ${(lab.tools || []).length ? `<p class="kv">${t("Tools", "도구")}</p><div class="pillrow">${pills(lab.tools)}</div>` : ""}
+        ${(lab.resources || []).length ? `<p class="kv">${t("Guides & videos", "가이드·영상")}</p>
+          <ul style="margin-top:4px">${lab.resources.map((r) => `<li><a href="${esc(r.link)}">${esc(r.title)}</a>${r.minutes ? ` <span class="sub" style="margin:0;display:inline">~${esc(r.minutes)}${t(" min", "분")}</span>` : ""}</li>`).join("")}</ul>` : ""}
         ${lab.deliverable ? `<p class="kv">${t("Deliverable", "제출물")}</p><p style="margin:0;font-size:13.5px">${esc(lab.deliverable)}</p>` : ""}
         ${lab.homework ? `<div class="note" style="margin:14px 0 0"><b>${t("Homework", "과제")}</b> — ${esc(lab.homework)}</div>` : ""}
       </div>
@@ -85,6 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ${(() => {
         const bx = [];
         const teach = (n >= 1 && n <= 7) || (n >= 9 && n <= 12);
+        if (n === 1) bx.push(["tool01", t("AI Toolkit Report (5-page PDF)", "AI 툴킷 활용 정리 (5페이지 PDF)")]);
         if (n === 1) bx.push(["hw0", t("HW0 — PDF report", "HW0 — PDF 보고서")]);
         if (teach) bx.push([`note${String(n).padStart(2, "0")}`, t(`My research note (Week ${n}, PDF)`, `내 연구노트 (${n}주차, PDF)`)]);
         if (w.reading && w.reading.book) bx.push([`book${String(n).padStart(2, "0")}`, t(`Book summary (Week ${n} — HANDWRITTEN, scanned to PDF, no AI)`, `북 정리 (${n}주차 — 손글씨 작성 후 스캔 PDF, AI 금지)`)]);

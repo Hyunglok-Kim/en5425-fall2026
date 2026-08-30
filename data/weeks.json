@@ -20,7 +20,7 @@
         },
         {
           "min": 15,
-          "topic": "AI-agent-native engineering: what Claude Code/Cursor are good at (scaffolding, refactors, sweeps) and bad at (silent numerical bugs, eval leakage); the verification discipline — you own every number; repo hygiene, commit-per-lab, research notes as first-class output."
+          "topic": "AI-agent-native engineering: what Claude Code/Codex are good at (scaffolding, refactors, sweeps) and bad at (silent numerical bugs, eval leakage); the verification discipline — you own every number; repo hygiene, commit-per-lab, research notes as first-class output."
         },
         {
           "min": 10,
@@ -36,18 +36,36 @@
         }
       ],
       "lab": {
-        "task": "(a) Environment: Python + PyTorch on Colab and/or the shared GPU server, uv/conda, GPU sanity check. (b) Create personal course repo with GitHub Pages (Quarto or MkDocs-Material) and publish Research Note 01. (c) With the agent, build and train a small CNN classifier on EuroSAT (RGB), ~10 epochs, and manually verify one gradient with a finite-difference check the agent writes tests for.",
-        "data": [
-          "EuroSAT (RGB, via TorchGeo/HF Datasets)"
-        ],
+        "task": "AI Toolkit onboarding lab (after the diagnostic): set up the tools this course runs on and prove each one works. (1) VS Code + the Claude Code extension — install, sign in, and have it explain then modify a small script; (2) Codex in VS Code — same exercise, compare the two agents on one refactor; (3) Google Colab — GPU runtime on, torch.cuda.is_available() screenshot, save-a-copy discipline; (4) Kaggle — account + phone verification (unlocks the weekly free GPU quota), run one GPU notebook; (5) GitHub — account, SSH key, clone the course repo. Work through the linked official videos/docs at your own pace; instructor and TA circulate.",
+        "data": [],
         "tools": [
-          "Claude Code/Cursor",
-          "PyTorch",
-          "TorchGeo",
-          "GitHub Pages (Quarto/MkDocs)"
+          "VS Code",
+          "Claude Code",
+          "Codex",
+          "Google Colab",
+          "Kaggle",
+          "git/GitHub"
         ],
-        "deliverable": "Live course-site account activated (password changed), environment verified, first CNN trained; Research Note 01 drafted in the repo — PDF submitted on this site by Sun 9/6 23:59 as part of HW0.",
-        "homework": null
+        "deliverable": "AI Toolkit Report — 5-page PDF due Sun 9/6 23:59 on this site: for each tool, how you set it up, one real thing you made it do (screenshot), where it fits your weekly workflow, and one limitation you noticed.",
+        "homework": "Finish whatever didn't complete in class before the HW0 deadline — HW0 assumes all five tools work.",
+        "resources": [
+          {
+            "title": "Claude Code — official docs (install & VS Code)",
+            "link": "https://code.claude.com/docs"
+          },
+          {
+            "title": "OpenAI Codex — official docs (IDE setup)",
+            "link": "https://developers.openai.com/codex"
+          },
+          {
+            "title": "Google Colab — welcome notebook",
+            "link": "https://colab.research.google.com/"
+          },
+          {
+            "title": "Kaggle notebooks — docs (GPU quota)",
+            "link": "https://www.kaggle.com/docs/notebooks"
+          }
+        ]
       },
       "reading": {
         "memo": "standard",
@@ -992,7 +1010,7 @@
           "W&B (alerts, MCP)",
           "GitHub Actions CI",
           "hydra/yaml configs",
-          "Claude Code/Cursor"
+          "Claude Code/Codex"
         ],
         "deliverable": "M1 (PDF on this site, due Fri 12/4 23:59): frozen data/ + eval/ modules with CI green; runs launched with public W&B link; pre-registered eval protocol.",
         "homework": null
