@@ -22,7 +22,7 @@
 html { scroll-behavior:smooth; }
 body { margin:0; background:var(--page); color:var(--ink); font-family:var(--sans);
   font-size:15px; line-height:1.65; -webkit-font-smoothing:antialiased; }
-.wrap { max-width:880px; margin:0 auto; padding:0 24px 90px; }
+.wrap { max-width:1280px; margin:0 auto; padding:0 24px 90px; }
 a { color:var(--accent); text-decoration:none; }
 a:hover { text-decoration:underline; }
 :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
@@ -30,7 +30,7 @@ a:hover { text-decoration:underline; }
 /* ---- site nav ---- */
 .site-nav { border-bottom:1px solid var(--hairline); background:var(--page);
   position:sticky; top:0; z-index:20; }
-.site-nav .in { max-width:880px; margin:0 auto; padding:12px 24px;
+.site-nav .in { max-width:1280px; margin:0 auto; padding:12px 24px;
   display:flex; align-items:baseline; gap:6px 18px; flex-wrap:wrap; }
 .site-nav .brand { display:flex; align-items:center; gap:9px; margin-right:10px; color:var(--ink); }
 .site-nav .brand a { color:inherit; }
