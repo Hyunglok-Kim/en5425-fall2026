@@ -71,7 +71,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       <h1>${esc(title)}</h1>
       ${previewNote}
       <p class="lede">${esc(goal || "")}</p>
-      ${w.slides ? `<p style="margin-top:10px"><a class="btn" href="slides/week${String(n).padStart(2, "0")}.html">${t("Lecture slides →", "강의 슬라이드 →")}</a></p>` : ""}
+      ${(() => {
+        const hasBoxes = n === 1 || (n >= 1 && n <= 7) || (n >= 9 && n <= 12) || (w.reading && (w.reading.book || w.reading.video)) || [8, 13, 14, 15, 16].includes(n);
+        const ticketWeek = rd.memo && rd.memo !== "none" && n !== 1;
+        const btns = [
+          w.slides ? `<a class="btn" href="slides/week${String(n).padStart(2, "0")}.html">${t("Lecture slides", "강의 슬라이드")}</a>` : "",
+          hasBoxes ? `<a class="btn primary" href="#submit">${t("Submit this week's work", "이번 주 과제 제출")}</a>` : "",
+          ticketWeek ? `<a class="btn" href="journal.html">${t("Write your ticket", "티켓 쓰기")}</a>` : "",
+        ].filter(Boolean);
+        return btns.length ? `<p style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">${btns.join("")}</p>` : "";
+      })()}
 
       ${w.async ? `<div class="note"><b>${t("Async week — no class meeting.", "원격 주간 — 수업 없음.")}</b> ${t("Capstone sprint continues on your own schedule; feedback via GitHub issues. Deliverables and due dates below.", "Capstone 스프린트는 각자 일정대로 진행하고, 피드백은 GitHub 이슈로 받습니다. 산출물과 마감은 아래를 확인하세요.")}</div>` : ""}
       ${!w.async && n !== 1 && n !== 8 && n !== 16 ? `<p class="sub" style="margin-top:14px">${t(
@@ -126,7 +135,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (n === 14) bx.push(["m2", t("Milestone M2 (PDF)", "마일스톤 M2 (PDF)")]);
         if (n === 15) bx.push(["m3", t("Milestone M3 (PDF)", "마일스톤 M3 (PDF)")]);
         if (n === 16) bx.push(["final", t("Final deliverable (PDF)", "최종 산출물 (PDF)")]);
-        return bx.map(([aid, label]) =>
+        if (!bx.length) return "";
+        return `<h2 id="submit">${t("Submit", "제출")}</h2>` + bx.map(([aid, label]) =>
           `<div class="subbox" data-aid="${aid}" data-label="${label}"></div>`).join("");
       })()}
 
@@ -159,8 +169,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       </div>`;
     if (typeof initSubmitBoxes === "function") initSubmitBoxes();
     if (location.hash === "#submit") setTimeout(() => {
-      const b = document.querySelector(".subbox");
-      if (b) b.scrollIntoView({ behavior: "smooth", block: "center" });
+      const b = document.getElementById("submit") || document.querySelector(".subbox");
+      if (b) b.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 350);
   } catch {
     el.innerHTML = `<p class="eyebrow">${t("Schedule", "주차별 일정")}</p><h1>${t("Week plan coming soon", "주차 계획을 곧 공개합니다")}</h1>

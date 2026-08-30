@@ -97,23 +97,18 @@ document.addEventListener("DOMContentLoaded", async () => {
           ? `<br><a href="week.html?w=${w.n}" class="sub" style="margin:0">${t(`+${optional.length - 3} more…`, `+${optional.length - 3}편 더…`)}</a>` : "";
         readLinks = `<span class="sub" style="margin:0">${t("optional:", "선택:")}</span><br>${shown}${more}`;
       }
-      /* direct submit links: week-page submit boxes for PDFs, journal page for tickets */
-      const boxLink = `<a href="week.html?w=${w.n}#submit" style="font-weight:600;white-space:nowrap">${t("submit &#8594;", "제출 &#8594;")}</a>`;
-      const hasBox = !!lab.deliverable || [1, 8, 13, 14, 15, 16].includes(w.n);
       const bookLine = rd.book
         ? `<br><span class="sub" style="margin:0">${t("book:", "책:")} ${rd.book.link
             ? `<a href="${esc(rd.book.link)}">${esc(rd.book.short || rd.book.title)}</a>`
-            : esc(rd.book.short || rd.book.title)} <span class="pill">${t("1p handwritten", "1p 손글씨")}</span> ${boxLink}</span>`
+            : esc(rd.book.short || rd.book.title)} <span class="pill">${t("1p handwritten", "1p 손글씨")}</span></span>`
         : "";
       const vidLine = rd.video
-        ? `<br><span class="sub" style="margin:0">${t("video:", "영상:")} <a href="${esc(rd.video.link)}">${esc(rd.video.channel)}</a> <span class="pill">${t("0.5p summary", "0.5p 정리")}</span> ${boxLink}</span>`
+        ? `<br><span class="sub" style="margin:0">${t("video:", "영상:")} <a href="${esc(rd.video.link)}">${esc(rd.video.channel)}</a> <span class="pill">${t("0.5p summary", "0.5p 정리")}</span></span>`
         : "";
-      const ticketLink = rd.memo && rd.memo !== "none"
-        ? ` <a href="journal.html" style="font-weight:600;white-space:nowrap">${t("write ticket &#8594;", "티켓 쓰기 &#8594;")}</a>` : "";
       const memoPill = w.n === 1
-        ? ` <span class="pill">${t("assigned in class &#183; ticket due with W2", "수업에서 배정 &#183; 티켓은 W2와 함께")}</span>${ticketLink}`
+        ? ` <span class="pill">${t("assigned in class &#183; ticket due with W2", "수업에서 배정 &#183; 티켓은 W2와 함께")}</span>`
         : rd.memo && rd.memo !== "none"
-        ? ` <span class="pill acc">${esc(rd.memo)}</span>${ticketLink}` : "";
+        ? ` <span class="pill acc">${esc(rd.memo)}</span>` : "";
       /* week pages open one week before class (00:00 KST) — mark still-locked rows */
       const unlockIso = w.date ? (() => { const d = new Date(w.date + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() - 7); return d.toISOString().slice(0, 10); })() : null;
       const todayKST = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
@@ -124,8 +119,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td class="tnum">${esc(fmtDate(w.date))}</td>
         <td class="topic"><b><a href="week.html?w=${w.n}">${esc(wTitle(w))}</a></b>${lockMark}<br>
           <span class="sub" style="margin:0">${esc(wGoal(w) || "")}</span></td>
-        <td>${esc(firstSentence((ko() && lab.task_ko) || lab.task))}${dataPills ? `<div class="pills">${dataPills}</div>` : ""}${hasBox
-          ? `<div style="margin-top:4px">${boxLink}</div>` : ""}</td>
+        <td>${esc(firstSentence((ko() && lab.task_ko) || lab.task))}${dataPills ? `<div class="pills">${dataPills}</div>` : ""}</td>
         <td>${readLinks || '<span class="sub" style="margin:0">—</span>'}${memoPill}${bookLine}${vidLine}</td>
       </tr>`;
       for (const ev of events.filter((e) => e.after === w.n)) {

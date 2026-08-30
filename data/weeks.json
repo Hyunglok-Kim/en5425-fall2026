@@ -152,8 +152,8 @@
    "concept": [
     {
      "min": 10,
-     "topic": "Backprop as vector–Jacobian products; where activation memory goes (sets up gradient checkpointing in W12) — compressed recap, full derivation in the handout",
-     "topic_ko": "backprop을 vector–Jacobian product로 이해 · activation 메모리가 어디로 가는가(W12 gradient checkpointing의 밑작업) — 압축 복습, 전체 유도는 handout에"
+     "topic": "Backprop as vector–Jacobian products; where activation memory goes (sets up gradient checkpointing in W12) — derived in full on the slides",
+     "topic_ko": "backprop을 vector–Jacobian product로 이해 · activation 메모리가 어디로 가는가(W12 gradient checkpointing의 밑작업) — 전체 유도를 슬라이드에서 단계별로"
     },
     {
      "min": 15,
