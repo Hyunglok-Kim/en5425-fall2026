@@ -39,7 +39,7 @@
   <h2>Today in five moves</h2>
   <ul>
     <li><b>1 · Backprop as vector–Jacobian products</b> — and where the memory goes <span class="muted">(10 min)</span></li>
-    <li><b>2 · The optimizer recipe</b> — AdamW + warmup/cosine, the recipe every FM uses <span class="muted">(15 min)</span></li>
+    <li><b>2 · The optimizer recipe</b> — AdamW + warmup/cosine, the recipe every foundation model uses <span class="muted">(15 min)</span></li>
     <li><b>3 · Leakage-safe evaluation</b> — why random splits lie, and by how much <span class="accent">(25 min · headline)</span></li>
     <li><b>4 · Worked example</b> — a reviewer-proof split for global soil moisture <span class="muted">(10 min)</span></li>
     <li><b>5 · Journal club</b> — Reichstein et al. 2019, in groups after break <span class="muted">(30 min)</span></li>
@@ -133,9 +133,9 @@
   <h2>Activations, not weights, dominate training memory</h2>
   <ul>
     <li>Every saved tensor is a debt the backward pass collects: activation memory ∝ depth × batch × tokens × width.</li>
-    <li>ViT-L, batch 256: weights + Adam states ≈ 3.6 GB — <span class="accent">activations ≈ tens of GB</span>. Activations set your batch-size ceiling, not parameters.</li>
+    <li>A large Vision Transformer (ViT-Large, 0.3 billion parameters), batch 256: weights + Adam states ≈ 3.6 GB — <span class="accent">activations ≈ tens of GB</span>. Activations set your batch-size ceiling, not parameters.</li>
     <li><b>Gradient checkpointing</b>: keep ~O(√L) of the activations, recompute the rest during backward — ≈30% extra FLOPs for 5–10× less activation memory.</li>
-    <li class="muted">When you OOM fine-tuning an FM in Week 12, the fix is checkpointing / batch / precision — not a smaller model. Remember this slide.</li>
+    <li class="muted">When you run out of GPU memory fine-tuning a foundation model in Week 12, the fix is checkpointing / batch / precision — not a smaller model. Remember this slide.</li>
   </ul>
   <div class="foot"><span>Chen et al. 2016, arXiv:1604.06174 (checkpointing) · callback target: W12 fine-tuning lab</span></div>
   <aside class="notes">~3 min, then transition. Quick mental arithmetic on the ViT-L numbers: 0.3B params × 4 bytes ≈ 1.2 GB, Adam doubles it with m and v. Then point at batch×tokens×width×depth and let them see it dwarfs 3.6 GB. Transition: "so we can compute gradients cheaply — what do we do with them? The recipe. Minute 10, Part 2."</aside>
@@ -145,8 +145,8 @@
 <section class="slide section">
   <p class="kicker">Part 2 · 15 min</p>
   <h2>The optimizer recipe</h2>
-  <p class="big muted">AdamW · warmup + cosine · decoupled decay · clipping — one recipe, every FM.</p>
-  <aside class="notes">Timing: minutes 10–25. Framing: this is not a menu, it is THE recipe — by the end of this part they should be able to read the optimization paragraph of any FM paper in 30 seconds. Five content slides, ~2.5 min each.</aside>
+  <p class="big muted">AdamW · warmup + cosine · decoupled decay · clipping — one recipe, every foundation model.</p>
+  <aside class="notes">Timing: minutes 10–25. Framing: this is not a menu, it is THE recipe — by the end of this part they should be able to read the optimization paragraph of any foundation-model paper in 30 seconds. Five content slides, ~2.5 min each.</aside>
 </section>
 
 <section class="slide">
@@ -163,7 +163,7 @@
   <ul class="small">
     <li>The ratio m̂/√v̂ makes the step size ≈ η<sub>t</sub> per parameter, whatever the raw gradient scale — a signal-to-noise step.</li>
     <li>Bias correction (1−βᵗ) only matters for the first ~1/(1−β) steps — exactly when training is most fragile.</li>
-    <li>Typical FM settings: β₁ = 0.9, β₂ = 0.95, ε = 10⁻⁸, λ = 0.05–0.1.</li>
+    <li>Typical foundation-model settings: β₁ = 0.9, β₂ = 0.95, ε = 10⁻⁸, λ = 0.05–0.1.</li>
   </ul>
   <div class="foot"><span>Kingma &amp; Ba 2015 (Adam) · Loshchilov &amp; Hutter 2019, arXiv:1711.05101 (AdamW)</span></div>
   <aside class="notes">~3 min. Read the update aloud once, slowly: momentum in the numerator, running second moment in the denominator, and — separately, outside the adaptive ratio — the decay term. That "outside" is the entire AdamW point; flag it and promise the distinction in two slides. Note β₂ = 0.95 (not 0.999) is the large-model convention: shorter variance memory tolerates noisy spikes better.</aside>
@@ -199,7 +199,7 @@
     <li>Warmup: η ramps 0 → η<sub>max</sub> while v̂ statistics are still garbage — skip it and step 50 diverges.</li>
     <li>Cosine: η<sub>t</sub> = η<sub>min</sub> + ½(η<sub>max</sub> − η<sub>min</sub>)(1 + cos(π·t/T)) — long quiet tail, no step-schedule cliffs; T = total steps, fixed in advance.</li>
   </ul>
-  <aside class="notes">~3 min. Intuition for warmup: Adam divides by √v̂; with 10 samples of variance, that denominator is noise, so early steps can be huge in random directions. Intuition for cosine: most of the decay budget is spent slowly in the middle, and the tail lets the model settle into a basin. Note T is a commitment — cosine requires deciding the compute budget up front, which is very FM-culture.</aside>
+  <aside class="notes">~3 min. Intuition for warmup: Adam divides by √v̂; with 10 samples of variance, that denominator is noise, so early steps can be huge in random directions. Intuition for cosine: most of the decay budget is spent slowly in the middle, and the tail lets the model settle into a basin. Note T is a commitment — cosine requires deciding the compute budget up front, which is very foundation-model culture.</aside>
 </section>
 
 <section class="slide">
@@ -219,7 +219,7 @@
       <ul class="small">
         <li>−η<sub>t</sub>·λ·θ applied directly, outside the adaptive ratio.</li>
         <li>Uniform multiplicative shrinkage of every weight, every step.</li>
-        <li>Empirically recovers SGD-like generalization; this is why "AdamW" is in every FM paper and plain Adam is not.</li>
+        <li>Empirically recovers the generalization of plain stochastic gradient descent; this is why "AdamW" is in every foundation-model paper and plain Adam is not.</li>
       </ul>
     </div>
   </div>
@@ -247,7 +247,7 @@
     <li><b>Early stopping</b> on a validation metric is the one regularizer you always use — patience in epochs, restore the best checkpoint, never the last.</li>
     <li><b>Augmentation</b> encodes invariances — but physical fields have preferred directions: never N–S flip a wind field; Coriolis is not flip-invariant.</li>
     <li><b>Dropout / weight decay</b> trade variance for bias; at pretraining scale, decay does most of the work and dropout often goes to 0.</li>
-    <li class="muted"><b>Double descent</b>, in one line: past the interpolation threshold, bigger models can generalize better — part of why FMs are big at all.</li>
+    <li class="muted"><b>Double descent</b>, in one line: past the interpolation threshold, bigger models can generalize better — part of why foundation models are big at all.</li>
   </ul>
   <div class="foot"><span>Belkin et al. 2019, PNAS 116:15849 (double descent)</span></div>
   <aside class="notes">~2.5 min. The augmentation bullet is the geoscience twist — invariances are physical claims, not free lunch. Early stopping foreshadows Part 3: "early stopping is only as honest as the validation set it watches — hold that thought."</aside>
@@ -255,14 +255,14 @@
 
 <section class="slide">
   <p class="kicker">Part 2 · 15 min</p>
-  <h2>This exact recipe trains every FM in this course</h2>
+  <h2>This exact recipe trains every foundation model in this course</h2>
   <div class="scroll">
     <table>
       <thead><tr><th>Model</th><th>Optimizer</th><th>Schedule</th><th>Decay / clip</th></tr></thead>
       <tbody>
         <tr><td>GraphCast (Lam et al. 2023)</td><td>AdamW, β₂ = 0.95</td><td>linear warmup ~10³ steps → cosine</td><td>λ = 0.1 · clip c = 32</td></tr>
-        <tr><td>MAE (He et al. 2022)</td><td>AdamW, β₂ = 0.95</td><td>warmup 40 epochs → cosine</td><td>λ = 0.05</td></tr>
-        <tr><td>Prithvi-EO (Jakubik et al. 2023)</td><td>AdamW</td><td>warmup → cosine</td><td>decoupled decay</td></tr>
+        <tr><td>Masked autoencoder (He et al. 2022)</td><td>AdamW, β₂ = 0.95</td><td>warmup 40 epochs → cosine</td><td>λ = 0.05</td></tr>
+        <tr><td>Prithvi (Jakubik et al. 2023)</td><td>AdamW</td><td>warmup → cosine</td><td>decoupled decay</td></tr>
       </tbody>
     </table>
   </div>
@@ -528,7 +528,7 @@
     <li>Report a per-region table, not one global mean — the model's failures in data-sparse regions are the scientific result.</li>
     <li class="accent">This is DQ2 in tonight's entrance ticket. Use today's vocabulary: range, block, gap, optimism gap.</li>
   </ul>
-  <aside class="notes">~3 min, end at minute 60. Stress "touched once": the test set is spent the moment it influences any decision. And the per-region table point previews the FM-evaluation weeks — global means hide exactly the regions environmental science cares about. Transition to the reading discussion.</aside>
+  <aside class="notes">~3 min, end at minute 60. Stress "touched once": the test set is spent the moment it influences any decision. And the per-region table point previews the foundation-model evaluation weeks — global means hide exactly the regions environmental science cares about. Transition to the reading discussion.</aside>
 </section>
 
 <!-- ============================ PART 5 ============================ -->
@@ -545,7 +545,7 @@
   <ul>
     <li>Reichstein's five challenges for DL in Earth system science: <b>interpretability</b> · <b>physical consistency</b> · <b>complex, uncertain data</b> · <b>limited labels</b> · <b>computational demand</b>.</li>
     <li>Their bet: the future is <span class="accent">hybrid physics–ML</span> — process models and learning fused, not learning alone.</li>
-    <li>Written before transformers reached the Earth sciences: no FMs, no GraphCast, no self-supervised pretraining at scale.</li>
+    <li>Written before transformers reached the Earth sciences: no foundation models, no GraphCast, no self-supervised pretraining at scale.</li>
     <li class="muted">Tonight's question is an audit: which challenges did scale solve, which did it dodge, and did the hybrid bet pay off?</li>
   </ul>
   <div class="foot"><span>Reichstein et al. 2019, Nature 566:195 · doi:10.1038/s41586-019-0912-1</span></div>
@@ -556,7 +556,7 @@
   <p class="kicker">Journal club · 30 min · after break</p>
   <h2>Reichstein et al. 2019 — discussion questions</h2>
   <ol>
-    <li>Which of Reichstein's five challenges have FMs since addressed, and which have they dodged?</li>
+    <li>Which of Reichstein's five challenges have foundation models since addressed, and which have they dodged?</li>
     <li>Design a split for a global soil-moisture model that a reviewer couldn't reject — what do you hold out?</li>
     <li>Is 'hybrid physics-ML' (their vision) winning in 2026, given NeuralGCM vs pure-ML GraphCast?</li>
   </ol>

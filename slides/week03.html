@@ -41,7 +41,7 @@
     <li><b>1 · The data zoo</b> (15) — what each product measures, at what resolution, latency, and error character.</li>
     <li><b>2 · Cloud-native geospatial</b> (15) — COG, Zarr, STAC; why chunking dominates throughput; where the data lives.</li>
     <li><b>3 · ERA5 as a pretraining corpus</b> (15) — equiangular grids, the cos φ weighted mean, anomalies, regridding.</li>
-    <li><b>4 · Dataset objects</b> (10) — chips vs tiles vs time series; normalization and QA masking done right.</li>
+    <li><b>4 · Dataset objects</b> (10) — chips vs tiles vs time series; normalization and quality-assurance masking done right.</li>
     <li><b>5 · Reading framing: Rolf 2024</b> (15) — the position in one slide + the five-differences board exercise.</li>
     <li><b>6 · Journal club</b> (30 · after break) + <b>7 · Lab briefing</b> — DQs from your tickets; two ETL pipes you keep all semester.</li>
   </ul>
@@ -486,7 +486,7 @@ items = cat.search(
     </svg>
   </div>
   <ul class="small">
-    <li>The choice couples to architecture: ViT-MAE models eat <b>chips</b> (SatMAE 224², Prithvi); Presto (~400K params) and TESSERA eat <b>pixel series</b>; tiles are for delivery and inference tiling, <span class="accent">never for batching</span>.</li>
+    <li>The choice couples to architecture: masked-autoencoder Vision Transformers eat <b>chips</b> (SatMAE 224², Prithvi); Presto (about 400 thousand parameters) and TESSERA eat <b>pixel series</b>; tiles are for delivery and inference tiling, <span class="accent">never for batching</span>.</li>
   </ul>
   <div class="foot"><span>Cong et al. 2022 (SatMAE) · Tseng et al. 2023 (Presto) · lab chips: 64×64 × 4 bands</span></div>
   <aside class="notes">3 min. Vocabulary slide — nail the three words because papers blur them. A tile is what the agency ships; a chip is what your dataloader yields; a pixel series is the degenerate chip that turns EO into sequence modeling. Note the economy argument: Presto proves a 400K-param model on pixel series is competitive for many tasks — chips are not the only road to an FM, and that matters for capstone compute budgets.</aside>
@@ -509,7 +509,7 @@ items = cat.search(
 <!-- 26 -->
 <section class="slide">
   <p class="kicker">Part 4 · 10 min</p>
-  <h2>QA masking: the curation every FM corpus lives on</h2>
+  <h2>Quality-assurance masking: the curation every foundation-model corpus lives on</h2>
   <ul>
     <li>Sentinel-2 L2A ships <b>SCL</b> (scene classification, 20 m): reject pixels in classes <b>3</b> cloud shadow, <b>8/9</b> cloud medium/high, <b>10</b> cirrus (+ 0/1 nodata/defective); keep 4 vegetation, 5 bare, 6 water.</li>
     <li>Chip rule in today's lab: <span class="accent">keep a chip only if its bad-SCL fraction is below a threshold</span> (e.g. &lt; 5–10%).</li>
@@ -528,8 +528,8 @@ items = cat.search(
     <li><b>Choose</b> from the zoo — knowing what's measured vs modeled, at what resolution, latency, error character.</li>
     <li><b>Reach</b> it cloud-natively — STAC to find, COG/Zarr to read only the bytes you need, chunking to make it fast.</li>
     <li><b>Shape</b> it — grid geometry (cos φ), anomalies vs climatology, the right regridding.</li>
-    <li><b>Curate</b> it — chips with QA masking and versioned, train-only, per-band stats.</li>
-    <li class="muted">Every FM paper's "Data" section is these four verbs. Most of the effort — and many of the bugs — live here.</li>
+    <li><b>Curate</b> it — chips with quality-assurance masking and versioned, train-only, per-band stats.</li>
+    <li class="muted">Every foundation-model paper's "Data" section is these four verbs. Most of the effort — and many of the bugs — live here.</li>
   </ul>
   <aside class="notes">1–2 min, breathe. This is the synthesis: today was one pipeline told four ways. In W7, when we pretrain on the chip store built today, zero new data code should be needed. Time check: ~55 min — move to the reading discussion.</aside>
 </section>
@@ -550,7 +550,7 @@ items = cat.search(
   <h2>The position in one slide</h2>
   <ul>
     <li>Claim: satellite data is not "images, but bigger" — it differs from natural images in ways that should <span class="accent">change how we design, train, and evaluate models</span>.</li>
-    <li>If true: EO-native architectures (SatMAE's temporal/spectral tokens, Scale-MAE's GSD encoding) are necessary, not decoration.</li>
+    <li>If true: satellite-native architectures (SatMAE's temporal/spectral tokens, Scale-MAE's ground-sample-distance encoding) are necessary, not decoration.</li>
     <li>If false: general vision backbones (DINOv3) should win — and on high-res RGB benchmarks, GEO-Bench-2 says they sometimes do.</li>
     <li class="muted">This tension is the course thesis; we test it empirically for the rest of the semester.</li>
   </ul>
@@ -565,7 +565,7 @@ items = cat.search(
   <ul>
     <li>Collect on the board: <span class="accent">five concrete ways satellite data differs from natural images</span> — concrete enough to change a line of code.</li>
     <li>Each must name its design consequence: tokenizer? positional encoding? masking scheme? loss? evaluation split?</li>
-    <li class="muted">We photograph this board and re-grade it in W7 (EO FMs) and during the async capstone sprints via GitHub.</li>
+    <li class="muted">We photograph this board and re-grade it in W7 (Earth-observation foundation models) and during the async capstone sprints via GitHub.</li>
   </ul>
   <div class="foot"><span>Rule: "there's more of it" is not a difference — scale of archive vs scarcity of labels is</span></div>
   <aside class="notes">6–7 min. Target list to steer toward (don't reveal upfront): (1) metric scale/GSD is meaningful and varies by orders of magnitude → Scale-MAE's GSD positional encoding; (2) many physically-meaningful spectral channels and sensor types beyond RGB → SatMAE's band groups, DOFA's wavelength-conditioned embeddings; (3) revisit structure — the same place imaged repeatedly, irregularly → temporal tokens, pixel-time-series models; (4) every pixel is georeferenced → auxiliary data joins, spatial autocorrelation, non-IID splits (W2 callback); (5) planetary unlabeled archives vs scarce, geographically biased labels → SSL pretraining as the default, label-shift-aware evaluation. If students propose others (nadir viewpoint, no canonical orientation, physical units vs perceptual RGB), take them — five is a floor for discussion, not a ceiling.</aside>
@@ -577,7 +577,7 @@ items = cat.search(
   <h2>Rolf et al. 2024 — discussion questions</h2>
   <ol>
     <li>Which of Rolf's claimed distinctions actually change architecture choices (cite SatMAE/Scale-MAE design decisions)?</li>
-    <li>Reanalysis is a model product — what does that mean for 'ground truth' when we evaluate a weather FM against ERA5?</li>
+    <li>Reanalysis is a model product — what does that mean for 'ground truth' when we evaluate a weather foundation model against ERA5?</li>
     <li>Why is chunking layout a scientific issue, not just an engineering one?</li>
   </ol>
   <p class="small muted">Groups of 4–5, working from your published entrance tickets (Journal Club tab on the course site) · this week’s lead pair moderates · these three questions are the agenda.</p>
@@ -593,7 +593,7 @@ items = cat.search(
   <h2>Today's lab: two ETL pipes, one reusable module</h2>
   <div class="card small">
     <p><b>Pipe (a) — ERA5.</b> Open WeatherBench2's public ERA5 Zarr (5.625° subset) with xarray → compute a <b>Z500 climatology + anomaly field</b> → verify the <b>cos-lat weighted global mean of T2m against the naive mean</b>. <span class="pill">WB2 ERA5 Zarr</span> <span class="pill">xarray · zarr · gcsfs</span></p>
-    <p><b>Pipe (b) — Sentinel-2.</b> Pull ~200 <b>S2 L2A chips</b> (64×64, 4 bands) over South Korea via STAC (Earth Search on AWS) or HLS via earthaccess, <b>SCL cloud/QA filtering at chip selection</b> → local Zarr/NPZ <b>chip store with per-band stats</b>. <span class="pill">STAC / Earth Search</span> <span class="pill">pystac-client · stackstac · earthaccess</span></p>
+    <p><b>Pipe (b) — Sentinel-2.</b> Pull ~200 <b>S2 L2A chips</b> (64×64, 4 bands) over South Korea via STAC (Earth Search on AWS) or HLS via earthaccess, <b>cloud/quality filtering (the SCL band) at chip selection</b> → local Zarr/NPZ <b>chip store with per-band stats</b>. <span class="pill">STAC / Earth Search</span> <span class="pill">pystac-client · stackstac · earthaccess</span></p>
     <p><b>Deliverable.</b> Reusable <code>data/</code> module + Note 03: chip gallery, anomaly map, weighted-vs-naive mean table. <b>This chip store is reused in W7.</b></p>
   </div>
   <ul class="small">
