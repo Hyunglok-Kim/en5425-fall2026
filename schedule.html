@@ -109,10 +109,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? ` <span class="pill">${t("assigned in class &#183; ticket due with W2", "수업에서 배정 &#183; 티켓은 W2와 함께")}</span>`
         : rd.memo && rd.memo !== "none"
         ? ` <span class="pill acc">${esc(rd.memo)}</span>` : "";
+      /* week pages open one week before class (00:00 KST) — mark still-locked rows */
+      const unlockIso = w.date ? (() => { const d = new Date(w.date + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() - 7); return d.toISOString().slice(0, 10); })() : null;
+      const todayKST = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+      const lockMark = unlockIso && todayKST < unlockIso
+        ? ` <span title="${t(`opens ${fmtDate(unlockIso)}`, `${esc(fmtDate(unlockIso))} 공개`)}" style="opacity:.55;font-size:12px">&#128274;</span>` : "";
       html += `<tr>
         <td class="num"><a href="week.html?w=${w.n}"><b>${w.n}</b></a></td>
         <td class="tnum">${esc(fmtDate(w.date))}</td>
-        <td class="topic"><b><a href="week.html?w=${w.n}">${esc(wTitle(w))}</a></b><br>
+        <td class="topic"><b><a href="week.html?w=${w.n}">${esc(wTitle(w))}</a></b>${lockMark}<br>
           <span class="sub" style="margin:0">${esc(wGoal(w) || "")}</span></td>
         <td>${esc(firstSentence((ko() && lab.task_ko) || lab.task))}${dataPills ? `<div class="pills">${dataPills}</div>` : ""}</td>
         <td>${readLinks || '<span class="sub" style="margin:0">—</span>'}${memoPill}${bookLine}${vidLine}</td>

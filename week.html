@@ -31,6 +31,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     const title = (ko && w.title_ko) ? w.title_ko : w.title;
     const goal = (ko && w.goal_ko) ? w.goal_ko : w.goal;
     document.title = t(`EN5425 · Week ${n} · ${title}`, `EN5425 · ${n}주차 · ${title}`);
+
+    /* Each week opens one week before its class date (00:00 KST) — students see
+       only the current and next week in advance; PI/TA accounts preview all. */
+    const addDays = (iso, k) => { const d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + k); return d.toISOString().slice(0, 10); };
+    const todayKST = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+    const unlockIso = w.date ? addDays(w.date, -7) : null;
+    let previewNote = "";
+    if (unlockIso && todayKST < unlockIso) {
+      const st = await siteSession();
+      const isPI = st.mode === "authed" && st.me.role === "pi";
+      const [, um, ud] = unlockIso.split("-").map(Number);
+      const opensOn = t(fmtDate(unlockIso), `${um}월 ${ud}일`);
+      if (!isPI) {
+        el.innerHTML = `
+          <p class="eyebrow">${t(`Week ${n}`, `${n}주차`)}${w.date ? " · " + esc(fmtDate(w.date)) : ""}</p>
+          <h1>${esc(title)}</h1>
+          <div class="note" style="margin-top:18px"><b>&#128274; ${t("Not open yet.", "아직 공개 전입니다.")}</b> ${t(
+            `This week's page opens on <b>${opensOn}</b>, one week before the class.`,
+            `이 주차 내용은 강의 전주인 <b>${opensOn}</b>에 공개됩니다.`)}</div>
+          <p class="sub" style="margin-top:12px">${t(
+            "Only the current week and the next week are open in advance.",
+            "지금 주차와 다음 주차까지만 미리 볼 수 있습니다.")}</p>
+          <p style="margin-top:20px"><a class="btn" href="schedule.html">${t("&#8592; Back to schedule", "&#8592; 주차별 일정으로")}</a></p>`;
+        return;
+      }
+      previewNote = `<div class="note" style="margin-top:14px"><b>&#128274; ${t("Instructor preview", "검토용 미리보기")}</b> — ${t(
+        `students see this page from <b>${opensOn}</b>.`, `학생에게는 <b>${opensOn}</b>에 공개됩니다.`)}</div>`;
+    }
     const lab = w.lab || {}, rd = w.reading || {};
     const primary = Array.isArray(rd.primary) ? rd.primary : [];
     const optional = Array.isArray(rd.optional) ? rd.optional : [];
@@ -41,6 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     el.innerHTML = `
       <p class="eyebrow">${t(`Week ${n}`, `${n}주차`)} · ${esc((ko && { "Foundations": "기초", "Pretraining Core": "프리트레이닝 핵심", "Foundation Models": "파운데이션 모델", "Capstone Sprints": "Capstone 스프린트" }[w.phase]) || w.phase || "")}${w.date ? " · " + esc(fmtDate(w.date)) : ""}${w.instructor ? " · " + esc(w.instructor) : ""}</p>
       <h1>${esc(title)}</h1>
+      ${previewNote}
       <p class="lede">${esc(goal || "")}</p>
       ${w.slides ? `<p style="margin-top:10px"><a class="btn" href="slides/week${String(n).padStart(2, "0")}.html">${t("Lecture slides →", "강의 슬라이드 →")}</a></p>` : ""}
 

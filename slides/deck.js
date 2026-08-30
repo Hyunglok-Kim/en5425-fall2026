@@ -6,6 +6,34 @@ try {
   const th = localStorage.getItem("en5425-theme");
   if (th) document.documentElement.dataset.theme = th;
 } catch {}
+/* Decks unlock one week before their class date (00:00 KST), same as week pages;
+   PI/TA accounts preview all. Fails open (e.g. file:// rehearsal, missing JSON). */
+(async () => {
+  const m = location.pathname.match(/week(\d+)\.html$/);
+  if (!m) return;
+  try {
+    const { weeks } = await (await fetch("../data/weeks.json", { cache: "no-store" })).json();
+    const w = (weeks || []).find((x) => x.n === parseInt(m[1], 10));
+    if (!w || !w.date) return;
+    const d = new Date(w.date + "T00:00:00Z");
+    d.setUTCDate(d.getUTCDate() - 7);
+    const unlock = d.toISOString().slice(0, 10);
+    const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+    if (today >= unlock) return;
+    try {
+      const r = await fetch("/api/me", { cache: "no-store" });
+      if (r.ok && (await r.json()).role === "pi") return;
+    } catch {}
+    const [, mm, dd] = unlock.split("-").map(Number);
+    document.body.innerHTML =
+      `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center">
+        <div><div style="font-size:40px">&#128274;</div>
+          <p style="font-size:20px;font-weight:600;margin:14px 0 6px">이 슬라이드는 강의 전주인 ${mm}월 ${dd}일에 공개됩니다.</p>
+          <p style="opacity:.7;margin:0">These slides open on ${unlock}, one week before the class.</p>
+          <p style="margin-top:22px"><a href="../schedule.html" style="color:inherit">&#8592; 주차별 일정 · Schedule</a></p>
+        </div></div>`;
+  } catch {}
+})();
 document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("deck");
   const slides = [...document.querySelectorAll("section.slide")];
