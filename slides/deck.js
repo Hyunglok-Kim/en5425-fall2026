@@ -53,7 +53,25 @@ document.addEventListener("DOMContentLoaded", () => {
     slides.forEach((s, k) => s.classList.toggle("on", k === cur));
     counter.textContent = `${cur + 1} / ${slides.length}`;
     history.replaceState(null, "", `#${cur + 1}`);
+    document.dispatchEvent(new CustomEvent("deck:slide", { detail: cur }));
   }
+  /* in-slide YouTube: click an <a class="yt" data-id> to swap its thumbnail for an
+     autoplaying embed; leaving the slide restores the thumbnail (and stops audio) */
+  document.querySelectorAll("a.yt[data-id]").forEach((a) => {
+    const box = a.querySelector(".ytbox");
+    if (!box) return;
+    const original = box.innerHTML;
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      box.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${a.dataset.id}?autoplay=1&rel=0"
+        style="width:100%;aspect-ratio:16/9;border:0;border-radius:8px;display:block"
+        allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+    });
+    document.addEventListener("deck:slide", () => {
+      if (!a.closest("section.slide").classList.contains("on") && box.querySelector("iframe"))
+        box.innerHTML = original;
+    });
+  });
   show(cur);
 
   document.addEventListener("keydown", (e) => {
