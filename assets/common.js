@@ -31,7 +31,6 @@ const NAV = [
   ["capstone", "Capstone", "프로젝트", "capstone.html"],
   ["setup", "Setup", "환경 설정", "setup.html"],
   ["students", "Students", "수강생", "students.html"],
-  ["signin", "Sign in", "로그인", "/portal/login.html"],
 ];
 /* Semester tracker: W1 begins Mon 2026-08-31 (KST). */
 const SEMESTER_START = "2026-08-31";
@@ -71,6 +70,9 @@ function injectNav() {
     ${NAV.map(([id, en, ko, href]) =>
       `<a class="item${id === page ? " on" : ""}" href="${href.startsWith("/") ? P + href.slice(1) : P + href}">${lang === "ko" ? ko : en}</a>`).join("")}
     <span class="nav-date tnum">${navDateChip(lang)}</span>
+    <span id="navAuth" style="display:flex;gap:10px;align-items:center;white-space:nowrap">
+      <a class="item" href="${P}portal/login.html">${lang === "ko" ? "로그인" : "Sign in"}</a>
+    </span>
     <button class="btn lang-btn" id="langBtn" type="button"
       aria-label="Switch language">${lang === "ko" ? "EN" : "한국어"}</button>
   </div>`;
@@ -150,25 +152,23 @@ async function liveClassURL() {
   } catch { return null; }
 }
 async function navSession() {
-  const link = document.querySelector('.site-nav a[href$="portal/login.html"]');
-  if (!link) return null;
+  const slot = document.getElementById("navAuth");
+  if (!slot) return null;
   const st = await siteSession();
   if (st.mode === "authed") {
     if (st.me.must_change) { location.href = "/portal/login.html#change"; return st; }
-    const wrap = document.createElement("span");
-    wrap.style.cssText = "display:flex;gap:10px;align-items:center";
-    wrap.innerHTML = `${st.me.role === "pi"
+    slot.innerHTML = `${st.me.role === "pi"
         ? `<a class="item" href="/portal/admin.html">${t("Grades", "성적 관리")}</a>` : ""}
       <span class="item" style="color:var(--accent);font-weight:600">${esc(st.me.name || st.me.sid)}</span>
       <a class="item" href="#" id="navLogout">${t("Sign out", "로그아웃")}</a>`;
-    link.replaceWith(wrap);
-    wrap.querySelector("#navLogout").addEventListener("click", async (e) => {
+    slot.querySelector("#navLogout").addEventListener("click", async (e) => {
       e.preventDefault();
       try { await fetch("/api/logout", { method: "POST", headers: XHDR }); } catch {}
       location.reload();
     });
   } else if (st.mode === "anon") {
-    link.href = "/portal/login.html?next=" + encodeURIComponent(location.pathname + location.search);
+    const a = slot.querySelector("a");
+    if (a) a.href = "/portal/login.html?next=" + encodeURIComponent(location.pathname + location.search);
   }
   return st;
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T17:56:21+09:00",
+  "updated": "2026-08-30T18:05:51+09:00",
   "assignments": [
     {
       "id": "hw0",
@@ -332,8 +332,8 @@
       "bio": null,
       "status": {
         "hw0": "due",
-        "memo01": "due",
-        "memo02": "due",
+        "memo01": "ok",
+        "memo02": "ok",
         "memo03": "due",
         "memo04": "due",
         "memo05": "due",

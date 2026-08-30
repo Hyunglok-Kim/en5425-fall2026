@@ -1,4 +1,25 @@
 {
-  "updated": "2026-08-30T17:56:21+09:00",
-  "weeks": {}
+  "updated": "2026-08-30T18:05:51+09:00",
+  "weeks": {
+    "01": [
+      {
+        "gh": "",
+        "display": "Student 4046",
+        "photo": "assets/students/44766ad66201.png",
+        "at": "2026-08-30T18:05:39+09:00",
+        "late": false,
+        "ticket": "test"
+      }
+    ],
+    "02": [
+      {
+        "gh": "",
+        "display": "Student 4046",
+        "photo": "assets/students/44766ad66201.png",
+        "at": "2026-08-30T18:05:51+09:00",
+        "late": false,
+        "ticket": "testtest"
+      }
+    ]
+  }
 }
