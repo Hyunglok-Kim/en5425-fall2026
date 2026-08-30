@@ -8,6 +8,8 @@
 <script src="assets/common.js" defer></script>
 <style>
   td.topic b { font-family:var(--serif); font-size:14px; }
+  tr.evrow td { background:var(--wash); font-size:12.5px; color:var(--ink-2); }
+  tr.evrow.exam td { border-left:3px solid var(--accent); font-weight:600; color:var(--ink); }
   td .pills { margin-top:4px; display:flex; flex-wrap:wrap; gap:4px; }
   #sched td { min-width:0; }
   #sched td:nth-child(3) { min-width:280px; }
@@ -55,7 +57,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return m ? m[0] : s;
   };
   try {
-    const { weeks } = await loadJSON("weeks");
+    const { weeks, events = [] } = await loadJSON("weeks");
     const ko = () => document.body.dataset.lang === "ko";
     const wTitle = (w) => (ko() && w.title_ko) ? w.title_ko : w.title;
     const wGoal = (w) => (ko() && w.goal_ko) ? w.goal_ko : w.goal;
@@ -93,6 +95,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td>${esc(firstSentence(lab.task))}${dataPills ? `<div class="pills">${dataPills}</div>` : ""}</td>
         <td>${readLinks || '<span class="sub" style="margin:0">—</span>'}${memoPill}</td>
       </tr>`;
+      for (const ev of events.filter((e) => e.after === w.n)) {
+        const evTitle = (document.body.dataset.lang === "ko" && ev.title_ko) ? ev.title_ko : ev.title;
+        html += `<tr class="evrow ${ev.kind}">
+          <td class="num">${ev.kind === "exam" ? "✎" : "—"}</td>
+          <td class="tnum">${esc(fmtDate(ev.date))}</td>
+          <td colspan="3">${esc(evTitle)}</td>
+        </tr>`;
+      }
     }
     tb.innerHTML = html || `<tr><td colspan="5"><span class="sub">${t("Schedule coming soon.", "일정을 곧 공개합니다.")}</span></td></tr>`;
   } catch {

@@ -1126,5 +1126,21 @@
       ],
       "async": true
     }
+  ],
+  "events": [
+    {
+      "after": 5,
+      "date": "2026-10-05",
+      "kind": "noclass",
+      "title": "No class — substitute holiday (National Foundation Day)",
+      "title_ko": "휴강 — 개천절 대체공휴일"
+    },
+    {
+      "after": 6,
+      "date": "2026-10-19",
+      "kind": "exam",
+      "title": "Book Check — 60′ closed-book on the hand-summarized chapters (Goodfellow 5/6/8/9/10 + d2l 11) · counts as 2 quiz slots · TA-proctored, no lecture",
+      "title_ko": "교과서 점검 — 손으로 정리한 챕터(Goodfellow 5·6·8·9·10 + d2l 11) 범위 60분 closed-book · 퀴즈 2회분 반영 · 조교 감독, 강의 없음"
+    }
   ]
 }
