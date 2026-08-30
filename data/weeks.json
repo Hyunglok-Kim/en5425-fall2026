@@ -141,7 +141,8 @@
         ],
         "book": {
           "title": "Goodfellow, Deep Learning — Ch. 6 (Deep Feedforward Networks, §6.1–6.5) + Ch. 8 (Optimization, §8.1–8.5)",
-          "link": "https://www.deeplearningbook.org/contents/mlp.html"
+          "link": "https://www.deeplearningbook.org/contents/mlp.html",
+          "short": "Goodfellow Ch. 6 + 8"
         }
       },
       "skills": [
@@ -220,7 +221,8 @@
         ],
         "book": {
           "title": "Goodfellow, Deep Learning — Ch. 5 (Machine Learning Basics, §5.1–5.5)",
-          "link": "https://www.deeplearningbook.org/contents/ml.html"
+          "link": "https://www.deeplearningbook.org/contents/ml.html",
+          "short": "Goodfellow Ch. 5"
         }
       },
       "skills": [
@@ -296,7 +298,8 @@
         ],
         "book": {
           "title": "Goodfellow, Deep Learning — Ch. 9 (Convolutional Networks, §9.1–9.5)",
-          "link": "https://www.deeplearningbook.org/contents/convnets.html"
+          "link": "https://www.deeplearningbook.org/contents/convnets.html",
+          "short": "Goodfellow Ch. 9"
         }
       },
       "skills": [
@@ -371,7 +374,8 @@
         ],
         "book": {
           "title": "Goodfellow, Deep Learning — Ch. 10 (Sequence Modeling, §10.1–10.7)",
-          "link": "https://www.deeplearningbook.org/contents/rnn.html"
+          "link": "https://www.deeplearningbook.org/contents/rnn.html",
+          "short": "Goodfellow Ch. 10"
         }
       },
       "skills": [
@@ -446,7 +450,8 @@
         ],
         "book": {
           "title": "Dive into Deep Learning (d2l.ai) — Ch. 11 (Attention Mechanisms & Transformers)",
-          "link": "https://d2l.ai/chapter_attention-mechanisms-and-transformers/index.html"
+          "link": "https://d2l.ai/chapter_attention-mechanisms-and-transformers/index.html",
+          "short": "d2l Ch. 11"
         }
       },
       "skills": [
@@ -525,7 +530,8 @@
         ],
         "book": {
           "title": "Goodfellow, Deep Learning — Ch. 14 (Autoencoders, §14.1–14.5)",
-          "link": "https://www.deeplearningbook.org/contents/autoencoders.html"
+          "link": "https://www.deeplearningbook.org/contents/autoencoders.html",
+          "short": "Goodfellow Ch. 14"
         }
       },
       "skills": [
@@ -651,7 +657,8 @@
         ],
         "book": {
           "title": "Goodfellow, Deep Learning — Ch. 11 (Practical Methodology)",
-          "link": "https://www.deeplearningbook.org/contents/guidelines.html"
+          "link": "https://www.deeplearningbook.org/contents/guidelines.html",
+          "short": "Goodfellow Ch. 11"
         }
       },
       "skills": [

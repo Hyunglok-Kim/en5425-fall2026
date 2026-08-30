@@ -83,6 +83,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           ? `<br><a href="week.html?w=${w.n}" class="sub" style="margin:0">${t(`+${optional.length - 3} more…`, `+${optional.length - 3}편 더…`)}</a>` : "";
         readLinks = `<span class="sub" style="margin:0">${t("optional:", "선택:")}</span><br>${shown}${more}`;
       }
+      const bookLine = rd.book
+        ? `<br><span class="sub" style="margin:0">${t("book:", "책:")} ${rd.book.link
+            ? `<a href="${esc(rd.book.link)}">${esc(rd.book.short || rd.book.title)}</a>`
+            : esc(rd.book.short || rd.book.title)} <span class="pill">${t("1p handwritten", "1p 손글씨")}</span></span>`
+        : "";
       const memoPill = w.n === 1
         ? ` <span class="pill">${t("assigned in class &#183; ticket due with W2", "수업에서 배정 &#183; 티켓은 W2와 함께")}</span>`
         : rd.memo && rd.memo !== "none"
@@ -93,7 +98,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td class="topic"><b><a href="week.html?w=${w.n}">${esc(wTitle(w))}</a></b><br>
           <span class="sub" style="margin:0">${esc(wGoal(w) || "")}</span></td>
         <td>${esc(firstSentence(lab.task))}${dataPills ? `<div class="pills">${dataPills}</div>` : ""}</td>
-        <td>${readLinks || '<span class="sub" style="margin:0">—</span>'}${memoPill}</td>
+        <td>${readLinks || '<span class="sub" style="margin:0">—</span>'}${memoPill}${bookLine}</td>
       </tr>`;
       for (const ev of events.filter((e) => e.after === w.n)) {
         const evTitle = (document.body.dataset.lang === "ko" && ev.title_ko) ? ev.title_ko : ev.title;
