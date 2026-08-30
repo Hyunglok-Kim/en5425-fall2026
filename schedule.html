@@ -7,11 +7,15 @@
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/common.js" defer></script>
 <style>
+  /* This page goes wide: the 5-column table needs more than the site's 880px column. */
+  .wrap { max-width:1280px; }
+  .site-nav .in { max-width:1280px; }
   td.topic b { font-family:var(--serif); font-size:14px; }
   td .pills { margin-top:4px; display:flex; flex-wrap:wrap; gap:4px; }
   #sched td { min-width:0; }
-  #sched td:nth-child(3) { min-width:220px; }
-  #sched td:nth-child(4), #sched td:nth-child(5) { min-width:200px; }
+  #sched td:nth-child(3) { min-width:280px; }
+  #sched td:nth-child(4) { min-width:250px; }
+  #sched td:nth-child(5) { min-width:240px; }
 </style>
 </head>
 <body data-page="schedule">
