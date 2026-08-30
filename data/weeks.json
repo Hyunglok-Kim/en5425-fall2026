@@ -64,6 +64,31 @@
           {
             "title": "Kaggle notebooks — docs (GPU quota)",
             "link": "https://www.kaggle.com/docs/notebooks"
+          },
+          {
+            "title": "Mastering Claude Code in 30 minutes",
+            "link": "https://www.youtube.com/watch?v=6eBSHbLKuN0",
+            "minutes": 28
+          },
+          {
+            "title": "OpenAI Codex in your code editor",
+            "link": "https://www.youtube.com/watch?v=sd21Igx4HtA",
+            "minutes": 7
+          },
+          {
+            "title": "Making the most of Colab (TF Dev Summit '20)",
+            "link": "https://www.youtube.com/watch?v=pnClcwTCyc0",
+            "minutes": 7
+          },
+          {
+            "title": "How to use Kaggle Notebooks",
+            "link": "https://www.youtube.com/watch?v=BPQDZLPtgDc",
+            "minutes": 4
+          },
+          {
+            "title": "How to take advantage of GPUs and TPUs for your ML project (Coding TensorFlow)",
+            "link": "https://www.youtube.com/watch?v=tCYSce6l8gA",
+            "minutes": 4
           }
         ]
       },
