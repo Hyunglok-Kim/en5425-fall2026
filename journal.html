@@ -130,6 +130,8 @@
    does not exist; the boxes then point to the live class address (taken
    from the pinned announcement). */
 const XH = { "X-EN5425": "1" };
+let _stP = null;
+function apiStateOnce() { if (!_stP) _stP = apiState(); return _stP; }
 async function apiState() {
   try {
     const r = await fetch("/api/me", { cache: "no-store" });
@@ -141,8 +143,9 @@ async function apiState() {
 async function liveURL() { return liveClassURL(); }
 
 /* discussion groups: hidden until 13:00 on class day; leader starred */
-async function initGroupBoxes() {
-  const boxes = $$(".grpbox");
+async function initGroupBoxes(scope) {
+  const boxes = $$(".grpbox:not([data-init])", scope || document);
+  boxes.forEach((b) => { b.dataset.init = "1"; });
   if (!boxes.length) return;
   for (const b of boxes) {
     const n = b.dataset.week;
@@ -170,10 +173,11 @@ async function initGroupBoxes() {
         </div>`).join("")}</div>`;
   }
 }
-async function initTicketBoxes() {
-  const boxes = $$(".mybox");
+async function initTicketBoxes(scope) {
+  const boxes = $$(".mybox:not([data-init])", scope || document);
+  boxes.forEach((b) => { b.dataset.init = "1"; });
   if (!boxes.length) return;
-  const st = await apiState();
+  const st = await apiStateOnce();
   if (st.mode === "authed" && st.me.must_change) { location.href = "/portal/login.html#change"; return; }
 
   if (st.mode === "mirror") {
@@ -204,8 +208,11 @@ async function initTicketBoxes() {
           const j = await r.json();
           if (!r.ok) throw new Error(j.detail || "login failed");
           if (j.must_change) { location.href = "/portal/login.html#change"; return; }
-          initTicketBoxes();
-    initGroupBoxes();
+          $$("details.jcweek").forEach((d) => {
+      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); };
+      d.addEventListener("toggle", () => { if (d.open) initHere(); });
+      if (d.open) initHere();
+    });
         } catch (err) { b.querySelector(".gerr").textContent = err.message; }
       });
       continue;
@@ -344,8 +351,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }).join("") + (journal.updated ? `<p class="sub" style="margin-top:14px">${esc(
       t("Updated ", "업데이트 ") + (fmtDate(String(journal.updated).slice(0, 10)) || journal.updated))}</p>` : "");
 
-    initTicketBoxes();
-    initGroupBoxes();
+    $$("details.jcweek").forEach((d) => {
+      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); };
+      d.addEventListener("toggle", () => { if (d.open) initHere(); });
+      if (d.open) initHere();
+    });
 
     if (new URLSearchParams(location.search).get("w")) {
       const target = document.getElementById("wk" + cur);

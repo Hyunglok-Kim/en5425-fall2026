@@ -71,70 +71,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     const todayK = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
     const upcoming = jcWeeks.find((w) => w.date && w.date >= todayK);
     const cur = (upcoming || jcWeeks[jcWeeks.length - 1]).n;
-
     const wTitle = (w) => (ko && w.title_ko) ? w.title_ko : w.title;
-    let html = "";
+    const liveP = st.mode === "mirror" ? liveClassURL() : null;
 
+    /* shells first — a week's data loads only when its panel is open */
+    let html = "";
     for (const w of jcWeeks) {
-      let body = "";
-      if (st.mode === "mirror") {
-        const live = await liveClassURL();
-        body = `<p class="sub" style="margin:12px 0 0">${live
-          ? `<a class="btn primary" href="${esc(live)}/present.html">${t("Open on the live class site →", "수업용 주소에서 열기 →")}</a>`
-          : t("Group cards and slides open on the live class address.", "그룹 카드와 발표자료는 수업용 주소에서 열려요.")}</p>`;
-      } else if (st.mode === "anon") {
-        body = `<p class="sub" style="margin:12px 0 0"><a class="btn primary"
-          href="/portal/login.html?next=${encodeURIComponent("/present.html")}">${t("Sign in to view", "로그인하고 보기")}</a></p>`;
-      } else {
-        let g = null, sl = null;
-        try { g = await (await fetch(`/api/groups?week=${w.n}`, { cache: "no-store" })).json(); } catch {}
-        try { sl = await (await fetch(`/api/slides?week=${w.n}`, { cache: "no-store" })).json(); } catch {}
-        if (!g || g.exists === false) {
-          body = `<p class="sub" style="margin:12px 0 0">${t("Groups are not made yet.", "아직 그룹 편성 전이에요.")}</p>`;
-        } else if (g.hidden) {
-          body = `<p class="sub" style="margin:12px 0 0">${t(
-            `Groups, leaders, and presenters are revealed at 13:00 on class day (${fmtDate(String(g.reveal_at).slice(0, 10))}).`,
-            `그룹·리더·발표자는 수업 당일 13:00에 공개돼요 (${fmtDate(String(g.reveal_at).slice(0, 10))}).`)}</p>`;
-        } else {
-          const previewPill = g.preview
-            ? `<p class="sub" style="margin:10px 0 0"><span class="pill acc">${t("PI preview — hidden from students until 13:00 on class day", "PI 미리보기 — 학생에게는 수업 당일 13:00까지 비공개")}</span></p>` : "";
-          const slByG = {};
-          (sl && sl.groups || []).forEach((x) => { slByG[x.g] = x; });
-          body = previewPill + `<div class="grp-grid">${(g.groups || []).map((grp, i) => {
-            const s2 = slByG[i + 1] || {};
-            const open = s2.has
-              ? `<a class="btn primary" href="/api/slides/file?week=${w.n}&g=${i + 1}" target="_blank" rel="noopener">${t("Open slides", "발표자료 열기")}${s2.ext ? ` (${esc(s2.ext.toUpperCase())})` : ""}</a>`
-              : `<span class="sub" style="margin:0">${t("No slides yet.", "아직 업로드 전이에요.")}</span>`;
-            return `<div class="grp-card"><p class="grp-t">${t("Group", "그룹")} ${i + 1}</p>
-              ${grp.members.map((m) => `<div class="grp-m${m.leader ? " lead" : ""}${m.presenter ? " pres" : ""}">
-                ${face(m.display, m.photo)}
-                <span>${esc(m.display)}${m.leader ? ` <span class="grp-star">★ ${t("leader", "리더")}</span>` : ""}${m.presenter ? ` <span class="grp-star" style="color:var(--ok)">◆ ${t("presenter", "발표자")}</span>` : ""}</span>
-              </div>`).join("")}
-              <div class="slide-row">${open}${s2.at ? `<span class="sub" style="margin:0">${esc(String(s2.at).slice(5, 16).replace("T", " "))}</span>` : ""}</div>
-            </div>`;
-          }).join("")}</div>`;
-          /* presenter's upload box */
-          const myRow = (sl && sl.groups || []).find((x) => x.presenter &&
-            st.me && (x.presenter === (st.me.display || ("Student " + st.me.sid.slice(-4)))));
-          if (myRow) {
-            body += `<div class="upbox" data-week="${w.n}">
-              <p class="grp-t">${t("You are this week's presenter — upload your group's slides (PDF, ≤ 3 MB)", "이번 주 발표자예요 — 그룹 발표자료를 올려 주세요 (PDF, 3 MB 이하)")}</p>
-              <input type="file" accept="application/pdf,.pdf">
-              <button class="btn primary" style="margin-left:8px">${myRow.has ? t("Replace", "다시 올리기") : t("Upload", "업로드")}</button>
-              <span class="sub uperr" style="margin:0 0 0 8px;color:var(--warn)"></span>
-            </div>`;
-          }
-        }
-      }
-      html += `<details class="pweek" id="pw${w.n}" ${w.n === cur ? "open" : ""}>
+      html += `<details class="pweek" id="pw${w.n}" data-week="${w.n}" ${w.n === cur ? "open" : ""}>
         <summary><span class="pw-wk">${t("Week " + w.n, w.n + "주차")}</span>
           <span class="pw-date">${esc(fmtDate(w.date))}</span>
           <span class="pw-title">${esc(wTitle(w))}</span></summary>
-        <div class="pw-body">${body}</div>
+        <div class="pw-body"><p class="sub" style="margin:12px 0 0">${t("Loading…", "불러오는 중…")}</p></div>
       </details>`;
     }
-
-    /* placeholders: midterm proposal pitches + final demos (collapsed for now) */
     html += `<details class="pweek"><summary><span class="pw-wk">${t("Week 8", "8주차")}</span>
         <span class="pw-date">Nov 2</span>
         <span class="pw-title">${t("Capstone proposal pitches — placeholder", "Capstone 제안서 발표 — 준비 중")}</span></summary>
@@ -147,11 +96,74 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="pw-body"><p class="sub" style="margin:12px 0 0">${t(
         "Recorded demo videos and release links will be collected and opened here in finals week.",
         "기말 주간에 녹화 데모 영상과 릴리스 링크를 여기서 모아 볼 수 있게 됩니다.")}</p></div></details>`;
-
     el.innerHTML = html;
 
+    async function weekBody(w) {
+      if (st.mode === "mirror") {
+        const live = await liveP;
+        return `<p class="sub" style="margin:12px 0 0">${live
+          ? `<a class="btn primary" href="${esc(live)}/present.html">${t("Open on the live class site →", "수업용 주소에서 열기 →")}</a>`
+          : t("Group cards and slides open on the live class address.", "그룹 카드와 발표자료는 수업용 주소에서 열려요.")}</p>`;
+      }
+      if (st.mode === "anon") {
+        return `<p class="sub" style="margin:12px 0 0"><a class="btn primary"
+          href="/portal/login.html?next=${encodeURIComponent("/present.html")}">${t("Sign in to view", "로그인하고 보기")}</a></p>`;
+      }
+      const [g, sl] = await Promise.all([
+        fetch(`/api/groups?week=${w.n}`, { cache: "no-store" }).then((r) => r.json()).catch(() => null),
+        fetch(`/api/slides?week=${w.n}`, { cache: "no-store" }).then((r) => r.json()).catch(() => null),
+      ]);
+      if (!g || g.exists === false)
+        return `<p class="sub" style="margin:12px 0 0">${t("Groups are not made yet.", "아직 그룹 편성 전이에요.")}</p>`;
+      if (g.hidden)
+        return `<p class="sub" style="margin:12px 0 0">${t(
+          `Groups, leaders, and presenters are revealed at 13:00 on class day (${fmtDate(String(g.reveal_at).slice(0, 10))}).`,
+          `그룹·리더·발표자는 수업 당일 13:00에 공개돼요 (${fmtDate(String(g.reveal_at).slice(0, 10))}).`)}</p>`;
+      const previewPill = g.preview
+        ? `<p class="sub" style="margin:10px 0 0"><span class="pill acc">${t("PI preview — hidden from students until 13:00 on class day", "PI 미리보기 — 학생에게는 수업 당일 13:00까지 비공개")}</span></p>` : "";
+      const slByG = {};
+      (sl && sl.groups || []).forEach((x) => { slByG[x.g] = x; });
+      let body = previewPill + `<div class="grp-grid">${(g.groups || []).map((grp, i) => {
+        const s2 = slByG[i + 1] || {};
+        const open = s2.has
+          ? `<a class="btn primary" href="/api/slides/file?week=${w.n}&g=${i + 1}" target="_blank" rel="noopener">${t("Open slides", "발표자료 열기")}${s2.ext ? ` (${esc(s2.ext.toUpperCase())})` : ""}</a>`
+          : `<span class="sub" style="margin:0">${t("No slides yet.", "아직 업로드 전이에요.")}</span>`;
+        return `<div class="grp-card"><p class="grp-t">${t("Group", "그룹")} ${i + 1}</p>
+          ${grp.members.map((m) => `<div class="grp-m${m.leader ? " lead" : ""}${m.presenter ? " pres" : ""}">
+            ${face(m.display, m.photo)}
+            <span>${esc(m.display)}${m.leader ? ` <span class="grp-star">★ ${t("leader", "리더")}</span>` : ""}${m.presenter ? ` <span class="grp-star" style="color:var(--ok)">◆ ${t("presenter", "발표자")}</span>` : ""}</span>
+          </div>`).join("")}
+          <div class="slide-row">${open}${s2.at ? `<span class="sub" style="margin:0">${esc(String(s2.at).slice(5, 16).replace("T", " "))}</span>` : ""}</div>
+        </div>`;
+      }).join("")}</div>`;
+      const myRow = (sl && sl.groups || []).find((x) => x.presenter &&
+        st.me && (x.presenter === (st.me.display || ("Student " + st.me.sid.slice(-4)))));
+      if (myRow) {
+        body += `<div class="upbox" data-week="${w.n}">
+          <p class="grp-t">${t("You are this week's presenter — upload your group's slides (PDF, ≤ 3 MB)", "이번 주 발표자예요 — 그룹 발표자료를 올려 주세요 (PDF, 3 MB 이하)")}</p>
+          <input type="file" accept="application/pdf,.pdf">
+          <button class="btn primary" style="margin-left:8px">${myRow.has ? t("Replace", "다시 올리기") : t("Upload", "업로드")}</button>
+          <span class="sub uperr" style="margin:0 0 0 8px;color:var(--warn)"></span>
+        </div>`;
+      }
+      return body;
+    }
+
+    async function loadWeek(d) {
+      if (d.dataset.loaded) return;
+      d.dataset.loaded = "1";
+      const w = jcWeeks.find((x) => x.n === parseInt(d.dataset.week, 10));
+      const bodyEl = d.querySelector(".pw-body");
+      try { bodyEl.innerHTML = await weekBody(w); wireUploads(bodyEl); }
+      catch { bodyEl.innerHTML = `<p class="sub" style="margin:12px 0 0">${t("Failed to load — reopen to retry.", "불러오지 못했어요 — 다시 펼쳐 보세요.")}</p>`; delete d.dataset.loaded; }
+    }
+    $$("details.pweek[data-week]").forEach((d) => {
+      d.addEventListener("toggle", () => { if (d.open) loadWeek(d); });
+      if (d.open) loadWeek(d);
+    });
+
     /* upload wiring */
-    $$(".upbox").forEach((b) => {
+    function wireUploads(scope) { $$(".upbox", scope).forEach((b) => {
       b.querySelector("button").addEventListener("click", async () => {
         const err = b.querySelector(".uperr");
         const f = b.querySelector('input[type="file"]').files[0];
@@ -168,7 +180,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           location.reload();
         } catch (e2) { err.textContent = e2.message; }
       });
-    });
+    }); }
   } catch {
     el.innerHTML = `<p class="sub" style="margin-top:24px">${t(
       "Couldn't load — refresh to try again.", "불러오지 못했어요 — 새로고침해 주세요.")}</p>`;
