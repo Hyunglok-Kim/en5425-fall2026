@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T18:36:17+09:00",
+  "updated": "2026-08-30T20:25:07+09:00",
   "assignments": [
     {
       "id": "hw0",
@@ -180,6 +180,91 @@
     {
       "id": "quiz12",
       "title": "Quiz W12"
+    },
+    {
+      "id": "book02",
+      "title": "Book summary W2",
+      "due": "2026-09-13T23:59:00+09:00"
+    },
+    {
+      "id": "book03",
+      "title": "Book summary W3",
+      "due": "2026-09-20T23:59:00+09:00"
+    },
+    {
+      "id": "book04",
+      "title": "Book summary W4",
+      "due": "2026-09-27T23:59:00+09:00"
+    },
+    {
+      "id": "book05",
+      "title": "Book summary W5",
+      "due": "2026-10-04T23:59:00+09:00"
+    },
+    {
+      "id": "book06",
+      "title": "Book summary W6",
+      "due": "2026-10-18T23:59:00+09:00"
+    },
+    {
+      "id": "book07",
+      "title": "Book summary W7",
+      "due": "2026-11-01T23:59:00+09:00"
+    },
+    {
+      "id": "book09",
+      "title": "Book summary W9",
+      "due": "2026-11-15T23:59:00+09:00"
+    },
+    {
+      "id": "vid02",
+      "title": "Video summary W2",
+      "due": "2026-09-13T23:59:00+09:00"
+    },
+    {
+      "id": "vid03",
+      "title": "Video summary W3",
+      "due": "2026-09-20T23:59:00+09:00"
+    },
+    {
+      "id": "vid04",
+      "title": "Video summary W4",
+      "due": "2026-09-27T23:59:00+09:00"
+    },
+    {
+      "id": "vid05",
+      "title": "Video summary W5",
+      "due": "2026-10-04T23:59:00+09:00"
+    },
+    {
+      "id": "vid06",
+      "title": "Video summary W6",
+      "due": "2026-10-18T23:59:00+09:00"
+    },
+    {
+      "id": "vid07",
+      "title": "Video summary W7",
+      "due": "2026-11-01T23:59:00+09:00"
+    },
+    {
+      "id": "vid09",
+      "title": "Video summary W9",
+      "due": "2026-11-15T23:59:00+09:00"
+    },
+    {
+      "id": "vid10",
+      "title": "Video summary W10",
+      "due": "2026-11-22T23:59:00+09:00"
+    },
+    {
+      "id": "vid11",
+      "title": "Video summary W11",
+      "due": "2026-11-29T23:59:00+09:00"
+    },
+    {
+      "id": "vid12",
+      "title": "Video summary W12",
+      "due": "2026-12-06T23:59:00+09:00"
     }
   ],
   "students": [
@@ -227,7 +312,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -274,7 +376,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -321,7 +440,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -332,7 +468,7 @@
       "bio": null,
       "status": {
         "hw0": "due",
-        "memo01": "ok",
+        "memo01": "due",
         "memo02": "ok",
         "memo03": "due",
         "memo04": "due",
@@ -368,7 +504,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -415,7 +568,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -462,7 +632,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -509,7 +696,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -556,7 +760,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -603,7 +824,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -650,7 +888,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -697,7 +952,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -744,7 +1016,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -791,7 +1080,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -838,7 +1144,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -885,7 +1208,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -932,7 +1272,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -979,7 +1336,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     },
     {
@@ -1026,7 +1400,24 @@
         "quiz09": "due",
         "quiz10": "due",
         "quiz11": "due",
-        "quiz12": "due"
+        "quiz12": "due",
+        "book02": "due",
+        "book03": "due",
+        "book04": "due",
+        "book05": "due",
+        "book06": "due",
+        "book07": "due",
+        "book09": "due",
+        "vid02": "due",
+        "vid03": "due",
+        "vid04": "due",
+        "vid05": "due",
+        "vid06": "due",
+        "vid07": "due",
+        "vid09": "due",
+        "vid10": "due",
+        "vid11": "due",
+        "vid12": "due"
       }
     }
   ]
