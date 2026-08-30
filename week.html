@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       <h2>${t("Lecture", "강의")}</h2>
       <div class="rows">${(w.concept || []).map((c) => `
         <div class="row"><span class="tnum" style="flex:none;width:38px;color:var(--muted)">${esc(c.min)}&#8242;</span>
-          <span>${esc(c.topic)}</span></div>`).join("")
+          <span>${esc((ko && c.topic_ko) || c.topic)}</span></div>`).join("")
         || `<div class="row"><span class="sub">${t("Details coming soon.", "세부 내용을 곧 공개합니다.")}</span></div>`}</div>
 
       ${questions.length && n === 1 ? `<h2>${t("Cold-call prompts", "콜드콜 질문")}</h2>
@@ -75,13 +75,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       <h2>${w.async || n === 16 ? t("Sprint deliverables", "스프린트 산출물") : t("Lab (60 min)", "실습 (60분)")}</h2>
       <div class="card">
-        <p style="margin:0">${esc(lab.task || t("Lab details coming soon.", "실습 세부 내용을 곧 공개합니다."))}</p>
+        <p style="margin:0">${esc((ko && lab.task_ko) || lab.task || t("Lab details coming soon.", "실습 세부 내용을 곧 공개합니다."))}</p>
         ${(lab.data || []).length ? `<p class="kv">${t("Data", "데이터")}</p><div class="pillrow">${pills(lab.data)}</div>` : ""}
         ${(lab.tools || []).length ? `<p class="kv">${t("Tools", "도구")}</p><div class="pillrow">${pills(lab.tools)}</div>` : ""}
         ${(lab.resources || []).length ? `<p class="kv">${t("Guides & videos", "가이드·영상")}</p>
           <ul style="margin-top:4px">${lab.resources.map((r) => `<li><a href="${esc(r.link)}">${esc(r.title)}</a>${r.minutes ? ` <span class="sub" style="margin:0;display:inline">~${esc(r.minutes)}${t(" min", "분")}</span>` : ""}</li>`).join("")}</ul>` : ""}
-        ${lab.deliverable ? `<p class="kv">${t("Deliverable", "제출물")}</p><p style="margin:0;font-size:13.5px">${esc(lab.deliverable)}</p>` : ""}
-        ${lab.homework ? `<div class="note" style="margin:14px 0 0"><b>${t("Homework", "과제")}</b> — ${esc(lab.homework)}</div>` : ""}
+        ${lab.deliverable ? `<p class="kv">${t("Deliverable", "제출물")}</p><p style="margin:0;font-size:13.5px">${esc((ko && lab.deliverable_ko) || lab.deliverable)}</p>` : ""}
+        ${lab.homework ? `<div class="note" style="margin:14px 0 0"><b>${t("Homework", "과제")}</b> — ${esc((ko && lab.homework_ko) || lab.homework)}</div>` : ""}
       </div>
 
       ${(() => {

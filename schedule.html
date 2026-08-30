@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td class="tnum">${esc(fmtDate(w.date))}</td>
         <td class="topic"><b><a href="week.html?w=${w.n}">${esc(wTitle(w))}</a></b><br>
           <span class="sub" style="margin:0">${esc(wGoal(w) || "")}</span></td>
-        <td>${esc(firstSentence(lab.task))}${dataPills ? `<div class="pills">${dataPills}</div>` : ""}</td>
+        <td>${esc(firstSentence((ko() && lab.task_ko) || lab.task))}${dataPills ? `<div class="pills">${dataPills}</div>` : ""}</td>
         <td>${readLinks || '<span class="sub" style="margin:0">—</span>'}${memoPill}${bookLine}${vidLine}</td>
       </tr>`;
       for (const ev of events.filter((e) => e.after === w.n)) {
