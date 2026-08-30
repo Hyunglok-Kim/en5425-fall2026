@@ -14,83 +14,98 @@
 
 <!-- 1 ▸ Title -->
 <section class="slide title">
-  <p class="kicker">EN5425 / EV4240 · Week 1 · Fall 2026 · 환영합니다</p>
+  <p class="kicker">EN5425 / EV4240 · Week 1 · Fall 2026 · Welcome</p>
   <h1>Teaching Machines to Read the Earth</h1>
-  <p class="big muted">Welcome to <i>Deep Learning Applications in Environmental Big Data</i>. Today: what this course is, what it honestly costs, and whether it is for you — 오늘 하루면 알 수 있습니다.</p>
-  <div class="foot"><span>Course Overview, the 2026 FM Landscape, and AI-Native Engineering</span><span>Prof. Hyunglok Kim · HydroAI Lab · GIST</span></div>
+  <p class="big muted">Welcome to <i>Deep Learning Applications in Environmental Big Data</i>. Today: what this course is, what it honestly costs, and whether it is for you — by the end of today, you will know.</p>
+  <div class="foot"><span>Course Overview, the 2026 Foundation-Model Landscape, and AI-Native Engineering</span><span>Prof. Hyunglok Kim · HydroAI Lab · GIST</span></div>
   <aside class="notes">On screen as students arrive and sign attendance. Greet people warmly as they come in — this is the one day the room should feel welcoming before it becomes a lab meeting. Wi-Fi info and the course-site QR are posted at the front. Start at 0:00 sharp.</aside>
 </section>
 
 <!-- 2 ▸ The story -->
 <section class="slide">
   <p class="kicker">Part 1 · Welcome · 0:00–0:08</p>
-  <h2>이 과목은 무엇인가 — what is this course?</h2>
-  <div class="fill">
-    <p class="big">Right now, satellites are watching the Earth — soil drying near 광주, a typhoon organizing over the Pacific, forests breathing in and out. <span class="accent">This course teaches you to teach machines to read all of it.</span></p>
-    <p class="big muted">And by December, the model you taught will be public — released under your own name.</p>
+  <h2>What is this course about?</h2>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr">
+    <div class="fill">
+      <p class="big">Right now, hundreds of satellites are watching the Earth — a typhoon organizing over the Pacific, soil drying around Gwangju, forests breathing in and out.</p>
+      <p class="big"><span class="accent">This course is about teaching machines to read all of it</span> — you will learn, hands-on, roughly how such models are built, end to end.</p>
+      <p class="big muted">And by December, a model you trained will be public — under your own name.</p>
+    </div>
+    <div class="figure"><img src="img/real-hurricane.jpg" alt="Hurricane Genevieve photographed from the International Space Station" style="max-width:100%;max-height:100%;border-radius:12px;object-fit:cover"></div>
   </div>
-  <aside class="notes">Tell it as a story, not a syllabus item: satellites → data → a model that learns to read the planet → your name on the release. Thirty seconds, warm register. Then advance to the picture of the same sentence.</aside>
+  <div class="foot"><span>Photo: Hurricane Genevieve from the International Space Station, 2020 (NASA)</span></div>
+  <aside class="notes">Tell it as a story, not a syllabus item. Point at the photo: this is a real hurricane, photographed from orbit — the machines we build in this course learn to read exactly this. Thirty seconds, warm register. Then: "And you should know who else is working on this."</aside>
+</section>
+
+<!-- 2b ▸ The race -->
+<section class="slide">
+  <p class="kicker">Part 1 · Welcome · 0:00–0:08</p>
+  <h2>The biggest labs on Earth are racing to build exactly this</h2>
+  <ul class="small">
+    <li><b>Google DeepMind</b> — GraphCast (<i>Science</i> 2023) beat the world's best physics forecast on <b>90% of 1,380 targets</b>, producing a 10-day global forecast in under a minute on a single chip; GenCast (<i>Nature</i> 2024) then beat the European ensemble on 97% of targets.</li>
+    <li><b>Microsoft Research</b> — Aurora (<i>Nature</i> 2025): <b>one</b> pretrained model of the atmosphere, cheaply fine-tuned, out-forecasts the specialist systems for weather, air pollution, and ocean waves — thousands of times faster than physics pipelines.</li>
+    <li><b>IBM + NASA</b> — Prithvi: NASA's first open-source foundation model, trained on NASA's own satellite archive and given away on Hugging Face — <b>anyone in this room can fine-tune it</b> for floods, wildfires, or crops.</li>
+    <li class="muted">Also racing: Huawei (Pangu-Weather, <i>Nature</i> 2023) · NVIDIA (Earth-2, a "digital twin" of the planet) · and Europe's own weather agency, whose machine-learning forecast has been fully operational since February 2025.</li>
+  </ul>
+  <div style="display:flex;gap:1.4vw;margin-top:1.6vh;align-items:stretch">
+    <a href="https://www.youtube.com/watch?v=-KFO0pES-zQ" style="flex:1;max-width:30%;text-decoration:none;color:inherit">
+      <img src="img/yt-graphcast.jpg" alt="Google DeepMind video thumbnail" style="width:100%;border-radius:8px;display:block">
+      <p class="small muted" style="margin:.5vh 0 0">&#9654; Google DeepMind · Why AI Creates Better Weather Forecasts · 2 min</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=Zi4u-JWpY5w" style="flex:1;max-width:30%;text-decoration:none;color:inherit">
+      <img src="img/yt-aurora.jpg" alt="Microsoft Research Aurora video thumbnail" style="width:100%;border-radius:8px;display:block">
+      <p class="small muted" style="margin:.5vh 0 0">&#9654; Microsoft Research · Project Aurora · 7 min</p>
+    </a>
+  </div>
+  <aside class="notes">One breath per lab — these are hooks, not a lecture. If the room's energy needs a lift, click the DeepMind thumbnail and play the 2-minute video right here (sound on); it is the best 2-minute pitch for the whole field. Then: "Why does this race matter to anyone outside a lab?"</aside>
+</section>
+
+<!-- 2c ▸ Why it matters -->
+<section class="slide">
+  <p class="kicker">Part 1 · Welcome · 0:00–0:08</p>
+  <h2>They are replacing weather models — and predicting disasters</h2>
+  <div class="cols" style="grid-template-columns:1.15fr 1fr">
+    <div class="figure"><img src="img/fig-gencast.png" alt="GenCast ensemble cyclone track forecasts for Typhoon Hagibis at decreasing lead times" style="max-width:100%;max-height:100%;background:#fff;padding:1vh;border-radius:10px;object-fit:contain"></div>
+    <div>
+      <ul class="small">
+        <li><b>Typhoon tracks, days earlier.</b> Left: GenCast's ensemble closing in on Typhoon Hagibis at 7, 5, 3, and 1-day lead times. Microsoft's Aurora called Typhoon Doksuri's Philippines landfall <b>four days out</b> — while official forecasts pointed at Taiwan.</li>
+        <li><b>Floods, a week ahead.</b> Google's flood model (<i>Nature</i> 2024) warns up to 7 days early, even on rivers with no gauges — alerts now reach ~700 million people in 100+ countries.</li>
+        <li><b>This is operational, not futuristic.</b> Europe's weather centre has run its own machine-learning forecast in daily operations since February 2025 — using about 1,000× less energy.</li>
+      </ul>
+      <p class="small"><span class="accent">In this course you learn how this family of models is built — and build a small one.</span></p>
+    </div>
+  </div>
+  <div class="foot"><span>Figure: Google DeepMind, GenCast (Nature 2024) — Typhoon Hagibis ensemble tracks</span></div>
+  <aside class="notes">Walk the figure right to left: at 7 days the ensemble is a wide fan of possible tracks; by 1 day it has converged on the real landfall. That fan is what emergency managers actually need. Sixty seconds here, then the semester-in-one-picture slide.</aside>
 </section>
 
 <!-- 3 ▸ The pipeline, as one picture -->
 <section class="slide">
   <p class="kicker">Part 1 · Welcome · 0:00–0:08</p>
   <h2>The whole semester in one picture</h2>
-  <div class="figure">
-    <svg viewBox="0 0 900 260" role="img" aria-label="Pipeline: satellites watching Earth, to environmental data cubes, to a foundation model, to your publicly released model" style="width:min(96%,1000px)">
-      <g fill="none" stroke="currentColor" stroke-width="1.5">
-        <rect x="10"  y="60" width="170" height="120" rx="12"/>
-        <rect x="250" y="60" width="170" height="120" rx="12"/>
-        <rect x="490" y="60" width="170" height="120" rx="12"/>
-        <rect x="730" y="60" width="164" height="120" rx="12" stroke="var(--accent)" stroke-width="2.5"/>
-      </g>
-      <g stroke="var(--accent)" stroke-width="1.8" fill="none">
-        <path d="M180 120 H242"/><path d="M242 114 L250 120 L242 126 Z" fill="var(--accent)"/>
-        <path d="M420 120 H482"/><path d="M482 114 L490 120 L482 126 Z" fill="var(--accent)"/>
-        <path d="M660 120 H722"/><path d="M722 114 L730 120 L722 126 Z" fill="var(--accent)"/>
-      </g>
-      <!-- satellite icon -->
-      <g stroke="currentColor" stroke-width="1.5" fill="var(--wash)">
-        <rect x="80" y="88" width="34" height="20" rx="3"/>
-        <rect x="46" y="93" width="26" height="10"/>
-        <rect x="122" y="93" width="26" height="10"/>
-        <path d="M72 98 H80 M114 98 H122" fill="none"/>
-        <path d="M89 112 q8 10 16 0" fill="none" opacity="0.8"/>
-        <path d="M85 118 q12 15 24 0" fill="none" opacity="0.5"/>
-      </g>
-      <!-- data cube icon -->
-      <g stroke="currentColor" stroke-width="1.5" fill="var(--wash)">
-        <rect x="308" y="84" width="40" height="28" rx="3"/>
-        <rect x="316" y="92" width="40" height="28" rx="3"/>
-        <rect x="324" y="100" width="40" height="28" rx="3" stroke="var(--accent)"/>
-      </g>
-      <!-- model icon: tiny network -->
-      <g stroke="currentColor" stroke-width="1.3" fill="none">
-        <circle cx="552" cy="90"  r="6" fill="var(--wash)"/>
-        <circle cx="552" cy="108" r="6" fill="var(--wash)"/>
-        <circle cx="552" cy="126" r="6" fill="var(--wash)"/>
-        <circle cx="598" cy="99"  r="6" fill="var(--wash)"/>
-        <circle cx="598" cy="117" r="6" fill="var(--wash)"/>
-        <path d="M558 90 L592 99 M558 90 L592 117 M558 108 L592 99 M558 108 L592 117 M558 126 L592 99 M558 126 L592 117" opacity="0.6"/>
-      </g>
-      <!-- release icon: publish arrow -->
-      <g stroke="var(--accent)" stroke-width="2" fill="none">
-        <path d="M812 128 V96"/>
-        <path d="M804 104 L812 94 L820 104"/>
-        <path d="M794 128 H830" stroke="currentColor" stroke-width="1.5"/>
-      </g>
-      <g font-size="15" fill="currentColor" text-anchor="middle">
-        <text x="95"  y="152">위성이 보는 지구</text><text x="95"  y="170" opacity="0.65" font-size="11.5">satellites, every day</text>
-        <text x="335" y="152">environmental big data</text><text x="335" y="170" opacity="0.65" font-size="11.5">petabyte-scale data cubes</text>
-        <text x="575" y="152">foundation model</text><text x="575" y="170" opacity="0.65" font-size="11.5">pretrain · fine-tune · evaluate</text>
-        <text x="812" y="152" fill="var(--accent)">your released model</text><text x="812" y="170" opacity="0.65" font-size="10">GitHub + HF · 여러분의 이름으로</text>
-      </g>
-      <g font-size="12.5" fill="currentColor" opacity="0.75" text-anchor="middle">
-        <text x="450" y="225">16 weeks: every lecture, lab, and paper moves you one arrow to the right</text>
-      </g>
-    </svg>
+  <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:.8vw;align-items:center;flex:1;min-height:0">
+    <div style="text-align:center;min-width:0">
+      <img src="img/real-satellite.jpg" alt="A NASA Earth-observing satellite in orbit" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px">
+      <p class="small" style="margin:.9vh 0 0"><b>satellites watch the Earth</b><br><span class="muted">every day, all of it</span></p>
+    </div>
+    <div class="accent" style="font-size:3.2vh">&#8594;</div>
+    <div style="text-align:center;min-width:0">
+      <img src="img/real-earth.jpg" alt="The full Earth disc photographed by the DSCOVR satellite" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px">
+      <p class="small" style="margin:.9vh 0 0"><b>environmental big data</b><br><span class="muted">petabytes, free to download</span></p>
+    </div>
+    <div class="accent" style="font-size:3.2vh">&#8594;</div>
+    <div style="text-align:center;min-width:0">
+      <img src="img/fig-mae.png" alt="Masked autoencoder: masked image patches reconstructed by an encoder-decoder" style="width:100%;aspect-ratio:4/3;object-fit:contain;background:#fff;padding:.6vh;border-radius:10px">
+      <p class="small" style="margin:.9vh 0 0"><b>a model teaches itself</b><br><span class="muted">pretrain · fine-tune · evaluate</span></p>
+    </div>
+    <div class="accent" style="font-size:3.2vh">&#8594;</div>
+    <div style="text-align:center;min-width:0">
+      <img src="img/hf-prithvi.png" alt="A released foundation model page on Hugging Face" style="width:100%;aspect-ratio:4/3;object-fit:cover;object-position:top;border-radius:10px;border:2px solid var(--accent)">
+      <p class="small" style="margin:.9vh 0 0"><b class="accent">your released model</b><br><span class="muted">GitHub + Hugging Face, your name</span></p>
+    </div>
   </div>
-  <aside class="notes">Walk it left to right once, slowly. The last box is the point of the whole course: not a report, not an exam — a public artifact with their name on it. Say the caption line out loud. Then: "Before anything else — who is 'we'?"</aside>
+  <div class="foot"><span>16 weeks: every lecture, lab, and paper moves you one arrow to the right</span><span>Photos: NASA · figure: He et al. (Meta AI) · page: NASA + IBM's Prithvi on Hugging Face</span></div>
+  <aside class="notes">Walk it left to right once, slowly — every image is real: a real satellite, a real photo of the planet, the real hide-and-predict learning trick (we will meet it properly in Week 7), and a real released model page. The last card is the point of the course: not a report, not an exam — a public artifact with their name on it, sitting next to NASA's. Then: "Before anything else — who is 'we'?"</aside>
 </section>
 
 <!-- 4 ▸ Who teaches it -->
@@ -104,7 +119,7 @@
         <li>Instructor · <b>HydroAI Lab</b>, GIST</li>
         <li>Satellite hydrology × machine learning</li>
         <li>Lectures, journal club, capstone advising</li>
-        <li class="muted">Door open all week — 언제든 환영합니다</li>
+        <li class="muted">Door open all week — drop by any time</li>
       </ul>
     </div>
     <div>
@@ -145,14 +160,20 @@
 <section class="slide">
   <p class="kicker">Part 2 · Capstone · 6 min</p>
   <h2>The capstone: you release a model, individually</h2>
-  <p class="small muted">Default track for everyone — feasible on free compute (Kaggle/Colab). From-scratch FM development is the HydroAI lab team's joint project.</p>
-  <ul>
-    <li><b>Fine-tune</b> a public foundation model (Prithvi, OlmoEarth, ClimaX lineage) on a real environmental task — yourself, not a team. (Everyone pretrains a mini-model in the W7/W9 labs.)</li>
-    <li><b>Evaluate</b> it against honest baselines — the PANGAEA question: does it really beat a tuned supervised model?</li>
-    <li><b>Document</b> it: model card, ablation, limitations you actually believe.</li>
-    <li><b>Release</b> weights + code publicly: GitHub and Hugging Face, under your own name.</li>
-  </ul>
-  <div class="foot"><span>Project = 60% of grade · proposal 11/1 &rarr; pitches 11/2 · M1&ndash;M3 in December · gate = HW0</span></div>
+  <p class="small muted">Default track for everyone — feasible on free compute (Kaggle/Colab). Building a foundation model from scratch is the HydroAI lab team's joint project.</p>
+  <div class="cols" style="grid-template-columns:1.15fr 1fr">
+    <ul class="small" style="margin:0">
+      <li><b>Fine-tune</b> a public foundation model (Prithvi, OlmoEarth, ClimaX lineage) on a real environmental task — yourself, not a team. (Everyone pretrains a mini-model in the W7/W9 labs.)</li>
+      <li><b>Evaluate</b> it against honest baselines — does it really beat a tuned supervised model?</li>
+      <li><b>Document</b> it: model card, ablation, limitations you actually believe.</li>
+      <li><b>Release</b> weights + code publicly: GitHub and Hugging Face, under your own name.</li>
+    </ul>
+    <div style="min-width:0">
+      <img src="img/hf-prithvi.png" alt="The NASA and IBM Prithvi model page on Hugging Face" style="width:100%;border-radius:10px;border:1px solid var(--hairline)">
+      <p class="small muted" style="margin:.8vh 0 0;text-align:center">A real released model page (NASA + IBM's Prithvi) — in December, one of these is <span class="accent">yours</span>.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Project = 60% of grade · proposal 11/1 &rarr; pitches 11/2 · Milestones 1&ndash;3 in December · gate = HW0</span></div>
   <aside class="notes">Say "individually" twice. This is not a group deliverable and not a report — it is a public artifact. Transition: "So that 'released' is not abstract, here is exactly what it looks like." (0:08–0:14 for this pair)</aside>
 </section>
 
@@ -170,10 +191,10 @@
         <path d="M158 69 H200 M350 69 H392 M542 69 H584" stroke="var(--accent)"/>
       </g>
       <g font-size="15" fill="currentColor" text-anchor="middle">
-        <text x="83"  y="64">pretrain</text><text x="83"  y="84" opacity="0.65" font-size="12">SSL on EO / climate data</text>
+        <text x="83"  y="64">pretrain</text><text x="83"  y="84" opacity="0.65" font-size="11">self-supervised, on satellite data</text>
         <text x="275" y="64">fine-tune</text><text x="275" y="84" opacity="0.65" font-size="12">downstream task</text>
         <text x="467" y="64">evaluate</text><text x="467" y="84" opacity="0.65" font-size="12">vs honest baselines</text>
-        <text x="659" y="64" fill="var(--accent)">release</text><text x="659" y="84" opacity="0.65" font-size="12">GitHub + HF Hub</text>
+        <text x="659" y="64" fill="var(--accent)">release</text><text x="659" y="84" opacity="0.65" font-size="12">GitHub + Hugging Face</text>
         <text x="371" y="150" font-size="13" opacity="0.8">artifacts: weights · model card (intended use, data, eval table, limitations) · repo with runnable code · research notes</text>
       </g>
     </svg>
@@ -190,17 +211,17 @@
   <p class="kicker">Part 2 · Workload · 4 min</p>
   <h2>8–12 hours per week outside class — every week</h2>
   <div class="figure">
-    <svg viewBox="0 0 740 130" role="img" aria-label="Sample week: paper 3 hours, lab follow-through 3 hours, project 6 hours" style="width:min(92%,820px)">
+    <svg viewBox="0 0 740 130" role="img" aria-label="Sample week: paper 3 hours, lab follow-through 3 hours, project growing from 0 to 6 hours after the Week 8 proposal" style="width:min(92%,820px)">
       <g stroke="currentColor" stroke-width="1.2">
         <rect x="20"  y="35" width="175" height="40" fill="var(--accent)" stroke="none" rx="6"/>
         <rect x="199" y="35" width="175" height="40" fill="var(--hairline)" stroke="none" rx="6"/>
-        <rect x="378" y="35" width="350" height="40" fill="none" stroke="var(--accent)" rx="6"/>
+        <rect x="378" y="35" width="350" height="40" fill="none" stroke="var(--accent)" stroke-dasharray="6 4" rx="6"/>
         <path d="M20 95 H728" stroke="var(--hairline)"/>
       </g>
       <g font-size="14" fill="currentColor" text-anchor="middle">
         <text x="107" y="60" fill="var(--accent-ink)">paper · 3 h</text>
         <text x="286" y="60">lab · 2–3 h</text>
-        <text x="553" y="60">project · 3–6 h</text>
+        <text x="553" y="60">project · grows to 3–6 h</text>
       </g>
       <g font-size="12" fill="currentColor" opacity="0.65" text-anchor="middle">
         <text x="20"  y="115">0 h</text><text x="374" y="115">6 h</text><text x="728" y="115">12 h</text>
@@ -208,7 +229,8 @@
     </svg>
   </div>
   <ul>
-    <li>Paper + entrance ticket (3 h) · lab follow-through + Sunday packet (2–3 h) · project progress (3–6 h).</li>
+    <li>Paper + entrance ticket (3 h) · lab follow-through + Sunday packet (2–3 h) — from Week 1.</li>
+    <li>The project hours (dashed) start near zero and <b>ramp up after the Week 8 proposal</b> — December weeks are nearly all project.</li>
     <li>Including reading weeks. <span class="muted">There are no light weeks after today.</span></li>
   </ul>
   <div class="foot"><span>“If your semester cannot absorb this, this course is not for you this semester — that is a scheduling fact, not a judgment.”</span></div>
@@ -262,21 +284,21 @@
         <text x="72"  y="32">notes 12</text>
         <text x="176" y="32">book 5</text>
         <text x="224" y="32" font-size="11">3</text>
-        <text x="272" y="32">prop 5</text>
-        <text x="394" y="32">M1–M3 15</text>
+        <text x="272" y="32" font-size="10.5">proposal 5</text>
+        <text x="394" y="32">milestones 15</text>
         <text x="614" y="32" fill="var(--accent-ink)">final 20</text>
       </g>
       <g font-size="11" fill="currentColor" opacity="0.7" text-anchor="middle">
         <text x="72"  y="66">research notes · best 10 of 11</text>
         <text x="196" y="86">book 1p handwritten · video 0.5p</text>
-        <text x="394" y="66">W13–15 sprints · 5% each</text>
+        <text x="394" y="66">three December sprints · 5% each</text>
         <text x="614" y="66">release 8 · report + card 7 · demo 5</text>
       </g>
     </svg>
   </div>
   <ul class="small">
     <li><b>Lab portfolio 20%</b> — research notes 12% (11 notes, best 10 × 1.2%) · <b>book summaries 5%</b> (theory weeks W2–7 + W9, 1 page, <b>handwritten, strictly NO AI</b>, best 5 of 7) · video summaries 3% (0.5 page, best 6 of 10). All due Sun 23:59.</li>
-    <li><b>Proposal 5%</b> (due Sun 11/1, pitches 11/2) · <b>M1–M3 15%</b> (December sprints) · <b>final 20%</b> — release quality 8, report + model card 7, demo 5. A rigorously evaluated negative result can earn full marks.</li>
+    <li><b>Proposal 5%</b> (due Sun 11/1, pitches 11/2) · <b>Milestones 1–3, 15%</b> (three December sprint check-ins, 5% each) · <b>final 20%</b> — release quality 8, report + model card 7, demo 5. A rigorously evaluated negative result can earn full marks.</li>
   </ul>
   <div class="foot"><span>Late window: tickets/notes 48 h at −25% · milestones excluded · drop allowances exist to absorb life — spend them deliberately</span></div>
   <aside class="notes">Two beats: (1) the weekly Sunday packet — note + book + video — is where consistency is graded; (2) the final rubric rewards rigor, not leaderboard position. Flag the handwritten/no-AI rule here but explain it on the next slide. (by 0:24)</aside>
@@ -311,7 +333,7 @@
   <h2>What this course actually is</h2>
   <ul>
     <li>Not a survey, not an intro to deep learning. A <b>build course</b>: 12 in-person sessions plus three async sprint weeks constructing, end to end, the skill set to pretrain and fine-tune foundation models for Earth observation and weather/climate data.</li>
-    <li>By December: a small FM pretrained by you, fine-tuned on a real environmental task, evaluated against honest baselines, <b>released publicly</b> with weights, code, and a model card under your name.</li>
+    <li>By December: a small foundation model pretrained by you, fine-tuned on a real environmental task, evaluated against honest baselines, <b>released publicly</b> with weights, code, and a model card under your name.</li>
     <li>Fixed weekly rhythm: one paper + entrance ticket, one 3-hour session (quiz · lecture · 30-min journal club · 60-min lab), Sunday packet, project progress. 8–12 h outside class, every week.</li>
     <li>Everything is public-facing: notes, labs, capstone live on Git. You are building a portfolio a PhD advisor or employer can read — a feature, and a commitment.</li>
   </ul>
@@ -323,7 +345,7 @@
   <p class="kicker">Part 3 · 10 min</p>
   <h2>You should take this course if…</h2>
   <ul>
-    <li>You have <b>real fluency</b> in the prerequisites: linear algebra through SVD, probability through MLE and Bayes, multivariable calculus, comfortable Python/NumPy. Today’s diagnostic tells you whether “fluency” is the right word — believe it either way.</li>
+    <li>You have <b>real fluency</b> in the prerequisites: linear algebra through the singular value decomposition, probability through maximum likelihood and Bayes' rule, multivariable calculus, comfortable Python/NumPy. Today’s diagnostic tells you whether “fluency” is the right word — believe it either way.</li>
     <li>You want to do <b>research</b> with environmental data — hydrology, remote sensing, climate, ecology — and you want the modeling skills that field now assumes, not a tour of them.</li>
     <li>You are willing to <b>work in public</b>: commit history, released models, written notes. Willing to be wrong in writing and fix it in writing.</li>
     <li>You are excited, not annoyed, that your primary engineering partner is an AI agent — and that you must be able to defend every line it writes.</li>
@@ -418,7 +440,7 @@
     <li><b>C1 · backprop by hand:</b> a=6, b=2, L=4 → ∂L/∂b = 2b = 4, so ∂L/∂z = 4, ∂L/∂x = y·4 = <b>12</b>, ∂L/∂y = x·4 = <b>8</b>. The chain rule is bookkeeping, done in order.</li>
     <li><b>D2 · broadcasting:</b> (3,1) + (1,4) → shape <b>(3,4)</b>; C[2,1] = 2 + 10 = <b>12</b>. Broadcasting stretches size-1 axes — no loops, no copies.</li>
     <li><b>B1 · Bayes:</b> P(drought | flag) = (0.95·0.01) / (0.95·0.01 + 0.05·0.99) ≈ <b>0.16</b>. A 95%-sensitive detector on a 1% prior is wrong 5 times in 6.</li>
-    <li><b>G2 · NetCDF:</b> (365, 721, 1440) → 0.25° global grid, one year daily; 365·721·1440 ≈ <b>3.8×10⁸</b> values (~1.5 GB at float32). You must be able to read a header and know the cost.</li>
+    <li><b>G2 · climate data files (NetCDF format):</b> (365, 721, 1440) → 0.25° global grid, one year daily; 365·721·1440 ≈ <b>3.8×10⁸</b> values (~1.5 GB at float32). You must be able to read a header and know the cost.</li>
   </ul>
   <div class="foot"><span>Full key + worked answers: course site</span></div>
   <aside class="notes">Two minutes each, at the board, no slides-only hand-waving for C1 — write the graph and push the 4 backwards. These four predict success better than the total: they are respectively the chain rule, array semantics, base rates, and data literacy.</aside>
@@ -471,7 +493,7 @@
       </tbody>
     </table>
   </div>
-  <div class="foot"><span>Exceptions: W1 orientation (zero pre-work) · W8 proposal (Sun 11/1) · 10/19 Book Check · M1–M3 12/4, 12/9, 12/13 · final demo + release 12/16</span></div>
+  <div class="foot"><span>Exceptions: W1 orientation (zero pre-work) · W8 proposal (Sun 11/1) · 10/19 Book Check · Milestones 1–3 on 12/4, 12/9, 12/13 · final demo + release 12/16</span></div>
   <aside class="notes">Do not read the table — point at the two columns that matter: everything is due Sunday, and everything is submitted on the course site. This week is the one exception: no pre-work existed, so W1's ticket rides with W2's, and the lab deliverable is the AI Toolkit Report. Transition: "So let me show you the site." (end 2:13)</aside>
 </section>
 
@@ -503,7 +525,7 @@
   <h2>Home: your weekly starting point</h2>
   <ul class="small">
     <li>Top bar shows <b>today’s date and the current week</b> — the site always knows where the semester is.</li>
-    <li><b>공지 (announcements)</b>: read the pinned ones; anything urgent lands here first.</li>
+    <li><b>Announcements</b>: read the pinned ones; anything urgent lands here first.</li>
     <li>The <b>this-week card</b> links straight to the current week page — one click, everything you need.</li>
   </ul>
   <div class="figure"><img src="img/w1-home.png" alt="Course site home page" style="max-width:100%;max-height:100%;border:1px solid var(--hairline);border-radius:10px"></div>
@@ -515,7 +537,7 @@
   <p class="kicker">Site tour · 3 of 7</p>
   <h2>Schedule: every deadline of the semester</h2>
   <ul class="small">
-    <li>The <b>매주 마감 strip</b> at the top is the weekly rhythm you just saw — Sun 13:00 · Sun 23:59 · Mon 13:00.</li>
+    <li>The <b>weekly-deadline strip</b> at the top is the rhythm you just saw — Sun 13:00 · Sun 23:59 · Mon 13:00.</li>
     <li>The <b>16-week table</b>: click any week number for the full plan — minute-level lecture outline, lab spec, discussion questions.</li>
     <li>Readings and their tags (1p handwritten, 0.5p video) sit in the right column, per week.</li>
   </ul>
@@ -541,7 +563,7 @@
   <p class="kicker">Site tour · 5 of 7</p>
   <h2>Assignments: everything due, submit in place</h2>
   <ul class="small">
-    <li>Every deliverable of the semester with its deadline and status — the counter (<b>제출 0/46</b>) tracks you all term.</li>
+    <li>Every deliverable of the semester with its deadline and status — the submission counter (<b>0 / 46</b>) tracks you all term.</li>
     <li><b>Dashed red boxes = due this week.</b> Right now: Ticket W1, Ticket W2, HW0, AI Toolkit Report.</li>
     <li>Submit here or on the week page — same box, either works; <b>resubmit freely until it is graded</b>.</li>
   </ul>
@@ -568,7 +590,7 @@
   <h2>Sign in today: id = your student number</h2>
   <ul class="small">
     <li>Initial password = <b>your student number</b> — the site forces a change on first login. <b>Change it before you leave this room.</b></li>
-    <li>Signed in, you can submit, see feedback and your grades-in-progress, and use 내 공간 (My Space).</li>
+    <li>Signed in, you can submit, see feedback and your grades-in-progress, and use the My Space tab.</li>
     <li>Trouble signing in? That is a Yusang question — today, during lab.</li>
   </ul>
   <div class="figure"><img src="img/w1-login.png" alt="Course site sign-in page" style="max-width:100%;max-height:100%;border:1px solid var(--hairline);border-radius:10px"></div>
@@ -607,76 +629,92 @@
     </svg>
   </div>
   <ul class="small">
-    <li>Tensors → SSL objectives → fine-tuning &amp; honest evaluation → release engineering; models you meet along the way: <span class="accent">ViT, MAE, SatMAE, Presto, ClimaX, Prithvi, GraphCast, Aurora</span>.</li>
+    <li>Tensors → self-supervised pretraining → fine-tuning &amp; honest evaluation → release engineering; models you meet along the way: <span class="accent">the Vision Transformer, masked autoencoders, SatMAE, Presto, ClimaX, Prithvi, GraphCast, Aurora</span>.</li>
     <li>No class 10/5 (holiday) · 10/19 Book Check instead of lecture · W13–15 async, feedback via GitHub · W16: recorded demo + public release.</li>
   </ul>
   <p class="small muted">Every lab is one brick of your capstone. Miss a week and your own project stalls.</p>
   <aside class="notes">One slide instead of five now — the schedule page has the full per-week detail and you just showed them where. Point at the dependency: nothing in W13–16 is new work, it is assembly of what the labs already produced. That is why attendance and lab follow-through are non-negotiable. Then: "Why is this a reasonable demand in 2026? Three slides on the field." </aside>
 </section>
 
-<!-- 35 ▸ Landscape 1: EO generations -->
+<!-- 35a ▸ Landscape 0: how these models learn -->
 <section class="slide">
   <p class="kicker">Part 8 · 2026 landscape</p>
-  <h2>EO foundation models: three generations in four years</h2>
-  <div class="figure">
-    <svg viewBox="0 0 760 170" role="img" aria-label="Three generations of EO foundation models from 2022 to 2026" style="width:min(96%,900px)">
+  <h2>How these models learn: hide-and-predict, no labels needed</h2>
+  <div class="figure"><img src="img/fig-prithvi.png" alt="Prithvi architecture: a satellite image time series is masked, encoded, decoded, and reconstructed" style="max-width:100%;max-height:100%;background:#fff;padding:1.2vh;border-radius:10px;object-fit:contain"></div>
+  <ul class="small">
+    <li><b>The trick:</b> hide most of the patches in a satellite image, train the network to fill them back in. No human labels — so <b>the entire free satellite archive becomes training data</b>.</li>
+    <li>Do that on millions of images and the model teaches itself what fields, forests, water, and cities look like from above. A handful of labels afterward adapts it to <i>your</i> task — floods, crops, soil moisture.</li>
+  </ul>
+  <div class="foot"><span>Figure: NASA + IBM, Prithvi (the same hide-and-predict picture you saw in the opening) · you build a miniature version of this in the Week 7 lab</span></div>
+  <aside class="notes">This is the one idea to land before the model-name parade: self-supervised pretraining = hide-and-predict. Trace the figure once: satellite time series in, most patches masked, encoder-decoder reconstructs. "Remember the flamingo picture from the opening? Same trick, satellite edition. In Week 7 you do this with your own hands, in a notebook."</aside>
+</section>
+
+<!-- 35b ▸ Landscape 1: three generations -->
+<section class="slide">
+  <p class="kicker">Part 8 · 2026 landscape</p>
+  <h2>Geospatial foundation models: three generations in a decade</h2>
+  <div class="figure" style="flex:0 0 auto">
+    <svg viewBox="0 0 760 140" role="img" aria-label="Three generations of geospatial foundation models" style="width:min(96%,900px)">
       <g fill="none" stroke="currentColor" stroke-width="1.5">
         <rect x="10"  y="40" width="230" height="62" rx="10"/>
         <rect x="262" y="40" width="230" height="62" rx="10"/>
         <rect x="514" y="40" width="236" height="62" rx="10" stroke="var(--accent)" stroke-width="2"/>
         <path d="M240 71 H262 M492 71 H514" stroke="var(--accent)"/>
       </g>
-      <g font-size="14" fill="currentColor" text-anchor="middle">
-        <text x="125" y="63">MAE-era</text><text x="125" y="83" opacity="0.65" font-size="12">SatMAE · Scale-MAE · Prithvi</text>
-        <text x="377" y="63">sensor-agnostic multimodal</text><text x="377" y="83" opacity="0.65" font-size="12">DOFA · TerraMind · Galileo</text>
-        <text x="632" y="63" fill="var(--accent)">global embedding fields</text><text x="632" y="83" opacity="0.65" font-size="12">AlphaEarth · TESSERA</text>
+      <g font-size="13.5" fill="currentColor" text-anchor="middle">
+        <text x="125" y="63">borrowed vision models</text><text x="125" y="83" opacity="0.65" font-size="11.5">ImageNet networks, re-trained</text>
+        <text x="377" y="63">hide-and-predict on satellites</text><text x="377" y="83" opacity="0.65" font-size="11.5">SatMAE · Prithvi · Clay</text>
+        <text x="632" y="63" fill="var(--accent)">global embedding fields</text><text x="632" y="83" opacity="0.65" font-size="11.5">AlphaEarth · TESSERA · Prithvi 2.0</text>
       </g>
       <g font-size="12" fill="currentColor" opacity="0.65" text-anchor="middle">
-        <text x="125" y="130">2022–2023</text><text x="377" y="130">2024–2025</text><text x="632" y="130">2025–2026</text>
+        <text x="125" y="128">~2017–2021</text><text x="377" y="128">2022–2024</text><text x="632" y="128">2025–2026</text>
       </g>
     </svg>
   </div>
   <ul class="small">
-    <li>Gen 3’s deliverable is <b>precomputed embeddings</b>, not a backbone — AlphaEarth ships 64-D embeddings at 10 m, globally, annually.</li>
-    <li>A 2026 evaluation counted <b>89 public geospatial FMs</b>; GEO-Bench-2 finds <b>no single model dominates all tasks</b>.</li>
+    <li><b>Generation 1</b> — borrow a network trained on everyday photos (cats, cars), re-train its last layers on labeled satellite images. Problem: satellite data is nothing like everyday photos, and labels are scarce.</li>
+    <li><b>Generation 2</b> — hide-and-predict directly on the satellite archive (previous slide). Problem: each model welded to one sensor, one resolution, mostly one moment in time.</li>
+    <li><b>Generation 3</b> — one model fuses many sensors and whole time series, then publishes a precomputed <b>"fingerprint" vector for every spot on Earth, every year</b> — Google's AlphaEarth: 64 numbers per 10-meter square, globally. Mapping crops or forests becomes a lookup, not a supercomputing job.</li>
+    <li class="muted">A 2026 evaluation counts <b>89 public geospatial foundation models</b> — and finds no single one dominates all tasks. That finding is this course's evaluation thesis.</li>
   </ul>
-  <div class="foot"><span>SatMAE arXiv:2207.08051 · Prithvi 2310.18660 · DOFA 2403.15356 · TerraMind 2504.11171 · AlphaEarth 2507.22291 · TESSERA 2506.20380 · GEO-Bench-2 2511.15658</span></div>
-  <aside class="notes">One pass, left to right: masking objectives → any-sensor architectures → embeddings-as-product. The "no single model dominates" finding is the course's evaluation thesis in one line — hold onto it until W9–12.</aside>
+  <div class="foot"><span>SatMAE arXiv:2207.08051 · Prithvi 2310.18660 · AlphaEarth 2507.22291 · TESSERA 2506.20380 · GEO-Bench-2 2511.15658</span></div>
+  <aside class="notes">One pass, left to right, in plain words — the arXiv numbers are in the footer for later, not for now. The "no single model dominates" line is the seed of Weeks 9–12: evaluation is where this field is won or lost. Hold onto it.</aside>
 </section>
 
-<!-- 36 ▸ Landscape 2: operational weather + small models -->
+<!-- 36a ▸ Landscape 2: weather flipped -->
 <section class="slide">
   <p class="kicker">Part 8 · 2026 landscape</p>
-  <h2>The field is operational — and it fits your laptop budget</h2>
-  <div class="cols">
-    <div>
-      <h3>ML weather is not a demo</h3>
-      <ul class="small">
-        <li><b>ECMWF AIFS</b> operational since <b>Feb 2025</b>; CRPS-trained ensemble since July 2025.</li>
-        <li><b>NOAA AIGFS</b> deployed <b>Jan 2026</b>; <b>Google WeatherNext 2</b> powers Search, Gemini, Pixel, Maps.</li>
-        <li>The frontier moved to <span class="accent">probabilistic skill, obs-direct pipelines, honest evaluation</span> — “can ML forecast?” is settled.</li>
-      </ul>
-    </div>
-    <div>
-      <h3>Small models are real models</h3>
-      <ul class="small">
-        <li><b>OlmoEarth-Nano: 1.4M params</b> — state-of-the-art against 12 FMs on most benchmark tasks.</li>
-        <li><b>Presto: ~400K params</b> — pixel-time-series transformer, still competitive on real tasks.</li>
-        <li>Meaningful EO pretraining <b>fits Colab-scale compute</b>. Your capstone is these models’ younger sibling — <span class="muted">at this scale it <i>is</i> research practice.</span></li>
-      </ul>
-    </div>
-  </div>
-  <div class="foot"><span>AIFS arXiv:2406.01465 · WeatherNext 2 (FGN) 2506.10772 · OlmoEarth 2511.13655 (CVPR 2026) · Presto 2304.14065</span></div>
-  <aside class="notes">Left column: the debate closed while current seniors were sophomores. Right column is the existence proof for the entire course design — 1.4M and 400K parameters are numbers a student GPU budget can train. Say it plainly: "Nobody in this room lacks the compute. The constraint is skill and consistency, which is what the 16 weeks build." (end landscape 2:31)</aside>
+  <h2>In weather, the flip already happened</h2>
+  <div class="figure" style="flex:0 0 auto;max-height:26vh"><img src="img/fig-graphcast.png" alt="GraphCast: input weather state, one-step prediction, autoregressive rollout of a global forecast" style="max-width:100%;max-height:100%;background:#fff;padding:1vh;border-radius:10px;object-fit:contain"></div>
+  <ul class="small" style="margin-top:1.4vh">
+    <li><b>2022</b> — FourCastNet (NVIDIA): first neural network at physics-model resolution; a week's forecast in <b>2 seconds</b>. · <b>2023</b> — Pangu-Weather (<i>Nature</i>) and GraphCast (<i>Science</i>, above): <b>more accurate</b> than the best physics forecasts, at 10,000× the speed.</li>
+    <li><b>2024</b> — GenCast (<i>Nature</i>): beats the European <i>ensemble</i> on 97% of targets — probabilistic forecasting conquered. · <b>Feb 2025</b> — Europe's weather centre puts <b>its own machine-learning forecast into daily operations</b>. · <b>2025</b> — Aurora (<i>Nature</i>): one pretrained atmosphere model, fine-tuned for weather, waves, and air quality.</li>
+    <li><b>2026</b> — the United States deploys a machine-learning global forecast; Google open-sources WeatherNext 2, whose cyclone-track forecasts see <b>about one day further ahead</b> than leading operational systems.</li>
+  </ul>
+  <div class="foot"><span>Figure: Google DeepMind, GraphCast — one learned step, rolled out into a 10-day global forecast · “can machine learning forecast?” is settled; the frontier is probabilistic skill and honest evaluation</span></div>
+  <aside class="notes">Read the timeline as one story: faster (2022) → more accurate (2023) → better ensembles (2024) → adopted by the agencies themselves (2025–26). The debate closed while this room's seniors were sophomores. Transition: "You might think this is only for trillion-dollar labs. The opposite is true."</aside>
+</section>
+
+<!-- 36b ▸ Landscape 3: small models are real models -->
+<section class="slide">
+  <p class="kicker">Part 8 · 2026 landscape</p>
+  <h2>And it fits your laptop budget: small models are real models</h2>
+  <ul>
+    <li><b>OlmoEarth-Nano: 1.4 million parameters</b> — state-of-the-art against 12 much larger foundation models on most benchmark tasks. <span class="muted">(Your phone's keyboard model is bigger.)</span></li>
+    <li><b>Presto: about 400 thousand parameters</b> — a pixel-time-series Transformer, still competitive on real agricultural tasks.</li>
+    <li>Meaningful Earth-observation pretraining <b>fits the free Colab and Kaggle compute you set up today</b>. Your capstone model is these models' younger sibling — at this scale, what you do <i>is</i> research practice, not a toy.</li>
+  </ul>
+  <div class="foot"><span>OlmoEarth arXiv:2511.13655 (CVPR 2026) · Presto 2304.14065 · Nobody in this room lacks the compute — the constraint is skill and consistency</span></div>
+  <aside class="notes">This slide is the existence proof for the entire course design — 1.4 million and 400 thousand parameters are numbers a student GPU budget trains comfortably. Say the footer line plainly: "Nobody in this room lacks the compute. The constraint is skill and consistency, which is what the 16 weeks build." (end landscape ~2:31)</aside>
 </section>
 
 <!-- 37 ▸ Reading preview -->
 <section class="slide">
   <p class="kicker">Part 8 · Journal-club preview · 2 min</p>
-  <h2>Your weekend: Attention (Vaswani 2017) + ViT (Dosovitskiy 2020)</h2>
+  <h2>Your weekend: “Attention Is All You Need” (2017) + the Vision Transformer (2020)</h2>
   <ol>
     <li>Why does attention scale as O(n²) in tokens, and what does that imply for a 0.25° global weather grid (721×1440)?</li>
-    <li>ViT needs more data than CNNs to win — what inductive biases were traded away, and do satellite images restore any of them?</li>
+    <li>The Vision Transformer needs more data than convolutional networks to win — what inductive biases were traded away, and do satellite images restore any of them?</li>
     <li>What exactly is a 'token' for a multispectral image cube?</li>
   </ol>
   <div class="foot"><span>W1 + W2 tickets both due Sun 9/6 13:00 on the Journal Club page · W2 also reads Reichstein 2019 (Nature) · first journal club is W2 — I co-moderate to model the format</span></div>
@@ -689,15 +727,21 @@
 <section class="slide">
   <p class="kicker">Lab · 2:33–2:52 · AI Toolkit onboarding</p>
   <h2>Today’s lab: set up the five tools this course runs on</h2>
-  <ol class="small">
-    <li><b>VS Code + Claude Code extension</b> — install, sign in, have it <i>explain</i> then <i>modify</i> a small script.</li>
-    <li><b>Codex in VS Code</b> — same exercise; compare the two agents on one refactor.</li>
-    <li><b>Google Colab</b> — GPU runtime on, <code>torch.cuda.is_available()</code> → screenshot the <code>True</code>; save-a-copy discipline.</li>
-    <li><b>Kaggle</b> — account + phone verification (unlocks the weekly free GPU quota); run one GPU notebook.</li>
-    <li><b>GitHub</b> — account, SSH key, clone the course repo.</li>
-  </ol>
-  <div class="card"><p class="small"><b>Goal.</b> Leave with five tools proven working — <i>or</i> a precise list of what is broken. <b>Finish the rest at home before the HW0 deadline: HW0 assumes all five work.</b> Instructor and TA circulate — raise a hand early, not at 2:50.</p></div>
-  <aside class="notes">Self-paced from here — the official guides are linked on the Week-1 page (next slide stays up as the map). The two-agent comparison in steps 1–2 is deliberate: noticing where Claude Code and Codex disagree on one refactor is the first exercise in critical code review. Do not debug for students — debug with them, narrating the diagnosis.</aside>
+  <div class="cols" style="grid-template-columns:1fr 1.25fr">
+    <ol class="small" style="margin:0">
+      <li><b>VS Code + Claude Code</b> — install, sign in, have it <i>explain</i> then <i>modify</i> a small script.</li>
+      <li><b>Codex in VS Code</b> — same exercise; compare the two agents on one refactor.</li>
+      <li><b>Google Colab</b> — GPU runtime on, <code>torch.cuda.is_available()</code> → screenshot the <code>True</code>.</li>
+      <li><b>Kaggle</b> — account + phone verification (unlocks the free weekly GPU quota); run one GPU notebook.</li>
+      <li><b>GitHub</b> — account, SSH key, clone the course repo.</li>
+    </ol>
+    <div style="min-width:0">
+      <img src="img/w1-lab-resources.png" alt="The Week 1 page's lab card with the tool list and official guides and videos" style="width:100%;border-radius:10px;border:1px solid var(--hairline)">
+      <p class="small muted" style="margin:.8vh 0 0;text-align:center"><span class="accent">Work from here:</span> the Week-1 page — lab spec, official guides &amp; videos, all linked.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Goal: leave with five tools proven working — or a precise list of what is broken · finish at home before the HW0 deadline (HW0 assumes all five work) · raise a hand early, not at 2:50</span></div>
+  <aside class="notes">Self-paced from here — put this slide up, then have everyone open the Week-1 page themselves: the screenshot shows exactly where the guides live. The two-agent comparison in steps 1–2 is deliberate: noticing where Claude Code and Codex disagree on one refactor is the first exercise in critical code review. Do not debug for students — debug with them, narrating the diagnosis.</aside>
 </section>
 
 <!-- 39 ▸ Lab guides & videos -->
@@ -725,7 +769,7 @@
       </ul>
     </div>
   </div>
-  <div class="foot"><span>All links live on the Week-1 page → 가이드 &amp; 영상 · watch the long video at home; use the docs in the room</span></div>
+  <div class="foot"><span>All links live on the Week-1 page → Guides &amp; videos · watch the long video at home; use the docs in the room</span></div>
   <aside class="notes">Leave this or the previous slide on screen during hands-on time. The 28-minute Claude Code video is homework viewing, not lab viewing — in the room, the docs plus the agent itself are faster.</aside>
 </section>
 
@@ -734,14 +778,16 @@
   <p class="kicker">Lab · Deliverable</p>
   <h2>Deliverable: the AI Toolkit Report</h2>
   <div class="card">
-    <p><b>5-page PDF · due Sun 9/6, 23:59 · submitted on this site</b> (Week-1 page or Assignments tab). For each of the five tools: <b>how you set it up</b> · <b>one real thing you made it do</b> (with screenshot) · <b>where it fits your weekly workflow</b> · <b>one limitation you noticed</b>.</p>
+    <p class="small"><b>5-page PDF · due Sun 9/6, 23:59 · submitted on this site</b> (Week-1 page or Assignments tab). For each of the five tools: <b>how you set it up</b> · <b>one real thing you made it do</b> (with screenshot) · <b>where it fits your weekly workflow</b> · <b>one limitation you noticed</b>.</p>
+  </div>
+  <div style="margin-top:1.4vh">
+    <img src="img/w1-submitbox.png" alt="The AI Toolkit Report submit box on the Week 1 page, with the deadline and a file chooser" style="width:100%;border-radius:10px;border:1px solid var(--hairline)">
+    <p class="small muted" style="margin:.8vh 0 0;text-align:center"><span class="accent">Submit right here</span> — this exact box on the Week-1 page (sign in first) · resubmit freely until it is graded.</p>
   </div>
   <ul class="small">
-    <li>One page per tool is the natural shape; screenshots count toward the five pages.</li>
-    <li>“One limitation you noticed” is the graded muscle: honest, specific observation — the same skill as a model card’s limitations section.</li>
-    <li>This is also your first research note: precise, reproducible, written for a reader who was not there.</li>
+    <li>One page per tool; screenshots count toward the five pages. “One limitation you noticed” is the graded muscle — the same honest-observation skill a model card’s limitations section demands.</li>
   </ul>
-  <aside class="notes">This replaces a generic "environment check" with evidence of actual use — five tools, five proofs. Point at the submit box on the Week-1 page (they saw it in the tour). The limitations bullet is the sleeper: it trains the same honesty the capstone model card demands in December.</aside>
+  <aside class="notes">This replaces a generic "environment check" with evidence of actual use — five tools, five proofs. The screenshot removes every excuse: they have seen the exact box, with the exact deadline on it. The limitations bullet is the sleeper: it trains the same honesty the capstone model card demands in December.</aside>
 </section>
 
 <!-- ════════ PART 9 · HW0 + CLOSE · 2:52–3:00 ════════ -->
@@ -752,7 +798,7 @@
   <h2>HW0: the gate — due Sun 9/6, 23:59 (PDF on this site)</h2>
   <ul class="small">
     <li><b>Pass/fail, and a hard gate</b> for the project (60%): milestones are not accepted without a passed HW0. Designed for 4–8 h with an AI agent if prerequisites are in place.</li>
-    <li><b>Build:</b> fork the template repo; train a small MLP on ~10,000 rows of station soil-moisture data; temporal split (train ≤2018 / val 2019 / test 2020), scaling fit on train only; beat the mean-predictor baseline.</li>
+    <li><b>Build:</b> fork the template repo; train a small multi-layer perceptron (a basic neural network) on ~10,000 rows of station soil-moisture data; temporal split (train ≤2018 / val 2019 / test 2020), scaling fit on train only; beat the mean-predictor baseline.</li>
     <li><b>Ship:</b> <code>train_mlp.py</code> runnable from a fresh clone · <code>metrics.json</code> + loss curve · 1-page <code>report.md</code> with baselines table and an <b>agent-accountability section</b> · research note · ≥5 meaningful commits.</li>
     <li class="accent">“HW0 is a compressed sample of an ordinary week. If HW0 takes you 20 hours, this course will take you 20 hours a week.”</li>
   </ul>
@@ -767,7 +813,7 @@
     <p class="big">You now have the syllabus, a diagnostic score, a working toolkit, and a gate assignment.</p>
     <p><b>This Sunday, 9/6</b> — <span class="accent">13:00:</span> tickets W1 + W2 · <span class="accent">23:59:</span> AI Toolkit Report + HW0. All on the site you signed into today.</p>
     <p class="big accent">Decide deliberately. Both staying and leaving are respectable — drifting is not.</p>
-    <p class="muted">Office hours all week · attempt HW0 before you decide · see you (or not) in Week 2 — 수고했습니다.</p>
+    <p class="muted">Office hours all week · attempt HW0 before you decide · see you (or not) in Week 2.</p>
   </div>
   <aside class="notes">Adjourn on time — two minutes early rather than late; precision is part of the signal. Read the Sunday line once so the four deliverables are the last thing they hear. No pep talk after this slide: the whole session was the pep talk, delivered as information.</aside>
 </section>
