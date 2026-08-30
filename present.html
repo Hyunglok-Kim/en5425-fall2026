@@ -43,10 +43,10 @@
   <h1><span class="lang-en">Presentations</span><span class="lang-ko">발표</span></h1>
   <p class="lede">
     <span class="lang-en">Each journal-club week: the drawn <b>presenter</b> of every group uploads the
-      group's synthesis slides here (PDF/PPT/PPTX, ≤ 20 MB) and presents in the closing minutes.
+      group's synthesis slides here (<b>PDF, ≤ 3 MB</b>) and presents in the closing minutes.
       Click a card to open the slides directly. Proposal pitches (W8) and the final demos (W16)
       will live here too.</span>
-    <span class="lang-ko">저널클럽 주간마다 각 그룹의 <b>발표자</b>가 그룹 정리 발표자료(PDF/PPT/PPTX, 20 MB 이하)를
+    <span class="lang-ko">저널클럽 주간마다 각 그룹의 <b>발표자</b>가 그룹 정리 발표자료(<b>PDF, 3 MB 이하</b>)를
       여기에 올리고 마지막에 발표해요. 카드에서 바로 눌러 열 수 있어요. 제안서 발표(8주차)와 파이널 데모(16주차)도
       이곳에서 진행됩니다.</span>
   </p>
@@ -96,9 +96,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             `Groups, leaders, and presenters are revealed at 13:00 on class day (${fmtDate(String(g.reveal_at).slice(0, 10))}).`,
             `그룹·리더·발표자는 수업 당일 13:00에 공개돼요 (${fmtDate(String(g.reveal_at).slice(0, 10))}).`)}</p>`;
         } else {
+          const previewPill = g.preview
+            ? `<p class="sub" style="margin:10px 0 0"><span class="pill acc">${t("PI preview — hidden from students until 13:00 on class day", "PI 미리보기 — 학생에게는 수업 당일 13:00까지 비공개")}</span></p>` : "";
           const slByG = {};
           (sl && sl.groups || []).forEach((x) => { slByG[x.g] = x; });
-          body = `<div class="grp-grid">${(g.groups || []).map((grp, i) => {
+          body = previewPill + `<div class="grp-grid">${(g.groups || []).map((grp, i) => {
             const s2 = slByG[i + 1] || {};
             const open = s2.has
               ? `<a class="btn primary" href="/api/slides/file?week=${w.n}&g=${i + 1}" target="_blank" rel="noopener">${t("Open slides", "발표자료 열기")}${s2.ext ? ` (${esc(s2.ext.toUpperCase())})` : ""}</a>`
@@ -116,8 +118,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             st.me && (x.presenter === (st.me.display || ("Student " + st.me.sid.slice(-4)))));
           if (myRow) {
             body += `<div class="upbox" data-week="${w.n}">
-              <p class="grp-t">${t("You are this week's presenter — upload your group's slides", "이번 주 발표자예요 — 그룹 발표자료를 올려 주세요")}</p>
-              <input type="file" accept=".pdf,.ppt,.pptx,application/pdf">
+              <p class="grp-t">${t("You are this week's presenter — upload your group's slides (PDF, ≤ 3 MB)", "이번 주 발표자예요 — 그룹 발표자료를 올려 주세요 (PDF, 3 MB 이하)")}</p>
+              <input type="file" accept="application/pdf,.pdf">
               <button class="btn primary" style="margin-left:8px">${myRow.has ? t("Replace", "다시 올리기") : t("Upload", "업로드")}</button>
               <span class="sub uperr" style="margin:0 0 0 8px;color:var(--warn)"></span>
             </div>`;
@@ -154,7 +156,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const err = b.querySelector(".uperr");
         const f = b.querySelector('input[type="file"]').files[0];
         if (!f) { err.textContent = t("Choose a file first.", "파일을 먼저 선택해 주세요."); return; }
-        if (f.size > 20 * 1024 * 1024) { err.textContent = t("Over the 20 MB limit.", "20 MB를 넘어요."); return; }
+        if (f.size > 3 * 1024 * 1024) { err.textContent = t("Over the 3 MB limit.", "3 MB를 넘어요."); return; }
+        if (!/\.pdf$/i.test(f.name)) { err.textContent = t("PDF only.", "PDF만 올릴 수 있어요."); return; }
         const fd = new FormData();
         fd.append("aid", "pres" + String(b.dataset.week).padStart(2, "0"));
         fd.append("file", f, f.name);

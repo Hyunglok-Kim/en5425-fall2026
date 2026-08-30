@@ -151,13 +151,15 @@ async function initGroupBoxes() {
     if (!g || g.exists === false) { b.innerHTML = ""; continue; }
     if (g.hidden) {
       const at = String(g.reveal_at || "");
-      b.innerHTML = `<h3>${t("Discussion groups", "토론 그룹")}</h3>
+      b.innerHTML = `<h3>${t("Discussion groups", "토론 그룹")}${g.preview
+        ? ` <span class="pill acc" style="vertical-align:2px">${t("PI preview — hidden from students until 13:00", "PI 미리보기 — 학생에겐 13:00까지 비공개")}</span>` : ""}</h3>
         <p class="sub" style="margin:0">${t(
           `Groups, leaders, and presenters are revealed here at 13:00 on class day (${fmtDate(at.slice(0,10))}). Anyone can be drawn — prepare accordingly.`,
           `그룹·리더·발표자는 수업 당일 13:00에 여기서 공개돼요 (${fmtDate(at.slice(0,10))}). 누구든 뽑힐 수 있으니 모두 준비해 오세요.`)}</p>`;
       continue;
     }
-    b.innerHTML = `<h3>${t("Discussion groups", "토론 그룹")}</h3>
+    b.innerHTML = `<h3>${t("Discussion groups", "토론 그룹")}${g.preview
+        ? ` <span class="pill acc" style="vertical-align:2px">${t("PI preview — hidden from students until 13:00", "PI 미리보기 — 학생에겐 13:00까지 비공개")}</span>` : ""}</h3>
       <div class="grp-grid">${(g.groups || []).map((grp, i) => `
         <div class="grp-card"><p class="grp-t">${t("Group", "그룹")} ${i + 1}</p>
           ${grp.members.map((m) => `<div class="grp-m${m.leader ? " lead" : ""}${m.presenter ? " pres" : ""}">
