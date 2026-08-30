@@ -59,12 +59,15 @@ function injectNav() {
   const nav = document.createElement("nav");
   nav.className = "site-nav";
   nav.innerHTML = `<div class="in">
-    <a class="brand" href="${P}index.html">
-      <span class="logo-chip"><img src="${P}assets/img/gist.png" alt="GIST · School of Earth Sciences and Environmental Engineering"></span>
-      <img class="logo-ha ha-light" src="${P}assets/img/hydroai_logo_black.png" alt="HydroAI Lab">
-      <img class="logo-ha ha-dark" src="${P}assets/img/hydroai_logo_white.png" alt="HydroAI Lab">
-      <span class="brand-t">EN5425 / EV4240<small>Fall 2026</small></span>
-    </a>
+    <span class="brand">
+      <a class="logo-chip" href="https://env1.gist.ac.kr/env1/" target="_blank" rel="noopener"
+         title="GIST School of Environment and Energy Engineering"><img src="${P}assets/img/gist.png" alt="GIST"></a>
+      <a class="logo-link" href="https://hydroai.net" target="_blank" rel="noopener" title="HydroAI Lab">
+        <img class="logo-ha ha-light" src="${P}assets/img/hydroai_logo_black.png" alt="HydroAI Lab">
+        <img class="logo-ha ha-dark" src="${P}assets/img/hydroai_logo_white.png" alt="HydroAI Lab">
+      </a>
+      <a class="brand-t" href="${P}index.html">EN5425 / EV4240<small>Fall 2026</small></a>
+    </span>
     ${NAV.map(([id, en, ko, href]) =>
       `<a class="item${id === page ? " on" : ""}" href="${href.startsWith("/") ? P + href.slice(1) : P + href}">${lang === "ko" ? ko : en}</a>`).join("")}
     <span class="nav-date tnum">${navDateChip(lang)}</span>

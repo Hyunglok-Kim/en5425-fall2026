@@ -33,8 +33,10 @@ a:hover { text-decoration:underline; }
 .site-nav .in { max-width:880px; margin:0 auto; padding:12px 24px;
   display:flex; align-items:baseline; gap:6px 18px; flex-wrap:wrap; }
 .site-nav .brand { display:flex; align-items:center; gap:9px; margin-right:10px; color:var(--ink); }
-.site-nav .brand:hover { text-decoration:none; }
-.site-nav .brand:hover .brand-t { color:var(--accent); }
+.site-nav .brand a { color:inherit; }
+.site-nav .brand a:hover { text-decoration:none; }
+.site-nav .logo-link { display:inline-flex; align-items:center; }
+.site-nav .brand-t:hover { color:var(--accent); }
 .site-nav .logo-chip { background:#fff; border:1px solid var(--hairline); border-radius:6px;
   padding:2px 6px; display:inline-flex; align-items:center; }
 .site-nav .logo-chip img { height:18px; width:auto; display:block; }
