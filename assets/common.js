@@ -31,7 +31,7 @@ const NAV = [
   ["capstone", "Capstone", "프로젝트", "capstone.html"],
   ["setup", "Setup", "환경 설정", "setup.html"],
   ["students", "Students", "수강생", "students.html"],
-  ["submit", "Sign in / Submit", "로그인 · 제출", "/portal/login.html"],
+  ["signin", "Sign in", "로그인", "/portal/login.html"],
 ];
 /* Semester tracker: W1 begins Mon 2026-08-31 (KST). */
 const SEMESTER_START = "2026-08-31";
@@ -128,11 +128,128 @@ function showGate() {
     }
   });
 }
-document.addEventListener("DOMContentLoaded", () => {
+
+/* ---- session-aware nav + shared in-page submission helpers ----------------
+   One sign-in gives submit rights on the site pages themselves. On the static
+   mirror (no API) the boxes link to the live class address instead. */
+const XHDR = { "X-EN5425": "1" };
+async function siteSession() {
+  try {
+    const r = await fetch("/api/me", { cache: "no-store" });
+    if (r.ok) return { mode: "authed", me: await r.json() };
+    if (r.status === 401 || r.status === 403) return { mode: "anon" };
+  } catch {}
+  return { mode: "mirror" };
+}
+async function liveClassURL() {
+  try {
+    const anns = await loadJSON("announcements");
+    const a = anns.find((x) => x.live_url);
+    const m = a && a.text.match(/https:\/\/\S+/);
+    return m ? m[0] : null;
+  } catch { return null; }
+}
+async function navSession() {
+  const link = document.querySelector('.site-nav a[href$="portal/login.html"]');
+  if (!link) return null;
+  const st = await siteSession();
+  if (st.mode === "authed") {
+    if (st.me.must_change) { location.href = "/portal/login.html#change"; return st; }
+    const wrap = document.createElement("span");
+    wrap.style.cssText = "display:flex;gap:10px;align-items:center";
+    wrap.innerHTML = `${st.me.role === "pi"
+        ? `<a class="item" href="/portal/admin.html">${t("Grades", "성적 관리")}</a>` : ""}
+      <span class="item" style="color:var(--accent);font-weight:600">${esc(st.me.name || st.me.sid)}</span>
+      <a class="item" href="#" id="navLogout">${t("Sign out", "로그아웃")}</a>`;
+    link.replaceWith(wrap);
+    wrap.querySelector("#navLogout").addEventListener("click", async (e) => {
+      e.preventDefault();
+      try { await fetch("/api/logout", { method: "POST", headers: XHDR }); } catch {}
+      location.reload();
+    });
+  } else if (st.mode === "anon") {
+    link.href = "/portal/login.html?next=" + encodeURIComponent(location.pathname + location.search);
+  }
+  return st;
+}
+/* generic in-page submission box: type "text" (ticket-like) or "pdf" (report) */
+function submitBoxHTML(row, mine, label) {
+  const dueTxt = row.due ? `${fmtDate(row.due.slice(0, 10))} ${row.due.slice(11, 16)}` : "";
+  const status = mine && mine.at
+    ? t("submitted", "제출됨") + " " + String(mine.at).slice(5, 16).replace("T", " ") + (row.late || (mine && mine.late) ? ` · <span style="color:var(--warn);font-weight:700">${t("late", "지각")}</span>` : "")
+    : (row.status === "miss" ? `<span style="color:var(--warn)">${t("missing", "미제출")}</span>` : t("not submitted yet", "아직 제출 전"));
+  const graded = row.score !== null && row.score !== undefined;
+  return `<p class="mybox-t" style="font-weight:700;font-size:13.5px;margin:0 0 8px;font-family:var(--serif)">${esc(label)}
+      <span class="sub" style="margin:0;display:inline"> · ${t("due", "마감")} ${esc(dueTxt)} · ${status}${graded
+        ? ` · <b>${t("score", "점수")} ${esc(row.score)}</b>` : ""}</span></p>
+    ${graded && row.feedback ? `<blockquote style="margin:6px 0">${esc(row.feedback)}</blockquote>` : ""}
+    ${row.type === "text"
+      ? `<textarea maxlength="20000" style="width:100%;min-height:110px;resize:vertical;padding:10px 11px;border:1px solid var(--hairline);border-radius:8px;background:var(--surface);color:var(--ink);font-size:13.5px;font-family:var(--sans);line-height:1.6">${mine && mine.text ? esc(mine.text) : ""}</textarea>`
+      : `<input type="file" accept="application/pdf,.pdf" style="font-size:12.5px">`}
+    <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
+      <button class="btn primary">${mine && mine.at ? t("Resubmit", "다시 제출") : t("Submit", "제출")}</button>
+      <span class="sub" style="margin:0">${row.type === "pdf" ? t("PDF only · ≤ 5 MB", "PDF만 · 5 MB 이하")
+        : t("Resubmission allowed; the latest one counts.", "다시 제출 가능 — 마지막 제출이 반영돼요.")}</span>
+    </div>
+    <p class="sub boxerr" style="min-height:16px;margin:6px 0 0;color:var(--warn)"></p>`;
+}
+async function initSubmitBoxes(st) {
+  const boxes = $$(".subbox");
+  if (!boxes.length) return;
+  if (!st) st = await siteSession();
+  if (st.mode === "mirror") {
+    const live = await liveClassURL();
+    boxes.forEach((b) => { b.innerHTML = `<div class="mybox-in" style="background:var(--page);border:1px dashed var(--accent);border-radius:10px;padding:12px 14px;margin:14px 0 4px">
+      ${live ? `<a class="btn primary" href="${esc(live)}${esc(location.pathname)}${esc(location.search)}">${t("Submit on the live class site →", "수업용 주소에서 제출하기 →")}</a>`
+             : `<span class="sub" style="margin:0">${t("Submission opens on the live class address (pinned on Home).", "제출은 수업용 주소에서 열려요 (홈 고정 공지 참고).")}</span>`}</div>`; });
+    return;
+  }
+  if (st.mode === "anon") {
+    const login = "/portal/login.html?next=" + encodeURIComponent(location.pathname + location.search);
+    boxes.forEach((b) => { b.innerHTML = `<div class="mybox-in" style="background:var(--page);border:1px dashed var(--accent);border-radius:10px;padding:12px 14px;margin:14px 0 4px">
+      <a class="btn primary" href="${login}">${t("Sign in to submit", "로그인하고 제출하기")}</a>
+      <span class="sub" style="margin:0"> ${esc(b.dataset.label || "")}</span></div>`; });
+    return;
+  }
+  if (st.me.role === "pi") { boxes.forEach((b) => { b.innerHTML = ""; }); return; }
+  for (const b of boxes) {
+    const aid = b.dataset.aid, label = b.dataset.label || aid;
+    const row = (st.me.assignments || []).find((a) => a.id === aid);
+    if (!row || row.type === "score") { b.innerHTML = ""; continue; }
+    let mine = null;
+    if (row.type === "text") {
+      try { mine = await (await fetch(`/api/mysub?aid=${aid}`)).json(); } catch {}
+    } else if (row.submitted_at) mine = { at: row.submitted_at, late: row.late };
+    b.innerHTML = `<div class="mybox-in" style="background:var(--page);border:1px dashed var(--accent);border-radius:10px;padding:12px 14px;margin:14px 0 4px">${submitBoxHTML(row, mine, label)}</div>`;
+    b.querySelector("button").addEventListener("click", async () => {
+      const err = b.querySelector(".boxerr");
+      const fd = new FormData(); fd.append("aid", aid);
+      if (row.type === "text") {
+        const txt = b.querySelector("textarea").value.trim();
+        if (!txt) { err.textContent = t("Write something first.", "내용을 먼저 적어 주세요."); return; }
+        fd.append("text", txt);
+      } else {
+        const f = b.querySelector('input[type="file"]').files[0];
+        if (!f) { err.textContent = t("Choose a PDF first.", "PDF 파일을 먼저 선택해 주세요."); return; }
+        if (f.size > 5 * 1024 * 1024) { err.textContent = t("Over the 5 MB limit.", "5 MB를 넘어요."); return; }
+        fd.append("file", f, f.name);
+      }
+      try {
+        const r = await fetch("/api/submit", { method: "POST", headers: XHDR, body: fd });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.detail || "submit failed");
+        location.reload();
+      } catch (e2) { err.textContent = e2.message; }
+    });
+  }
+}
+document.addEventListener("DOMContentLoaded", async () => {
   document.body.dataset.lang = LANG.get();
   injectNav();
   injectFooter();
   if (!gatePassed()) showGate();
+  const st = await navSession();
+  initSubmitBoxes(st);
 });
 
 /* Date helpers — weeks.json carries "date": "YYYY-MM-DD" (class day) or null until the
