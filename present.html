@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Presentations</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js" defer></script>
+<style>
+  details.pweek { border:1px solid var(--hairline); border-radius:12px; background:var(--surface);
+    margin:12px 0; overflow:hidden; }
+  details.pweek[open] { border-color:var(--accent); }
+  details.pweek > summary { cursor:pointer; list-style:none; display:flex; align-items:baseline;
+    gap:10px 14px; flex-wrap:wrap; padding:13px 18px; }
+  details.pweek > summary::-webkit-details-marker { display:none; }
+  details.pweek > summary::before { content:"▸"; color:var(--muted); font-size:12px; }
+  details.pweek[open] > summary::before { content:"▾"; color:var(--accent); }
+  .pw-wk { font-family:var(--serif); font-weight:700; font-size:15.5px; white-space:nowrap; }
+  .pw-date { font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .pw-title { font-size:13px; color:var(--ink-2); flex:1; min-width:200px; }
+  .pw-body { padding:2px 18px 18px; border-top:1px solid var(--hairline); }
+
+  .grp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px; margin:14px 0 4px; }
+  .grp-card { background:var(--page); border:1px solid var(--hairline); border-radius:10px; padding:12px 14px; }
+  .grp-t { font-family:var(--serif); font-weight:700; font-size:13.5px; margin:0 0 8px; }
+  .grp-m { display:flex; align-items:center; gap:8px; font-size:13px; padding:3px 0; }
+  .face { width:28px; height:28px; border-radius:50%; object-fit:cover; flex:none;
+    border:1px solid var(--hairline); }
+  .face.av { display:flex; align-items:center; justify-content:center; background:var(--wash);
+    color:var(--ink-2); font-family:var(--serif); font-size:12px; font-weight:700; }
+  .grp-star { color:var(--accent); font-size:11px; font-weight:700; }
+  .grp-m.lead span, .grp-m.pres span { font-weight:700; }
+  .slide-row { margin-top:10px; padding-top:10px; border-top:1px solid var(--hairline);
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:12.5px; }
+  .upbox { border:1px dashed var(--accent); border-radius:10px; padding:12px 14px; margin:12px 0 4px;
+    background:var(--page); }
+  .upbox input[type="file"] { font-size:12.5px; }
+</style>
+</head>
+<body data-page="present">
+<div class="wrap">
+  <p class="eyebrow">EN5425 / EV4240 · Fall 2026</p>
+  <h1><span class="lang-en">Presentations</span><span class="lang-ko">발표</span></h1>
+  <p class="lede">
+    <span class="lang-en">Each journal-club week: the drawn <b>presenter</b> of every group uploads the
+      group's synthesis slides here (PDF/PPT/PPTX, ≤ 20 MB) and presents in the closing minutes.
+      Click a card to open the slides directly. Proposal pitches (W8) and the final demos (W16)
+      will live here too.</span>
+    <span class="lang-ko">저널클럽 주간마다 각 그룹의 <b>발표자</b>가 그룹 정리 발표자료(PDF/PPT/PPTX, 20 MB 이하)를
+      여기에 올리고 마지막에 발표해요. 카드에서 바로 눌러 열 수 있어요. 제안서 발표(8주차)와 파이널 데모(16주차)도
+      이곳에서 진행됩니다.</span>
+  </p>
+
+  <div id="pr">
+    <p class="sub" style="margin-top:24px"><span class="lang-en">Loading…</span><span class="lang-ko">불러오는 중…</span></p>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const el = $("#pr");
+  let ko = false; try { ko = localStorage.getItem("en5425-lang") === "ko"; } catch {}
+  const face = (name, photo) => photo
+    ? `<img class="face" src="${esc(photo)}" alt="" loading="lazy">`
+    : `<div class="face av" aria-hidden="true">${esc((String(name).trim()[0] || "?").toUpperCase())}</div>`;
+
+  try {
+    const { weeks } = await loadJSON("weeks");
+    const st = await siteSession();
+    const jcWeeks = weeks.filter((w) => w.n >= 2 && w.n <= 12 && w.n !== 8);
+    const todayK = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+    const upcoming = jcWeeks.find((w) => w.date && w.date >= todayK);
+    const cur = (upcoming || jcWeeks[jcWeeks.length - 1]).n;
+
+    const wTitle = (w) => (ko && w.title_ko) ? w.title_ko : w.title;
+    let html = "";
+
+    for (const w of jcWeeks) {
+      let body = "";
+      if (st.mode === "mirror") {
+        const live = await liveClassURL();
+        body = `<p class="sub" style="margin:12px 0 0">${live
+          ? `<a class="btn primary" href="${esc(live)}/present.html">${t("Open on the live class site →", "수업용 주소에서 열기 →")}</a>`
+          : t("Group cards and slides open on the live class address.", "그룹 카드와 발표자료는 수업용 주소에서 열려요.")}</p>`;
+      } else if (st.mode === "anon") {
+        body = `<p class="sub" style="margin:12px 0 0"><a class="btn primary"
+          href="/portal/login.html?next=${encodeURIComponent("/present.html")}">${t("Sign in to view", "로그인하고 보기")}</a></p>`;
+      } else {
+        let g = null, sl = null;
+        try { g = await (await fetch(`/api/groups?week=${w.n}`, { cache: "no-store" })).json(); } catch {}
+        try { sl = await (await fetch(`/api/slides?week=${w.n}`, { cache: "no-store" })).json(); } catch {}
+        if (!g || g.exists === false) {
+          body = `<p class="sub" style="margin:12px 0 0">${t("Groups are not made yet.", "아직 그룹 편성 전이에요.")}</p>`;
+        } else if (g.hidden) {
+          body = `<p class="sub" style="margin:12px 0 0">${t(
+            `Groups, leaders, and presenters are revealed at 13:00 on class day (${fmtDate(String(g.reveal_at).slice(0, 10))}).`,
+            `그룹·리더·발표자는 수업 당일 13:00에 공개돼요 (${fmtDate(String(g.reveal_at).slice(0, 10))}).`)}</p>`;
+        } else {
+          const slByG = {};
+          (sl && sl.groups || []).forEach((x) => { slByG[x.g] = x; });
+          body = `<div class="grp-grid">${(g.groups || []).map((grp, i) => {
+            const s2 = slByG[i + 1] || {};
+            const open = s2.has
+              ? `<a class="btn primary" href="/api/slides/file?week=${w.n}&g=${i + 1}" target="_blank" rel="noopener">${t("Open slides", "발표자료 열기")}${s2.ext ? ` (${esc(s2.ext.toUpperCase())})` : ""}</a>`
+              : `<span class="sub" style="margin:0">${t("No slides yet.", "아직 업로드 전이에요.")}</span>`;
+            return `<div class="grp-card"><p class="grp-t">${t("Group", "그룹")} ${i + 1}</p>
+              ${grp.members.map((m) => `<div class="grp-m${m.leader ? " lead" : ""}${m.presenter ? " pres" : ""}">
+                ${face(m.display, m.photo)}
+                <span>${esc(m.display)}${m.leader ? ` <span class="grp-star">★ ${t("leader", "리더")}</span>` : ""}${m.presenter ? ` <span class="grp-star" style="color:var(--ok)">◆ ${t("presenter", "발표자")}</span>` : ""}</span>
+              </div>`).join("")}
+              <div class="slide-row">${open}${s2.at ? `<span class="sub" style="margin:0">${esc(String(s2.at).slice(5, 16).replace("T", " "))}</span>` : ""}</div>
+            </div>`;
+          }).join("")}</div>`;
+          /* presenter's upload box */
+          const myRow = (sl && sl.groups || []).find((x) => x.presenter &&
+            st.me && (x.presenter === (st.me.display || ("Student " + st.me.sid.slice(-4)))));
+          if (myRow) {
+            body += `<div class="upbox" data-week="${w.n}">
+              <p class="grp-t">${t("You are this week's presenter — upload your group's slides", "이번 주 발표자예요 — 그룹 발표자료를 올려 주세요")}</p>
+              <input type="file" accept=".pdf,.ppt,.pptx,application/pdf">
+              <button class="btn primary" style="margin-left:8px">${myRow.has ? t("Replace", "다시 올리기") : t("Upload", "업로드")}</button>
+              <span class="sub uperr" style="margin:0 0 0 8px;color:var(--warn)"></span>
+            </div>`;
+          }
+        }
+      }
+      html += `<details class="pweek" id="pw${w.n}" ${w.n === cur ? "open" : ""}>
+        <summary><span class="pw-wk">${t("Week " + w.n, w.n + "주차")}</span>
+          <span class="pw-date">${esc(fmtDate(w.date))}</span>
+          <span class="pw-title">${esc(wTitle(w))}</span></summary>
+        <div class="pw-body">${body}</div>
+      </details>`;
+    }
+
+    /* placeholders: midterm proposal pitches + final demos (collapsed for now) */
+    html += `<details class="pweek"><summary><span class="pw-wk">${t("Week 8", "8주차")}</span>
+        <span class="pw-date">Nov 2</span>
+        <span class="pw-title">${t("Capstone proposal pitches — placeholder", "Capstone 제안서 발표 — 준비 중")}</span></summary>
+      <div class="pw-body"><p class="sub" style="margin:12px 0 0">${t(
+        "Pitch slides will be uploaded and opened here on proposal day. Format to be announced.",
+        "제안서 발표일에 피치 슬라이드를 여기서 올리고 열게 됩니다. 형식은 추후 공지.")}</p></div></details>`;
+    html += `<details class="pweek"><summary><span class="pw-wk">${t("Week 16", "16주차")}</span>
+        <span class="pw-date">Dec 16</span>
+        <span class="pw-title">${t("Final recorded demos — placeholder", "파이널 녹화 데모 — 준비 중")}</span></summary>
+      <div class="pw-body"><p class="sub" style="margin:12px 0 0">${t(
+        "Recorded demo videos and release links will be collected and opened here in finals week.",
+        "기말 주간에 녹화 데모 영상과 릴리스 링크를 여기서 모아 볼 수 있게 됩니다.")}</p></div></details>`;
+
+    el.innerHTML = html;
+
+    /* upload wiring */
+    $$(".upbox").forEach((b) => {
+      b.querySelector("button").addEventListener("click", async () => {
+        const err = b.querySelector(".uperr");
+        const f = b.querySelector('input[type="file"]').files[0];
+        if (!f) { err.textContent = t("Choose a file first.", "파일을 먼저 선택해 주세요."); return; }
+        if (f.size > 20 * 1024 * 1024) { err.textContent = t("Over the 20 MB limit.", "20 MB를 넘어요."); return; }
+        const fd = new FormData();
+        fd.append("aid", "pres" + String(b.dataset.week).padStart(2, "0"));
+        fd.append("file", f, f.name);
+        try {
+          const r = await fetch("/api/submit", { method: "POST", headers: XHDR, body: fd });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.detail || "upload failed");
+          location.reload();
+        } catch (e2) { err.textContent = e2.message; }
+      });
+    });
+  } catch {
+    el.innerHTML = `<p class="sub" style="margin-top:24px">${t(
+      "Couldn't load — refresh to try again.", "불러오지 못했어요 — 새로고침해 주세요.")}</p>`;
+  }
+});
+</script>
+</body>
+</html>
