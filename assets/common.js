@@ -129,6 +129,16 @@ function injectFooter() {
    sign-in must escape the frame — session cookies are third-party inside an iframe
    and Safari/Chrome drop them. */
 const EMBEDDED = (() => { try { return window.self !== window.top; } catch { return true; } })();
+/* Instructor preview: opens date-locked content where no PI session exists (the
+   static mirror, the hydroai.net embed). Curtain-level, like the gate — the repo
+   is public anyway. ?preview=on / ?preview=off on any page toggles it; signing in
+   as PI on the live site turns it on automatically. */
+try {
+  const _pv = new URLSearchParams(location.search).get("preview");
+  if (_pv === "on") localStorage.setItem("en5425-preview", "1");
+  else if (_pv === "off") localStorage.removeItem("en5425-preview");
+} catch {}
+function previewOn() { try { return localStorage.getItem("en5425-preview") === "1"; } catch { return false; } }
 const GATE_HASH = "4c0d0a6332aca7bac1ba8ef0dad4e1f305d9897fc595a84f37332718cb57b57f";
 async function _sha256hex(txt) {
   const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt));
@@ -193,6 +203,7 @@ async function navSession() {
   const st = await siteSession();
   if (st.mode === "authed") {
     if (st.me.must_change) { location.href = "/portal/login.html#change"; return st; }
+    if (st.me.role === "pi") { try { localStorage.setItem("en5425-preview", "1"); } catch {} }
     slot.innerHTML = `${st.me.role === "pi"
         ? `<a class="item" href="/portal/admin.html">${t("Grades", "성적 관리")}</a>` : ""}
       <span class="item" style="color:var(--accent);font-weight:600">${esc(st.me.name || st.me.sid)}</span>

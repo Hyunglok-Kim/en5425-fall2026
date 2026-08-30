@@ -12,6 +12,11 @@ try {
   const m = location.pathname.match(/week(\d+)\.html$/);
   if (!m) return;
   try {
+    const pv = new URLSearchParams(location.search).get("preview");
+    if (pv === "on") localStorage.setItem("en5425-preview", "1");
+    else if (pv === "off") localStorage.removeItem("en5425-preview");
+  } catch {}
+  try {
     const { weeks } = await (await fetch("../data/weeks.json", { cache: "no-store" })).json();
     const w = (weeks || []).find((x) => x.n === parseInt(m[1], 10));
     if (!w || !w.date) return;
@@ -20,9 +25,17 @@ try {
     const unlock = d.toISOString().slice(0, 10);
     const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
     if (today >= unlock) return;
+    const badge = () => {
+      const b = document.createElement("div");
+      b.textContent = `Instructor preview · students see this from ${unlock}`;
+      b.style.cssText = "position:fixed;top:10px;right:12px;z-index:99;background:rgba(0,0,0,.55);" +
+        "color:#fff;padding:4px 12px;border-radius:999px;font-size:11px;letter-spacing:.03em";
+      document.body.appendChild(b);
+    };
+    try { if (localStorage.getItem("en5425-preview") === "1") return badge(); } catch {}
     try {
       const r = await fetch("/api/me", { cache: "no-store" });
-      if (r.ok && (await r.json()).role === "pi") return;
+      if (r.ok && (await r.json()).role === "pi") return badge();
     } catch {}
     const [, mm, dd] = unlock.split("-").map(Number);
     document.body.innerHTML =

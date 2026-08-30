@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     let previewNote = "";
     if (unlockIso && todayKST < unlockIso) {
       const st = await siteSession();
-      const isPI = st.mode === "authed" && st.me.role === "pi";
+      const isPI = (st.mode === "authed" && st.me.role === "pi") || previewOn();
       const [, um, ud] = unlockIso.split("-").map(Number);
       const opensOn = t(fmtDate(unlockIso), `${um}월 ${ud}일`);
       if (!isPI) {
