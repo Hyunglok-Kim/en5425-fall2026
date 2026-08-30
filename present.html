@@ -101,9 +101,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     async function weekBody(w) {
       if (st.mode === "mirror") {
         const live = await liveP;
-        return `<p class="sub" style="margin:12px 0 0">${live
-          ? `<a class="btn primary" href="${esc(live)}/present.html">${t("Open on the live class site →", "수업용 주소에서 열기 →")}</a>`
-          : t("Group cards and slides open on the live class address.", "그룹 카드와 발표자료는 수업용 주소에서 열려요.")}</p>`;
+        const login = (live ? live + "/portal/login.html" : "portal/login.html") + "?next=%2Fpresent.html";
+        return `<p class="sub" style="margin:12px 0 0"><a class="btn primary" href="${esc(login)}">${t("Sign in to view", "로그인하고 보기")}</a></p>`;
       }
       if (st.mode === "anon") {
         return `<p class="sub" style="margin:12px 0 0"><a class="btn primary"

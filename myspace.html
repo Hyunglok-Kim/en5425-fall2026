@@ -153,12 +153,12 @@ async function renderGate(st) {
   const box = (inner) => `<div class="card" style="border-style:dashed;border-color:var(--accent)">${inner}</div>`;
   if (st.mode === "mirror") {
     const live = await liveClassURL();
-    g.innerHTML = box(`<b>${t("This is the static mirror", "여기는 정적 mirror예요")}</b>
+    const login = (live ? live + "/portal/login.html" : "portal/login.html") + "?next=%2Fmyspace.html";
+    g.innerHTML = box(`<b>${t("Sign in to see your space", "로그인하면 내 공간이 열려요")}</b>
       <p class="sub" style="margin:6px 0 10px">${t(
-        "Your personal dashboard — progress, submissions, profile — lives on the live class site.",
-        "진행 상황·제출 내역·프로필 같은 개인 대시보드는 수업용 주소에서 볼 수 있어요.")}</p>
-      ${live ? `<a class="btn primary" href="${esc(live)}/myspace.html">${t("Open on the live class site →", "수업용 주소에서 열기 →")}</a>`
-             : `<span class="sub" style="margin:0">${t("The live class address is pinned on Home.", "수업용 주소는 홈 고정 공지에 있어요.")}</span>`}`);
+        "Progress at a glance, every submission with score and feedback, and your public profile card.",
+        "진행 상황, 점수와 피드백이 달린 제출 내역, 내 프로필 카드까지 — 로그인하면 여기에 보여요.")}</p>
+      <a class="btn primary" href="${esc(login)}">${t("Sign in →", "로그인 →")}</a>`);
   } else {
     g.innerHTML = box(`<b>${t("Sign in to see your space", "로그인하면 내 공간이 열려요")}</b>
       <p class="sub" style="margin:6px 0 10px">${t(

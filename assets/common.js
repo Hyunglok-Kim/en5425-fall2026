@@ -234,10 +234,15 @@ async function initSubmitBoxes(st) {
   if (!boxes.length) return;
   if (!st) st = await siteSession();
   if (st.mode === "mirror") {
+    /* Students should never see the live/mirror split — every box just says "sign in".
+       Deep-link straight to the live sign-in form when the class address is known;
+       otherwise the local stub forwards there on its own. */
     const live = await liveClassURL();
+    const page = location.pathname.split("/").pop() || "index.html";
+    const next = encodeURIComponent("/" + page + location.search);
+    const login = (live ? live + "/portal/login.html" : "portal/login.html") + "?next=" + next;
     boxes.forEach((b) => { b.innerHTML = `<div class="mybox-in" style="background:var(--page);border:1px dashed var(--accent);border-radius:10px;padding:12px 14px;margin:14px 0 4px">
-      ${live ? `<a class="btn primary" href="${esc(live)}${esc(location.pathname)}${esc(location.search)}">${t("Submit on the live class site →", "수업용 주소에서 제출하기 →")}</a>`
-             : `<span class="sub" style="margin:0">${t("Submission opens on the live class address (pinned on Home).", "제출은 수업용 주소에서 열려요 (홈 고정 공지 참고).")}</span>`}</div>`; });
+      <a class="btn primary" href="${esc(login)}">${t("Sign in to submit →", "로그인하고 제출하기 →")}</a></div>`; });
     return;
   }
   if (st.mode === "anon") {

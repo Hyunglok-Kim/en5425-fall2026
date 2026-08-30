@@ -182,10 +182,9 @@ async function initTicketBoxes(scope) {
 
   if (st.mode === "mirror") {
     const live = await liveURL();
+    const login = (live ? live + "/portal/login.html" : "portal/login.html") + "?next=%2Fjournal.html";
     boxes.forEach((b) => { b.innerHTML = `<div class="mybox-in"><p class="sub" style="margin:0">
-      ${live ? `<a class="btn primary" href="${esc(live)}/journal.html">${t("Write your ticket on the live class site →", "수업용 주소에서 티켓 작성하기 →")}</a>`
-             : t("Ticket submission opens on the live class address (see the pinned announcement on Home).",
-                 "티켓 제출은 수업용 주소에서 열려요 (홈의 고정 공지 참고).")}</p></div>`; });
+      <a class="btn primary" href="${esc(login)}">${t("Sign in to write your ticket →", "로그인하고 티켓 쓰기 →")}</a></p></div>`; });
     return;
   }
 

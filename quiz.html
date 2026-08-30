@@ -83,12 +83,12 @@ function render(el, quizzes, states, isPI, mode, base) {
     const quizBtn = (s.quiz || isPI) && canLink
       ? `<a class="btn" target="_blank" rel="noopener" href="${fileURL(q, "quiz")}">${t("Quiz PDF", "문제 PDF")}${!s.quiz ? ` <span class="sub" style="margin:0;display:inline">(${t("preview", "미공개 · 미리보기")})</span>` : ""}</a>`
       : s.quiz && !canLink
-      ? `<span class="sub" style="margin:0">${t("Open on the live class site (pinned on Home).", "수업용 주소에서 열 수 있어요 (홈 고정 공지).")}</span>`
+      ? `<span class="sub" style="margin:0">${t("Temporarily unavailable — try again in a moment.", "지금은 열리지 않아요 — 잠시 후 다시 시도해 주세요.")}</span>`
       : `<span class="sub" style="margin:0">${t("The paper is posted here after class.", "퀴즈지는 수업 후에 올라와요.")}</span>`;
     const keyBtn = (s.key || isPI) && canLink
       ? `<a class="btn primary" target="_blank" rel="noopener" href="${fileURL(q, "key")}">${t("Answer key PDF", "정답 PDF")}${!s.key ? ` <span class="sub" style="margin:0;display:inline;color:inherit">(${t("preview", "미공개 · 미리보기")})</span>` : ""}</a>`
       : s.key && !canLink
-      ? `<span class="sub" style="margin:0">${t("Open on the live class site.", "수업용 주소에서 열 수 있어요.")}</span>`
+      ? `<span class="sub" style="margin:0">${t("Temporarily unavailable — try again in a moment.", "지금은 열리지 않아요 — 잠시 후 다시 시도해 주세요.")}</span>`
       : `<span class="sub" style="margin:0">${t("The key opens when the instructor releases it.", "정답지는 교수님이 공개하면 열려요.")}</span>`;
     const pictl = isPI ? `
       <div class="pictl" data-qid="${q.id}">

@@ -54,12 +54,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ---- mirror (static copy, no API): point to the live class address ---- */
   if (st.mode === "mirror") {
     const live = await liveClassURL();
+    const login = (live ? live + "/portal/login.html" : "portal/login.html") + "?next=%2Fassignments.html";
     el.innerHTML = `<div class="card center-card">
-      <h3 style="margin:0 0 6px">${t("Submission runs on the live class site", "제출은 수업용 주소에서 열려요")}</h3>
-      ${live
-        ? `<a class="btn primary" href="${esc(live)}/assignments.html">${t("Submit on the live class site →", "수업용 주소에서 제출하기 →")}</a>`
-        : `<p class="sub" style="margin:8px 0 0">${t("Submission opens on the live class address (pinned on Home).",
-            "제출은 수업용 주소에서 열려요 (홈 고정 공지 참고).")}</p>`}</div>`;
+      <h3 style="margin:0 0 6px">${t("Sign in to submit", "제출하려면 로그인이 필요해요")}</h3>
+      <a class="btn primary" href="${esc(login)}">${t("Sign in →", "로그인 →")}</a></div>`;
     return;
   }
 
