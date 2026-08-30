@@ -103,7 +103,7 @@
     </svg>
   </div>
   <ul>
-    <li>Paper + written response (3 h) · lab follow-through (2–3 h) · project progress (3–6 h).</li>
+    <li>Paper + entrance ticket (3 h) · lab follow-through (2–3 h) · project progress (3–6 h).</li>
     <li>Including reading weeks. <span class="muted">There are no light weeks after today.</span></li>
   </ul>
   <div class="foot"><span>“If your semester cannot absorb this, this course is not for you this semester — that is a scheduling fact, not a judgment.”</span></div>
@@ -116,11 +116,11 @@
   <h2>Grading: 10 / 30 / 60</h2>
   <ul>
     <li><b>10% attendance.</b> You are here, prepared, on time.</li>
-    <li><b>30% paper discussion.</b> One paper <span class="accent">every week</span>; written memo due 24 h before class; cold-call discussion in class — being unprepared is visible and graded. Discussion leads rotate.</li>
+    <li><b>30% paper discussion.</b> One paper <span class="accent">every week</span>: entrance tickets <b>15%</b> (public on the site’s Journal Club tab, due 24 h before class; best 12 × 1.25%), reading quizzes <b>6%</b> (5-min closed book, pass = 2/3; best 10 × 0.6%), discussion leadership <b>9%</b> (pairs — lead once + discussant once).</li>
     <li><b>60% project.</b> Milestones from Week 4 onward; the capstone gate is <b>HW0</b>. Public GitHub Pages site + weekly research notes are required infrastructure.</li>
   </ul>
-  <div class="foot"><span>Logistics on the course site: memo format, lead rotation, compute accounts</span></div>
-  <aside class="notes">Emphasize the mechanics, not the percentages: the memo deadline (24 h before class) and cold-calling are what make the 30% real. "Cold-call means I pick; the memo means you cannot improvise." Transition: "One policy left, and it is the one that makes this course different." (by 0:19)</aside>
+  <div class="foot"><span>Logistics on the course site: entrance-ticket format, lead rotation, compute accounts</span></div>
+  <aside class="notes">Emphasize the mechanics, not the percentages: tickets are published on the Journal Club tab 24 h before class, and a closed-book quiz opens every session — being unprepared is visible twice before discussion even starts. Transition: "One policy left, and it is the one that makes this course different." (by 0:19)</aside>
 </section>
 
 <!-- 8 ▸ AI-agent policy -->
@@ -151,7 +151,7 @@
   <ul>
     <li>Not a survey, not an intro to deep learning. A <b>build course</b>: sixteen weeks constructing, end to end, the skill set to pretrain and fine-tune foundation models for Earth observation and weather/climate data.</li>
     <li>By December: a small FM pretrained by you, fine-tuned on a real environmental task, evaluated against honest baselines, <b>released publicly</b> with weights, code, and a model card under your name.</li>
-    <li>Fixed weekly rhythm: one paper + written response, one 3-hour session, lab follow-through, project progress. 8–12 h outside class, every week.</li>
+    <li>Fixed weekly rhythm: one paper + public entrance ticket, one 3-hour session (quiz · lecture · 30-min journal club · 60-min lab), lab follow-through, project progress. 8–12 h outside class, every week.</li>
     <li>Everything is public-facing: notes, labs, capstone live on Git. You are building a portfolio a PhD advisor or employer can read — a feature, and a commitment.</li>
   </ul>
   <aside class="notes">"Unforgiving in the best sense" is the register: the rhythm never changes, which is exactly what makes the output real. Pause after the portfolio point — for many students that is the actual sell.</aside>
@@ -441,15 +441,15 @@
 
 <!-- 30 ▸ Reading discussion -->
 <section class="slide">
-  <p class="kicker">Part 6 · reading cold-calls</p>
+  <p class="kicker">Part 6 · journal-club preview</p>
   <h2>Attention Is All You Need (Vaswani 2017) + ViT (Dosovitskiy 2020)</h2>
   <ol>
     <li>Why does attention scale as O(n²) in tokens, and what does that imply for a 0.25° global weather grid (721×1440)?</li>
     <li>ViT needs more data than CNNs to win — what inductive biases were traded away, and do satellite images restore any of them?</li>
     <li>What exactly is a 'token' for a multispectral image cube?</li>
   </ol>
-  <div class="foot"><span>Lead: rotation pair · opens with one reproduced figure · memo due 24 h before class, every week</span></div>
-  <aside class="notes">If the room has read the papers, run this as the first cold-call: derive scaled dot-product attention shapes at the board (Q·Kᵀ/√d over n tokens → an n×n map; 721×1440 ≈ 1.04×10⁶ grid points → ~10¹² pairwise scores — hence patching, windowing, meshes) and press on why patchify is tokenization. If not, these three questions are the memo prompts and this slide is the preview of how every discussion will run: no summaries, derivations and design trade-offs only.</aside>
+  <div class="foot"><span>Lead pair moderates · opens with one reproduced figure · entrance ticket due 24 h before class, every week</span></div>
+  <aside class="notes">If the room has read the papers, run this as the first live discussion: derive scaled dot-product attention shapes at the board (Q·Kᵀ/√d over n tokens → an n×n map; 721×1440 ≈ 1.04×10⁶ grid points → ~10¹² pairwise scores — hence patching, windowing, meshes) and press on why patchify is tokenization. If not, these three questions are the entrance-ticket prompts and this slide is the preview of how every journal club will run: no summaries, derivations and design trade-offs only.</aside>
 </section>
 
 <!-- 31 ▸ Lab 0 -->
@@ -487,11 +487,12 @@
   <h2>For Week 2: Reichstein et al. (2019), <i>Nature</i></h2>
   <ul>
     <li>“Deep learning and process understanding for data-driven Earth system science” — the paper that frames this whole field.</li>
-    <li><b>Memo:</b> 300–400-word written response, standard format, <b>due 24 h before Week 2 class</b>. Prompt on the course site.</li>
-    <li>This is the weekly rhythm starting now: paper → memo → cold-call discussion. Week 2’s lecture assumes you have read it.</li>
+    <li><b>Entrance ticket:</b> <code>memos/week02.md</code> — 3-sentence summary · substantive critique · capstone connection · one real question — <b>due 24 h before Week 2 class</b>, published on the site’s <b>Journal Club tab</b>.</li>
+    <li>Your ticket appears next to your cohort card — the class reads each other before class.</li>
+    <li>The weekly ritual starting now: <b>5-min closed-book quiz</b> at 0:00 → lecture → <b>30-min journal club</b> on the paper → lab. Week 2’s lecture assumes you have read it.</li>
   </ul>
   <div class="foot"><span>Reichstein et al. 2019, Nature 566, 195–204 · doi:10.1038/s41586-019-0912-1</span></div>
-  <aside class="notes">One sentence of framing only: "Reichstein asks what deep learning can and cannot do for Earth system science — you will spend 16 weeks answering him." Do not lecture the paper today.</aside>
+  <aside class="notes">One sentence of framing only: "Reichstein asks what deep learning can and cannot do for Earth system science — you will spend 16 weeks answering him." Do not lecture the paper today. Show the Journal Club tab live so they see where their ticket will appear next to their cohort card — tickets are public by design; the syllabus states it.</aside>
 </section>
 
 <!-- 34 ▸ Close -->

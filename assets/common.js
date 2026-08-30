@@ -12,25 +12,43 @@ async function loadJSON(name) {
   return r.json();
 }
 
+/* Language toggle — same pattern as the lab dashboards: localStorage + top-right button.
+   Static bilingual content uses <span class="lang-en">…</span><span class="lang-ko">…</span>
+   blocks (CSS hides the inactive one via body[data-lang]); JS-rendered strings use t(en, ko).
+   Toggling reloads the page so every renderer picks up the new language. */
+const LANG = {
+  get: () => { try { return localStorage.getItem("en5425-lang") || "en"; } catch { return "en"; } },
+  set: (v) => { try { localStorage.setItem("en5425-lang", v); } catch {} },
+};
+const t = (en, ko) => (document.body.dataset.lang === "ko" && ko) ? ko : en;
+
 /* Nav is injected so every page stays in sync. body[data-page] marks the active item. */
 const NAV = [
-  ["index", "Home", "index.html"],
-  ["syllabus", "Syllabus", "syllabus.html"],
-  ["schedule", "Schedule", "schedule.html"],
-  ["capstone", "Capstone", "capstone.html"],
-  ["setup", "Setup", "setup.html"],
-  ["students", "Students", "students.html"],
+  ["index", "Home", "Home", "index.html"],
+  ["syllabus", "Syllabus", "강의계획", "syllabus.html"],
+  ["schedule", "Schedule", "주차별 일정", "schedule.html"],
+  ["journal", "Journal Club", "저널클럽", "journal.html"],
+  ["capstone", "Capstone", "프로젝트", "capstone.html"],
+  ["setup", "Setup", "환경 설정", "setup.html"],
+  ["students", "Students", "수강생", "students.html"],
 ];
 function injectNav() {
   const page = document.body.dataset.page || "";
+  const lang = document.body.dataset.lang;
   const nav = document.createElement("nav");
   nav.className = "site-nav";
   nav.innerHTML = `<div class="in">
     <a class="brand" href="index.html">EN5425</a>
-    ${NAV.map(([id, label, href]) =>
-      `<a class="item${id === page ? " on" : ""}" href="${href}">${label}</a>`).join("")}
+    ${NAV.map(([id, en, ko, href]) =>
+      `<a class="item${id === page ? " on" : ""}" href="${href}">${lang === "ko" ? ko : en}</a>`).join("")}
+    <button class="btn lang-btn" id="langBtn" type="button"
+      aria-label="Switch language">${lang === "ko" ? "EN" : "한국어"}</button>
   </div>`;
   document.body.prepend(nav);
+  nav.querySelector("#langBtn").addEventListener("click", () => {
+    LANG.set(lang === "ko" ? "en" : "ko");
+    location.reload();
+  });
 }
 function injectFooter() {
   const f = document.createElement("footer");
@@ -39,7 +57,11 @@ function injectFooter() {
     Fall 2026 · Prof. Hyunglok Kim · <a href="https://hydroai.net">HydroAI Lab</a>, GIST`;
   ($(".wrap") || document.body).appendChild(f);
 }
-document.addEventListener("DOMContentLoaded", () => { injectNav(); injectFooter(); });
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.dataset.lang = LANG.get();
+  injectNav();
+  injectFooter();
+});
 
 /* Date helpers — weeks.json carries "date": "YYYY-MM-DD" (class day) or null until the
    weekday is fixed; every renderer must degrade gracefully when date is null. */

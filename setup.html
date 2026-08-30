@@ -10,15 +10,20 @@
 </head>
 <body data-page="setup">
 <div class="wrap">
-  <p class="eyebrow">EN5425 / EV4240 · Fall 2026</p>
-  <h1>Setup</h1>
-  <p class="lede">Everything on this page should be done before the Week 1 lab and is verified by HW0.
+  <p class="eyebrow">EN5425 / EV4240 · <span class="lang-en">Fall 2026</span><span class="lang-ko">2026 가을학기</span></p>
+  <h1><span class="lang-en">Setup</span><span class="lang-ko">환경 설정</span></h1>
+  <p class="lede"><span class="lang-en">Everything on this page should be done before the Week 1 lab and is verified by HW0.
     Work through it top to bottom with your AI agent beside you — driving an agent through setup is itself the
-    first exercise of the course.</p>
+    first exercise of the course.</span><span
+    class="lang-ko">이 페이지의 모든 항목은 1주차 lab 전에 끝내야 하고, HW0로 검증돼요.
+    AI 에이전트를 옆에 두고 위에서부터 차례대로 진행해 보세요 — 에이전트를 지휘해 환경을 설정하는 것 자체가
+    이 강의의 첫 번째 연습이에요.</span></p>
 
-  <h2>1 · Environment</h2>
-  <p class="sub">Python 3.11 in an isolated environment named <code>en5425</code>, created with conda <i>or</i> uv —
-    your choice, but you must be able to export and rebuild it (HW0 checks this from a fresh clone).</p>
+  <h2><span class="lang-en">1 · Environment</span><span class="lang-ko">1 · 개발 환경</span></h2>
+  <p class="sub"><span class="lang-en">Python 3.11 in an isolated environment named <code>en5425</code>, created with conda <i>or</i> uv —
+    your choice, but you must be able to export and rebuild it (HW0 checks this from a fresh clone).</span><span
+    class="lang-ko">conda <i>또는</i> uv로 만든 <code>en5425</code>라는 이름의 격리된 환경에 Python 3.11을 준비해요 —
+    어느 쪽이든 좋지만, 환경을 export하고 다시 빌드할 수 있어야 해요 (HW0가 fresh clone에서 이를 확인해요).</span></p>
   <pre><code># Option A — conda (Miniconda is enough)
 conda create -n en5425 python=3.11
 conda activate en5425
@@ -29,90 +34,135 @@ conda env export --from-history &gt; environment.yml   # commit this
 uv init en5425 --python 3.11 &amp;&amp; cd en5425
 uv add torch numpy pandas xarray matplotlib
 # pyproject.toml + uv.lock are your export — commit both</code></pre>
-  <p class="sub">Configure git with your real name and university email — commit history is graded evidence in this course.</p>
+  <p class="sub"><span class="lang-en">Configure git with your real name and university email — commit history is graded evidence in this course.</span><span
+    class="lang-ko">git에 실명과 학교 이메일을 설정해 주세요 — 이 강의에서 commit 히스토리는 채점되는 증거예요.</span></p>
   <pre><code>git config --global user.name  "Your Real Name"
 git config --global user.email "you@gm.gist.ac.kr"</code></pre>
   <ul>
-    <li><b>Editor:</b> <a href="https://code.visualstudio.com">VS Code</a> or the editor of your choice — anything you are fast in.</li>
-    <li><b>AI coding agent (required, at least one):</b> <a href="https://claude.com/product/claude-code">Claude Code</a>,
+    <li><span class="lang-en"><b>Editor:</b> <a href="https://code.visualstudio.com">VS Code</a> or the editor of your choice — anything you are fast in.</span><span
+      class="lang-ko"><b>Editor:</b> <a href="https://code.visualstudio.com">VS Code</a> 또는 손에 익은 편집기 — 빠르게 쓸 수 있는 것이면 무엇이든 좋아요.</span></li>
+    <li><span class="lang-en"><b>AI coding agent (required, at least one):</b> <a href="https://claude.com/product/claude-code">Claude Code</a>,
       <a href="https://openai.com/codex/">Codex</a>, or <a href="https://cursor.com">Cursor</a>. Agents are mandatory
       tooling here — and you remain accountable for every line they write (see the
-      <a href="syllabus.html">AI coding agent policy</a>).</li>
+      <a href="syllabus.html">AI coding agent policy</a>).</span><span
+      class="lang-ko"><b>AI 코딩 에이전트 (필수, 최소 1개):</b> <a href="https://claude.com/product/claude-code">Claude Code</a>,
+      <a href="https://openai.com/codex/">Codex</a>, 또는 <a href="https://cursor.com">Cursor</a>. 에이전트는 이 강의의 필수
+      도구예요 — 그리고 에이전트가 쓴 모든 줄에 대한 책임은 여러분에게 있어요
+      (<a href="syllabus.html">AI 코딩 에이전트 정책</a> 참고).</span></li>
   </ul>
 
-  <h2>2 · Accounts</h2>
-  <p class="sub">Create all six before Week 1 lab; each is used repeatedly from Week 1–3 onward.</p>
+  <h2><span class="lang-en">2 · Accounts</span><span class="lang-ko">2 · 계정</span></h2>
+  <p class="sub"><span class="lang-en">Create all six before Week 1 lab; each is used repeatedly from Week 1–3 onward.</span><span
+    class="lang-ko">여섯 개 모두 1주차 lab 전에 만들어 주세요. 각 계정은 1–3주차부터 계속 사용해요.</span></p>
   <div class="scroll">
     <table>
-      <thead><tr><th>Account</th><th>Where</th><th>Why / what to do</th></tr></thead>
+      <thead><tr><th><span class="lang-en">Account</span><span class="lang-ko">계정</span></th>
+        <th><span class="lang-en">Where</span><span class="lang-ko">주소</span></th>
+        <th><span class="lang-en">Why / what to do</span><span class="lang-ko">용도 / 할 일</span></th></tr></thead>
       <tbody>
         <tr><td><b>GitHub</b> + SSH key</td>
           <td><a href="https://github.com">github.com</a></td>
-          <td>Home of your semester repo and all submissions. Add an SSH key:
+          <td><span class="lang-en">Home of your semester repo and all submissions. Add an SSH key:
             <code>ssh-keygen -t ed25519</code>, paste the public key at
             <a href="https://github.com/settings/keys">github.com/settings/keys</a>, verify with
             <code>ssh -T git@github.com</code>
-            (<a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh">guide</a>).</td></tr>
+            (<a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh">guide</a>).</span><span
+            class="lang-ko">학기 repo와 모든 제출물이 사는 곳이에요. SSH key를 추가해요:
+            <code>ssh-keygen -t ed25519</code> 실행 후 public key를
+            <a href="https://github.com/settings/keys">github.com/settings/keys</a>에 붙여넣고
+            <code>ssh -T git@github.com</code>으로 확인해요
+            (<a href="https://docs.github.com/en/authentication/connecting-to-github-with-ssh">가이드</a>).</span></td></tr>
         <tr><td><b>Weights &amp; Biases</b></td>
           <td><a href="https://wandb.ai">wandb.ai</a></td>
-          <td>Experiment tracking, mandatory from Week 2. Free academic tier; run <code>wandb login</code> once inside
-            your <code>en5425</code> env.</td></tr>
+          <td><span class="lang-en">Experiment tracking, mandatory from Week 2. Free academic tier; run <code>wandb login</code> once inside
+            your <code>en5425</code> env.</span><span
+            class="lang-ko">실험 추적 도구로, 2주차부터 필수예요. 무료 academic tier가 있어요. <code>en5425</code> 환경 안에서
+            <code>wandb login</code>을 한 번 실행해 두세요.</span></td></tr>
         <tr><td><b>Hugging Face</b></td>
           <td><a href="https://huggingface.co">huggingface.co</a></td>
-          <td>Datasets and public checkpoints all semester; your capstone model is released here in Week 15–16.
-            Create a write token under Settings → Access Tokens.</td></tr>
+          <td><span class="lang-en">Datasets and public checkpoints all semester; your capstone model is released here in Week 15–16.
+            Create a write token under Settings → Access Tokens.</span><span
+            class="lang-ko">학기 내내 dataset과 공개 checkpoint를 여기서 받고, 15–16주차에는 capstone model을 여기에
+            release해요. Settings → Access Tokens에서 write token을 만들어 두세요.</span></td></tr>
         <tr><td><b>NASA Earthdata Login</b></td>
           <td><a href="https://urs.earthdata.nasa.gov">urs.earthdata.nasa.gov</a></td>
-          <td>Required for SMAP, HLS, and anything pulled via <code>earthaccess</code> from Week 3 onward.
-            Registration is free and instant.</td></tr>
-        <tr><td><b>Kaggle</b> <span class="pill acc">compute floor</span></td>
+          <td><span class="lang-en">Required for SMAP, HLS, and anything pulled via <code>earthaccess</code> from Week 3 onward.
+            Registration is free and instant.</span><span
+            class="lang-ko">3주차부터 SMAP, HLS 등 <code>earthaccess</code>로 받는 모든 데이터에 필요해요.
+            가입은 무료이고 즉시 완료돼요.</span></td></tr>
+        <tr><td><b>Kaggle</b> <span class="pill acc"><span class="lang-en">compute floor</span><span class="lang-ko">컴퓨팅 하한선</span></span></td>
           <td><a href="https://www.kaggle.com">kaggle.com</a></td>
-          <td>Free ~30 GPU-hours/week — <b>the course compute floor</b>: every lab and the default capstone fit inside
-            it even if you never touch another GPU. Verify your phone number to unlock GPU sessions.</td></tr>
+          <td><span class="lang-en">Free ~30 GPU-hours/week — <b>the course compute floor</b>: every lab and the default capstone fit inside
+            it even if you never touch another GPU. Verify your phone number to unlock GPU sessions.</span><span
+            class="lang-ko">주당 약 30 GPU-hours 무료 — <b>이 강의의 컴퓨팅 하한선</b>이에요: 다른 GPU를 전혀 쓰지 않아도
+            모든 lab과 기본 capstone이 이 안에 들어와요. GPU 세션을 열려면 전화번호 인증을 해 주세요.</span></td></tr>
         <tr><td><b>Google Colab</b></td>
           <td><a href="https://colab.research.google.com">colab.research.google.com</a></td>
-          <td>Secondary free GPU. Sessions are preemptible and time-limited, so practice
+          <td><span class="lang-en">Secondary free GPU. Sessions are preemptible and time-limited, so practice
             <b>checkpoint-resume discipline</b> from day one: save checkpoints every N steps to Drive, and write every
-            training script so a restarted session resumes from the last checkpoint instead of starting over.</td></tr>
+            training script so a restarted session resumes from the last checkpoint instead of starting over.</span><span
+            class="lang-ko">보조 무료 GPU예요. 세션이 선점형이고 시간제한이 있어서, 첫날부터
+            <b>checkpoint-resume 습관</b>을 들여야 해요: N step마다 checkpoint를 Drive에 저장하고, 세션이 재시작되면
+            처음부터가 아니라 마지막 checkpoint에서 이어지도록 모든 학습 스크립트를 작성해요.</span></td></tr>
       </tbody>
     </table>
   </div>
 
-  <h2>3 · Your semester repository</h2>
-  <p>All of your graded written work — memos, research notes, labs, the capstone — lives in one <b>private</b> GitHub
-    repository that you own.</p>
+  <h2><span class="lang-en">3 · Your semester repository</span><span class="lang-ko">3 · 학기 repository</span></h2>
+  <p><span class="lang-en">All of your graded written work — entrance tickets, research notes, labs, the capstone — lives in one <b>private</b> GitHub
+    repository that you own.</span><span
+    class="lang-ko">채점되는 모든 서면 작업 — entrance ticket, research note, lab, capstone — 은 여러분이 소유한
+    하나의 <b>private</b> GitHub repository에 모여요.</span></p>
   <ol>
-    <li>Open the template repo <code>en5425-student-template</code> in the course GitHub organization and click
+    <li><span class="lang-en">Open the template repo <code>en5425-student-template</code> in the course GitHub organization and click
       <b>Use this template → Create a new repository</b>. Name it <code>en5425-&lt;your-github-username&gt;</code> and set it
-      to <b>Private</b>.</li>
-    <li>Invite the instructor as a collaborator (Settings → Collaborators; the instructor's GitHub handle is announced
-      in class and on LMS).</li>
-    <li>Clone it over SSH and work in it all semester.</li>
+      to <b>Private</b>.</span><span
+      class="lang-ko">강의 GitHub organization의 템플릿 repo <code>en5425-student-template</code>을 열고
+      <b>Use this template → Create a new repository</b>를 클릭해요. 이름은 <code>en5425-&lt;your-github-username&gt;</code>으로
+      하고 <b>Private</b>으로 설정해요.</span></li>
+    <li><span class="lang-en">Invite the instructor as a collaborator (Settings → Collaborators; the instructor's GitHub handle is announced
+      in class and on LMS).</span><span
+      class="lang-ko">담당교수를 collaborator로 초대해요 (Settings → Collaborators; 교수님의 GitHub handle은 수업과
+      LMS에서 공지돼요).</span></li>
+    <li><span class="lang-en">Clone it over SSH and work in it all semester.</span><span
+      class="lang-ko">SSH로 clone해서 한 학기 내내 그 안에서 작업해요.</span></li>
   </ol>
   <pre><code>your-repo/
 ├── labs/        # one folder per weekly lab (code, figures)
-├── memos/       # weekNN.md — reading memos
+├── memos/       # weekNN.md — entrance tickets
 ├── notes/       # research notes, one per lab
 ├── project/     # capstone: proposal, milestones, final report
 └── hw0/         # the gate assignment</code></pre>
-  <p><b>Conventions</b> — these are graded habits, not suggestions:</p>
+  <p><span class="lang-en"><b>Conventions</b> — these are graded habits, not suggestions:</span><span
+    class="lang-ko"><b>규칙</b> — 제안이 아니라 채점되는 습관이에요:</span></p>
   <ul>
-    <li><code>memos/weekNN.md</code> pushed <b>24 h before class</b>; the push timestamp is the submission time.</li>
-    <li>A research note in <code>notes/</code> after <b>every</b> lab, using the course template
-      (<i>What I did / What I learned / What confused me / Open questions</i>).</li>
-    <li>Commit at <b>every lab checkpoint</b> with informative messages — commit history is part of AI-agent
-      accountability, and one giant "final" commit reads as exactly what it is.</li>
-    <li><b>Never commit data or model checkpoints.</b> The template ships a <code>.gitignore</code> that covers
-      <code>data/</code>, <code>*.ckpt</code>, <code>*.pt</code>, and friends — keep it intact.</li>
+    <li><span class="lang-en">Entrance ticket (<code>memos/weekNN.md</code>) pushed <b>24 h before class</b>; the push timestamp is the submission time.</span><span
+      class="lang-ko">Entrance ticket(<code>memos/weekNN.md</code>)은 <b>수업 24시간 전까지</b> push해요. push 시각이 곧 제출 시각이에요.</span></li>
+    <li><span class="lang-en">A research note in <code>notes/</code> after <b>every</b> lab, using the course template
+      (<i>What I did / What I learned / What confused me / Open questions</i>).</span><span
+      class="lang-ko"><b>매</b> lab이 끝나면 <code>notes/</code>에 research note를 남겨요. 강의 템플릿
+      (<i>What I did / What I learned / What confused me / Open questions</i>)을 사용해요.</span></li>
+    <li><span class="lang-en">Commit at <b>every lab checkpoint</b> with informative messages — commit history is part of AI-agent
+      accountability, and one giant "final" commit reads as exactly what it is.</span><span
+      class="lang-ko"><b>모든 lab checkpoint</b>에서 의미 있는 메시지와 함께 commit해요 — commit 히스토리는 AI 에이전트
+      책임의 일부이고, 하나의 거대한 "final" commit은 딱 그렇게 보여요.</span></li>
+    <li><span class="lang-en"><b>Never commit data or model checkpoints.</b> The template ships a <code>.gitignore</code> that covers
+      <code>data/</code>, <code>*.ckpt</code>, <code>*.pt</code>, and friends — keep it intact.</span><span
+      class="lang-ko"><b>데이터와 model checkpoint는 절대 commit하지 않아요.</b> 템플릿에 <code>data/</code>,
+      <code>*.ckpt</code>, <code>*.pt</code> 등을 덮는 <code>.gitignore</code>가 들어 있어요 — 그대로 유지해 주세요.</span></li>
   </ul>
 
-  <h2>4 · Course materials</h2>
-  <p>Lecture notebooks, lab scaffolds, and the smoke test live in the course repo. Clone it once and pull weekly:</p>
+  <h2><span class="lang-en">4 · Course materials</span><span class="lang-ko">4 · 강의 자료</span></h2>
+  <p><span class="lang-en">Lecture notebooks, lab scaffolds, and the smoke test live in the course repo. Clone it once and pull weekly:</span><span
+    class="lang-ko">강의 노트북, lab scaffold, smoke test는 강의 repo에 있어요. 한 번 clone하고 매주 pull해요:</span></p>
   <pre><code>git clone git@github.com:gist-en5425/course.git
 cd course &amp;&amp; git pull        # run before every session</code></pre>
-  <div class="note"><b>Never edit inside the clone.</b> Copy notebooks and scaffolds out into your own repo
+  <div class="note"><span class="lang-en"><b>Never edit inside the clone.</b> Copy notebooks and scaffolds out into your own repo
     (e.g., into <code>labs/weekNN/</code>) before touching them — local edits will collide with the weekly
-    <code>git pull</code>, and your work belongs in <i>your</i> repository, where it is graded.</div>
+    <code>git pull</code>, and your work belongs in <i>your</i> repository, where it is graded.</span><span
+    class="lang-ko"><b>clone 안에서는 절대 수정하지 마세요.</b> 노트북과 scaffold는 손대기 전에 자신의 repo
+    (예: <code>labs/weekNN/</code>)로 복사해요 — 로컬 수정은 매주의 <code>git pull</code>과 충돌하고,
+    여러분의 작업은 채점이 이루어지는 <i>여러분의</i> repository에 있어야 해요.</span></div>
 </div>
 </body>
 </html>

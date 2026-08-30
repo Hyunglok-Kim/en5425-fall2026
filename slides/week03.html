@@ -19,6 +19,20 @@
   <aside class="notes">Open: last week we learned how to train without lying to ourselves (leakage, splits). This week is the other half of every foundation-model paper — the data. By the end of today you should be able to open any dataset in this field, know exactly what it measures and how much model is inside it, and stream it without downloading a single file. Timing: 75 min total, six blocks, keep the zoo brisk.</aside>
 </section>
 
+<!-- 1b ─ Reading quiz -->
+<section class="slide">
+  <p class="kicker">0:00 · Reading quiz</p>
+  <h2>Quiz first — 5 minutes, closed book</h2>
+  <ul>
+    <li>3 questions on this week’s paper (Rolf et al. 2024).</li>
+    <li>No AI, no notes.</li>
+    <li>Swap with your neighbor to grade.</li>
+    <li>Pass = 2 of 3.</li>
+    <li>Best 10 of 13 count (6% of grade).</li>
+  </ul>
+  <aside class="notes">Distribute at 0:00 sharp, collect at 0:05.</aside>
+</section>
+
 <!-- 2 ─ Roadmap -->
 <section class="slide">
   <p class="kicker">Week 3 · 75 min</p>
@@ -28,7 +42,8 @@
     <li><b>2 · Cloud-native geospatial</b> (15) — COG, Zarr, STAC; why chunking dominates throughput; where the data lives.</li>
     <li><b>3 · ERA5 as a pretraining corpus</b> (15) — equiangular grids, the cos φ weighted mean, anomalies, regridding.</li>
     <li><b>4 · Dataset objects</b> (10) — chips vs tiles vs time series; normalization and QA masking done right.</li>
-    <li><b>5 · Reading</b> (15) + <b>6 · Lab briefing</b> (5) — Rolf et al. 2024; two ETL pipes you keep all semester.</li>
+    <li><b>5 · Reading framing: Rolf 2024</b> (15) — the position in one slide + the five-differences board exercise.</li>
+    <li><b>6 · Journal club</b> (30 · after break) + <b>7 · Lab briefing</b> — DQs from your tickets; two ETL pipes you keep all semester.</li>
   </ul>
   <div class="foot"><span>Skills this week: cloud-native ETL (Zarr/STAC/COG) · ERA5 handling · cos-lat weighting · regridding · dataset/normalization design</span></div>
   <aside class="notes">One sentence per block, 60 seconds total. Emphasize the arc: pick data (zoo) → reach it (formats) → shape it for training (ERA5, dataset objects). The lab's chip store is reused in Week 7 — today's work is infrastructure, not a throwaway exercise.</aside>
@@ -526,7 +541,7 @@ items = cat.search(
   <p class="kicker">Part 5 · 15 min</p>
   <h2>Reading: Rolf et al. 2024</h2>
   <p class="big muted">Position: Satellite data is a distinct modality in machine learning</p>
-  <aside class="notes">15 minutes. Rotation pair opens with one reproduced figure (2 min), then the board exercise, then the three DQs. Keep the board list — we photograph it and revisit it all semester.</aside>
+  <aside class="notes">15 minutes in-lecture: 2-minute framing, then the five-differences board exercise. The three DQs run in the journal club after the break — the board photo becomes the lead pair's opener. Keep the board list; we revisit it all semester.</aside>
 </section>
 
 <!-- 29 -->
@@ -558,22 +573,23 @@ items = cat.search(
 
 <!-- 31 -->
 <section class="slide">
-  <p class="kicker">Reading discussion · 15 min</p>
+  <p class="kicker">Journal club · 30 min · after break</p>
   <h2>Rolf et al. 2024 — discussion questions</h2>
   <ol>
     <li>Which of Rolf's claimed distinctions actually change architecture choices (cite SatMAE/Scale-MAE design decisions)?</li>
     <li>Reanalysis is a model product — what does that mean for 'ground truth' when we evaluate a weather FM against ERA5?</li>
     <li>Why is chunking layout a scientific issue, not just an engineering one?</li>
   </ol>
-  <div class="foot"><span>Lead: rotation pair · opens with one reproduced figure · optional: Bauer, Thorpe &amp; Brunet 2015, doi:10.1038/nature14956</span></div>
-  <aside class="notes">Remaining ~6 min across the three DQs. DQ1 harvests the board exercise into citations. DQ2: return to the assimilation-cycle diagram — good answers mention data-sparse regions being mostly model, and that "beating IFS on ERA5" partly measures agreement with ECMWF's own worldview. DQ3: return to the chunking slide — feasibility of whole analyses is set at archive-write time, and whoever chunks the archive decides which science is cheap. Close with a one-line bridge to lab.</aside>
+  <p class="small muted">Groups of 4–5, working from your published entrance tickets (Journal Club tab on the course site) · this week’s lead pair moderates · these three questions are the agenda.</p>
+  <div class="foot"><span>Lead pair · opens with one reproduced figure · optional: Bauer, Thorpe &amp; Brunet 2015, doi:10.1038/nature14956</span></div>
+  <aside class="notes">Journal club: 30 min in groups of 4–5, lead pair moderating; harvest in the last 5 min. DQ1 harvests the board exercise into citations. DQ2: return to the assimilation-cycle diagram — good answers mention data-sparse regions being mostly model, and that "beating IFS on ERA5" partly measures agreement with ECMWF's own worldview. DQ3: return to the chunking slide — feasibility of whole analyses is set at archive-write time, and whoever chunks the archive decides which science is cheap. Close with a one-line bridge to lab.</aside>
 </section>
 
 <!-- ============ PART 6 · LAB ============ -->
 
 <!-- 32 -->
 <section class="slide">
-  <p class="kicker">Lab briefing · 5 min</p>
+  <p class="kicker">Lab briefing · after journal club</p>
   <h2>Today's lab: two ETL pipes, one reusable module</h2>
   <div class="card small">
     <p><b>Pipe (a) — ERA5.</b> Open WeatherBench2's public ERA5 Zarr (5.625° subset) with xarray → compute a <b>Z500 climatology + anomaly field</b> → verify the <b>cos-lat weighted global mean of T2m against the naive mean</b>. <span class="pill">WB2 ERA5 Zarr</span> <span class="pill">xarray · zarr · gcsfs</span></p>

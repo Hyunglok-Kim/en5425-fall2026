@@ -16,23 +16,33 @@
 </head>
 <body data-page="schedule">
 <div class="wrap">
-  <p class="eyebrow">EN5425 / EV4240 · Fall 2026</p>
-  <h1>16-Week Schedule</h1>
-  <p class="lede">Each session is 75 minutes of concept plus 75 minutes of lab. Reading memos are due
-    24&nbsp;hours before class; click a week number for the full plan, minute-by-minute concept
-    breakdown, and discussion questions.</p>
+  <p class="eyebrow">EN5425 / EV4240 · <span class="lang-en">Fall 2026</span><span class="lang-ko">2026 가을학기</span></p>
+  <h1><span class="lang-en">16-Week Schedule</span><span class="lang-ko">16주 일정</span></h1>
+  <p class="lede"><span class="lang-en">Weeks 2–15 run on a fixed rhythm: 5&#8242; reading quiz &#183; lecture &#183;
+    15&#8242; break &#183; 30&#8242; journal club &#183; 60&#8242; lab. Entrance tickets are due 24&nbsp;hours
+    before class; click a week number for the full plan, minute-by-minute lecture breakdown,
+    and discussion questions.</span><span class="lang-ko">2–15주차는 고정 리듬으로 진행합니다: 리딩 퀴즈 5분 &#183;
+    강의 &#183; 휴식 15분 &#183; 저널클럽 30분 &#183; 실습 60분. 입장 티켓은 수업 24시간 전까지 제출합니다.
+    주차 번호를 클릭하면 전체 계획, 분 단위 강의 구성, 토론 질문을 볼 수 있습니다.</span></p>
 
   <div class="scroll" style="margin-top:22px">
     <table id="sched">
       <thead><tr>
-        <th class="num">Wk</th><th>Date</th><th>Topic</th><th>Lab</th><th>Reading</th>
+        <th class="num"><span class="lang-en">Wk</span><span class="lang-ko">주</span></th>
+        <th><span class="lang-en">Date</span><span class="lang-ko">날짜</span></th>
+        <th><span class="lang-en">Topic</span><span class="lang-ko">주제</span></th>
+        <th><span class="lang-en">Lab</span><span class="lang-ko">실습</span></th>
+        <th><span class="lang-en">Reading</span><span class="lang-ko">읽기자료</span></th>
       </tr></thead>
-      <tbody id="rows"><tr><td colspan="5"><span class="sub">Loading schedule…</span></td></tr></tbody>
+      <tbody id="rows"><tr><td colspan="5"><span class="sub"><span class="lang-en">Loading schedule…</span><span class="lang-ko">일정을 불러오는 중…</span></span></td></tr></tbody>
     </table>
   </div>
-  <p class="sub" style="margin-top:12px">Dates appear once the weekday is fixed at registration.
+  <p class="sub" style="margin-top:12px"><span class="lang-en">Dates appear once the weekday is fixed at registration.
     Memo pills: <span class="pill">standard</span> full memo · <span class="pill">short</span> reduced
-    memo · <span class="pill">menu</span> choose one paper · no pill means no memo that week.</p>
+    memo · <span class="pill">menu</span> choose one paper · no pill means no memo that week.</span><span
+    class="lang-ko">날짜는 수강신청 시 요일이 확정되면 표시됩니다.
+    Memo 표시: <span class="pill">standard</span> 전체 memo · <span class="pill">short</span> 축약
+    memo · <span class="pill">menu</span> 논문 한 편 선택 · 표시가 없으면 그 주는 memo가 없습니다.</span></p>
 </div>
 
 <script>
@@ -45,11 +55,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
   try {
     const { weeks } = await loadJSON("weeks");
+    const ko = () => document.body.dataset.lang === "ko";
+    const wTitle = (w) => (ko() && w.title_ko) ? w.title_ko : w.title;
+    const wGoal = (w) => (ko() && w.goal_ko) ? w.goal_ko : w.goal;
+    const PHASE_KO = { "Foundations": "기초", "Pretraining Core": "프리트레이닝 핵심",
+      "Foundation Models": "파운데이션 모델", "Capstone Sprints": "Capstone 스프린트" };
+    const phaseLabel = (p) => (document.body.dataset.lang === "ko" && PHASE_KO[p]) ? PHASE_KO[p] : p;
     let phase = null, html = "";
     for (const w of weeks) {
       if (w.phase && w.phase !== phase) {
         phase = w.phase;
-        html += `<tr class="phase"><td colspan="5">${esc(phase)}</td></tr>`;
+        html += `<tr class="phase"><td colspan="5">${esc(phaseLabel(phase))}</td></tr>`;
       }
       const lab = w.lab || {};
       const rd = w.reading || {};
@@ -62,15 +78,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       html += `<tr>
         <td class="num"><a href="week.html?w=${w.n}"><b>${w.n}</b></a></td>
         <td class="tnum">${esc(fmtDate(w.date))}</td>
-        <td class="topic"><b><a href="week.html?w=${w.n}">${esc(w.title)}</a></b><br>
-          <span class="sub" style="margin:0">${esc(w.goal || "")}</span></td>
+        <td class="topic"><b><a href="week.html?w=${w.n}">${esc(wTitle(w))}</a></b><br>
+          <span class="sub" style="margin:0">${esc(wGoal(w) || "")}</span></td>
         <td>${esc(firstSentence(lab.task))}${dataPills ? `<div class="pills">${dataPills}</div>` : ""}</td>
         <td>${readLinks || '<span class="sub" style="margin:0">—</span>'}${memoPill}</td>
       </tr>`;
     }
-    tb.innerHTML = html || '<tr><td colspan="5"><span class="sub">Schedule coming soon.</span></td></tr>';
+    tb.innerHTML = html || `<tr><td colspan="5"><span class="sub">${t("Schedule coming soon.", "일정을 곧 공개합니다.")}</span></td></tr>`;
   } catch {
-    tb.innerHTML = '<tr><td colspan="5"><span class="sub">Schedule coming soon — check back shortly.</span></td></tr>';
+    tb.innerHTML = `<tr><td colspan="5"><span class="sub">${t("Schedule coming soon — check back shortly.", "일정을 곧 공개합니다 — 잠시 후 다시 확인해 주세요.")}</span></td></tr>`;
   }
 });
 </script>

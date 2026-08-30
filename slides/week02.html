@@ -19,6 +19,20 @@
   <aside class="notes">Open: last week we asked what a foundation model is; this week we ask a sharper question — how do you know an environmental model is good at all? Two compressed recaps (backprop, the optimizer recipe), then the headline: leakage. Total 75 min; keep the recaps brutal and fast.</aside>
 </section>
 
+<!-- ============================ READING QUIZ ============================ -->
+<section class="slide">
+  <p class="kicker">0:00 · Reading quiz</p>
+  <h2>Quiz first — 5 minutes, closed book</h2>
+  <ul>
+    <li>3 questions on this week’s paper (Reichstein et al. 2019).</li>
+    <li>No AI, no notes.</li>
+    <li>Swap with your neighbor to grade.</li>
+    <li>Pass = 2 of 3.</li>
+    <li>Best 10 of 13 count (6% of grade).</li>
+  </ul>
+  <aside class="notes">Distribute at 0:00 sharp, collect at 0:05.</aside>
+</section>
+
 <!-- ============================ ROADMAP ============================ -->
 <section class="slide">
   <p class="kicker">Week 2 · 75 min</p>
@@ -28,7 +42,7 @@
     <li><b>2 · The optimizer recipe</b> — AdamW + warmup/cosine, the recipe every FM uses <span class="muted">(15 min)</span></li>
     <li><b>3 · Leakage-safe evaluation</b> — why random splits lie, and by how much <span class="accent">(25 min · headline)</span></li>
     <li><b>4 · Worked example</b> — a reviewer-proof split for global soil moisture <span class="muted">(10 min)</span></li>
-    <li><b>5 · Reading discussion</b> — Reichstein et al. 2019 <span class="muted">(15 min)</span></li>
+    <li><b>5 · Journal club</b> — Reichstein et al. 2019, in groups after break <span class="muted">(30 min)</span></li>
   </ul>
   <div class="foot"><span>Lab after break: CAMELS-US MLP + W&amp;B sweep + the random-vs-spatial split experiment</span></div>
   <aside class="notes">Frame the asymmetry explicitly: parts 1–2 are recaps of things they nominally know — we compress to what a practitioner actually uses. Part 3 is new for most and is the skill this course will grade them on all semester. Transition: "start the clock — 10 minutes of backprop."</aside>
@@ -455,7 +469,7 @@
 <section class="slide section">
   <p class="kicker">Part 4 · 10 min</p>
   <h2>Worked example: a reviewer-proof split for global soil moisture</h2>
-  <aside class="notes">Timing: minutes 50–60. Format: pose the design problem, expose the three leak paths, then build the three-way holdout. This is also literally DQ2 in tonight's reading memo — tell them so at the end of the part.</aside>
+  <aside class="notes">Timing: minutes 50–60. Format: pose the design problem, expose the three leak paths, then build the three-way holdout. This is also literally DQ2 in tonight's entrance ticket — tell them so at the end of the part.</aside>
 </section>
 
 <section class="slide">
@@ -512,21 +526,21 @@
     <li><b>Secondary</b>: network-holdout to bound the instrument-bias contribution.</li>
     <li>All tuning (sweeps, early stopping, checkpoint choice) inside training folds; the test partition is touched once.</li>
     <li>Report a per-region table, not one global mean — the model's failures in data-sparse regions are the scientific result.</li>
-    <li class="accent">This is DQ2 in tonight's memo. Use today's vocabulary: range, block, gap, optimism gap.</li>
+    <li class="accent">This is DQ2 in tonight's entrance ticket. Use today's vocabulary: range, block, gap, optimism gap.</li>
   </ul>
   <aside class="notes">~3 min, end at minute 60. Stress "touched once": the test set is spent the moment it influences any decision. And the per-region table point previews the FM-evaluation weeks — global means hide exactly the regions environmental science cares about. Transition to the reading discussion.</aside>
 </section>
 
 <!-- ============================ PART 5 ============================ -->
 <section class="slide section">
-  <p class="kicker">Part 5 · 15 min</p>
-  <h2>Reading discussion</h2>
+  <p class="kicker">Part 5 · 10 min</p>
+  <h2>Reading framing</h2>
   <p class="big muted">Reichstein et al. 2019 — where has DL for Earth system science delivered since, and where hasn't it?</p>
-  <aside class="notes">Timing: minutes 60–75. Rotation pair opens with one reproduced figure from the paper (2 min), then run the three DQs at ~4 min each. Keep DQ2 short — we just did it — and spend the recovered time on DQ3.</aside>
+  <aside class="notes">Timing: minutes ~65–75. Framing only — the three DQs run in the 30-minute journal club after the break, moderated by the lead pair. Here: set the 2019 context so the tickets land on prepared ground.</aside>
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 5 · 15 min</p>
+  <p class="kicker">Part 5 · 10 min</p>
   <h2>The 2019 agenda we are grading seven years later</h2>
   <ul>
     <li>Reichstein's five challenges for DL in Earth system science: <b>interpretability</b> · <b>physical consistency</b> · <b>complex, uncertain data</b> · <b>limited labels</b> · <b>computational demand</b>.</li>
@@ -539,20 +553,21 @@
 </section>
 
 <section class="slide">
-  <p class="kicker">Part 5 · 15 min</p>
+  <p class="kicker">Journal club · 30 min · after break</p>
   <h2>Reichstein et al. 2019 — discussion questions</h2>
   <ol>
     <li>Which of Reichstein's five challenges have FMs since addressed, and which have they dodged?</li>
     <li>Design a split for a global soil-moisture model that a reviewer couldn't reject — what do you hold out?</li>
     <li>Is 'hybrid physics-ML' (their vision) winning in 2026, given NeuralGCM vs pure-ML GraphCast?</li>
   </ol>
-  <div class="foot"><span>Lead: rotation pair · opens with one reproduced figure · memo due before class</span></div>
-  <aside class="notes">Run at ~4 min each; DQ2 shorter (we built the answer in Part 4 — ask a student to reconstruct the three axes from memory). For DQ1, push past "computational demand is solved" — is physical consistency addressed or merely benchmarked? For DQ3, seed the tension: GraphCast beat physics-free, yet NeuralGCM's differentiable-physics core wins on long rollouts and conservation. Close: lab briefing, 1 min.</aside>
+  <p class="small muted">Groups of 4–5, working from your published entrance tickets (Journal Club tab on the course site) · this week’s lead pair moderates · these three questions are the agenda.</p>
+  <div class="foot"><span>Lead pair · opens with one reproduced figure · entrance tickets due 24 h before class</span></div>
+  <aside class="notes">Journal club: 30 min in groups of 4–5, lead pair moderating; keep DQ2 short (we built the answer in Part 4 — ask a student to reconstruct the three axes from memory). For DQ1, push past "computational demand is solved" — is physical consistency addressed or merely benchmarked? For DQ3, seed the tension: GraphCast beat physics-free, yet NeuralGCM's differentiable-physics core wins on long rollouts and conservation. Close: lab briefing, 1 min.</aside>
 </section>
 
 <!-- ============================ LAB ============================ -->
 <section class="slide">
-  <p class="kicker">Lab briefing · then break</p>
+  <p class="kicker">Lab briefing · after journal club</p>
   <h2>Today's lab: measure the optimism gap yourself</h2>
   <div class="card">
     <p><b>Task.</b> Predict runoff ratio and mean annual streamflow from catchment attributes; agent builds an MLP + gradient-boosting baseline. <b>Data.</b> <span class="pill">CAMELS-US · ~671 basins · tabular</span></p>
@@ -563,7 +578,7 @@
     <li class="accent">W&amp;B logging is mandatory from today — every run, every week, no exceptions.</li>
     <li>Tools: PyTorch · scikit-learn · W&amp;B. Verify yourself: normalization stats computed inside training folds only (checklist item 4).</li>
   </ul>
-  <aside class="notes">1 min, then break. Predict the result out loud so they can falsify it: the sweep winner's random-split score will drop when basins are held out by HUC region — their first personally measured optimism gap. The post-mortem paragraph should cite which checklist item the random split violated.</aside>
+  <aside class="notes">1 min, then dismiss to lab (60 min). Predict the result out loud so they can falsify it: the sweep winner's random-split score will drop when basins are held out by HUC region — their first personally measured optimism gap. The post-mortem paragraph should cite which checklist item the random split violated.</aside>
 </section>
 
 </body>

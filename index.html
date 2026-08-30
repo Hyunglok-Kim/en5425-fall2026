@@ -10,30 +10,44 @@
 </head>
 <body data-page="index">
 <div class="wrap">
-  <p class="eyebrow">EN5425 / EV4240 · GIST · Fall 2026</p>
-  <h1>Deep Learning Applications in Environmental Big&nbsp;Data</h1>
-  <p class="lede">A build course. By Week 16 you will have pretrained, fine-tuned, evaluated,
+  <p class="eyebrow">EN5425 / EV4240 · GIST · <span class="lang-en">Fall 2026</span><span class="lang-ko">2026 가을학기</span></p>
+  <h1><span class="lang-en">Deep Learning Applications in Environmental Big&nbsp;Data</span><span
+    class="lang-ko">환경 빅데이터 딥러닝 응용</span></h1>
+  <p class="lede"><span class="lang-en">A build course. By Week 16 you will have pretrained, fine-tuned, evaluated,
     documented, and publicly released a small foundation model for Earth observation or
-    weather/climate data — working alongside AI coding agents whose every line you can defend.</p>
+    weather/climate data — working alongside AI coding agents whose every line you can defend.</span><span
+    class="lang-ko">만들면서 배우는 강의예요. 16주차가 끝나면 Earth observation 또는 기상/기후 데이터를 위한
+    소형 foundation model을 직접 pretraining, fine-tuning, 평가, 문서화하고 공개 release한 상태가 돼요 —
+    모든 줄을 스스로 설명할 수 있는 AI 코딩 에이전트와 함께 작업하면서요.</span></p>
   <div class="meta">
-    <span><b>Format</b> one 3-hour session/week · 75' concept + 75' lab</span>
-    <span><b>Level</b> first-semester PhD</span>
-    <span><b>Grading</b> attendance 10 · paper discussion 30 · project 60</span>
-    <span><b>Instructor</b> Prof. Hyunglok Kim</span>
+    <span><span class="lang-en"><b>Format</b> one 3-hour session/week · quiz · lecture · journal club · lab</span><span
+      class="lang-ko"><b>형식</b> 주 1회 3시간 · quiz · 강의 · journal club · lab</span></span>
+    <span><span class="lang-en"><b>Level</b> first-semester PhD</span><span class="lang-ko"><b>수준</b> 박사과정 1학기</span></span>
+    <span><span class="lang-en"><b>Grading</b> attendance 10 · paper discussion 30 · project 60</span><span
+      class="lang-ko"><b>평가</b> 출석 10 · 논문 토론 30 · 프로젝트 60</span></span>
+    <span><span class="lang-en"><b>Instructor</b> Prof. Hyunglok Kim</span><span class="lang-ko"><b>담당교수</b> 김형록 교수</span></span>
   </div>
 
-  <h2>Announcements</h2>
-  <div class="rows" id="announcements"><div class="row"><span class="sub">Loading…</span></div></div>
+  <h2><span class="lang-en">Announcements</span><span class="lang-ko">공지</span></h2>
+  <div class="rows" id="announcements"><div class="row"><span class="sub"><span class="lang-en">Loading…</span><span class="lang-ko">불러오는 중…</span></span></div></div>
 
-  <h2>This week</h2>
-  <div class="card" id="thisweek"><span class="sub">Loading…</span></div>
+  <h2><span class="lang-en">This week</span><span class="lang-ko">이번 주</span></h2>
+  <div class="card" id="thisweek"><span class="sub"><span class="lang-en">Loading…</span><span class="lang-ko">불러오는 중…</span></span></div>
 
-  <h2>Quick links</h2>
+  <h2><span class="lang-en">Quick links</span><span class="lang-ko">바로가기</span></h2>
   <div class="cards">
-    <a class="card" href="syllabus.html"><b>Syllabus</b><br><span class="sub">Workload, AI-agent policy, grading — read before add/drop.</span></a>
-    <a class="card" href="schedule.html"><b>16-week schedule</b><br><span class="sub">Weekly topics, labs, readings with discussion questions.</span></a>
-    <a class="card" href="capstone.html"><b>Capstone</b><br><span class="sub">Fine-tune &amp; evaluate a foundation model. Milestones, rubric, tracks.</span></a>
-    <a class="card" href="setup.html"><b>Setup</b><br><span class="sub">Environment, accounts, compute, and your semester repository.</span></a>
+    <a class="card" href="syllabus.html"><b><span class="lang-en">Syllabus</span><span class="lang-ko">강의계획</span></b><br><span class="sub"><span
+      class="lang-en">Workload, AI-agent policy, grading — read before add/drop.</span><span
+      class="lang-ko">수업량, AI 에이전트 정책, 평가 — 수강정정 전에 꼭 읽어 주세요.</span></span></a>
+    <a class="card" href="schedule.html"><b><span class="lang-en">16-week schedule</span><span class="lang-ko">16주 일정</span></b><br><span class="sub"><span
+      class="lang-en">Weekly topics, labs, readings with discussion questions.</span><span
+      class="lang-ko">주차별 주제, lab, 토론 질문이 딸린 읽기자료.</span></span></a>
+    <a class="card" href="capstone.html"><b>Capstone</b><br><span class="sub"><span
+      class="lang-en">Fine-tune &amp; evaluate a foundation model. Milestones, rubric, tracks.</span><span
+      class="lang-ko">Foundation model의 fine-tuning과 평가. Milestone, 루브릭, 트랙.</span></span></a>
+    <a class="card" href="setup.html"><b><span class="lang-en">Setup</span><span class="lang-ko">환경 설정</span></b><br><span class="sub"><span
+      class="lang-en">Environment, accounts, compute, and your semester repository.</span><span
+      class="lang-ko">개발 환경, 계정, 컴퓨팅, 그리고 학기 repository.</span></span></a>
   </div>
 </div>
 
@@ -44,23 +58,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("#announcements").innerHTML = anns.length ? anns.map((a) => `
       <div class="row">
         <span class="tnum" style="color:var(--muted);flex:none">${esc(fmtDate(a.date))}</span>
-        <span>${a.pin ? '<span class="pill acc">pinned</span> ' : ""}${esc(a.text)}</span>
+        <span>${a.pin ? `<span class="pill acc">${t("pinned", "고정")}</span> ` : ""}${esc(a.text)}</span>
       </div>`).join("")
-      : '<div class="row"><span class="sub">No announcements yet.</span></div>';
-  } catch { $("#announcements").innerHTML = '<div class="row"><span class="sub">No announcements yet.</span></div>'; }
+      : `<div class="row"><span class="sub">${t("No announcements yet.", "아직 공지가 없어요.")}</span></div>`;
+  } catch { $("#announcements").innerHTML = `<div class="row"><span class="sub">${t("No announcements yet.", "아직 공지가 없어요.")}</span></div>`; }
 
   try {
     const { weeks } = await loadJSON("weeks");
     const w = currentWeek(weeks);
+    const ko = document.body.dataset.lang === "ko";
     $("#thisweek").innerHTML = `
-      <p class="eyebrow" style="margin-top:0">Week ${w.n}${w.date ? " · " + esc(fmtDate(w.date)) : ""}</p>
-      <h3 style="margin:0 0 6px">${esc(w.title)}</h3>
-      <p class="sub" style="margin-bottom:10px">${esc(w.goal || "")}</p>
+      <p class="eyebrow" style="margin-top:0">${t(`Week ${w.n}`, `${w.n}주차`)}${w.date ? " · " + esc(fmtDate(w.date)) : ""}</p>
+      <h3 style="margin:0 0 6px">${esc((ko && w.title_ko) || w.title)}</h3>
+      <p class="sub" style="margin-bottom:10px">${esc((ko && w.goal_ko) || w.goal || "")}</p>
       ${w.reading && w.reading.primary && w.reading.primary.length ? `<p style="font-size:13.5px;margin:6px 0">
-        <b>Reading due</b> (memo 24 h before class): ${w.reading.primary.map((r) =>
+        <b>${t("Reading due", "읽기자료 마감")}</b> ${t("(entrance ticket 24 h before class)", "(entrance ticket은 수업 24시간 전까지)")}: ${w.reading.primary.map((r) =>
           r.link ? `<a href="${esc(r.link)}">${esc(r.title)}</a>` : esc(r.title)).join(" · ")}</p>` : ""}
-      <a class="btn" href="week.html?w=${w.n}">Open week ${w.n} →</a>`;
-  } catch { $("#thisweek").innerHTML = '<span class="sub">Schedule coming soon.</span>'; }
+      <a class="btn" href="week.html?w=${w.n}">${t(`Open week ${w.n} →`, `${w.n}주차 열기 →`)}</a>`;
+  } catch { $("#thisweek").innerHTML = `<span class="sub">${t("Schedule coming soon.", "일정을 곧 공개합니다.")}</span>`; }
 });
 </script>
 </body>

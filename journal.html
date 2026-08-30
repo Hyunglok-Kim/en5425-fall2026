@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Journal Club</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js" defer></script>
+<style>
+  .wksel { display:flex; flex-wrap:wrap; gap:6px; margin:22px 0 10px; }
+  .wksel a { cursor:pointer; }
+  .wksel a:hover { text-decoration:none; border-color:var(--accent); color:var(--accent); }
+  .wksel a.fill:hover { color:var(--accent-ink); }
+  #paper { font-size:13.5px; margin:0 0 6px; }
+  #paper b { font-family:var(--serif); }
+
+  /* prep board — row of small faces, dimmed until the ticket lands */
+  .board { display:flex; flex-wrap:wrap; gap:9px; margin:12px 0 4px; }
+  .face { width:42px; height:42px; border-radius:50%; object-fit:cover; flex:none;
+    border:1px solid var(--hairline); }
+  .face.av { display:flex; align-items:center; justify-content:center; background:var(--wash);
+    color:var(--ink-2); font-family:var(--serif); font-size:17px; font-weight:700; }
+  .board .who { position:relative; }
+  .board .who.off { opacity:.35; }
+  .board .who.in .face { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent); }
+
+  /* ticket cards */
+  #tickets .card { margin:14px 0; padding:16px 20px; }
+  .tk-head { display:flex; align-items:center; gap:12px; padding-bottom:10px;
+    border-bottom:1px solid var(--hairline); margin-bottom:4px; }
+  .tk-head .face { width:46px; height:46px; }
+  .tk-head b { font-size:14.5px; }
+  .tk-head .gh { font-size:12px; font-family:var(--mono); }
+  .tk-head .tk-at { font-size:12px; color:var(--muted); }
+  .tk-late { display:inline-block; font-size:10.5px; font-weight:700; color:var(--warn);
+    border:1px solid var(--warn); border-radius:999px; padding:0 7px; margin-left:6px;
+    letter-spacing:.04em; text-transform:uppercase; vertical-align:1px; }
+  .tk-body { font-size:13.8px; }
+  .tk-body p { margin:9px 0 0; }
+  @media (max-width:520px) {
+    .face { width:36px; height:36px; }
+    #tickets .card { padding:14px 15px; }
+  }
+</style>
+</head>
+<body data-page="journal">
+<div class="wrap">
+  <p class="eyebrow">EN5425 / EV4240 · Fall 2026</p>
+  <h1><span class="lang-en">Journal Club</span><span class="lang-ko">저널클럽</span></h1>
+  <p class="lede">
+    <span class="lang-en">Every class opens with a 5-minute reading quiz; after the lecture we hold
+      a 30-minute discussion in groups of 4&ndash;5, moderated by the week's lead pair. Your entrance
+      ticket &mdash; submitted on the <a href="/portal/login.html">student portal</a> 24&nbsp;h before
+      class &mdash; is published here, face and all, so the whole class reads each other's takes
+      before we talk.</span>
+    <span class="lang-ko">매주 수업은 5분 리딩 퀴즈로 시작하고, 강의 후에는 4&ndash;5명씩 30분 토론을
+      해요. 이번 주 리드 조가 진행합니다. 수업 24시간 전까지 <a href="/portal/login.html">학생
+      포털</a>에서 제출한 entrance ticket은 얼굴 카드와 함께 이 페이지에 공개되어, 토론 전에 서로의
+      생각을 미리 읽을 수 있어요.</span>
+  </p>
+
+  <div id="jc">
+    <p class="sub" style="margin-top:24px"><span class="lang-en">Loading tickets…</span><span class="lang-ko">티켓을 불러오는 중…</span></p>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const el = $("#jc");
+  let ko = false; try { ko = localStorage.getItem("en5425-lang") === "ko"; } catch {}
+  const pad = (n) => String(n).padStart(2, "0");
+  const face = (name, photo, cls = "") => photo
+    ? `<img class="face ${cls}" src="${esc(photo)}" alt="" loading="lazy">`
+    : `<div class="face av ${cls}" aria-hidden="true">${esc((String(name).trim()[0] || "?").toUpperCase())}</div>`;
+  /* escape FIRST, then **bold** + paragraph breaks — no raw HTML ever reaches the DOM */
+  const ticketHTML = (txt) => esc(txt).replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>")
+    .split(/\n\s*\n/).filter((p) => p.trim())
+    .map((p) => `<p>${p.trim().replace(/\n/g, "<br>")}</p>`).join("");
+
+  try {
+    const [{ weeks }, journal] = await Promise.all([loadJSON("weeks"), loadJSON("journal")]);
+    const jw = journal.weeks || {};
+    const jcWeeks = weeks.filter((w) => w.n >= 1 && w.n <= 15 && w.n !== 8);
+    const has = (n) => (jw[pad(n)] || jw[String(n)] || []).length > 0;
+
+    let n = parseInt(new URLSearchParams(location.search).get("w"), 10);
+    if (!jcWeeks.some((w) => w.n === n)) {
+      const withTickets = jcWeeks.filter((w) => has(w.n)).map((w) => w.n);
+      n = withTickets.length ? Math.max(...withTickets) : jcWeeks[0].n;
+    }
+    const w = jcWeeks.find((x) => x.n === n);
+    const tickets = jw[pad(n)] || jw[String(n)] || [];
+    const title = (ko && w.title_ko) ? w.title_ko : w.title;
+    document.title = t(`EN5425 · Journal Club · Week ${n}`, `EN5425 · 저널클럽 · ${n}주차`);
+
+    const primary = ((w.reading || {}).primary || []);
+    const papers = primary.map((r) => r.link
+      ? `<a href="${esc(r.link)}">${esc(r.title)}</a>` : esc(r.title)).join(" · ");
+
+    let html = `
+      <div class="wksel">${jcWeeks.map((x) =>
+        `<a class="pill${x.n === n ? " fill" : ""}" href="journal.html?w=${x.n}"
+           aria-current="${x.n === n ? "true" : "false"}">${t("W" + x.n, x.n + "주")}</a>`).join("")}</div>
+      <p id="paper"><b>${t(`Week ${n}`, `${n}주차`)}</b> · ${esc(title)}${w.date ? " · " + esc(fmtDate(w.date)) : ""}
+        ${papers ? `<br>${t("Paper:", "논문:")} ${papers}` : ""}</p>`;
+
+    /* prep board — whole roster; full color = ticket in, dimmed = not yet.
+       Matched on display name (gh may be empty in the new data shape). */
+    let readySet = new Set(tickets.map((tk) => tk.display || tk.gh));
+    try {
+      const { students = [] } = await loadJSON("status");
+      if (students.length) {
+        const ready = students.filter((s) => readySet.has(s.display || s.gh)).length;
+        html += `
+          <h2>${t("Prep board", "준비 현황판")}</h2>
+          <p class="sub" style="margin:0">${t(
+            `Who's ready for Week ${n} — entrance tickets ${ready}/${students.length}.`,
+            `${n}주차 준비 현황 — entrance ticket ${ready}/${students.length}명 제출.`)}</p>
+          <div class="board">${students.map((s) => {
+            const name = s.display || s.gh;
+            const inOut = readySet.has(name) ? "in" : "off";
+            return `<span class="who ${inOut}" title="${esc(name)}${readySet.has(name)
+              ? "" : " — " + t("no ticket yet", "티켓 미제출")}">${face(name, s.photo)}</span>`;
+          }).join("")}</div>`;
+      }
+    } catch { /* roster unavailable — tickets still render below */ }
+
+    html += `<h2>${t("Entrance tickets", "Entrance tickets")}</h2>`;
+    if (!tickets.length) {
+      html += `<p class="sub">${esc(t(
+        `No tickets for Week ${n} yet — tickets appear here as classmates submit them on the portal (due 24 h before class).`,
+        `아직 ${n}주차 티켓이 없어요 — 포털에서 제출되는 대로 (수업 24시간 전 마감) 여기에 나타나요.`))}</p>`;
+    } else {
+      html += tickets.map((tk) => {
+        const name = tk.display || tk.gh;
+        /* gh may be empty in the new data shape — link only when present;
+           show the submitted time (and a late badge) when the export has it. */
+        const at = tk.at ? String(tk.at) : "";
+        const when = at ? [fmtDate(at.slice(0, 10)) || at.slice(0, 10),
+                           at.slice(11, 16)].filter(Boolean).join(" ") : "";
+        const meta = [
+          tk.gh ? `<a class="gh" href="https://github.com/${esc(tk.gh)}">@${esc(tk.gh)}</a>` : "",
+          when ? `<span class="tk-at">${esc(t("submitted ", "제출 ") + when)}</span>` : "",
+        ].filter(Boolean).join(" · ");
+        return `<div class="card">
+          <div class="tk-head">${face(name, tk.photo)}
+            <span><b>${esc(name)}</b>${tk.late
+              ? ` <span class="tk-late">${t("late", "지각")}</span>` : ""}${meta ? `<br>${meta}` : ""}</span>
+          </div>
+          <div class="tk-body">${ticketHTML(tk.ticket)}</div>
+        </div>`;
+      }).join("");
+    }
+    if (journal.updated) html += `<p class="sub" style="margin-top:14px">${esc(
+      t("Updated ", "업데이트 ") + (fmtDate(String(journal.updated).slice(0, 10)) || journal.updated))}</p>`;
+    el.innerHTML = html;
+  } catch {
+    el.innerHTML = `<p class="sub" style="margin-top:24px">${esc(t(
+      "Couldn't load the journal-club data — check your connection and refresh.",
+      "저널클럽 데이터를 불러오지 못했어요 — 연결을 확인하고 새로고침해 주세요."))}</p>`;
+  }
+});
+</script>
+</body>
+</html>

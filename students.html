@@ -3,61 +3,120 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EN5425 · Students</title>
+<title>EN5425 · Cohort</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/common.js" defer></script>
 <style>
+  #cohort .cards { grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }
+  .card.student { display:flex; flex-direction:column; align-items:center; text-align:center;
+    gap:3px; padding:20px 16px 16px; transition:transform .15s ease, box-shadow .15s ease; }
+  .card.student:hover { transform:translateY(-2px); box-shadow:0 4px 14px var(--wash); }
+  @media (prefers-reduced-motion: reduce) {
+    .card.student { transition:none; }
+    .card.student:hover { transform:none; }
+  }
+  .card.student .ph { width:72px; height:72px; border-radius:50%; object-fit:cover;
+    border:1px solid var(--hairline); margin-bottom:7px; }
+  .card.student .av { display:flex; align-items:center; justify-content:center;
+    background:var(--wash); color:var(--ink-2); font-family:var(--serif);
+    font-size:26px; font-weight:700; }
+  .card.student b { font-size:14.5px; }
+  .card.student .bio { margin:0; font-size:12.5px; color:var(--muted); }
+  .card.student .gh { font-size:12px; font-family:var(--mono); }
   #board th.a { max-width:110px; white-space:normal; }
   #board td, #board th { text-align:center; }
   #board td:first-child, #board th:first-child { text-align:left; white-space:nowrap; }
   .legend { display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:12px;
-            font-size:12.5px; color:var(--ink-2); align-items:center; }
+    font-size:12.5px; color:var(--ink-2); align-items:center; }
+  .closing { margin-top:44px; padding-top:16px; border-top:1px solid var(--hairline);
+    font-family:var(--serif); font-style:italic; color:var(--ink-2); font-size:14.5px; max-width:60ch; }
 </style>
 </head>
 <body data-page="students">
 <div class="wrap">
   <p class="eyebrow">EN5425 / EV4240 · Fall 2026</p>
-  <h1>Submission Board</h1>
-  <p class="lede">Public view of who has turned in what.</p>
-  <div class="note"><b>Submission status only</b> — grades and feedback stay in your private repo.</div>
+  <h1><span class="lang-en">Cohort — Fall 2026</span><span class="lang-ko">Fall 2026 수강생</span></h1>
+  <p class="lede">
+    <span class="lang-en">One semester, one cohort — sixteen weeks of building, evaluating,
+      and releasing foundation models together.</span>
+    <span class="lang-ko">한 학기, 한 cohort — 16주 동안 foundation model을 함께 만들고,
+      평가하고, release합니다.</span>
+  </p>
 
-  <div id="board-wrap"><p class="sub" id="empty">Loading roster…</p></div>
-  <div class="legend" id="legend" hidden>
-    <span><span class="st ok">&#10003;</span> submitted</span>
-    <span><span class="st due">&#183;</span> due / in progress</span>
-    <span><span class="st miss">&#8212;</span> missing</span>
+  <div id="cohort">
+    <p class="sub"><span class="lang-en">Loading cohort…</span><span class="lang-ko">수강생 정보를 불러오는 중…</span></p>
   </div>
   <p class="sub" id="updated" style="margin-top:10px"></p>
+
+  <div id="board-sec" hidden>
+    <h2><span class="lang-en">Submission board</span><span class="lang-ko">제출 현황</span></h2>
+    <div class="note">
+      <span class="lang-en"><b>Submission status only</b> — grades and feedback stay in your private repo.</span>
+      <span class="lang-ko"><b>제출 여부만 공개합니다</b> — 성적과 피드백은 각자의 private repo에만 남습니다.</span>
+    </div>
+    <div id="board-wrap"></div>
+    <div class="legend">
+      <span><span class="st ok">&#10003;</span> <span class="lang-en">submitted</span><span class="lang-ko">제출 완료</span></span>
+      <span><span class="st late">!</span> <span class="lang-en">late</span><span class="lang-ko">지각</span></span>
+      <span><span class="st due">&#183;</span> <span class="lang-en">due / in progress</span><span class="lang-ko">진행 중 · 마감 전</span></span>
+      <span><span class="st miss">&#8212;</span> <span class="lang-en">missing</span><span class="lang-ko">미제출</span></span>
+    </div>
+  </div>
+
+  <p class="closing">
+    <span class="lang-en">Every model released on Demo Day gets a permanent card here.
+      The semester ends; the archive stays.</span>
+    <span class="lang-ko">Demo Day에 release한 모든 model은 이곳에 영구 카드로 남습니다.
+      학기는 끝나도, archive는 남습니다.</span>
+  </p>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
-  const wrapEl = $("#board-wrap");
+  const cohortEl = $("#cohort");
   const chip = (s) =>
-    s === "ok"   ? '<span class="st ok" title="submitted">&#10003;</span>' :
-    s === "due"  ? '<span class="st due" title="due">&#183;</span>' :
-    s === "miss" ? '<span class="st miss" title="missing">&#8212;</span>' : "";
+    s === "ok"   ? `<span class="st ok" title="${t("submitted","제출 완료")}">&#10003;</span>` :
+    s === "late" ? `<span class="st late" title="${t("submitted late","지각 제출")}">!</span>` :
+    s === "due"  ? `<span class="st due" title="${t("due","진행 중")}">&#183;</span>` :
+    s === "miss" ? `<span class="st miss" title="${t("missing","미제출")}">&#8212;</span>` : "";
+  const card = (s) => {
+    const name = s.display || s.gh || "";
+    const photo = s.photo
+      ? `<img class="ph" src="${esc(s.photo)}" alt="" loading="lazy">`
+      : `<div class="ph av" aria-hidden="true">${esc((String(name).trim()[0] || "?").toUpperCase())}</div>`;
+    return `<div class="card student">${photo}
+      <b>${esc(name)}</b>
+      ${s.bio ? `<span class="sub bio">${esc(s.bio)}</span>` : ""}
+      ${s.gh ? `<a class="gh" href="https://github.com/${esc(s.gh)}">@${esc(s.gh)}</a>` : ""}
+    </div>`;
+  };
+  const empty = () => { cohortEl.innerHTML = `<p class="sub">${esc(t(
+    "Cards appear here after HW0 — set your display name and bio (photo optional) on the student portal.",
+    "HW0 이후에 카드가 나타납니다 — 학생 포털에서 표시 이름과 한 줄 소개를 설정해 주세요 (사진은 선택)."))}</p>`; };
   try {
     const d = await loadJSON("status");
     const assignments = Array.isArray(d.assignments) ? d.assignments : [];
     const students = Array.isArray(d.students) ? d.students : [];
-    if (!students.length || !assignments.length) {
-      wrapEl.innerHTML = '<p class="sub">Roster appears here after HW0.</p>';
+    if (!students.length) {
+      empty();
     } else {
-      wrapEl.innerHTML = `<div class="scroll"><table id="board">
-        <thead><tr><th>Student</th>${assignments.map((a) =>
-          `<th class="a" title="${esc(a.due ? "due " + fmtDate(a.due) : "")}">${esc(a.title || a.id)}</th>`).join("")}
-        </tr></thead>
-        <tbody>${students.map((s) => `<tr>
-          <td><a href="https://github.com/${esc(s.gh)}">${esc(s.display || s.gh)}</a></td>
-          ${assignments.map((a) => `<td>${chip((s.status || {})[a.id])}</td>`).join("")}
-        </tr>`).join("")}</tbody></table></div>`;
-      $("#legend").hidden = false;
+      cohortEl.innerHTML = `<div class="cards">${students.map(card).join("")}</div>`;
+      if (assignments.length) {
+        $("#board-wrap").innerHTML = `<div class="scroll"><table id="board">
+          <thead><tr><th>${t("Student","수강생")}</th>${assignments.map((a) =>
+            `<th class="a" title="${esc(a.due ? t("due ","마감 ") + fmtDate(a.due) : "")}">${esc(a.title || a.id)}</th>`).join("")}
+          </tr></thead>
+          <tbody>${students.map((s) => `<tr>
+            <td>${s.gh ? `<a href="https://github.com/${esc(s.gh)}">${esc(s.display || s.gh)}</a>` : esc(s.display || "")}</td>
+            ${assignments.map((a) => `<td>${chip((s.status || {})[a.id])}</td>`).join("")}
+          </tr>`).join("")}</tbody></table></div>`;
+        $("#board-sec").hidden = false;
+      }
     }
     if (d.updated) $("#updated").textContent =
-      "Updated " + (fmtDate(String(d.updated).slice(0, 10)) || d.updated);
+      t("Updated ", "업데이트 ") + (fmtDate(String(d.updated).slice(0, 10)) || d.updated);
   } catch {
-    wrapEl.innerHTML = '<p class="sub">Roster appears here after HW0.</p>';
+    empty();
   }
 });
 </script>

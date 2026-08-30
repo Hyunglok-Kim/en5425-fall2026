@@ -15,7 +15,7 @@
 </head>
 <body data-page="schedule">
 <div class="wrap">
-  <div id="wk"><p class="sub" style="margin-top:38px">Loading week…</p></div>
+  <div id="wk"><p class="sub" style="margin-top:38px"><span class="lang-en">Loading week…</span><span class="lang-ko">주차 정보를 불러오는 중…</span></p></div>
 </div>
 
 <script>
@@ -27,7 +27,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     let n = parseInt(new URLSearchParams(location.search).get("w"), 10) || 1;
     const w = weeks.find((x) => x.n === n) || weeks[0];
     n = w.n;
-    document.title = `EN5425 · Week ${n} · ${w.title}`;
+    const ko = document.body.dataset.lang === "ko";
+    const title = (ko && w.title_ko) ? w.title_ko : w.title;
+    const goal = (ko && w.goal_ko) ? w.goal_ko : w.goal;
+    document.title = t(`EN5425 · Week ${n} · ${title}`, `EN5425 · ${n}주차 · ${title}`);
     const lab = w.lab || {}, rd = w.reading || {};
     const primary = Array.isArray(rd.primary) ? rd.primary : [];
     const optional = Array.isArray(rd.optional) ? rd.optional : [];
@@ -36,52 +39,72 @@ document.addEventListener("DOMContentLoaded", async () => {
     const prev = weeks.find((x) => x.n === n - 1), next = weeks.find((x) => x.n === n + 1);
 
     el.innerHTML = `
-      <p class="eyebrow">Week ${n} · ${esc(w.phase || "")}${w.date ? " · " + esc(fmtDate(w.date)) : ""}</p>
-      <h1>${esc(w.title)}</h1>
-      <p class="lede">${esc(w.goal || "")}</p>
-      ${w.slides ? `<p style="margin-top:10px"><a class="btn" href="slides/week${String(n).padStart(2, "0")}.html">Lecture slides →</a></p>` : ""}
+      <p class="eyebrow">${t(`Week ${n}`, `${n}주차`)} · ${esc((ko && { "Foundations": "기초", "Pretraining Core": "프리트레이닝 핵심", "Foundation Models": "파운데이션 모델", "Capstone Sprints": "Capstone 스프린트" }[w.phase]) || w.phase || "")}${w.date ? " · " + esc(fmtDate(w.date)) : ""}</p>
+      <h1>${esc(title)}</h1>
+      <p class="lede">${esc(goal || "")}</p>
+      ${w.slides ? `<p style="margin-top:10px"><a class="btn" href="slides/week${String(n).padStart(2, "0")}.html">${t("Lecture slides →", "강의 슬라이드 →")}</a></p>` : ""}
 
-      <h2>Concept (75 min)</h2>
+      ${n !== 1 && n !== 8 && n !== 16 ? `<p class="sub" style="margin-top:14px">${t(
+        "Session rhythm: 5&#8242; reading quiz &#183; lecture &#183; 15&#8242; break &#183; 30&#8242; journal club &#183; 60&#8242; lab.",
+        "세션 구성: 리딩 퀴즈 5분 &#183; 강의 &#183; 휴식 15분 &#183; 저널클럽 30분 &#183; 실습 60분.")}</p>` : ""}
+
+      <h2>${t("Lecture", "강의")}</h2>
       <div class="rows">${(w.concept || []).map((c) => `
         <div class="row"><span class="tnum" style="flex:none;width:38px;color:var(--muted)">${esc(c.min)}&#8242;</span>
           <span>${esc(c.topic)}</span></div>`).join("")
-        || '<div class="row"><span class="sub">Details coming soon.</span></div>'}</div>
+        || `<div class="row"><span class="sub">${t("Details coming soon.", "세부 내용을 곧 공개합니다.")}</span></div>`}</div>
 
-      <h2>Lab (75 min)</h2>
+      ${questions.length && n === 1 ? `<h2>${t("Cold-call prompts", "콜드콜 질문")}</h2>
       <div class="card">
-        <p style="margin:0">${esc(lab.task || "Lab details coming soon.")}</p>
-        ${(lab.data || []).length ? `<p class="kv">Data</p><div class="pillrow">${pills(lab.data)}</div>` : ""}
-        ${(lab.tools || []).length ? `<p class="kv">Tools</p><div class="pillrow">${pills(lab.tools)}</div>` : ""}
-        ${lab.deliverable ? `<p class="kv">Deliverable</p><p style="margin:0;font-size:13.5px">${esc(lab.deliverable)}</p>` : ""}
-        ${lab.homework ? `<div class="note" style="margin:14px 0 0"><b>Homework</b> — ${esc(lab.homework)}</div>` : ""}
+        <p style="margin:0" class="small">${t(
+          "Orientation day — nothing is due beforehand. These readings are assigned in class today; your Week 1 ticket is due together with Week 2's, 24 h before the Week 2 session.",
+          "오리엔테이션 날 — 미리 해올 것은 없습니다. 읽기자료는 오늘 수업에서 배정되고, 1주차 티켓은 2주차 티켓과 함께 2주차 수업 24시간 전까지 제출합니다.")}</p>
+        <ol style="margin-top:8px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>
+      </div>` : ""}
+
+      ${questions.length && n !== 1 ? `<h2>${t("Journal club (30 min)", "저널클럽 (30분)")}</h2>
+      <div class="card">
+        <p style="margin:0" class="small">${t(
+          "Bring your entrance ticket (committed as <code>memos/week" + String(n).padStart(2, "0") + ".md</code> 24 h before class). Groups of 4&#8211;5, the week's lead pair moderates; the class opens with a 5-minute closed-book reading quiz.",
+          "입장 티켓(<code>memos/week" + String(n).padStart(2, "0") + ".md</code>, 수업 24시간 전까지 커밋)을 가지고 4&#8211;5명씩 토론합니다. 이번 주 리드 조가 진행하고, 수업 시작은 5분 closed-book 리딩 퀴즈입니다.")}</p>
+        <p class="kv">${t("Discussion questions", "토론 질문")}</p>
+        <ol style="margin-top:4px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>
+        <p style="margin:10px 0 0"><a class="btn" href="journal.html?w=${n}">${t("Read this week's tickets &#8594;", "이번 주 티켓 보기 &#8594;")}</a></p>
+      </div>` : ""}
+
+      <h2>${t("Lab (60 min)", "실습 (60분)")}</h2>
+      <div class="card">
+        <p style="margin:0">${esc(lab.task || t("Lab details coming soon.", "실습 세부 내용을 곧 공개합니다."))}</p>
+        ${(lab.data || []).length ? `<p class="kv">${t("Data", "데이터")}</p><div class="pillrow">${pills(lab.data)}</div>` : ""}
+        ${(lab.tools || []).length ? `<p class="kv">${t("Tools", "도구")}</p><div class="pillrow">${pills(lab.tools)}</div>` : ""}
+        ${lab.deliverable ? `<p class="kv">${t("Deliverable", "제출물")}</p><p style="margin:0;font-size:13.5px">${esc(lab.deliverable)}</p>` : ""}
+        ${lab.homework ? `<div class="note" style="margin:14px 0 0"><b>${t("Homework", "과제")}</b> — ${esc(lab.homework)}</div>` : ""}
       </div>
 
-      <h2>Reading</h2>
+      <h2>${t("Reading", "읽기자료")}</h2>
       <div class="card">
-        ${primary.length ? `<p class="kv" style="margin-top:0">Primary</p>
+        ${primary.length ? `<p class="kv" style="margin-top:0">${t("Primary", "필수")}</p>
           <ul style="margin-top:4px">${primary.map((r) => `<li>${linkOf(r)}</li>`).join("")}</ul>` : ""}
-        ${optional.length ? `<p class="kv">Optional</p>
+        ${optional.length ? `<p class="kv">${t("Optional", "선택")}</p>
           <ul style="margin-top:4px">${optional.map((r) => `<li>${linkOf(r)}</li>`).join("")}</ul>` : ""}
         ${rd.memo && rd.memo !== "none"
-          ? `<p class="sub" style="margin:10px 0 0">Memo type: <span class="pill acc">${esc(rd.memo)}</span> — due 24 h before class, committed to your repo.</p>`
-          : (primary.length ? '<p class="sub" style="margin:10px 0 0">No memo due this week.</p>'
-                            : '<p class="sub" style="margin:0">No assigned reading this week.</p>')}
-        ${questions.length ? `<p class="kv">Discussion questions</p>
-          <ol style="margin-top:4px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>` : ""}
+          ? `<p class="sub" style="margin:10px 0 0">${t("Ticket type:", "티켓 유형:")} <span class="pill acc">${esc(rd.memo)}</span> ${t("— your entrance ticket, due 24 h before class, committed to your repo.", "— 입장 티켓입니다. 수업 24시간 전까지 본인 repo에 커밋해 제출합니다.")}</p>`
+          : (primary.length ? `<p class="sub" style="margin:10px 0 0">${t("No ticket due this week.", "이번 주는 티켓이 없습니다.")}</p>`
+                            : `<p class="sub" style="margin:0">${t("No assigned reading this week.", "이번 주는 지정 읽기자료가 없습니다.")}</p>`)}
       </div>
 
-      ${(w.skills || []).length ? `<h2>Skills you leave with</h2>
+      ${(w.skills || []).length ? `<h2>${t("Skills you leave with", "이번 주에 얻어 가는 skill")}</h2>
         <div class="pillrow">${(w.skills || []).map((s) => `<span class="pill acc">${esc(s)}</span>`).join("")}</div>` : ""}
 
       <div class="pager">
-        <span>${prev ? `<a class="btn" href="week.html?w=${prev.n}">&#8592; Week ${prev.n}</a>` : ""}</span>
-        <a class="btn" href="schedule.html">All weeks</a>
-        <span>${next ? `<a class="btn primary" href="week.html?w=${next.n}">Week ${next.n} &#8594;</a>` : ""}</span>
+        <span>${prev ? `<a class="btn" href="week.html?w=${prev.n}">${t(`&#8592; Week ${prev.n}`, `&#8592; ${prev.n}주차`)}</a>` : ""}</span>
+        <a class="btn" href="schedule.html">${t("All weeks", "전체 주차")}</a>
+        <span>${next ? `<a class="btn primary" href="week.html?w=${next.n}">${t(`Week ${next.n} &#8594;`, `${next.n}주차 &#8594;`)}</a>` : ""}</span>
       </div>`;
   } catch {
-    el.innerHTML = `<p class="eyebrow">Schedule</p><h1>Week plan coming soon</h1>
-      <p class="lede">This week's plan has not been published yet.</p>
-      <a class="btn" href="schedule.html">Back to schedule</a>`;
+    el.innerHTML = `<p class="eyebrow">${t("Schedule", "주차별 일정")}</p><h1>${t("Week plan coming soon", "주차 계획을 곧 공개합니다")}</h1>
+      <p class="lede">${t("This week's plan has not been published yet.", "이번 주 계획이 아직 게시되지 않았습니다.")}</p>
+      <a class="btn" href="schedule.html">${t("Back to schedule", "일정으로 돌아가기")}</a>`;
   }
 });
 </script>

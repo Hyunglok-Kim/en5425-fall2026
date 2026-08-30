@@ -15,114 +15,175 @@
 <body data-page="capstone">
 <div class="wrap">
   <p class="eyebrow">EN5425 / EV4240 · Capstone</p>
-  <h1>Fine-tune, Evaluate, Release a Foundation Model</h1>
-  <p class="lede">The capstone is an evaluation project wearing a modeling project's clothes.
+  <h1><span class="lang-en">Fine-tune, Evaluate, Release a Foundation Model</span><span
+    class="lang-ko">Foundation Model을 fine-tuning하고, 평가하고, release하기</span></h1>
+  <p class="lede"><span class="lang-en">The capstone is an evaluation project wearing a modeling project's clothes.
     You will adapt a public Earth-observation or weather foundation model to a real task, test it
     against baselines that are actually trying to win, and release everything publicly — adapters,
-    evaluation report, and model card. A rigorously demonstrated negative result scores full marks.</p>
+    evaluation report, and model card. A rigorously demonstrated negative result scores full marks.</span><span
+    class="lang-ko">Capstone은 모델링 프로젝트의 옷을 입은 평가 프로젝트예요.
+    공개된 Earth observation 또는 기상 foundation model을 실제 task에 적응시키고, 정말로 이기려고 하는
+    baseline들과 겨루게 하고, 모든 것을 공개적으로 release해요 — adapter, 평가 보고서, model card까지.
+    엄밀하게 입증된 부정적 결과도 만점을 받아요.</span></p>
 
-  <h2>The central question</h2>
-  <div class="note">The PANGAEA benchmark asked it bluntly: <b>does the foundation model really beat a
+  <h2><span class="lang-en">The central question</span><span class="lang-ko">핵심 질문</span></h2>
+  <div class="note"><span class="lang-en">The PANGAEA benchmark asked it bluntly: <b>does the foundation model really beat a
     well-tuned supervised baseline on your task?</b> Sometimes yes, often no, and the field needs
     honest answers. Your capstone answers that question for one model on one task, with an evaluation
-    airtight enough that either answer is publishable.</div>
+    airtight enough that either answer is publishable.</span><span
+    class="lang-ko">PANGAEA benchmark는 이 질문을 직설적으로 던졌어요: <b>foundation model이 잘 튜닝된
+    supervised baseline을 여러분의 task에서 정말로 이길까요?</b> 어떤 때는 그렇고, 많은 경우 아니에요 —
+    그리고 이 분야에는 정직한 답이 필요해요. 여러분의 capstone은 하나의 모델, 하나의 task에 대해 이 질문에
+    답해요. 어느 쪽 답이 나와도 발표할 수 있을 만큼 빈틈없는 평가와 함께요.</span></div>
 
-  <h2>Structure — three tiers</h2>
+  <h2><span class="lang-en">Structure — three tiers</span><span class="lang-ko">구조 — 세 개의 tier</span></h2>
 
   <div class="card tier">
-    <span class="tag pill fill">Tier 1 · default — everyone</span>
-    <h3 style="margin-top:0">Fine-tune &amp; rigorously evaluate a public FM</h3>
-    <p class="sub" style="margin-bottom:10px">Solo (EN5425) or pairs with a contribution statement (EV4240).</p>
-    <p style="font-size:13.5px"><b>Geospatial direction.</b> Adapt
+    <span class="tag pill fill"><span class="lang-en">Tier 1 · default — everyone</span><span class="lang-ko">Tier 1 · 기본 — 전원</span></span>
+    <h3 style="margin-top:0"><span class="lang-en">Fine-tune &amp; rigorously evaluate a public FM</span><span
+      class="lang-ko">공개 FM을 fine-tuning하고 엄밀하게 평가하기</span></h3>
+    <p class="sub" style="margin-bottom:10px"><span class="lang-en">Solo (EN5425) or pairs with a contribution statement (EV4240).</span><span
+      class="lang-ko">개인 (EN5425) 또는 기여 명세와 함께 pair (EV4240).</span></p>
+    <p style="font-size:13.5px"><span class="lang-en"><b>Geospatial direction.</b> Adapt
       <a href="https://huggingface.co/ibm-nasa-geospatial">Prithvi-EO-2.0</a> (via
       <a href="https://github.com/IBM/terratorch">TerraTorch</a>), OlmoEarth-Nano, or
-      <a href="https://arxiv.org/abs/2304.14065">Presto</a> to one downstream task:
+      <a href="https://arxiv.org/abs/2304.14065">Presto</a> to one downstream task:</span><span
+      class="lang-ko"><b>Geospatial 방향.</b>
+      <a href="https://huggingface.co/ibm-nasa-geospatial">Prithvi-EO-2.0</a>
+      (<a href="https://github.com/IBM/terratorch">TerraTorch</a> 이용), OlmoEarth-Nano, 또는
+      <a href="https://arxiv.org/abs/2304.14065">Presto</a>를 downstream task 하나에 적응시켜요:</span>
       <span class="pill">Sen1Floods11 flood mapping</span> <span class="pill">crop-type from pixel time series</span>
       <span class="pill">SMAP soil-moisture regression</span></p>
-    <p style="font-size:13.5px"><b>Weather/climate direction.</b> Adapt
+    <p style="font-size:13.5px"><span class="lang-en"><b>Weather/climate direction.</b> Adapt
       <a href="https://arxiv.org/abs/2301.10343">ClimaX</a> or
-      <a href="https://arxiv.org/abs/2409.13598">Prithvi-WxC</a> checkpoints to:
+      <a href="https://arxiv.org/abs/2409.13598">Prithvi-WxC</a> checkpoints to:</span><span
+      class="lang-ko"><b>Weather/climate 방향.</b>
+      <a href="https://arxiv.org/abs/2301.10343">ClimaX</a> 또는
+      <a href="https://arxiv.org/abs/2409.13598">Prithvi-WxC</a> checkpoint를 다음에 적응시켜요:</span>
       <span class="pill">Korea-region downscaling</span> <span class="pill">multi-step forecasting at longer leads</span></p>
-    <p style="font-size:13.5px;margin-bottom:0"><b>Release =</b> LoRA adapters + evaluation report +
+    <p style="font-size:13.5px;margin-bottom:0"><span class="lang-en"><b>Release =</b> LoRA adapters + evaluation report +
       model card on the Hugging Face Hub, plus a tagged GitHub repo whose README quickstart runs in
-      under five minutes.</p>
+      under five minutes.</span><span
+      class="lang-ko"><b>Release =</b> Hugging Face Hub의 LoRA adapter + 평가 보고서 + model card,
+      그리고 README quickstart가 5분 안에 실행되는 tag된 GitHub repo.</span></p>
   </div>
 
   <div class="card tier">
-    <span class="tag pill acc">Tier 2 · built into the labs</span>
-    <h3 style="margin-top:0">Everyone experiences pretraining</h3>
-    <p style="font-size:13.5px;margin-bottom:0">You do not need to pretrain for the capstone to know
+    <span class="tag pill acc"><span class="lang-en">Tier 2 · built into the labs</span><span class="lang-ko">Tier 2 · lab에 내장</span></span>
+    <h3 style="margin-top:0"><span class="lang-en">Everyone experiences pretraining</span><span
+      class="lang-ko">모두가 pretraining을 경험해요</span></h3>
+    <p style="font-size:13.5px;margin-bottom:0"><span class="lang-en">You do not need to pretrain for the capstone to know
       what pretraining feels like: the Week 7 lab has you pretrain a small masked autoencoder yourself,
       and the Week 9 lab has you fit scaling behavior on real runs. Those experiences are what make
       your capstone's evaluation judgments credible — you will know what the checkpoint you are
-      fine-tuning actually went through.</p>
+      fine-tuning actually went through.</span><span
+      class="lang-ko">pretraining이 어떤 것인지 알기 위해 capstone에서 직접 pretraining할 필요는 없어요:
+      7주차 lab에서 소형 masked autoencoder를 직접 pretraining하고, 9주차 lab에서 실제 run으로 scaling
+      거동을 적합해 봐요. 이 경험들이 여러분의 capstone 평가 판단에 신뢰를 부여해요 — 여러분이 fine-tuning하는
+      checkpoint가 실제로 무엇을 거쳐 왔는지 알게 되니까요.</span></p>
   </div>
 
   <div class="card tier">
-    <span class="tag pill acc">Tier 3 · from-scratch stretch</span>
-    <h3 style="margin-top:0">Hydro-FM — joint pretraining project</h3>
-    <p style="font-size:13.5px;margin-bottom:0">One team of <b>4 members from the HydroAI lab</b> may
+    <span class="tag pill acc"><span class="lang-en">Tier 3 · from-scratch stretch</span><span class="lang-ko">Tier 3 · from-scratch 도전</span></span>
+    <h3 style="margin-top:0"><span class="lang-en">Hydro-FM — joint pretraining project</span><span
+      class="lang-ko">Hydro-FM — 공동 pretraining 프로젝트</span></h3>
+    <p style="font-size:13.5px;margin-bottom:0"><span class="lang-en">One team of <b>4 members from the HydroAI lab</b> may
       opt into pretraining a small hydrology-focused foundation model from scratch as a joint project.
       Same milestones and same rubric as everyone else, with two additions that keep individual
       accountability real: <b>individual vivas</b> (each member defends the whole pipeline alone) and
-      <b>commit audits</b> (contribution is verified in the git history, not the author list).</p>
+      <b>commit audits</b> (contribution is verified in the git history, not the author list).</span><span
+      class="lang-ko"><b>HydroAI lab 소속 4인</b> 1팀은 소형 수문 특화 foundation model을 처음부터 pretraining하는
+      공동 프로젝트를 선택할 수 있어요. milestone과 루브릭은 모두와 동일하고, 개인 책임을 실질적으로 유지하는
+      두 가지가 추가돼요: <b>individual viva</b> (각 구성원이 전체 pipeline을 혼자 방어) 그리고
+      <b>commit audit</b> (기여를 저자 목록이 아니라 git 히스토리로 검증).</span></p>
   </div>
 
-  <h2>The baseline quartet</h2>
-  <p class="sub">Every capstone reports all four of these on the same frozen evaluation split.
+  <h2><span class="lang-en">The baseline quartet</span><span class="lang-ko">Baseline 4중주</span></h2>
+  <p class="sub"><span class="lang-en">Every capstone reports all four of these on the same frozen evaluation split.
     Skipping one is the single fastest way to lose points — the quartet is what makes your headline
-    number mean something.</p>
+    number mean something.</span><span
+    class="lang-ko">모든 capstone은 동일한 고정 평가 split에서 이 네 가지를 모두 보고해요.
+    하나라도 빼먹는 것이 점수를 잃는 가장 빠른 길이에요 — 이 4중주가 여러분의 대표 수치에 의미를 부여해요.</span></p>
   <div class="card">
     <ol class="quartet" style="margin:0">
-      <li><b>Random-init control</b> — your fine-tuning recipe applied to an untrained copy of the
-        same architecture. Separates "the pretraining helped" from "the architecture helped".</li>
-      <li><b>Supervised baseline that tries to win</b> — the Week 4 U-Net for segmentation tasks;
-        persistence and climatology for forecasting tasks. Tuned honestly, not sandbagged.</li>
-      <li><b>Frozen probe</b> — the FM's frozen features with only a lightweight head trained.
-        Measures what the representation gives you for free.</li>
-      <li><b>Fine-tuned model</b> — your headline system (LoRA or full fine-tune), reported with
-        seeds and error bars.</li>
+      <li><span class="lang-en"><b>Random-init control</b> — your fine-tuning recipe applied to an untrained copy of the
+        same architecture. Separates "the pretraining helped" from "the architecture helped".</span><span
+        class="lang-ko"><b>Random-init control</b> — 동일한 architecture의 학습되지 않은 복사본에 여러분의 fine-tuning
+        레시피를 적용한 것. "pretraining이 도움이 됐다"와 "architecture가 도움이 됐다"를 분리해 줘요.</span></li>
+      <li><span class="lang-en"><b>Supervised baseline that tries to win</b> — the Week 4 U-Net for segmentation tasks;
+        persistence and climatology for forecasting tasks. Tuned honestly, not sandbagged.</span><span
+        class="lang-ko"><b>이기려고 하는 supervised baseline</b> — segmentation task에는 4주차 U-Net,
+        forecasting task에는 persistence와 climatology. 봐주기 없이 정직하게 튜닝해요.</span></li>
+      <li><span class="lang-en"><b>Frozen probe</b> — the FM's frozen features with only a lightweight head trained.
+        Measures what the representation gives you for free.</span><span
+        class="lang-ko"><b>Frozen probe</b> — FM의 고정된 feature에 가벼운 head만 학습한 것.
+        representation이 공짜로 주는 것을 측정해요.</span></li>
+      <li><span class="lang-en"><b>Fine-tuned model</b> — your headline system (LoRA or full fine-tune), reported with
+        seeds and error bars.</span><span
+        class="lang-ko"><b>Fine-tuned model</b> — 여러분의 대표 시스템 (LoRA 또는 full fine-tune).
+        seed와 error bar와 함께 보고해요.</span></li>
     </ol>
   </div>
-  <div class="note"><b>Honest-negative-result rubric.</b> If the tuned U-Net beats your fine-tuned FM,
+  <div class="note"><span class="lang-en"><b>Honest-negative-result rubric.</b> If the tuned U-Net beats your fine-tuned FM,
     you have not failed — you have measured something the field cares about. The rubric grades the
     rigor of the comparison (frozen splits, seeds, error bars, ablation, limitations stated plainly),
-    not which row of your table is bold.</div>
+    not which row of your table is bold.</span><span
+    class="lang-ko"><b>정직한 부정적 결과 루브릭.</b> 튜닝된 U-Net이 여러분의 fine-tuned FM을 이겼다면,
+    실패한 것이 아니에요 — 이 분야가 궁금해하는 것을 측정한 거예요. 루브릭은 비교의 엄밀함(고정된 split,
+    seed, error bar, ablation, 분명하게 서술된 한계)을 채점하지, 표의 어느 행이 굵은 글씨인지를 채점하지 않아요.</span></div>
 
-  <h2>Milestones</h2>
+  <h2><span class="lang-en">Milestones</span><span class="lang-ko">Milestone</span></h2>
   <div class="scroll">
     <table>
-      <thead><tr><th>When</th><th>Milestone</th><th>Deliverables</th></tr></thead>
+      <thead><tr><th><span class="lang-en">When</span><span class="lang-ko">시기</span></th>
+        <th>Milestone</th>
+        <th><span class="lang-en">Deliverables</span><span class="lang-ko">산출물</span></th></tr></thead>
       <tbody>
         <tr><td class="tnum">W8</td><td><b>Proposal</b></td>
-          <td>2-page proposal + in-class pitch. Graded on eval-first design and budget realism, not ambition.</td></tr>
-        <tr><td class="tnum">W13</td><td><b>M1 — frozen &amp; launched</b></td>
-          <td>Data and evaluation protocol frozen (splits committed before any results); fine-tuning runs launched; W&amp;B project public.</td></tr>
-        <tr><td class="tnum">W14</td><td><b>M2 — first result</b></td>
-          <td>Working checkpoint + first downstream result against interim baselines; structured peer review exchanged.</td></tr>
+          <td><span class="lang-en">2-page proposal + in-class pitch. Graded on eval-first design and budget realism, not ambition.</span><span
+            class="lang-ko">2페이지 proposal + 수업 내 pitch. 야심이 아니라 평가 우선 설계와 예산 현실성으로 채점해요.</span></td></tr>
+        <tr><td class="tnum">W13</td><td><b><span class="lang-en">M1 — frozen &amp; launched</span><span class="lang-ko">M1 — 고정 &amp; 착수</span></b></td>
+          <td><span class="lang-en">Data and evaluation protocol frozen (splits committed before any results); fine-tuning runs launched; W&amp;B project public.</span><span
+            class="lang-ko">데이터와 평가 프로토콜 고정 (결과가 나오기 전에 split을 commit); fine-tuning run 착수; W&amp;B 프로젝트 공개.</span></td></tr>
+        <tr><td class="tnum">W14</td><td><b><span class="lang-en">M2 — first result</span><span class="lang-ko">M2 — 첫 결과</span></b></td>
+          <td><span class="lang-en">Working checkpoint + first downstream result against interim baselines; structured peer review exchanged.</span><span
+            class="lang-ko">작동하는 checkpoint + 중간 baseline 대비 첫 downstream 결과; 구조화된 동료 평가 교환.</span></td></tr>
         <tr><td class="tnum">W15</td><td><b>M3 — release candidate</b></td>
-          <td>Full evaluation + ablation tables with seeds/error bars; complete model card; release candidate tagged on HF Hub and GitHub; draft slides.</td></tr>
+          <td><span class="lang-en">Full evaluation + ablation tables with seeds/error bars; complete model card; release candidate tagged on HF Hub and GitHub; draft slides.</span><span
+            class="lang-ko">seed/error bar가 포함된 전체 평가 + ablation 표; 완성된 model card; HF Hub와 GitHub에 tag된 release candidate; 슬라이드 초안.</span></td></tr>
         <tr><td class="tnum">W16</td><td><b>Demo day</b></td>
-          <td>8-min talk + 4-min Q&amp;A; live quickstart verification on a randomly selected repo; final release (adapters, model card, 6-page report, W&amp;B report) due 48 h after class.</td></tr>
+          <td><span class="lang-en">8-min talk + 4-min Q&amp;A; live quickstart verification on a randomly selected repo; final release (adapters, model card, 6-page report, W&amp;B report) due 48 h after class.</span><span
+            class="lang-ko">8분 발표 + 4분 Q&amp;A; 무작위로 선택된 repo에서 quickstart 라이브 검증; 최종 release (adapter, model card, 6페이지 보고서, W&amp;B report)는 수업 후 48시간 이내 제출.</span></td></tr>
       </tbody>
     </table>
   </div>
 
-  <h2>Compute envelope</h2>
-  <p class="lede" style="font-size:14px">Free tiers are sufficient for the default track — that is a
-    design constraint, not an apology. LoRA fine-tuning of small public checkpoints fits comfortably in:</p>
+  <h2><span class="lang-en">Compute envelope</span><span class="lang-ko">컴퓨팅 범위</span></h2>
+  <p class="lede" style="font-size:14px"><span class="lang-en">Free tiers are sufficient for the default track — that is a
+    design constraint, not an apology. LoRA fine-tuning of small public checkpoints fits comfortably in:</span><span
+    class="lang-ko">기본 트랙은 무료 tier로 충분해요 — 이건 변명이 아니라 설계 제약이에요.
+    소형 공개 checkpoint의 LoRA fine-tuning은 다음 안에 여유 있게 들어가요:</span></p>
   <div class="cards">
-    <div class="card"><b>Kaggle</b><br><span class="sub" style="margin:0">~30 GPU-hours/week free (T4/P100). Enough for every fine-tuning experiment in this course.</span></div>
-    <div class="card"><b>Colab</b><br><span class="sub" style="margin:0">Free-tier sessions with checkpoint-resume discipline — save-and-restore is itself a Week 12 engineering skill.</span></div>
-    <div class="card"><b>Rule of thumb</b><br><span class="sub" style="margin:0">If your plan needs more than a free tier, shrink the plan, not the evaluation. The Hydro-FM team budgets separately with the instructor.</span></div>
+    <div class="card"><b>Kaggle</b><br><span class="sub" style="margin:0"><span class="lang-en">~30 GPU-hours/week free (T4/P100). Enough for every fine-tuning experiment in this course.</span><span
+      class="lang-ko">주당 약 30 GPU-hours 무료 (T4/P100). 이 강의의 모든 fine-tuning 실험에 충분해요.</span></span></div>
+    <div class="card"><b>Colab</b><br><span class="sub" style="margin:0"><span class="lang-en">Free-tier sessions with checkpoint-resume discipline — save-and-restore is itself a Week 12 engineering skill.</span><span
+      class="lang-ko">checkpoint-resume 습관과 함께 쓰는 무료 tier 세션 — 저장하고 복원하는 것 자체가 12주차의 엔지니어링 기술이에요.</span></span></div>
+    <div class="card"><b><span class="lang-en">Rule of thumb</span><span class="lang-ko">경험 법칙</span></b><br><span class="sub" style="margin:0"><span
+      class="lang-en">If your plan needs more than a free tier, shrink the plan, not the evaluation. The Hydro-FM team budgets separately with the instructor.</span><span
+      class="lang-ko">계획에 무료 tier 이상이 필요하다면, 평가가 아니라 계획을 줄이세요. Hydro-FM 팀은 담당교수와 별도로 예산을 잡아요.</span></span></div>
   </div>
 
-  <h2>Where the grade comes from</h2>
-  <p class="sub">The capstone drives the 60% project grade: lab portfolio 20% (best 10 of 11 weekly
+  <h2><span class="lang-en">Where the grade comes from</span><span class="lang-ko">성적은 어디서 오나요</span></h2>
+  <p class="sub"><span class="lang-en">The capstone drives the 60% project grade: lab portfolio 20% (best 10 of 11 weekly
     lab notes — the labs are the skill acquisition), proposal 5%, milestones M1–M3 15% (graded on
     process: eval frozen before results, honest interim tables), final deliverable 20% (release
     quality, report + model card, demo). See the <a href="syllabus.html">syllabus</a> for the full
-    breakdown and the AI-agent policy that applies to every line of capstone code.</p>
+    breakdown and the AI-agent policy that applies to every line of capstone code.</span><span
+    class="lang-ko">Capstone이 프로젝트 성적 60%를 이끌어요: lab 포트폴리오 20% (주간 lab note 11개 중
+    상위 10개 — lab이 곧 기술 습득이에요), proposal 5%, milestone M1–M3 15% (과정으로 채점: 결과 전에
+    평가 고정, 정직한 중간 결과표), 최종 산출물 20% (release 품질, 보고서 + model card, demo).
+    전체 세부 내역과 capstone 코드의 모든 줄에 적용되는 AI 에이전트 정책은
+    <a href="syllabus.html">강의계획</a>에서 확인하세요.</span></p>
 </div>
 </body>
 </html>
