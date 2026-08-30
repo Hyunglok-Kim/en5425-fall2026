@@ -864,8 +864,9 @@
     <p><b>Deliverable.</b> <code>notes/week02.md</code>: sweep parallel-coordinates plot + a “random split vs spatial split” table + a one-paragraph leakage post-mortem.</p>
   </div>
   <ul class="small">
+    <li class="accent">Start from the ready-made notebook: Week 2 page → “Lab 02 notebook — open in Colab” → run top to bottom. Data loads itself; nothing to download or clone.</li>
     <li class="accent">Weights &amp; Biases logging is mandatory from today — every run, every week, no exceptions.</li>
-    <li>Tools: PyTorch · scikit-learn · Weights &amp; Biases. Verify yourself: normalization statistics computed inside training folds only (checklist item 4).</li>
+    <li>Verify yourself: normalization statistics computed inside training folds only (checklist item 4) — find the scaler in the notebook and check where it is fit.</li>
   </ul>
   <aside class="notes">1 min, then dismiss to lab (60 min). Predict the result out loud so they can falsify it: the sweep winner's random-split score will drop when basins are held out by region — their first personally measured optimism gap. The post-mortem paragraph should cite which checklist item the random split violated.</aside>
 </section>

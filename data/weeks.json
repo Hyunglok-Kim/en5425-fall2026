@@ -59,6 +59,10 @@
     "homework_ko": "수업에서 끝내지 못한 항목은 HW0 마감(9/14 월 23:59) 전까지 완료 — HW0는 다섯 도구가 모두 작동한다는 전제로 진행돼요. HW0는 채점하지 않아요: 이 수업의 한 주 워크플로를 내가 굴릴 수 있는지 직접 확인해 보는 과정이에요. 막히면 S6 317호(HydroAI 연구실)에 들러 연구원들에게 물어보세요 — 기다리고 있어요.",
     "resources": [
      {
+      "title": "▶ Lab 01 — step-by-step toolkit guide (start here)",
+      "link": "https://github.com/Hyunglok-Kim/en5425-student-template/blob/main/labs/week01.md"
+     },
+     {
       "title": "Claude Code — official docs (install & VS Code)",
       "link": "https://code.claude.com/docs"
      },
@@ -182,6 +186,14 @@
     "deliverable_ko": "Note 02: sweep parallel-coordinates plot + 'random split vs spatial split' 표 · 한 문단짜리 leakage post-mortem",
     "homework": null,
     "resources": [
+     {
+      "title": "▶ Lab 02 notebook — open in Colab and run, top to bottom (start here)",
+      "link": "https://colab.research.google.com/github/Hyunglok-Kim/en5425-student-template/blob/main/labs/week02_lab.ipynb"
+     },
+     {
+      "title": "Lab 02 — reference spec (labs/week02.md)",
+      "link": "https://github.com/Hyunglok-Kim/en5425-student-template/blob/main/labs/week02.md"
+     },
      {
       "title": "CAMELS-US — catchment attributes & hydrology dataset (download here)",
       "link": "https://ral.ucar.edu/solutions/products/camels"
