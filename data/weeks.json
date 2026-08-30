@@ -138,7 +138,11 @@
           "Which of Reichstein's five challenges have FMs since addressed, and which have they dodged?",
           "Design a split for a global soil-moisture model that a reviewer couldn't reject — what do you hold out?",
           "Is 'hybrid physics-ML' (their vision) winning in 2026, given NeuralGCM vs pure-ML GraphCast?"
-        ]
+        ],
+        "book": {
+          "title": "Goodfellow, Deep Learning — Ch. 6 (Deep Feedforward Networks, §6.1–6.5) + Ch. 8 (Optimization, §8.1–8.5)",
+          "link": "https://www.deeplearningbook.org/contents/mlp.html"
+        }
       },
       "skills": [
         "optimization recipes",
@@ -213,7 +217,11 @@
           "Which of Rolf's claimed distinctions actually change architecture choices (cite SatMAE/Scale-MAE design decisions)?",
           "Reanalysis is a model product — what does that mean for 'ground truth' when we evaluate a weather FM against ERA5?",
           "Why is chunking layout a scientific issue, not just an engineering one?"
-        ]
+        ],
+        "book": {
+          "title": "Goodfellow, Deep Learning — Ch. 5 (Machine Learning Basics, §5.1–5.5)",
+          "link": "https://www.deeplearningbook.org/contents/ml.html"
+        }
       },
       "skills": [
         "cloud-native ETL (Zarr/STAC/COG)",
@@ -285,7 +293,11 @@
           "Exactly what information do skip connections carry that the bottleneck destroys, and why does that matter more at 10 m GSD than on ImageNet?",
           "Where should a pretrained FM plug into a U-Net-style decoder (this is what TerraTorch/Prithvi do)?",
           "Why did ConvLSTM lose to transformers for global weather but survive for nowcasting (MetNet-3)?"
-        ]
+        ],
+        "book": {
+          "title": "Goodfellow, Deep Learning — Ch. 9 (Convolutional Networks, §9.1–9.5)",
+          "link": "https://www.deeplearningbook.org/contents/convnets.html"
+        }
       },
       "skills": [
         "dense prediction heads",
@@ -356,7 +368,11 @@
           "Map Kratzert's 'regional model + static attributes' onto FM vocabulary: what is pretraining, what is conditioning?",
           "Derive why 1-step MSE training produces unstable long rollouts; what are three remedies (curriculum, multi-step loss, noise injection)?",
           "Is streamflow prediction in ungauged basins a 'fine-tuning' or 'zero-shot' problem?"
-        ]
+        ],
+        "book": {
+          "title": "Goodfellow, Deep Learning — Ch. 10 (Sequence Modeling, §10.1–10.7)",
+          "link": "https://www.deeplearningbook.org/contents/rnn.html"
+        }
       },
       "skills": [
         "autoregressive rollout",
@@ -427,7 +443,11 @@
           "Why does shifted windowing recover cross-window information flow — and what is the weather-model analog at the poles/dateline?",
           "For a 13-band image, argue for/against: one patch embed for all bands vs band-group embeds vs wavelength-conditioned embeds (DOFA's answer).",
           "Presto has 400K params and competes with giants on pixel time series — what does that say about scale vs inductive fit?"
-        ]
+        ],
+        "book": {
+          "title": "Dive into Deep Learning (d2l.ai) — Ch. 11 (Attention Mechanisms & Transformers)",
+          "link": "https://d2l.ai/chapter_attention-mechanisms-and-transformers/index.html"
+        }
       },
       "skills": [
         "transformer implementation",
@@ -502,7 +522,11 @@
           "Why can MAE mask 75% while BERT masks 15% — and what ratio would you predict for cloud-free Sentinel-2 vs ERA5 fields (compare Prithvi-WxC's choice)?",
           "What exactly does the decoder learn, and why throw it away?",
           "Propose one EO-specific masking structure and the invariance it would induce."
-        ]
+        ],
+        "book": {
+          "title": "Goodfellow, Deep Learning — Ch. 14 (Autoencoders, §14.1–14.5)",
+          "link": "https://www.deeplearningbook.org/contents/autoencoders.html"
+        }
       },
       "skills": [
         "masking strategies",
@@ -624,7 +648,11 @@
           "Chinchilla says balance N and D — what is 'a token' of ERA5, and how many does 40 years of 0.25° reanalysis contain?",
           "Why might scaling exponents differ for satellite imagery vs text?",
           "Given your W9 lab fit: is your capstone compute-optimal, over-parameterized, or data-starved?"
-        ]
+        ],
+        "book": {
+          "title": "Goodfellow, Deep Learning — Ch. 11 (Practical Methodology)",
+          "link": "https://www.deeplearningbook.org/contents/guidelines.html"
+        }
       },
       "skills": [
         "scaling-law fitting",
