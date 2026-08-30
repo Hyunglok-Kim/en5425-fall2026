@@ -47,8 +47,9 @@ const NAV = [
   ["journal", "Journal Club", "저널클럽", "journal.html"],
   ["capstone", "Capstone", "프로젝트", "capstone.html"],
   ["setup", "Setup", "환경 설정", "setup.html"],
-  ["students", "Students", "수강생", "students.html"],
+  ["assignments", "Assignments", "과제 제출", "assignments.html"],
   ["present", "Presentations", "발표", "present.html"],
+  ["myspace", "My Space", "내 공간", "myspace.html"],
 ];
 /* Semester tracker: W1 begins Mon 2026-08-31 (KST). */
 const SEMESTER_START = "2026-08-31";
