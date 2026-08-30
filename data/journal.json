@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-30T18:05:51+09:00",
+  "updated": "2026-08-30T18:12:16+09:00",
   "weeks": {
     "01": [
       {
@@ -7,8 +7,7 @@
         "display": "Student 4046",
         "photo": "assets/students/44766ad66201.png",
         "at": "2026-08-30T18:05:39+09:00",
-        "late": false,
-        "ticket": "test"
+        "late": false
       }
     ],
     "02": [
@@ -17,8 +16,7 @@
         "display": "Student 4046",
         "photo": "assets/students/44766ad66201.png",
         "at": "2026-08-30T18:05:51+09:00",
-        "late": false,
-        "ticket": "testtest"
+        "late": false
       }
     ]
   }

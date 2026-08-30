@@ -58,6 +58,13 @@
   .mybox-in .gform input { flex:1; min-width:120px; padding:8px 10px; border:1px solid var(--hairline);
     border-radius:8px; background:var(--surface); color:var(--ink); font-size:13.5px; }
   .mybox-foot { display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap; }
+  .grp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:10px; margin:10px 0 4px; }
+  .grp-card { background:var(--page); border:1px solid var(--hairline); border-radius:10px; padding:10px 12px; }
+  .grp-t { font-family:var(--serif); font-weight:700; font-size:13px; margin:0 0 8px; }
+  .grp-m { display:flex; align-items:center; gap:8px; font-size:13px; padding:3px 0; }
+  .grp-m .face { width:28px; height:28px; font-size:12px; }
+  .grp-m.lead span { font-weight:700; }
+  .grp-star { color:var(--accent); font-size:11px; font-weight:700; }
   @media (max-width:520px) {
     .face { width:36px; height:36px; }
     .tk-card { padding:12px 13px; }
@@ -72,12 +79,14 @@
     <span class="lang-en">Journal-club weeks (2&ndash;7, 9&ndash;12) open with a 5-minute reading quiz; after the lecture we hold
       a 30-minute discussion in groups of 4&ndash;5, moderated by the week's lead pair (Week 2 is moderated
       by the instructor to model the format; the rotation starts Week 3). Write and submit your entrance
-      ticket <b>right on this page</b> (sign in below; due Sunday 13:00) &mdash; it is published here,
-      face and all, so the whole class reads each other's takes before we talk.</span>
+      ticket <b>right on this page</b> (sign in below; due Sunday 13:00). Ticket text stays
+      <b>private</b> &mdash; only the instructor and TA read it; classmates see just who has
+      submitted on the prep board. You can withdraw and resubmit until it is graded.</span>
     <span class="lang-ko">저널클럽 주간(2&ndash;7, 9&ndash;12주차)은 5분 리딩 퀴즈로 시작하고, 강의 후에는 4&ndash;5명씩
       30분 토론을 해요. 리드 조가 진행합니다 (2주차는 포맷 시범을 위해 교수가 직접 진행하고, 로테이션은 3주차부터예요).
       entrance ticket은 <b>바로 이 페이지에서</b> 작성하고 제출해요 (아래에서 로그인 · 마감 일요일 13:00).
-      제출하면 얼굴 카드와 함께 여기에 공개되어, 토론 전에 서로의 생각을 미리 읽을 수 있어요.</span>
+      티켓 내용은 <b>비공개</b>예요 — 교수·조교만 읽고, 동료들에게는 준비 현황판에 제출 여부만 보여요.
+      채점 전까지는 삭제·재제출이 가능해요.</span>
   </p>
 
   <div id="jc">
@@ -107,6 +116,35 @@ async function liveURL() {
     const m = a && a.text.match(/https:\/\/\S+/);
     return m ? m[0] : null;
   } catch { return null; }
+}
+
+/* discussion groups: hidden until 13:00 on class day; leader starred */
+async function initGroupBoxes() {
+  const boxes = $$(".grpbox");
+  if (!boxes.length) return;
+  for (const b of boxes) {
+    const n = b.dataset.week;
+    let g = null;
+    try { g = await (await fetch(`/api/groups?week=${n}`, { cache: "no-store" })).json(); } catch {}
+    if (!g || g.exists === false) { b.innerHTML = ""; continue; }
+    if (g.hidden) {
+      const at = String(g.reveal_at || "");
+      b.innerHTML = `<h3>${t("Discussion groups", "토론 그룹")}</h3>
+        <p class="sub" style="margin:0">${t(
+          `Groups and each group's leader are revealed here at 13:00 on class day (${fmtDate(at.slice(0,10))}). Anyone can be drawn as leader — prepare accordingly.`,
+          `그룹과 각 그룹의 리더는 수업 당일 13:00에 여기서 공개돼요 (${fmtDate(at.slice(0,10))}). 누구든 리더로 뽑힐 수 있으니 모두 준비해 오세요.`)}</p>`;
+      continue;
+    }
+    b.innerHTML = `<h3>${t("Discussion groups", "토론 그룹")}</h3>
+      <div class="grp-grid">${(g.groups || []).map((grp, i) => `
+        <div class="grp-card"><p class="grp-t">${t("Group", "그룹")} ${i + 1}</p>
+          ${grp.members.map((m) => `<div class="grp-m${m.leader ? " lead" : ""}">
+            ${m.photo ? `<img class="face" src="${esc(m.photo)}" alt="">`
+                      : `<div class="face av">${esc((m.display || "?")[0].toUpperCase())}</div>`}
+            <span>${esc(m.display)}${m.leader ? ` <span class="grp-star">★ ${t("leader", "리더")}</span>` : ""}</span>
+          </div>`).join("")}
+        </div>`).join("")}</div>`;
+  }
 }
 async function initTicketBoxes() {
   const boxes = $$(".mybox");
@@ -143,6 +181,7 @@ async function initTicketBoxes() {
           if (!r.ok) throw new Error(j.detail || "login failed");
           if (j.must_change) { location.href = "/portal/login.html#change"; return; }
           initTicketBoxes();
+    initGroupBoxes();
         } catch (err) { b.querySelector(".gerr").textContent = err.message; }
       });
       continue;
@@ -162,10 +201,23 @@ async function initTicketBoxes() {
         "3문장 요약 · 실질 비판 · capstone 연결 · 진짜 궁금한 질문")}">${mine.text ? esc(mine.text) : ""}</textarea>
       <div class="mybox-foot">
         <button class="btn primary">${mine.at ? t("Resubmit", "다시 제출") : t("Submit ticket", "티켓 제출")}</button>
-        <span class="sub" style="margin:0">${t("Resubmission allowed; the latest one counts.", "다시 제출 가능 — 마지막 제출이 반영돼요.")}</span>
+        ${mine.at && (row.score === null || row.score === undefined)
+          ? `<button class="btn jc-del" type="button">${t("Delete my ticket", "내 티켓 삭제")}</button>` : ""}
+        <span class="sub" style="margin:0">${t("Private to instructor/TA · resubmission allowed until graded.", "교수·조교만 열람 · 채점 전까지 재제출/삭제 가능.")}</span>
       </div>
       <p class="sub gerr" style="min-height:16px;margin:6px 0 0;color:var(--warn)"></p></div>`;
-    b.querySelector("button").addEventListener("click", async () => {
+    const delBtn = b.querySelector(".jc-del");
+    if (delBtn) delBtn.addEventListener("click", async () => {
+      if (!confirm(t("Delete your submitted ticket?", "제출한 티켓을 삭제할까요?"))) return;
+      const fd = new FormData(); fd.append("aid", aid);
+      try {
+        const r = await fetch("/api/unsubmit", { method: "POST", headers: XH, body: fd });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.detail || "delete failed");
+        location.reload();
+      } catch (e2) { b.querySelector(".gerr").textContent = e2.message; }
+    });
+    b.querySelector("button.primary, .mybox-foot .btn.primary").addEventListener("click", async () => {
       const txt = b.querySelector("textarea").value.trim();
       const err = b.querySelector(".gerr");
       if (!txt) { err.textContent = t("Write something first.", "내용을 먼저 적어 주세요."); return; }
@@ -227,6 +279,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           "2주차에는 1주차 논문(Attention + ViT)과 Reichstein을 함께 다룹니다 — 두 티켓 모두 9/6(일) 13:00 마감.")}</span>` : ""}</p>`;
       if (questions.length) h += `<h3>${t("Discussion questions", "토론 질문")}</h3>
         <ol style="margin-top:4px;font-size:13.5px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>`;
+      h += `<div class="grpbox" data-week="${w.n}"></div>`;
       if (roster.length) {
         const ready = new Set(tickets.map((tk) => tk.display || tk.gh));
         h += `<h3>${t("Prep board", "준비 현황판")} <span class="jc-count">${tickets.length}/${roster.length}</span></h3>
@@ -238,30 +291,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       h += `${w.n === 2 ? `<div class="mybox" data-aid="memo01" data-label="${t("My Week 1 ticket (Attention + ViT)", "내 1주차 티켓 (Attention + ViT)")}"></div>` : ""}
         <div class="mybox" data-aid="memo${pad(w.n)}" data-label="${t("My ticket for this week", "내 이번 주 티켓")}"></div>`;
-      h += `<h3>${t("Entrance tickets", "Entrance tickets")}</h3>`;
-      if (!tickets.length) {
-        h += `<p class="sub">${esc(t(
-          "No tickets yet — they appear here as classmates submit them (due Sunday 13:00).",
-          "아직 티켓이 없어요 — 제출되는 대로 여기에 실려요 (마감: 일요일 13:00)."))}</p>`;
-      } else {
-        h += tickets.map((tk) => {
-          const name = (tk.display || tk.gh) + (tk.w1 ? t(" · W1 ticket", " · 1주차 티켓") : "");
-          const at = tk.at ? String(tk.at) : "";
-          const when = at ? [fmtDate(at.slice(0, 10)) || at.slice(0, 10),
-                             at.slice(11, 16)].filter(Boolean).join(" ") : "";
-          const meta = [
-            tk.gh ? `<a class="gh" href="https://github.com/${esc(tk.gh)}">@${esc(tk.gh)}</a>` : "",
-            when ? `<span class="tk-at">${esc(t("submitted ", "제출 ") + when)}</span>` : "",
-          ].filter(Boolean).join(" · ");
-          return `<div class="tk-card">
-            <div class="tk-head">${face(name, tk.photo)}
-              <span><b>${esc(name)}</b>${tk.late
-                ? ` <span class="tk-late">${t("late", "지각")}</span>` : ""}${meta ? `<br>${meta}` : ""}</span>
-            </div>
-            <div class="tk-body">${ticketHTML(tk.ticket)}</div>
-          </div>`;
-        }).join("");
-      }
       return h;
     };
 
@@ -284,6 +313,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       t("Updated ", "업데이트 ") + (fmtDate(String(journal.updated).slice(0, 10)) || journal.updated))}</p>` : "");
 
     initTicketBoxes();
+    initGroupBoxes();
 
     if (new URLSearchParams(location.search).get("w")) {
       const target = document.getElementById("wk" + cur);

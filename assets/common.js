@@ -220,8 +220,22 @@ async function initSubmitBoxes(st) {
     if (row.type === "text") {
       try { mine = await (await fetch(`/api/mysub?aid=${aid}`)).json(); } catch {}
     } else if (row.submitted_at) mine = { at: row.submitted_at, late: row.late };
-    b.innerHTML = `<div class="mybox-in" style="background:var(--page);border:1px dashed var(--accent);border-radius:10px;padding:12px 14px;margin:14px 0 4px">${submitBoxHTML(row, mine, label)}</div>`;
-    b.querySelector("button").addEventListener("click", async () => {
+    const graded = row.score !== null && row.score !== undefined;
+    const withdraw = (mine && mine.at && !graded)
+      ? `<button class="btn box-del" type="button" style="margin-top:8px">${t("Delete my submission", "내 제출 삭제")}</button>` : "";
+    b.innerHTML = `<div class="mybox-in" style="background:var(--page);border:1px dashed var(--accent);border-radius:10px;padding:12px 14px;margin:14px 0 4px">${submitBoxHTML(row, mine, label)}${withdraw}</div>`;
+    const delBtn = b.querySelector(".box-del");
+    if (delBtn) delBtn.addEventListener("click", async () => {
+      if (!confirm(t("Delete your submission?", "제출물을 삭제할까요?"))) return;
+      const fd = new FormData(); fd.append("aid", aid);
+      try {
+        const r = await fetch("/api/unsubmit", { method: "POST", headers: XHDR, body: fd });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.detail || "delete failed");
+        location.reload();
+      } catch (e2) { b.querySelector(".boxerr").textContent = e2.message; }
+    });
+    b.querySelector("button.primary, .btn.primary").addEventListener("click", async () => {
       const err = b.querySelector(".boxerr");
       const fd = new FormData(); fd.append("aid", aid);
       if (row.type === "text") {
