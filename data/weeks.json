@@ -8,7 +8,7 @@
       "goal": "Understand what you will build (a small foundation model, released publicly), set up the full toolchain, and self-select honestly.",
       "title_ko": "과목 소개, 2026 FM 지형도, 그리고 AI-Native 엔지니어링",
       "goal_ko": "이번 학기에 만들 것(공개 배포하는 작은 foundation model)을 이해하고, 전체 toolchain을 설정하며, 수강 적합성을 스스로 솔직하게 판단합니다.",
-      "date": null,
+      "date": "2026-08-31",
       "concept": [
         {
           "min": 15,
@@ -88,7 +88,7 @@
       "goal": "Design evaluations that survive spatial/temporal autocorrelation — the geoscience failure mode — with the optimization recipe compressed to a working recap.",
       "title_ko": "Leakage 없는 평가 설계 (그리고 기초 복습)",
       "goal_ko": "지구과학의 대표적 실패 요인인 공간·시간 자기상관을 견디는 평가를 설계하고, optimization 레시피를 실전용 복습으로 압축합니다.",
-      "date": null,
+      "date": "2026-09-07",
       "concept": [
         {
           "min": 10,
@@ -155,7 +155,7 @@
       "goal": "Fluently move satellite, reanalysis, and in-situ data through cloud-native formats; meet ERA5 and cos-latitude weighting.",
       "title_ko": "환경 빅데이터와 Cloud-Native 파이프라인",
       "goal_ko": "위성·재분석·현장 관측 데이터를 cloud-native 포맷으로 자유롭게 다루고, ERA5와 cos-latitude 가중을 처음 만납니다.",
-      "date": null,
+      "date": "2026-09-14",
       "concept": [
         {
           "min": 15,
@@ -231,7 +231,7 @@
       "goal": "Master the convolutional toolbox and dense-prediction craft that every FM is benchmarked against.",
       "title_ko": "격자 데이터에서의 CNN과 시공간 모델링",
       "goal_ko": "모든 FM의 비교 기준이 되는 convolution 도구상자와 dense prediction 기법을 익힙니다.",
-      "date": null,
+      "date": "2026-09-21",
       "concept": [
         {
           "min": 15,
@@ -301,7 +301,7 @@
       "goal": "LSTMs for hydrologic time series, and the autoregressive rollout mechanics that all ML weather models live or die by.",
       "title_ko": "시퀀스 모델, Autoregressive 예측, Rollout 안정성",
       "goal_ko": "수문 시계열을 위한 LSTM과, 모든 ML 기상 모델의 성패를 가르는 autoregressive rollout 메커니즘을 배웁니다.",
-      "date": null,
+      "date": "2026-09-28",
       "concept": [
         {
           "min": 15,
@@ -373,7 +373,7 @@
       "goal": "Own every line of a Transformer/ViT implementation; understand the positional-encoding choices EO and weather models hinge on.",
       "title_ko": "Attention과 Transformer, 밑바닥부터 구현 (에이전트와 함께, 직접 검증)",
       "goal_ko": "Transformer/ViT 구현의 모든 줄을 직접 책임지고, EO·기상 모델의 핵심인 positional encoding 선택을 이해합니다.",
-      "date": null,
+      "date": "2026-10-12",
       "concept": [
         {
           "min": 20,
@@ -443,7 +443,7 @@
       "goal": "Understand the SSL design space and actually pretrain a mini-MAE on satellite imagery — everyone's hands-on pretraining experience and the capstone seed.",
       "title_ko": "Self-Supervised Learning: 첫 모델 Pretraining",
       "goal_ko": "SSL 설계 공간을 이해하고 위성 영상으로 mini-MAE를 실제로 pretraining합니다 — 전원이 직접 해보는 pretraining 경험이자 capstone의 씨앗입니다.",
-      "date": null,
+      "date": "2026-10-19",
       "concept": [
         {
           "min": 20,
@@ -518,7 +518,7 @@
       "goal": "Convert seven weeks of labs into a credible, compute-budgeted capstone proposal.",
       "title_ko": "중간 점검: 포트폴리오 리뷰와 Capstone 제안 발표",
       "goal_ko": "지난 7주의 실습을 compute 예산까지 갖춘 설득력 있는 capstone 제안서로 완성합니다.",
-      "date": null,
+      "date": "2026-10-26",
       "concept": [
         {
           "min": 15,
@@ -565,7 +565,7 @@
       "goal": "The intellectual frame — what makes a model a foundation model, and how scaling laws let you budget a tiny one honestly.",
       "title_ko": "Foundation Model과 Scaling Law",
       "goal_ko": "무엇이 모델을 foundation model로 만드는지라는 지적 틀과, scaling law로 작은 모델의 예산을 정직하게 세우는 법을 다룹니다.",
-      "date": null,
+      "date": "2026-11-02",
       "concept": [
         {
           "min": 15,
@@ -640,7 +640,7 @@
       "goal": "Command the GFM design space — from SatMAE to embedding fields — and how to evaluate them without fooling yourself.",
       "title_ko": "지구관측 Foundation Model (EO-FM 주간)",
       "goal_ko": "SatMAE부터 embedding field까지 GFM 설계 공간을 장악하고, 스스로를 속이지 않고 평가하는 법을 배웁니다.",
-      "date": null,
+      "date": "2026-11-09",
       "concept": [
         {
           "min": 15,
@@ -718,7 +718,7 @@
       "goal": "The full ML-weather stack: paradigms, spherical geometry, rollout stability, and WeatherBench2-grade evaluation — then train your own tiny forecaster.",
       "title_ko": "기상·기후 Foundation Model (Weather-FM 주간)",
       "goal_ko": "ML 기상의 전체 스택 — 패러다임, 구면 기하, rollout 안정성, WeatherBench2급 평가 — 을 다룬 뒤, 직접 작은 forecaster를 학습합니다.",
-      "date": null,
+      "date": "2026-11-16",
       "concept": [
         {
           "min": 10,
@@ -791,7 +791,7 @@
       "goal": "Every remaining capstone skill: efficient training at your compute ceiling, PEFT fine-tuning, ablation design, and a real HF Hub release — after this week you have 100% of the capstone skill set.",
       "title_ko": "파이프라인 확장: Training 엔지니어링, Fine-Tuning, 릴리스",
       "goal_ko": "capstone에 필요한 나머지 기술 전부 — compute 한도 내 효율적 학습, PEFT fine-tuning, ablation 설계, 실제 HF Hub 릴리스 — 를 익혀 이번 주로 capstone 기술 세트를 100% 갖춥니다.",
-      "date": null,
+      "date": "2026-11-23",
       "concept": [
         {
           "min": 15,
@@ -871,7 +871,7 @@
       "goal": "Turn your AI agent from code generator into experiment orchestrator; launch the capstone run. Milestone M1 due.",
       "title_ko": "Agentic ML 엔지니어링 + Capstone Sprint 1",
       "goal_ko": "AI 에이전트를 코드 생성기에서 실험 orchestrator로 격상시키고, capstone 학습 run을 시작합니다. Milestone M1 제출.",
-      "date": null,
+      "date": "2026-11-30",
       "concept": [
         {
           "min": 15,
@@ -933,7 +933,7 @@
       "goal": "Fine-tune and evaluate the model; subject your code to structured peer review. Milestone M2 due.",
       "title_ko": "Capstone Sprint 2 + 동료 코드 리뷰; Model Card와 재현성",
       "goal_ko": "모델을 fine-tuning하고 평가하며, 코드를 구조화된 동료 리뷰에 부칩니다. Milestone M2 제출.",
-      "date": null,
+      "date": "2026-11-30",
       "concept": [
         {
           "min": 15,
@@ -992,7 +992,7 @@
       "goal": "Finish evaluation and ablation, harden documentation, cut a release candidate. Milestone M3 due.",
       "title_ko": "Capstone Sprint 3: 평가, Ablation, 문서화, Release Candidate",
       "goal_ko": "평가와 ablation을 마무리하고 문서를 다듬어 release candidate를 만듭니다. Milestone M3 제출.",
-      "date": null,
+      "date": "2026-12-07",
       "concept": [
         {
           "min": 10,
@@ -1062,7 +1062,7 @@
       "goal": "Ship it.",
       "title_ko": "Demo Day: 발표와 모델 릴리스",
       "goal_ko": "완성하고, 공개합니다.",
-      "date": null,
+      "date": "2026-12-14",
       "concept": [
         {
           "min": 120,
