@@ -1,10 +1,10 @@
 {
-  "updated": "2026-08-30T20:25:10+09:00",
+  "updated": "2026-08-30T22:55:12+09:00",
   "assignments": [
     {
       "id": "hw0",
-      "title": "HW0 — Gate assignment",
-      "due": "2026-09-06T23:59:00+09:00"
+      "title": "HW0 — Starter project",
+      "due": "2026-09-14T23:59:00+09:00"
     },
     {
       "id": "memo01",
@@ -265,6 +265,11 @@
       "id": "vid12",
       "title": "Video summary W12",
       "due": "2026-12-06T23:59:00+09:00"
+    },
+    {
+      "id": "tool01",
+      "title": "AI Toolkit Report (5p)",
+      "due": "2026-09-06T23:59:00+09:00"
     }
   ],
   "students": [
@@ -329,7 +334,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -393,7 +399,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -457,7 +464,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -521,7 +529,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -585,7 +594,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -649,7 +659,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -713,7 +724,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -777,7 +789,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -841,7 +854,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -905,7 +919,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -969,7 +984,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -1033,7 +1049,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -1097,7 +1114,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -1161,7 +1179,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -1225,7 +1244,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -1289,7 +1309,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -1353,7 +1374,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     },
     {
@@ -1417,7 +1439,8 @@
         "vid09": "due",
         "vid10": "due",
         "vid11": "due",
-        "vid12": "due"
+        "vid12": "due",
+        "tool01": "due"
       }
     }
   ]

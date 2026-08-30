@@ -45,6 +45,7 @@ const NAV = [
   ["syllabus", "Syllabus", "강의계획", "syllabus.html"],
   ["schedule", "Schedule", "주차별 일정", "schedule.html"],
   ["journal", "Journal Club", "저널클럽", "journal.html"],
+  ["quiz", "Quizzes", "퀴즈", "quiz.html"],
   ["capstone", "Capstone", "프로젝트", "capstone.html"],
   ["setup", "Setup", "환경 설정", "setup.html"],
   ["assignments", "Assignments", "과제 제출", "assignments.html"],

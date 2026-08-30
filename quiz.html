@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Quizzes</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/common.js" defer></script>
+<style>
+  details.qz { border:1px solid var(--hairline); border-radius:12px; background:var(--surface);
+    margin:10px 0; overflow:hidden; }
+  details.qz > summary { list-style:none; cursor:pointer; padding:14px 18px;
+    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  details.qz > summary::-webkit-details-marker { display:none; }
+  details.qz > summary .tw { font-family:var(--serif); font-weight:700; font-size:15.5px; }
+  details.qz > summary .dt { color:var(--muted); font-size:12.5px; }
+  details.qz > summary .caret { margin-left:auto; color:var(--muted); transition:transform .15s; }
+  details.qz[open] > summary .caret { transform:rotate(90deg); }
+  details.qz .body { padding:0 18px 16px; }
+  .btnrow { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:6px; }
+  .pictl { margin-top:12px; padding-top:10px; border-top:1px dashed var(--hairline);
+    display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .pictl .lbl { font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--accent); }
+  .stpill { font-size:11.5px; border:1px solid var(--hairline); border-radius:999px;
+    padding:2px 10px; color:var(--muted); }
+  .stpill.on { border-color:var(--ok); color:var(--ok); }
+</style>
+</head>
+<body data-page="quiz">
+<div class="wrap">
+  <p class="eyebrow">EN5425 / EV4240 · <span class="lang-en">Fall 2026</span><span class="lang-ko">2026 가을학기</span></p>
+  <h1><span class="lang-en">Quizzes</span><span class="lang-ko">퀴즈</span></h1>
+  <p class="lede">
+    <span class="lang-en">Every in-class quiz paper is posted here after class so you can study from it.
+      The answer key for each quiz opens when the instructor releases it.</span>
+    <span class="lang-ko">수업에서 본 퀴즈지는 수업 후에 여기 올라와요 — 나중에 복습용으로 쓰세요.
+      정답지는 교수님이 공개하는 순간 열립니다.</span>
+  </p>
+  <div id="list"><p class="sub"><span class="lang-en">Loading…</span><span class="lang-ko">불러오는 중…</span></p></div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const el = $("#list");
+  try {
+    const st = await siteSession();
+    const isPI = st.mode === "authed" && st.me.role === "pi";
+    const { quizzes } = await loadJSON("quizzes");
+    const states = await loadStates();
+    const base = st.mode === "mirror" ? (await liveClassURL()) : "";
+    render(el, quizzes, states, isPI, st.mode, base);
+  } catch {
+    el.innerHTML = `<p class="sub">${t("Quiz list coming soon.", "퀴즈 목록을 곧 공개합니다.")}</p>`;
+  }
+});
+
+async function loadStates() {
+  try {
+    const r = await fetch("/api/quizzes", { cache: "no-store" });
+    if (r.ok) return (await r.json()).quizzes || {};
+  } catch {}
+  try { return await loadJSON("quizstate"); } catch { return {}; }
+}
+
+function render(el, quizzes, states, isPI, mode, base) {
+  const ko = document.body.dataset.lang === "ko";
+  /* open the newest entry with anything released; before anything is released, open the current week's */
+  const released = quizzes.filter((q) => { const s = states[q.id] || {}; return s.quiz || s.key; });
+  let openId = released.length ? released[released.length - 1].id : null;
+  if (!openId) {
+    const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+    const cur = quizzes.filter((q) => q.date <= today).pop() || quizzes[0];
+    openId = cur && cur.id;
+  }
+  const fileURL = (q, kind) => (base || "") + `/api/quiz-file?qid=${q.id}&kind=${kind}`;
+  const canLink = mode !== "mirror" || !!base;
+
+  el.innerHTML = quizzes.map((q) => {
+    const s = states[q.id] || {};
+    const title = (ko && q.title_ko) ? q.title_ko : q.title;
+    const wk = t(`Week ${q.week}`, `${q.week}주차`);
+    const quizBtn = (s.quiz || isPI) && canLink
+      ? `<a class="btn" target="_blank" rel="noopener" href="${fileURL(q, "quiz")}">${t("Quiz PDF", "문제 PDF")}${!s.quiz ? ` <span class="sub" style="margin:0;display:inline">(${t("preview", "미공개 · 미리보기")})</span>` : ""}</a>`
+      : s.quiz && !canLink
+      ? `<span class="sub" style="margin:0">${t("Open on the live class site (pinned on Home).", "수업용 주소에서 열 수 있어요 (홈 고정 공지).")}</span>`
+      : `<span class="sub" style="margin:0">${t("The paper is posted here after class.", "퀴즈지는 수업 후에 올라와요.")}</span>`;
+    const keyBtn = (s.key || isPI) && canLink
+      ? `<a class="btn primary" target="_blank" rel="noopener" href="${fileURL(q, "key")}">${t("Answer key PDF", "정답 PDF")}${!s.key ? ` <span class="sub" style="margin:0;display:inline;color:inherit">(${t("preview", "미공개 · 미리보기")})</span>` : ""}</a>`
+      : s.key && !canLink
+      ? `<span class="sub" style="margin:0">${t("Open on the live class site.", "수업용 주소에서 열 수 있어요.")}</span>`
+      : `<span class="sub" style="margin:0">${t("The key opens when the instructor releases it.", "정답지는 교수님이 공개하면 열려요.")}</span>`;
+    const pictl = isPI ? `
+      <div class="pictl" data-qid="${q.id}">
+        <span class="lbl">${t("Instructor", "공개 제어")}</span>
+        <span class="stpill ${s.quiz ? "on" : ""}">${t("paper", "문제")} ${s.quiz ? t("public", "공개") : t("hidden", "비공개")}</span>
+        <button class="btn" data-act="quiz">${s.quiz ? t("Hide paper", "문제 숨기기") : t("Release paper", "문제 공개")}</button>
+        <span class="stpill ${s.key ? "on" : ""}">${t("key", "정답")} ${s.key ? t("public", "공개") : t("hidden", "비공개")}</span>
+        <button class="btn" data-act="key">${s.key ? t("Hide key", "정답 숨기기") : t("Release key", "정답 공개")}</button>
+        <span class="sub" style="margin:0" data-msg></span>
+      </div>` : "";
+    return `<details class="qz" ${q.id === openId ? "open" : ""}>
+      <summary><span class="tw">${wk} · ${esc(title)}</span>
+        <span class="dt">${esc(fmtDate(q.date))}</span><span class="caret">&#8250;</span></summary>
+      <div class="body">
+        <div class="btnrow">${quizBtn}${keyBtn}</div>
+        ${pictl}
+      </div>
+    </details>`;
+  }).join("");
+
+  if (isPI) el.querySelectorAll(".pictl button").forEach((b) => {
+    b.addEventListener("click", async () => {
+      const box = b.closest(".pictl"), qid = box.dataset.qid;
+      const s = states[qid] || { quiz: false, key: false };
+      const next = { quiz: !!s.quiz, key: !!s.key };
+      next[b.dataset.act] = !next[b.dataset.act];
+      const fd = new FormData();
+      fd.append("qid", qid);
+      fd.append("quiz", next.quiz ? "1" : "0");
+      fd.append("key", next.key ? "1" : "0");
+      try {
+        const r = await fetch("/api/admin/quiz-state", { method: "POST", headers: XHDR, body: fd });
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        states[qid] = next;
+        render(el, quizzes, states, isPI, mode, "");
+      } catch (e) {
+        box.querySelector("[data-msg]").textContent = e.message;
+      }
+    });
+  });
+}
+</script>
+</body>
+</html>

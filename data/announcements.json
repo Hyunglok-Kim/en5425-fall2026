@@ -1,7 +1,7 @@
 [
-  {
-    "date": "2026-08-28",
-    "pin": true,
-    "text": "Welcome. Read the Syllabus page before the first session — this course expects 8–12 hours/week outside class, every week. Week 1 includes an ungraded readiness diagnostic and HW0, a pass/fail gate assignment."
-  }
+ {
+  "date": "2026-08-28",
+  "pin": true,
+  "text": "Welcome. Read the Syllabus page before the first session — this course expects 8–12 hours/week outside class, every week. Week 1 includes an ungraded readiness check and HW0, an ungraded starter project (due Mon 9/14)."
+ }
 ]

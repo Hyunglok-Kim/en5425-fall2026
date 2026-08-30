@@ -1,0 +1,92 @@
+{
+ "quizzes": [
+  {
+   "id": "w01",
+   "week": 1,
+   "date": "2026-08-31",
+   "title": "Readiness check (30 min, in class)",
+   "title_ko": "준비도 점검 (30분, 수업 중)",
+   "kind": "check"
+  },
+  {
+   "id": "w02",
+   "week": 2,
+   "date": "2026-09-07",
+   "title": "Reading quiz — Leakage-Safe Evaluation Design (and the Fundamentals Recap)",
+   "title_ko": "리딩 퀴즈 — Leakage 없는 평가 설계 (그리고 기초 복습)",
+   "kind": "reading"
+  },
+  {
+   "id": "w03",
+   "week": 3,
+   "date": "2026-09-14",
+   "title": "Reading quiz — Environmental Big Data and Cloud-Native Pipelines",
+   "title_ko": "리딩 퀴즈 — 환경 빅데이터와 Cloud-Native 파이프라인",
+   "kind": "reading"
+  },
+  {
+   "id": "w04",
+   "week": 4,
+   "date": "2026-09-21",
+   "title": "Reading quiz — CNNs and Spatiotemporal Modeling on Gridded Data",
+   "title_ko": "리딩 퀴즈 — 격자 데이터에서의 CNN과 시공간 모델링",
+   "kind": "reading"
+  },
+  {
+   "id": "w05",
+   "week": 5,
+   "date": "2026-09-28",
+   "title": "Reading quiz — Sequence Models, Autoregressive Forecasting, and Rollout Stability",
+   "title_ko": "리딩 퀴즈 — 시퀀스 모델, Autoregressive 예측, Rollout 안정성",
+   "kind": "reading"
+  },
+  {
+   "id": "w06",
+   "week": 6,
+   "date": "2026-10-12",
+   "title": "Reading quiz — Attention and the Transformer, Built From Scratch (With an Agent You Verify)",
+   "title_ko": "리딩 퀴즈 — Attention과 Transformer, 밑바닥부터 구현 (에이전트와 함께, 직접 검증)",
+   "kind": "reading"
+  },
+  {
+   "id": "w07",
+   "week": 7,
+   "date": "2026-10-26",
+   "title": "Reading quiz — Self-Supervised Learning: Pretrain Your First Model",
+   "title_ko": "리딩 퀴즈 — Self-Supervised Learning: 첫 모델 Pretraining",
+   "kind": "reading"
+  },
+  {
+   "id": "w09",
+   "week": 9,
+   "date": "2026-11-09",
+   "title": "Reading quiz — Foundation Models and Scaling Laws",
+   "title_ko": "리딩 퀴즈 — Foundation Model과 Scaling Law",
+   "kind": "reading"
+  },
+  {
+   "id": "w10",
+   "week": 10,
+   "date": "2026-11-16",
+   "title": "Reading quiz — Earth Observation Foundation Models (EO-FM Week)",
+   "title_ko": "리딩 퀴즈 — 지구관측 Foundation Model (EO-FM 주간)",
+   "kind": "reading"
+  },
+  {
+   "id": "w11",
+   "week": 11,
+   "date": "2026-11-23",
+   "title": "Reading quiz — Weather and Climate Foundation Models (Weather-FM Week)",
+   "title_ko": "리딩 퀴즈 — 기상·기후 Foundation Model (Weather-FM 주간)",
+   "kind": "reading"
+  },
+  {
+   "id": "w12",
+   "week": 12,
+   "date": "2026-11-30",
+   "title": "Reading quiz — Scaling the Pipeline: Training Engineering, Fine-Tuning, and Release",
+   "title_ko": "리딩 퀴즈 — 파이프라인 확장: Training 엔지니어링, Fine-Tuning, 릴리스",
+   "kind": "reading"
+  }
+ ]
+}

@@ -55,8 +55,8 @@
     ],
     "deliverable": "AI Toolkit Report — 5-page PDF due Sun 9/6 23:59 on this site: for each tool, how you set it up, one real thing you made it do (screenshot), where it fits your weekly workflow, and one limitation you noticed.",
     "deliverable_ko": "AI Toolkit Report — 5쪽 PDF, Sun 9/6 23:59까지 이 사이트에 제출: 도구별 설정 과정, 실제로 시켜본 작업 1가지(스크린샷), 주간 워크플로에서의 위치, 발견한 한계 1가지",
-    "homework": "Finish whatever didn't complete in class before the HW0 deadline — HW0 assumes all five tools work.",
-    "homework_ko": "수업에서 끝내지 못한 항목은 HW0 마감 전까지 완료 — HW0는 다섯 도구가 모두 작동한다는 전제",
+    "homework": "Finish whatever didn't complete in class before the HW0 deadline (Mon 9/14, 23:59) — HW0 assumes all five tools work. HW0 is ungraded: it's how you check, hands-on, that you can run this course's weekly workflow. Stuck? Drop by S6 room 317 (HydroAI lab) and ask the researchers — they're expecting you.",
+    "homework_ko": "수업에서 끝내지 못한 항목은 HW0 마감(9/14 월 23:59) 전까지 완료 — HW0는 다섯 도구가 모두 작동한다는 전제로 진행돼요. HW0는 채점하지 않아요: 이 수업의 한 주 워크플로를 내가 굴릴 수 있는지 직접 확인해 보는 과정이에요. 막히면 S6 317호(HydroAI 연구실)에 들러 연구원들에게 물어보세요 — 기다리고 있어요.",
     "resources": [
      {
       "title": "Claude Code — official docs (install & VS Code)",
