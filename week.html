@@ -44,7 +44,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       <p class="lede">${esc(goal || "")}</p>
       ${w.slides ? `<p style="margin-top:10px"><a class="btn" href="slides/week${String(n).padStart(2, "0")}.html">${t("Lecture slides →", "강의 슬라이드 →")}</a></p>` : ""}
 
-      ${n !== 1 && n !== 8 && n !== 16 ? `<p class="sub" style="margin-top:14px">${t(
+      ${w.async ? `<div class="note"><b>${t("Async week — no class meeting.", "원격 주간 — 수업 없음.")}</b> ${t("Capstone sprint continues on your own schedule; feedback via GitHub issues. Deliverables and due dates below.", "Capstone 스프린트는 각자 일정대로 진행하고, 피드백은 GitHub 이슈로 받습니다. 산출물과 마감은 아래를 확인하세요.")}</div>` : ""}
+      ${!w.async && n !== 1 && n !== 8 && n !== 16 ? `<p class="sub" style="margin-top:14px">${t(
         "Session rhythm: 5&#8242; reading quiz &#183; lecture &#183; 15&#8242; break &#183; 30&#8242; journal club &#183; 60&#8242; lab.",
         "세션 구성: 리딩 퀴즈 5분 &#183; 강의 &#183; 휴식 15분 &#183; 저널클럽 30분 &#183; 실습 60분.")}</p>` : ""}
 
@@ -62,11 +63,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         <ol style="margin-top:8px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>
       </div>` : ""}
 
-      ${questions.length && n !== 1 ? `<h2>${t("Journal club (30 min)", "저널클럽 (30분)")}</h2>
+      ${questions.length && n !== 1 && !w.async ? `<h2>${t("Journal club (30 min)", "저널클럽 (30분)")}</h2>
       <div class="card">
         <p style="margin:0" class="small">${t(
-          "Bring your entrance ticket (committed as <code>memos/week" + String(n).padStart(2, "0") + ".md</code> 24 h before class). Groups of 4&#8211;5, the week's lead pair moderates; the class opens with a 5-minute closed-book reading quiz.",
-          "입장 티켓(<code>memos/week" + String(n).padStart(2, "0") + ".md</code>, 수업 24시간 전까지 커밋)을 가지고 4&#8211;5명씩 토론합니다. 이번 주 리드 조가 진행하고, 수업 시작은 5분 closed-book 리딩 퀴즈입니다.")}</p>
+          "Bring your entrance ticket (submitted on the student portal 24 h before class). Groups of 4&#8211;5, the week's lead pair moderates; the class opens with a 5-minute closed-book reading quiz.",
+          "입장 티켓(수업 24시간 전까지 학생 포털에서 제출)을 가지고 4&#8211;5명씩 토론합니다. 이번 주 리드 조가 진행하고, 수업 시작은 5분 closed-book 리딩 퀴즈입니다.")}</p>
         <p class="kv">${t("Discussion questions", "토론 질문")}</p>
         <ol style="margin-top:4px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>
         <p style="margin:10px 0 0"><a class="btn" href="journal.html?w=${n}">${t("Read this week's tickets &#8594;", "이번 주 티켓 보기 &#8594;")}</a></p>
@@ -88,7 +89,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         ${optional.length ? `<p class="kv">${t("Optional", "선택")}</p>
           <ul style="margin-top:4px">${optional.map((r) => `<li>${linkOf(r)}</li>`).join("")}</ul>` : ""}
         ${rd.memo && rd.memo !== "none"
-          ? `<p class="sub" style="margin:10px 0 0">${t("Ticket type:", "티켓 유형:")} <span class="pill acc">${esc(rd.memo)}</span> ${t("— your entrance ticket, due 24 h before class, committed to your repo.", "— 입장 티켓입니다. 수업 24시간 전까지 본인 repo에 커밋해 제출합니다.")}</p>`
+          ? `<p class="sub" style="margin:10px 0 0">${t("Ticket type:", "티켓 유형:")} <span class="pill acc">${esc(rd.memo)}</span> ${n === 1
+              ? t("— assigned in class; due together with the Week 2 ticket, 24 h before the Week 2 session (non-droppable).", "— 수업에서 배정. 2주차 티켓과 함께 2주차 수업 24시간 전까지 제출합니다 (드롭 불가).")
+              : t("— your entrance ticket, due 24 h before class, submitted on the student portal.", "— 입장 티켓입니다. 수업 24시간 전까지 학생 포털에서 제출합니다.")}</p>`
           : (primary.length ? `<p class="sub" style="margin:10px 0 0">${t("No ticket due this week.", "이번 주는 티켓이 없습니다.")}</p>`
                             : `<p class="sub" style="margin:0">${t("No assigned reading this week.", "이번 주는 지정 읽기자료가 없습니다.")}</p>`)}
       </div>

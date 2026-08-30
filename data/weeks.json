@@ -443,7 +443,7 @@
       "goal": "Understand the SSL design space and actually pretrain a mini-MAE on satellite imagery — everyone's hands-on pretraining experience and the capstone seed.",
       "title_ko": "Self-Supervised Learning: 첫 모델 Pretraining",
       "goal_ko": "SSL 설계 공간을 이해하고 위성 영상으로 mini-MAE를 실제로 pretraining합니다 — 전원이 직접 해보는 pretraining 경험이자 capstone의 씨앗입니다.",
-      "date": "2026-10-19",
+      "date": "2026-10-26",
       "concept": [
         {
           "min": 20,
@@ -518,7 +518,7 @@
       "goal": "Convert seven weeks of labs into a credible, compute-budgeted capstone proposal.",
       "title_ko": "중간 점검: 포트폴리오 리뷰와 Capstone 제안 발표",
       "goal_ko": "지난 7주의 실습을 compute 예산까지 갖춘 설득력 있는 capstone 제안서로 완성합니다.",
-      "date": "2026-10-26",
+      "date": "2026-11-02",
       "concept": [
         {
           "min": 15,
@@ -565,7 +565,7 @@
       "goal": "The intellectual frame — what makes a model a foundation model, and how scaling laws let you budget a tiny one honestly.",
       "title_ko": "Foundation Model과 Scaling Law",
       "goal_ko": "무엇이 모델을 foundation model로 만드는지라는 지적 틀과, scaling law로 작은 모델의 예산을 정직하게 세우는 법을 다룹니다.",
-      "date": "2026-11-02",
+      "date": "2026-11-09",
       "concept": [
         {
           "min": 15,
@@ -640,7 +640,7 @@
       "goal": "Command the GFM design space — from SatMAE to embedding fields — and how to evaluate them without fooling yourself.",
       "title_ko": "지구관측 Foundation Model (EO-FM 주간)",
       "goal_ko": "SatMAE부터 embedding field까지 GFM 설계 공간을 장악하고, 스스로를 속이지 않고 평가하는 법을 배웁니다.",
-      "date": "2026-11-09",
+      "date": "2026-11-16",
       "concept": [
         {
           "min": 15,
@@ -718,7 +718,7 @@
       "goal": "The full ML-weather stack: paradigms, spherical geometry, rollout stability, and WeatherBench2-grade evaluation — then train your own tiny forecaster.",
       "title_ko": "기상·기후 Foundation Model (Weather-FM 주간)",
       "goal_ko": "ML 기상의 전체 스택 — 패러다임, 구면 기하, rollout 안정성, WeatherBench2급 평가 — 을 다룬 뒤, 직접 작은 forecaster를 학습합니다.",
-      "date": "2026-11-16",
+      "date": "2026-11-23",
       "concept": [
         {
           "min": 10,
@@ -791,7 +791,7 @@
       "goal": "Every remaining capstone skill: efficient training at your compute ceiling, PEFT fine-tuning, ablation design, and a real HF Hub release — after this week you have 100% of the capstone skill set.",
       "title_ko": "파이프라인 확장: Training 엔지니어링, Fine-Tuning, 릴리스",
       "goal_ko": "capstone에 필요한 나머지 기술 전부 — compute 한도 내 효율적 학습, PEFT fine-tuning, ablation 설계, 실제 HF Hub 릴리스 — 를 익혀 이번 주로 capstone 기술 세트를 100% 갖춥니다.",
-      "date": "2026-11-23",
+      "date": "2026-11-30",
       "concept": [
         {
           "min": 15,
@@ -867,11 +867,11 @@
     {
       "n": 13,
       "phase": "Capstone Sprints",
-      "title": "Agentic ML Engineering + Capstone Sprint 1",
+      "title": "Agentic ML Engineering + Capstone Sprint 1 — async sprint (no class meeting)",
       "goal": "Turn your AI agent from code generator into experiment orchestrator; launch the capstone run. Milestone M1 due.",
-      "title_ko": "Agentic ML 엔지니어링 + Capstone Sprint 1",
+      "title_ko": "Agentic ML 엔지니어링 + Capstone Sprint 1 — 원격 스프린트 (수업 없음)",
       "goal_ko": "AI 에이전트를 코드 생성기에서 실험 orchestrator로 격상시키고, capstone 학습 run을 시작합니다. Milestone M1 제출.",
-      "date": "2026-11-30",
+      "date": "2026-12-01",
       "concept": [
         {
           "min": 15,
@@ -899,14 +899,13 @@
         "homework": null
       },
       "reading": {
-        "memo": "short",
-        "primary": [
+        "memo": "none",
+        "primary": [],
+        "optional": [
           {
             "title": "Price et al. 2024 — GenCast",
             "link": "https://arxiv.org/abs/2312.15796"
-          }
-        ],
-        "optional": [
+          },
           {
             "title": "FGN / WeatherNext 2",
             "link": "https://arxiv.org/abs/2506.10772"
@@ -924,16 +923,17 @@
         "CI for ML",
         "pre-registered evaluation",
         "compute-optimal execution"
-      ]
+      ],
+      "async": true
     },
     {
       "n": 14,
       "phase": "Capstone Sprints",
-      "title": "Capstone Sprint 2 + Peer Code Review; Model Cards and Reproducibility",
+      "title": "Capstone Sprint 2 + Peer Code Review; Model Cards and Reproducibility — async sprint (no class meeting)",
       "goal": "Fine-tune and evaluate the model; subject your code to structured peer review. Milestone M2 due.",
-      "title_ko": "Capstone Sprint 2 + 동료 코드 리뷰; Model Card와 재현성",
+      "title_ko": "Capstone Sprint 2 + 동료 코드 리뷰; Model Card와 재현성 — 원격 스프린트 (수업 없음)",
       "goal_ko": "모델을 fine-tuning하고 평가하며, 코드를 구조화된 동료 리뷰에 부칩니다. Milestone M2 제출.",
-      "date": "2026-11-30",
+      "date": "2026-12-08",
       "concept": [
         {
           "min": 15,
@@ -960,14 +960,13 @@
         "homework": null
       },
       "reading": {
-        "memo": "short",
-        "primary": [
+        "memo": "none",
+        "primary": [],
+        "optional": [
           {
             "title": "Mitchell et al. 2019 — Model Cards for Model Reporting",
             "link": "https://arxiv.org/abs/1810.03993"
-          }
-        ],
-        "optional": [
+          },
           {
             "title": "How Usable Are Geospatial Foundation Models?",
             "link": "https://arxiv.org/abs/2608.03804"
@@ -983,16 +982,17 @@
         "reproducibility engineering",
         "code review",
         "licensing"
-      ]
+      ],
+      "async": true
     },
     {
       "n": 15,
       "phase": "Capstone Sprints",
-      "title": "Capstone Sprint 3: Evaluation, Ablation, Documentation, Release Candidate",
+      "title": "Capstone Sprint 3: Evaluation, Ablation, Documentation, Release Candidate — async sprint (no class meeting)",
       "goal": "Finish evaluation and ablation, harden documentation, cut a release candidate. Milestone M3 due.",
-      "title_ko": "Capstone Sprint 3: 평가, Ablation, 문서화, Release Candidate",
+      "title_ko": "Capstone Sprint 3: 평가, Ablation, 문서화, Release Candidate — 원격 스프린트 (수업 없음)",
       "goal_ko": "평가와 ablation을 마무리하고 문서를 다듬어 release candidate를 만듭니다. Milestone M3 제출.",
-      "date": "2026-12-07",
+      "date": "2026-12-11",
       "concept": [
         {
           "min": 10,
@@ -1015,8 +1015,9 @@
         "homework": null
       },
       "reading": {
-        "memo": "menu",
-        "primary": [
+        "memo": "none",
+        "primary": [],
+        "optional": [
           {
             "title": "AlphaEarth Foundations",
             "link": "https://arxiv.org/abs/2507.22291"
@@ -1042,7 +1043,6 @@
             "link": "https://arxiv.org/abs/2608.15282"
           }
         ],
-        "optional": [],
         "questions": [
           "What would this paper's authors say is wrong with your capstone?",
           "What is the smallest experiment that would extend your capstone toward this frontier?"
@@ -1053,16 +1053,17 @@
         "ablation completion",
         "release packaging",
         "scientific presentation"
-      ]
+      ],
+      "async": true
     },
     {
       "n": 16,
       "phase": "Capstone Sprints",
-      "title": "Demo Day: Presentations and Model Release",
+      "title": "Demo Week: recorded presentations + public release (no class meeting)",
       "goal": "Ship it.",
-      "title_ko": "Demo Day: 발표와 모델 릴리스",
+      "title_ko": "데모 주간: 녹화 발표 + 공개 릴리스 (수업 없음)",
       "goal_ko": "완성하고, 공개합니다.",
-      "date": "2026-12-14",
+      "date": "2026-12-16",
       "concept": [
         {
           "min": 120,
@@ -1094,7 +1095,8 @@
         "scientific presentation",
         "live release verification",
         "shipping a public model"
-      ]
+      ],
+      "async": true
     }
   ]
 }
