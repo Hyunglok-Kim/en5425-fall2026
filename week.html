@@ -88,6 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (n === 1) bx.push(["hw0", t("HW0 — PDF report", "HW0 — PDF 보고서")]);
         if (teach) bx.push([`note${String(n).padStart(2, "0")}`, t(`My research note (Week ${n}, PDF)`, `내 연구노트 (${n}주차, PDF)`)]);
         if (w.reading && w.reading.book) bx.push([`book${String(n).padStart(2, "0")}`, t(`Book summary (Week ${n} — HANDWRITTEN, scanned to PDF, no AI)`, `북 정리 (${n}주차 — 손글씨 작성 후 스캔 PDF, AI 금지)`)]);
+        if (w.reading && w.reading.video) bx.push([`vid${String(n).padStart(2, "0")}`, t(`Video summary (Week ${n}, 0.5-page PDF)`, `영상 정리 (${n}주차, 0.5페이지 PDF)`)]);
         if (n === 8) bx.push(["proposal", t("Capstone proposal (PDF)", "Capstone 제안서 (PDF)")]);
         if (n === 13) bx.push(["m1", t("Milestone M1 (PDF)", "마일스톤 M1 (PDF)")]);
         if (n === 14) bx.push(["m2", t("Milestone M2 (PDF)", "마일스톤 M2 (PDF)")]);
@@ -103,6 +104,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           <ul style="margin-top:4px">${primary.map((r) => `<li>${linkOf(r)}</li>`).join("")}</ul>` : ""}
         ${rd.book ? `<p class="kv">${t("Textbook (1-page summary due Sun 23:59)", "교과서 (1페이지 정리, 일 23:59 마감)")}</p>
           <ul style="margin-top:4px"><li>${rd.book.link ? `<a href="${esc(rd.book.link)}">${esc(rd.book.title)}</a>` : esc(rd.book.title)}</li></ul>` : ""}
+        ${rd.video ? `<p class="kv">${t("Video (0.5-page summary due Sun 23:59)", "영상 (0.5페이지 정리, 일 23:59 마감)")}</p>
+          <ul style="margin-top:4px"><li><a href="${esc(rd.video.link)}">${esc(rd.video.title)}</a>
+            <span class="sub" style="margin:0;display:inline"> — ${esc(rd.video.channel)}${rd.video.minutes ? `, ~${esc(rd.video.minutes)}${t(" min", "분")}` : ""}</span></li></ul>` : ""}
         ${optional.length ? `<p class="kv">${t("Optional", "선택")}</p>
           <ul style="margin-top:4px">${optional.map((r) => `<li>${linkOf(r)}</li>`).join("")}</ul>` : ""}
         ${rd.memo && rd.memo !== "none"
