@@ -1,6 +1,6 @@
 {
  "w01": {
-  "quiz": false,
-  "key": false
+  "quiz": true,
+  "key": true
  }
 }

@@ -1,4 +1,37 @@
 {
-  "updated": "2026-08-30T22:55:12+09:00",
-  "weeks": {}
+  "updated": "2026-09-05T15:08:31+09:00",
+  "weeks": {
+    "01": [
+      {
+        "gh": "",
+        "display": "Magdalena Alicja Pacocha",
+        "photo": "assets/students/04c828fe4cb1.png",
+        "at": "2026-09-05T14:32:40+09:00",
+        "late": false
+      },
+      {
+        "gh": "",
+        "display": "Maja Gabriela Szerszen",
+        "photo": "assets/students/5a398dd3e429.png",
+        "at": "2026-09-05T14:25:02+09:00",
+        "late": false
+      }
+    ],
+    "02": [
+      {
+        "gh": "",
+        "display": "Magdalena Alicja Pacocha",
+        "photo": "assets/students/04c828fe4cb1.png",
+        "at": "2026-09-05T14:33:42+09:00",
+        "late": false
+      },
+      {
+        "gh": "",
+        "display": "Maja Gabriela Szerszen",
+        "photo": "assets/students/5a398dd3e429.png",
+        "at": "2026-09-05T15:08:31+09:00",
+        "late": false
+      }
+    ]
+  }
 }
