@@ -61,31 +61,30 @@
   <h2>Training is a loop: guess → score → nudge</h2>
   <div class="cols" style="grid-template-columns:1fr 1.15fr;align-items:center;gap:2.5vw">
     <div class="figure" style="margin:0">
-      <svg viewBox="0 0 360 270" role="img" aria-label="The training loop: data through the model to a single-number loss, backward pass computes blame, update nudges the weights, repeat" style="width:min(100%,400px)">
+      <svg viewBox="0 0 380 280" role="img" aria-label="The training loop: data through the model to a single-number loss, backward pass computes blame, update nudges the weights, repeat" style="width:min(100%,420px)">
         <defs><marker id="lp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
         <marker id="lpa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker></defs>
         <g fill="none" stroke="currentColor" stroke-width="1.5">
-          <rect x="110" y="10"  width="140" height="42" rx="9"/>
-          <rect x="235" y="112" width="115" height="46" rx="9"/>
-          <rect x="110" y="216" width="140" height="42" rx="9"/>
-          <rect x="12"  y="112" width="98"  height="46" rx="9"/>
-          <path d="M252 54 Q288 74 293 106" marker-end="url(#lp)"/>
-          <path d="M290 160 Q286 196 254 220" marker-end="url(#lp)"/>
+          <rect x="110" y="10"  width="160" height="44" rx="9"/>
+          <rect x="245" y="115" width="120" height="46" rx="9"/>
+          <rect x="90"  y="220" width="200" height="46" rx="9"/>
+          <rect x="8"   y="115" width="112" height="46" rx="9"/>
+          <path d="M255 56 Q300 76 303 111" marker-end="url(#lp)"/>
+          <path d="M303 163 Q298 200 264 218" marker-end="url(#lp)"/>
         </g>
         <g fill="none" stroke="var(--accent)" stroke-width="1.8">
-          <path d="M108 236 Q66 226 61 164" marker-end="url(#lpa)"/>
-          <path d="M64 108 Q70 52 106 34" marker-end="url(#lpa)"/>
+          <path d="M86 244 Q52 232 60 164" marker-end="url(#lpa)"/>
+          <path d="M64 112 Q66 46 104 32" marker-end="url(#lpa)"/>
         </g>
-        <circle cx="292" cy="135" r="0" fill="none"/>
         <g font-family="var(--sans)" font-size="13.5" fill="currentColor" text-anchor="middle">
-          <text x="180" y="30">model f(x; θ)</text>
-          <text x="180" y="46" font-size="11" opacity="0.65">millions of weights θ</text>
-          <text x="292" y="132" fill="var(--accent)">loss L</text>
-          <text x="292" y="148" font-size="11" opacity="0.75">ONE number</text>
-          <text x="180" y="236">backward pass</text>
-          <text x="180" y="252" font-size="11" opacity="0.65">∂L/∂θ — blame for every weight</text>
-          <text x="61" y="132">update</text>
-          <text x="61" y="148" font-size="11" opacity="0.65">θ ← θ − η∇L</text>
+          <text x="190" y="30">model f(x; θ)</text>
+          <text x="190" y="46" font-size="11" opacity="0.65">millions of weights θ</text>
+          <text x="305" y="135" fill="var(--accent)">loss L</text>
+          <text x="305" y="151" font-size="11" opacity="0.75">ONE number</text>
+          <text x="190" y="240">backward pass</text>
+          <text x="190" y="256" font-size="11" opacity="0.65">∂L/∂θ — blame for every weight</text>
+          <text x="64" y="135">update</text>
+          <text x="64" y="151" font-size="11" opacity="0.65">θ ← θ − η∇L</text>
         </g>
       </svg>
     </div>
@@ -98,7 +97,9 @@
     <span><b>θ</b> “theta” — every weight in the model, gathered into one long list; training = choosing good values for θ.</span>
     <span><b>L</b> — the loss: ONE number scoring how wrong the current predictions are (smaller = better).</span>
     <span><b>∂L/∂θ</b> “partial L over partial theta” — the blame list: for each weight, how much L would move if that weight moved a hair.</span>
-    <span><b>θ ← θ − η∇L</b> — ∇L (“grad L”) stacks all those slopes into one vector; η (“eta”) is the step size; subtracting η∇L nudges every weight slightly downhill.</span>
+    <span><b>∇</b> “nabla” — the upside-down triangle means “the gradient of”: ∇L stacks all those slopes into one vector.</span>
+    <span><b>θ ← θ − η∇L</b> — η (“eta”) is the step size; “←” = overwrite the old θ; subtracting η∇L nudges every weight slightly downhill.</span>
+    <span><b>in the figure</b> — J(w₀, w₁) is MIT’s name for the loss (our L), drawn over just two weights w₀ and w₁ so it can be plotted; each ✚ is one trip around this loop.</span>
   </div>
   <div class="foot"><span>The whole of deep learning fits in this loop — everything in Parts 1–2 is just making each arrow cheap and safe.</span></div>
   <aside class="notes">~2 min. Analogy to say out loud: a hiker descending in thick fog — you can't see the valley, but you can feel the slope under your feet; take a small step downhill, feel again. Then the key fact, slowly: the loss is ONE number. Backprop's whole job is to convert that one number into a personalized blame score for every one of a million weights — and it does it for the cost of about two extra forward passes (that bill lands at the end of this part).</aside>
@@ -132,6 +133,7 @@
     <span><b>∂z/∂w</b> — “if w moved a hair, how much would z move?” For z = w·x it is simply x.</span>
     <span><b>chain rule</b> — slopes along a chain multiply: w moves z, z moves L, so ∂L/∂w = ∂L/∂z × ∂z/∂w.</span>
     <span><b>η</b> “eta” — the learning rate: what fraction of the blame you apply as a correction (here 0.1).</span>
+    <span><b>in the figure</b> — J(W) is again the loss (our L); ŷ “y-hat” — the model’s prediction; z₁ — the intermediate value between the two weights w₁ and w₂; each colored underline is one arrow’s local slope in the product.</span>
   </div>
   <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/mlp.html">Goodfellow §6.5</a> · <a href="https://cs231n.github.io/optimization-2/">CS231n “Backpropagation, Intuitions”</a> · full matrix version: Appendix</span></div>
   <aside class="notes">~2.5 min — do the numbers OUT LOUD, pointing at each line; this is the slide that makes the whole part land. Script: "the loss is 16 and it blames z at a rate of −8; z moves 2 per unit of w; so w's blame is −16 — negative means raise w." Then run the payoff line: one step and the loss falls from 16 to 0.64. That falling number IS learning. The MIT figure on the right is the same product one layer deeper: their J is our L.</aside>
@@ -344,6 +346,7 @@
     <span><b>η</b> “eta” — the learning rate: how far you step along −∇L each time.</span>
     <span><b>L(θ+Δ) ≈ L(θ) + ∇LᵀΔ</b> — “near θ, the loss looks like a tilted plane”; ∇LᵀΔ is slope × displacement (a dot product).</span>
     <span><b>unbiased</b> — right on average: the B-sample minibatch gradient equals the full gradient in expectation; <b>B</b> = batch size.</span>
+    <span><b>in the figure</b> — f(x) = ½x² (dashed) is a toy stand-in for the loss; the green line f′(x) is its derivative: where f′ &lt; 0 step right, where f′ &gt; 0 step left, and at f′ = 0 (the minimum) descent halts.</span>
   </div>
   <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/optimization.html">Goodfellow §8.3</a> · <a href="https://d2l.ai/chapter_optimization/gd.html">Dive into Deep Learning §12.3–12.5</a></span></div>
   <aside class="notes">~1.5 min. Repeat the fog-hiker from Part 1 — same walk, now we engineer it. The minibatch bullet in one spoken line: "a cheap compass that's right on average — we'll buy accuracy with averaging (momentum, next) instead of with bigger batches." The first bullet IS the one-line Taylor derivation — read it once and move on.</aside>
@@ -396,6 +399,7 @@
     <span><b>g</b> — this step’s (noisy) minibatch gradient.</span>
     <span><b>m</b> — the “velocity”: a running average of recent g’s; the update follows m, not the raw g.</span>
     <span><b>β</b> “beta” — the memory knob (0–1): how much of the old average survives each step; effective window ≈ 1/(1−β) recent gradients.</span>
+    <span><b>in the figures</b> — x₁, x₂: the two weights of a toy loss; blue rings: equal-loss contours, a map view of the valley (steep across, shallow along); orange dots: successive steps of the walk.</span>
   </div>
   <div class="foot"><span>Figures: Dive into Deep Learning, d2l.ai (CC BY-SA 4.0) · same function, same steps — only memory added · unroll of the average: Appendix</span></div>
   <aside class="notes">~2 min. Walk the triptych left to right: "steep direction flips sign every step, flat direction agrees every step. Averaging kills what flips and keeps what agrees — so the SAME learning rate that exploded now converges." That's momentum's entire job: a low-pass filter on the gradient. The window numbers (10/20/1000) are the practical takeaways students should remember.</aside>
@@ -418,6 +422,7 @@
     <span><b>SGD</b> — plain gradient descent, no memory.</span>
     <span><b>Momentum / NAG</b> — the heavy ball (NAG peeks one step ahead before committing).</span>
     <span><b>Adagrad / Adadelta / RMSprop</b> — per-parameter step sizes built from each weight’s own gradient history: the family Adam merges with momentum.</span>
+    <span><b>in the animations</b> — the rings are equal-loss contours and the ★ is the minimum; the right-hand surface is a <b>saddle point</b>: flat at the center, downhill only to the sides — the gradient there is ≈ 0, so memory-less SGD stalls.</span>
   </div>
   <div class="foot"><span>Animations: A. Radford, via Stanford CS231n · momentum overshoots but arrives · adaptive methods pick per-coordinate step sizes — that idea is Adam, next slide</span></div>
   <aside class="notes">~1 min — the animations loop on their own; narrate one loop of each. Left: momentum (green) overshoots the valley and swings back — that IS the heavy ball. Right: plain SGD (red) stalls on the saddle because the gradient is ~0 there while adaptive methods walk off. Set up the segue: "the adaptive ones are scaling each coordinate's step by its own history — do that with two averages and you've invented Adam."</aside>
