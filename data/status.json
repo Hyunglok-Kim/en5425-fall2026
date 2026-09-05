@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-05T17:02:36+09:00",
+  "updated": "2026-09-05T18:40:19+09:00",
   "assignments": [
     {
       "id": "hw0",
@@ -747,7 +747,7 @@
         "memo10": "due",
         "memo11": "due",
         "memo12": "due",
-        "note01": "due",
+        "note01": "ok",
         "note02": "due",
         "note03": "due",
         "note04": "due",
@@ -790,7 +790,7 @@
         "vid10": "due",
         "vid11": "due",
         "vid12": "due",
-        "tool01": "due"
+        "tool01": "ok"
       }
     },
     {
