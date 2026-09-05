@@ -84,18 +84,19 @@
   <h1><span class="lang-en">Journal Club</span><span class="lang-ko">저널클럽</span></h1>
   <p class="lede">
     <span class="lang-en">Journal-club weeks (2&ndash;7, 9&ndash;12) open with a 5-minute reading quiz; after the lecture we hold
-      a 30-minute discussion in groups of 4&ndash;5, shuffled every week, with two randomly drawn roles per
+      a 30-minute discussion in groups of 3&ndash;4, shuffled every week, with two randomly drawn roles per
       group &mdash; revealed at 13:00 on class day, so everyone prepares. (Week 2: the instructor
       co-moderates to model the format.) Write and submit your entrance
-      ticket <b>right on this page</b> (sign in below; due Sunday 13:00). Ticket text stays
-      <b>private</b> &mdash; only the instructor and TA read it; classmates see just who has
-      submitted on the prep board. You can withdraw and resubmit until it is graded.</span>
-    <span class="lang-ko">저널클럽 주간(2&ndash;7, 9&ndash;12주차)은 5분 리딩 퀴즈로 시작하고, 강의 후에는 4&ndash;5명씩
+      ticket <b>right on this page</b> (sign in below; due Sunday 13:00). Submitted tickets
+      appear <b>right here</b>: until 13:00 on class day only the instructor and TA can read
+      them; from 13:00 every ticket is visible to the whole class &mdash; they are the raw
+      material of the discussion. You can withdraw and resubmit until it is graded.</span>
+    <span class="lang-ko">저널클럽 주간(2&ndash;7, 9&ndash;12주차)은 5분 리딩 퀴즈로 시작하고, 강의 후에는 3&ndash;4명씩
       30분 토론을 해요. 그룹은 매주 랜덤으로 섞이고, 그룹마다 두 역할이 랜덤 추첨되어 <b>수업 당일 13:00에
       공개</b>돼요 — 누구든 뽑힐 수 있으니 모두가 준비해야 해요. (2주차는 교수가 함께 진행하며 포맷을 시범 보여요.)
       entrance ticket은 <b>바로 이 페이지에서</b> 작성하고 제출해요 (아래에서 로그인 · 마감 일요일 13:00).
-      티켓 내용은 <b>비공개</b>예요 — 교수·조교만 읽고, 동료들에게는 준비 현황판에 제출 여부만 보여요.
-      채점 전까지는 삭제·재제출이 가능해요.</span>
+      제출한 티켓은 <b>바로 이 페이지에 올라와요</b> — 수업 당일 13:00 전까지는 교수·조교만 읽을 수 있고,
+      13:00부터는 전체에게 공개되어 토론의 재료가 돼요. 채점 전까지는 삭제·재제출이 가능해요.</span>
   </p>
 
   <div class="roles">
@@ -173,6 +174,44 @@ async function initGroupBoxes(scope) {
         </div>`).join("")}</div>`;
   }
 }
+/* ticket texts: instructor/TA see them immediately, everyone from 13:00 on
+   class day (same reveal moment as the groups); static mirror shows none */
+let _tkP = null;
+function ticketTextsOnce() {
+  if (!_tkP) _tkP = fetch("/api/journal-texts", { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : { weeks: {} })).catch(() => ({ weeks: {} }));
+  return _tkP;
+}
+async function initTicketFeeds(scope) {
+  const boxes = $$(".tkbox:not([data-init])", scope || document);
+  boxes.forEach((b) => { b.dataset.init = "1"; });
+  if (!boxes.length) return;
+  const { weeks } = await ticketTextsOnce();
+  const face = (name, photo) => photo
+    ? `<img class="face" src="${esc(photo)}" alt="" loading="lazy">`
+    : `<div class="face av" aria-hidden="true">${esc((String(name).trim()[0] || "?").toUpperCase())}</div>`;
+  /* escape FIRST, then **bold** + paragraph breaks — no raw HTML reaches the DOM */
+  const tkHTML = (txt) => esc(txt).replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>")
+    .split(/\n\s*\n/).filter((p) => p.trim())
+    .map((p) => `<p>${p.trim().replace(/\n/g, "<br>")}</p>`).join("");
+  for (const b of boxes) {
+    const wk = (weeks || {})[b.dataset.week];
+    let entries = wk ? wk.tickets.map((e) => ({ ...e })) : [];
+    if (b.dataset.week === "02" && (weeks || {})["01"]) {  /* W2 discusses W1 tickets too */
+      entries = [...weeks["01"].tickets.map((e) => ({ ...e, w1: true })), ...entries];
+    }
+    if (!entries.length) { b.innerHTML = ""; continue; }
+    b.innerHTML = `<h3>${t("Entrance tickets", "입장 티켓")}${wk && wk.preview
+        ? ` <span class="pill acc" style="vertical-align:2px">${t("PI/TA preview — the class sees these from 13:00 on class day", "PI·조교 미리보기 — 학생에겐 수업 당일 13:00부터 공개")}</span>` : ""}</h3>
+      ${entries.map((e) => `<div class="tk-card">
+        <div class="tk-head">${face(e.display, e.photo)}
+          <div><b>${esc(e.display)}</b>${e.w1 ? ` <span class="pill" style="vertical-align:1px">W1</span>` : ""}${e.late ? ` <span class="tk-late">${t("late", "지각")}</span>` : ""}
+            <div class="tk-at">${e.at ? esc(String(e.at).slice(0, 16).replace("T", " ")) : ""}</div></div>
+        </div>
+        <div class="tk-body">${tkHTML(e.text || "")}</div>
+      </div>`).join("")}`;
+  }
+}
 async function initTicketBoxes(scope) {
   const boxes = $$(".mybox:not([data-init])", scope || document);
   boxes.forEach((b) => { b.dataset.init = "1"; });
@@ -208,7 +247,7 @@ async function initTicketBoxes(scope) {
           if (!r.ok) throw new Error(j.detail || "login failed");
           if (j.must_change) { location.href = "/portal/login.html#change"; return; }
           $$("details.jcweek").forEach((d) => {
-      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); };
+      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); initTicketFeeds(d); };
       d.addEventListener("toggle", () => { if (d.open) initHere(); });
       if (d.open) initHere();
     });
@@ -233,7 +272,7 @@ async function initTicketBoxes(scope) {
         <button class="btn primary">${mine.at ? t("Resubmit", "다시 제출") : t("Submit ticket", "티켓 제출")}</button>
         ${mine.at && (row.score === null || row.score === undefined)
           ? `<button class="btn jc-del" type="button">${t("Delete my ticket", "내 티켓 삭제")}</button>` : ""}
-        <span class="sub" style="margin:0">${t("Private to instructor/TA · resubmission allowed until graded.", "교수·조교만 열람 · 채점 전까지 재제출/삭제 가능.")}</span>
+        <span class="sub" style="margin:0">${t("Instructor/TA can read it now; the whole class sees it from 13:00 on class day · resubmission allowed until graded.", "지금은 교수·조교만 열람, 수업 당일 13:00부터 전체 공개 · 채점 전까지 재제출/삭제 가능.")}</span>
       </div>
       <p class="sub gerr" style="min-height:16px;margin:6px 0 0;color:var(--warn)"></p></div>`;
     const delBtn = b.querySelector(".jc-del");
@@ -310,6 +349,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (questions.length) h += `<h3>${t("Discussion questions", "토론 질문")}</h3>
         <ol style="margin-top:4px;font-size:13.5px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>`;
       h += `<div class="grpbox" data-week="${w.n}"></div>`;
+      h += `<div class="tkbox" data-week="${pad(w.n)}"></div>`;
       if (roster.length) {
         /* W2 has TWO ticket slots per student (W1 + W2) */
         const perStudent = w.n === 2 ? 2 : 1;
@@ -351,7 +391,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       t("Updated ", "업데이트 ") + (fmtDate(String(journal.updated).slice(0, 10)) || journal.updated))}</p>` : "");
 
     $$("details.jcweek").forEach((d) => {
-      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); };
+      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); initTicketFeeds(d); };
       d.addEventListener("toggle", () => { if (d.open) initHere(); });
       if (d.open) initHere();
     });
