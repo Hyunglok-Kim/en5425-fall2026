@@ -94,6 +94,12 @@
       <p class="small muted" style="margin:0;text-align:center">Downhill on the loss surface, one nudge at a time. Figure: MIT 6.S191, introtodeeplearning.com</p>
     </div>
   </div>
+  <div class="gloss">
+    <span><b>θ</b> “theta” — every weight in the model, gathered into one long list; training = choosing good values for θ.</span>
+    <span><b>L</b> — the loss: ONE number scoring how wrong the current predictions are (smaller = better).</span>
+    <span><b>∂L/∂θ</b> “partial L over partial theta” — the blame list: for each weight, how much L would move if that weight moved a hair.</span>
+    <span><b>θ ← θ − η∇L</b> — ∇L (“grad L”) stacks all those slopes into one vector; η (“eta”) is the step size; subtracting η∇L nudges every weight slightly downhill.</span>
+  </div>
   <div class="foot"><span>The whole of deep learning fits in this loop — everything in Parts 1–2 is just making each arrow cheap and safe.</span></div>
   <aside class="notes">~2 min. Analogy to say out loud: a hiker descending in thick fog — you can't see the valley, but you can feel the slope under your feet; take a small step downhill, feel again. Then the key fact, slowly: the loss is ONE number. Backprop's whole job is to convert that one number into a personalized blame score for every one of a million weights — and it does it for the cost of about two extra forward passes (that bill lands at the end of this part).</aside>
 </section>
@@ -120,6 +126,12 @@
       <img src="img/fig-w2-mit-backprop-chain-rule.png" alt="A two-neuron chain x to z1 to y-hat to loss J, with the chain rule written as a product of three color-coded local derivatives" style="max-width:100%;border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:4px">
       <p class="small muted" style="margin:0;text-align:center">Same idea, one layer deeper — each colored band is one local slope in the product. Figure: MIT 6.S191</p>
     </div>
+  </div>
+  <div class="gloss">
+    <span><b>∂L/∂z</b> — “if z moved a hair, how much would L move?” For L = (z−y)² that slope is 2(z−y).</span>
+    <span><b>∂z/∂w</b> — “if w moved a hair, how much would z move?” For z = w·x it is simply x.</span>
+    <span><b>chain rule</b> — slopes along a chain multiply: w moves z, z moves L, so ∂L/∂w = ∂L/∂z × ∂z/∂w.</span>
+    <span><b>η</b> “eta” — the learning rate: what fraction of the blame you apply as a correction (here 0.1).</span>
   </div>
   <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/mlp.html">Goodfellow §6.5</a> · <a href="https://cs231n.github.io/optimization-2/">CS231n “Backpropagation, Intuitions”</a> · full matrix version: Appendix</span></div>
   <aside class="notes">~2.5 min — do the numbers OUT LOUD, pointing at each line; this is the slide that makes the whole part land. Script: "the loss is 16 and it blames z at a rate of −8; z moves 2 per unit of w; so w's blame is −16 — negative means raise w." Then run the payoff line: one step and the loss falls from 16 to 0.64. That falling number IS learning. The MIT figure on the right is the same product one layer deeper: their J is our L.</aside>
@@ -176,6 +188,11 @@
       </svg>
     </div>
   </div>
+  <div class="gloss">
+    <span><b>h</b> — the output of one hidden unit; <b>z₁…z₄</b> — the four downstream units it feeds.</span>
+    <span><b>Σ</b> “sum” — h’s total blame adds one contribution per path its influence takes to the loss.</span>
+    <span><b>saved input</b> — the tensor a layer received in the forward pass; backward reuses it to turn blame into that layer’s weight updates.</span>
+  </div>
   <aside class="notes">~2 min. Point at the fan: "h whispered into four ears; to know h's total effect on the loss, add up what came of each whisper." That sentence IS the multivariable chain rule — students who memorized backprop often learn it here. The two repeated moves (pass back through weights, multiply by saved input) are the entire algorithm at any depth; the exact matrix forms are Appendix slides 2–4.</aside>
 </section>
 
@@ -186,6 +203,11 @@
     <img src="img/fig-w2-cs231n-backprop-circuit.png" alt="A sigmoid neuron drawn as a circuit of small gates, forward values written in green above each wire and backpropagated gradients in red below" style="max-width:min(96%,1100px);max-height:100%;border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:8px">
   </div>
   <p class="small muted" style="margin:.8vh 0 0;text-align:center">A 2-input sigmoid neuron as a circuit of tiny gates. Green: values flowing forward. Red: blame flowing backward — each gate multiplies the incoming red number by its own local slope. Figure: Stanford CS231n (cs231n.github.io)</p>
+  <div class="gloss">
+    <span><b>green</b> — the value each wire carries in the forward pass.</span>
+    <span><b>red</b> — that wire’s blame: how much the final output moves per unit change here; each gate multiplies the red number it receives by its own local slope, nothing more.</span>
+    <span><b>the gates</b> — ×, +, exp, 1/x … each knows its own one-line derivative; the circuit computes the sigmoid σ(x) = 1/(1+e⁻ˣ) of w₀x₀ + w₁x₁ + w₂.</span>
+  </div>
   <div class="foot"><span>PyTorch’s <code>loss.backward()</code> is exactly this picture: record the circuit on the way forward, walk it in reverse multiplying local slopes.</span></div>
   <aside class="notes">~1.5 min. Pick ONE gate and narrate it — e.g. the ×(−1) gate: red number comes in, gets multiplied by the local slope −1, passes on. Every gate is that dumb; intelligence is the bookkeeping. Close the loop with the software claim: autograd = record the graph forward, replay it in reverse. That is the entire mystery of loss.backward().</aside>
 </section>
@@ -237,6 +259,11 @@
         </g>
       </svg>
     </div>
+  </div>
+  <div class="gloss">
+    <span><b>activations</b> — the tensors each layer outputs (and must keep) during the forward pass.</span>
+    <span><b>∝</b> “proportional to” — grows in step with.</span>
+    <span><b>finite differences</b> — the naive alternative: wiggle one weight, rerun the whole network, read off the change; repeat per weight.</span>
   </div>
   <div class="foot"><span><a href="https://arxiv.org/abs/1604.06174">Chen et al. 2016 (checkpointing)</a> · same op count in <a href="https://www.cs.toronto.edu/~rgrosse/courses/csc321_2017/readings/L06%20Backpropagation.pdf">Grosse’s U. Toronto backpropagation notes</a> · callback target: Week 12 fine-tuning lab</span></div>
   <aside class="notes">~2 min. The 3× rule is worth committing to memory — it converts inference cost into training cost for any model, and it is the same bookkeeping behind the 6·N·D FLOPs rule in the scaling-law weeks. For memory, do the quick arithmetic aloud: ViT-Large 0.3B params × 4 bytes ≈ 1.2 GB, Adam triples it to ~3.6 — then batch × tokens × width × depth buries that. The fix hierarchy (checkpoint / batch / precision) returns verbatim in Week 12.</aside>
@@ -312,6 +339,12 @@
       <p class="small muted" style="margin:0;text-align:center">The derivative points uphill; walk the other way. Figure: I. Goodfellow, Deep Learning lecture slides</p>
     </div>
   </div>
+  <div class="gloss">
+    <span><b>∇L</b> “grad L” — every weight’s slope stacked into one vector; it points uphill, so −∇L is downhill.</span>
+    <span><b>η</b> “eta” — the learning rate: how far you step along −∇L each time.</span>
+    <span><b>L(θ+Δ) ≈ L(θ) + ∇LᵀΔ</b> — “near θ, the loss looks like a tilted plane”; ∇LᵀΔ is slope × displacement (a dot product).</span>
+    <span><b>unbiased</b> — right on average: the B-sample minibatch gradient equals the full gradient in expectation; <b>B</b> = batch size.</span>
+  </div>
   <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/optimization.html">Goodfellow §8.3</a> · <a href="https://d2l.ai/chapter_optimization/gd.html">Dive into Deep Learning §12.3–12.5</a></span></div>
   <aside class="notes">~1.5 min. Repeat the fog-hiker from Part 1 — same walk, now we engineer it. The minibatch bullet in one spoken line: "a cheap compass that's right on average — we'll buy accuracy with averaging (momentum, next) instead of with bigger batches." The first bullet IS the one-line Taylor derivation — read it once and move on.</aside>
 </section>
@@ -332,6 +365,9 @@
       <img src="img/fig-w2-cs231n-learningrates.jpeg" alt="Cartoon of loss curves: very high learning rate diverges, high plateaus, low is slow, good decays smoothly" style="max-width:min(100%,360px);border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:6px">
       <p class="small muted" style="margin:0;text-align:center">The four fates of a learning rate. Figure: Stanford CS231n</p>
     </div>
+  </div>
+  <div class="gloss">
+    <span><b>η</b> — the learning rate from the previous slide: the size of each downhill step. Each curve in the cartoon is one choice of η, watched over a whole training run (loss vs epoch; an <b>epoch</b> = one pass over the training data).</span>
   </div>
   <aside class="notes">~1.5 min. Have them read the cartoon silently for five seconds, then ask the room: "which curve is the sweep in today's lab going to find?" (The red one — and the sweep is exactly how practitioners find it.) Land the accent bullet: the right η is a FUNCTION of time, which is the whole justification for warmup + cosine later.</aside>
 </section>
@@ -356,6 +392,11 @@
   <div class="card">
     <p style="line-height:2">m ← β·m + (1−β)·g&emsp;·&emsp;step along m&emsp;<span class="muted">— an average of recent gradients: window ≈ 1/(1−β) steps&ensp;(β=0.9 → last ~10 · β=0.95 → ~20 · β=0.999 → ~1000)</span></p>
   </div>
+  <div class="gloss">
+    <span><b>g</b> — this step’s (noisy) minibatch gradient.</span>
+    <span><b>m</b> — the “velocity”: a running average of recent g’s; the update follows m, not the raw g.</span>
+    <span><b>β</b> “beta” — the memory knob (0–1): how much of the old average survives each step; effective window ≈ 1/(1−β) recent gradients.</span>
+  </div>
   <div class="foot"><span>Figures: Dive into Deep Learning, d2l.ai (CC BY-SA 4.0) · same function, same steps — only memory added · unroll of the average: Appendix</span></div>
   <aside class="notes">~2 min. Walk the triptych left to right: "steep direction flips sign every step, flat direction agrees every step. Averaging kills what flips and keeps what agrees — so the SAME learning rate that exploded now converges." That's momentum's entire job: a low-pass filter on the gradient. The window numbers (10/20/1000) are the practical takeaways students should remember.</aside>
 </section>
@@ -372,6 +413,11 @@
       <img src="img/fig-w2-cs231n-opt1.gif" alt="Animated saddle-point surface where plain SGD stalls and adaptive methods escape" style="max-width:100%;max-height:50vh;border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:4px">
       <figcaption class="small muted" style="margin-top:.5vh">at a saddle point — SGD stalls</figcaption>
     </figure>
+  </div>
+  <div class="gloss">
+    <span><b>SGD</b> — plain gradient descent, no memory.</span>
+    <span><b>Momentum / NAG</b> — the heavy ball (NAG peeks one step ahead before committing).</span>
+    <span><b>Adagrad / Adadelta / RMSprop</b> — per-parameter step sizes built from each weight’s own gradient history: the family Adam merges with momentum.</span>
   </div>
   <div class="foot"><span>Animations: A. Radford, via Stanford CS231n · momentum overshoots but arrives · adaptive methods pick per-coordinate step sizes — that idea is Adam, next slide</span></div>
   <aside class="notes">~1 min — the animations loop on their own; narrate one loop of each. Left: momentum (green) overshoots the valley and swings back — that IS the heavy ball. Right: plain SGD (red) stalls on the saddle because the gradient is ~0 there while adaptive methods walk off. Set up the segue: "the adaptive ones are scaling each coordinate's step by its own history — do that with two averages and you've invented Adam."</aside>
@@ -411,7 +457,7 @@
         <g font-family="var(--sans)" font-size="13" fill="currentColor" text-anchor="middle">
           <text x="45" y="122">g<tspan font-size="10" dy="2">t</tspan></text>
           <text x="190" y="52">average (β₁)</text>
-          <text x="190" y="68" font-size="11.5" opacity="0.7">direction m — denoised</text>
+          <text x="190" y="68" font-size="11.5" opacity="0.7">direction, denoised</text>
           <text x="190" y="180">average of g² (β₂)</text>
           <text x="190" y="196" font-size="11.5" opacity="0.7">typical size √v</text>
           <text x="316" y="115" fill="var(--accent)" font-size="12.5">m / √v</text>
@@ -421,6 +467,12 @@
         </g>
       </svg>
     </div>
+  </div>
+  <div class="gloss">
+    <span><b>m</b> — the averaged direction (momentum); <b>v</b> — the average of g²: each weight’s typical squared gradient.</span>
+    <span><b>√v</b> — each weight’s typical gradient size; dividing by it puts every weight on the same ≈ η step.</span>
+    <span><b>β₁, β₂</b> — the memory knobs of the two averages; <b>ε</b> “epsilon” — a tiny constant so nothing divides by zero.</span>
+    <span><b>sign(g)</b> — just the direction, +1 or −1: what the ratio collapses to when the gradient is steady.</span>
   </div>
   <div class="foot"><span><a href="https://arxiv.org/abs/1412.6980">Kingma &amp; Ba 2015 (Adam)</a> · Read: <a href="https://www.deeplearningbook.org/contents/optimization.html">Goodfellow §8.5.3</a> · <a href="https://d2l.ai/chapter_optimization/adam.html">Dive into Deep Learning §12.10</a></span></div>
   <aside class="notes">~2 min. Run the constant-gradient thought experiment aloud — it is the fastest honest way to see what the ratio does, and it needs no algebra. Real gradients are noisy, so the step becomes roughly η × (signal/total magnitude) ≤ η: bold where the gradient is consistent, timid where it thrashes. One caveat sentence: the young averages start biased toward zero, so Adam divides by (1−βᵗ) to unbias them — exact three-line proof in the appendix; the practical guard is warmup, next slide.</aside>
@@ -456,6 +508,11 @@
     <li><b>Warmup</b>: for the first ~tens of steps, Adam’s “typical size” v is an average of almost nothing — dividing by it produces huge steps in random directions. Ramping η from 0 keeps those steps harmless. <span class="muted">Skip it and step 50 diverges.</span></li>
     <li><b>Cosine</b>: leave η<sub>max</sub> gently, land quietly near zero — and T is fixed in advance: <span class="accent">the schedule is a commitment to a compute budget</span>, very foundation-model culture. <span class="muted">η<sub>t</sub> = η<sub>min</sub> + ½·(η<sub>max</sub>−η<sub>min</sub>)·(1 + cos(π·t/T)) — check: t = 0 → η<sub>max</sub>, t = T → η<sub>min</sub>.</span></li>
   </ul>
+  <div class="gloss">
+    <span><b>η<sub>t</sub></b> — the learning rate at step t: no longer one constant but a planned schedule.</span>
+    <span><b>η<sub>max</sub></b> — the peak rate, reached when warmup ends; <b>T</b> — the total number of steps, fixed before training starts.</span>
+    <span><b>cos(π·t/T)</b> — sweeps smoothly from 1 to −1 as t runs 0 → T; plugged into the formula it traces the gentle descent in the figure.</span>
+  </div>
   <div class="foot"><span>Read: <a href="https://d2l.ai/chapter_optimization/lr-scheduler.html">Dive into Deep Learning §12.11 (cosine §12.11.3.3, warmup §12.11.3.4)</a></span></div>
   <aside class="notes">~1.5 min. Tie it to the previous slide in one sentence: "we're dividing by an average of ten samples — that's a baby average; don't trust it with a full-size step." Then the culture point: T fixed in advance means the paper's compute budget is declared before training starts — you'll see warmup+cosine in the optimization paragraph of every foundation-model paper this semester.</aside>
 </section>
@@ -503,6 +560,11 @@
       </svg>
     </div>
   </div>
+  <div class="gloss">
+    <span><b>λ</b> “lambda” — the weight-decay strength: each step multiplies every weight by (1 − ηλ), a slight shrink toward zero that fights overfitting.</span>
+    <span><b>ℓ₂ penalty</b> — the older route to the same idea: add (λ/2)·‖θ‖² to the loss, where ‖θ‖ is the length of the weight vector.</span>
+    <span><b>m/√v</b> — Adam’s adaptive ratio from two slides back; “outside the ratio” = apply the shrink separately, after it.</span>
+  </div>
   <div class="foot"><span><a href="https://arxiv.org/abs/1711.05101">Loshchilov &amp; Hutter 2019</a> · Read: <a href="https://www.deeplearningbook.org/contents/regularization.html">Goodfellow §7.1</a> · <a href="https://d2l.ai/chapter_linear-regression/weight-decay.html">d2l §3.7</a> · the two-line SGD equivalence + where Adam breaks it: Appendix</span></div>
   <aside class="notes">~1.5 min. The diagram carries the slide: whatever enters left of the ratio gets divided by √v; the decay must enter on the right. Check question for the room: which weights does ℓ₂-inside-Adam fail to regularize? (Largest v — the busiest ones.) Then the PyTorch trap, slowly — half of them will hit it in their own sweeps this semester. This is why every paper writes "AdamW" and none write "Adam + ℓ₂".</aside>
 </section>
@@ -526,6 +588,10 @@
       <p class="small muted" style="margin:0;text-align:center"><b>Early stopping</b>: watch validation, stop at the turn, restore the <i>best</i> checkpoint — never the last. Figure: MIT 6.S191</p>
     </div>
   </div>
+  <div class="gloss">
+    <span><b>‖g‖</b> — the overall length (norm) of the gradient vector; <b>c</b> — the ceiling: if ‖g‖ &gt; c, rescale g to length exactly c, direction untouched.</span>
+    <span><b>validation set</b> — held-out data used only to decide when to stop; the gap between the two curves is overfitting happening live.</span>
+  </div>
   <div class="foot"><span><a href="https://doi.org/10.1126/science.adi2336">Lam et al. 2023 (GraphCast supplement)</a> · Read: <a href="https://www.deeplearningbook.org/contents/regularization.html">Goodfellow §7.8</a> — early stopping ≈ an ℓ₂ penalty set by the stopping time</span></div>
   <aside class="notes">~1.5 min, two beats. Beat 1 (clipping): insurance, not tuning — and log the clip rate, because clipping silently hides pathologies; first of the "what to watch in W&amp;B" habits that become mandatory in today's lab. Beat 2 (early stopping): point at the dashed line — "the one regularizer you always use; restore BEST, never last." Then the bridge to Part 3, verbatim: "early stopping is only as honest as the validation set it watches — hold that thought."</aside>
 </section>
@@ -544,6 +610,9 @@
     </table>
   </div>
   <p class="small muted" style="margin-top:2vh">When you read a foundation-model paper from now on, the optimization section should take you thirty seconds. The interesting choices are elsewhere: data, objective, and evaluation.</p>
+  <div class="gloss">
+    <span><b>β₂</b> — Adam’s variance memory (0.95 ≈ last 20 steps) · <b>λ</b> — weight-decay strength · <b>c</b> — gradient-clip ceiling · <b>warmup → cosine</b> — the schedule from three slides back.</span>
+  </div>
   <div class="foot"><span><a href="https://doi.org/10.1126/science.adi2336">Lam et al. 2023, Science</a> · <a href="https://arxiv.org/abs/2111.06377">He et al. 2022, CVPR</a> · <a href="https://arxiv.org/abs/2310.18660">Jakubik et al. 2023, arXiv:2310.18660</a></span></div>
   <aside class="notes">~1 min, end of Part 2 at minute 30. Let the table land: three domains — weather, natural images, satellite imagery — one recipe. Then pivot hard: "so if everyone trains the same way, what separates a credible result from a mirage? The evaluation. This is the headline."</aside>
 </section>
@@ -591,6 +660,10 @@
     <li>The variogram range — the distance where correlation dies — is the scale your split must respect (measured a few slides ahead).</li>
     <li class="muted">The model is not cheating; the evaluation is: memorized geography scores as skill.</li>
   </ul>
+  <div class="gloss">
+    <span><b>i.i.d.</b> — “independent, identically distributed”: every sample brings new information, drawn from the same underlying distribution — the assumption leakage breaks.</span>
+    <span><b>correlation range</b> — the distance beyond which two locations stop moving together.</span>
+  </div>
   <div class="foot"><span>Tobler 1970 · <a href="https://doi.org/10.1111/ecog.02881">Roberts et al. 2017, Ecography 40:913</a></span></div>
   <aside class="notes">~2.5 min. Anchor with a concrete pair: two soil-moisture stations 8 km apart in Iowa see the same rain, same soil, same season — knowing one IS knowing the other. Then the independence sentence: every off-the-shelf train_test_split call encodes an independence assumption the atmosphere refuses to satisfy.</aside>
 </section>
@@ -700,6 +773,11 @@
       </svg>
     </div>
   </div>
+  <div class="gloss">
+    <span><b>autocorrelation</b> — the correlation of a day with the day before it (0.95 ≈ nearly a copy).</span>
+    <span><b>persistence</b> — the zero-skill “model” that predicts tomorrow = today; leaky splits reward exactly this.</span>
+    <span><b>gap at the seam</b> — drop the days between train and test that are close enough to remember the training side.</span>
+  </div>
   <aside class="notes">~2 min. Concrete test to say aloud: "predict soil moisture for July 15 given July 14 and July 16 in training" — persistence alone scores brilliantly, no model needed; that's the top panel. Whenever a paper reports random-in-time cross-validation on daily data, its skill ceiling is set by autocorrelation, not by the model. Bottom panel is the fix and returns as a full design slide shortly.</aside>
 </section>
 
@@ -734,6 +812,10 @@
         </g>
       </svg>
     </div>
+  </div>
+  <div class="gloss">
+    <span><b>R²</b> — explained variance: 1 = perfect prediction, 0 = no better than always guessing the mean.</span>
+    <span><b>CV</b> — cross-validation: score the model on folds it never trained on; “random” vs “spatial” is just how those folds are cut.</span>
   </div>
   <div class="foot"><span><a href="https://www.nature.com/articles/s41467-020-18321-y">Ploton et al. 2020, Nat. Commun. 11:4540</a> · <a href="https://www.nature.com/articles/s41467-022-29838-9">Meyer &amp; Pebesma 2022, Nat. Commun. 13:2208</a> · today’s lab measures this gap on CAMELS-US</span></div>
   <aside class="notes">~2.5 min. Let the two bars do the work — 0.53 to 0.14 is not a correction, it's a different conclusion; the mapped product looked publishable and was largely geography memorization. Define the optimism gap while pointing at the vertical distance between the bars, and tell them it is a required row in today's lab table and in every project report this semester.</aside>
@@ -773,6 +855,11 @@
         </g>
       </svg>
     </div>
+  </div>
+  <div class="gloss">
+    <span><b>Z(s)</b> — the field’s value (say, soil moisture) at location s; <b>Z(s+d)</b> — the value at a point d away.</span>
+    <span><b>E[…]</b> — the average over many such pairs.</span>
+    <span><b>γ(d)</b> read aloud: “take all pairs d apart, square their disagreement, average it, halve it.”</span>
   </div>
   <div class="foot"><span>Read: <a href="https://r-spatial.org/book/12-Interpolation.html">Pebesma &amp; Bivand, Spatial Data Science, ch. 12 (variograms) — free online</a> · estimate with scikit-gstat or gstat; today’s lab computes one for CAMELS residuals.</span></div>
   <aside class="notes">~2.5 min. One formula, one picture. Read γ aloud: "average squared disagreement between points d apart, halved." Nugget = measurement noise + sub-grid variability; sill = variance of the whole field; range = where knowing one point stops telling you about another. That range becomes the block size on the design slide, two ahead.</aside>
@@ -819,6 +906,10 @@
         </g>
       </svg>
     </div>
+  </div>
+  <div class="gloss">
+    <span><b>ρ</b> “rho” — the correlation between neighboring samples, in time or in space (0 = unrelated, 1 = identical).</span>
+    <span><b>n<sub>eff</sub></b> — how many truly independent samples your n correlated ones are worth; honest error bars use n<sub>eff</sub>, not n.</span>
   </div>
   <div class="foot"><span>Read: Wilks, Statistical Methods in the Atmospheric Sciences, ch. 5 §5.2.4 · <a href="https://atmos.uw.edu/~dennis/552_Notes_6a.pdf">Hartmann, Objective Analysis notes §6.1.5</a> — linked on the Week 2 page</span></div>
   <aside class="notes">~2.5 min. Do the arithmetic live and slowly: 3650 days, divide by 39 — about 94. Say the punchline twice: "a decade of daily data carries three months of information." Then connect the two lies: leakage inflates the score, autocorrelation inflates the confidence — a random split gets BOTH wrong at once. Students who want the two-line proof: appendix, and it reuses the geometric series from Adam's bias correction (that callback earns a laugh).</aside>
@@ -867,6 +958,11 @@
       </svg>
     </div>
   </div>
+  <div class="gloss">
+    <span><b>climatology</b> — the long-run average for that place and day of year.</span>
+    <span><b>normalization statistics</b> — the mean/std you scale inputs with; fit them on all years and test-year information seeps into training.</span>
+    <span><b>nonstationarity</b> — the test years’ climate differs from the training years’ — that is the point of the test, not a flaw.</span>
+  </div>
   <aside class="notes">~2 min. The fourth bullet catches real papers: standardizing with the full-period mean quietly hands the model the test years' climate. In today's lab and every lab after, normalization statistics are computed inside the training fold — the agent will scaffold it; you must verify it.</aside>
 </section>
 
@@ -898,6 +994,10 @@
     <li>Common ERA5 ground truth, fixed metrics (root-mean-square error and anomaly correlation on standard fields), strict train/validation/test year separation — every model on the leaderboard obeys it.</li>
     <li>GraphCast, Pangu-Weather, NeuralGCM, and the European operational forecast are all scored on the same held-out year: <b>that</b> is why the comparison is believable.</li>
   </ul>
+  <div class="gloss">
+    <span><b>ERA5</b> — the standard reconstruction of past weather (a “reanalysis”), used here as ground truth.</span>
+    <span><b>RMSE</b> — root-mean-square error; <b>anomaly correlation</b> — correlate forecast vs truth after subtracting climatology, so you score the weather, not the season.</span>
+  </div>
   <div class="foot"><span><a href="https://arxiv.org/abs/2308.15560">Rasp et al. 2024, arXiv:2308.15560</a> · <a href="https://weatherbench2.readthedocs.io">weatherbench2.readthedocs.io</a></span></div>
   <aside class="notes">~2.5 min. This is the aspirational example: an entire subfield agreed on one leakage-safe protocol, and suddenly cross-paper comparison works. The dashed line is the discipline: no tuning decision — not even "which checkpoint to submit" — may look at 2020.</aside>
 </section>
@@ -1122,6 +1222,11 @@
       </svg>
     </div>
   </div>
+  <div class="gloss">
+    <span><b>ℝ<sup>d</sup></b> — a list of d real numbers; <b>W ∈ ℝ<sup>d₁×d₀</sup></b> — a matrix with d₁ rows and d₀ columns.</span>
+    <span><b>σ</b> — the activation function, applied entry by entry; <b>σ′</b> — its slope.</span>
+    <span><b>ᵀ</b> — transpose (flip rows ↔ columns); <b>½‖·‖²</b> — half the sum of squared entries.</span>
+  </div>
   <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/mlp.html">Goodfellow §6.5, pp. 200–220</a> · <a href="https://d2l.ai/chapter_multilayer-perceptrons/backprop.html">Dive into Deep Learning §5.3</a> · <a href="https://cs231n.github.io/optimization-2/">CS231n “Backpropagation, Intuitions”</a> + <a href="https://cs231n.stanford.edu/handouts/derivatives.pdf">Johnson’s “Derivatives” handout</a></span></div>
   <aside class="notes">Self-study. Fix the notation and shapes on this slide and the rest is mechanical. Squared-error loss keeps the algebra clean; swapping in cross-entropy changes only step 1. Emphasize: L is ONE number — that fact is what makes the whole reverse pass cheap.</aside>
 </section>
@@ -1171,6 +1276,10 @@
         </g>
       </svg>
     </div>
+  </div>
+  <div class="gloss">
+    <span><b>≔</b> — “defined as”.</span>
+    <span><b>g₂hᵀ</b> (outer product) — a column times a row fills a whole matrix; its (i,j) entry is g₂<sub>i</sub>·h<sub>j</sub>, exactly the picture on the right.</span>
   </div>
   <aside class="notes">Self-study. Do the middle line slowly: differentiate the sum, everything with j′ ≠ j dies, h_j survives. The outer-product form is just all (i,j) pairs at once. "Gradient with respect to weights = (incoming gradient) times (stored input)" is the punchline the memory discussion collects on.</aside>
 </section>
@@ -1230,6 +1339,10 @@
         </g>
       </svg>
     </div>
+  </div>
+  <div class="gloss">
+    <span><b>⊙</b> — multiply entry by entry (Hadamard product).</span>
+    <span><b>W₂ᵀg₂</b> — the transpose routes each output’s blame back through the same weights to the inputs that fed it.</span>
   </div>
   <aside class="notes">Self-study. The Σ-over-paths line is where students who memorized backprop actually learn it — one hidden unit, many downstream consumers, contributions add. Then note the symmetry with step 1: the algorithm is two alternating moves, all the way down, however deep the network is.</aside>
 </section>
@@ -1291,6 +1404,10 @@
         </g>
       </svg>
     </div>
+  </div>
+  <div class="gloss">
+    <span><b>J</b> (Jacobian) — the matrix of all slopes of a vector-valued function: J[i,j] = ∂f<sub>i</sub>/∂x<sub>j</sub>.</span>
+    <span><b>ḡ</b> “g-bar” — the running gradient carried backward; <b>ḡ ← Jᵀḡ</b> — one matrix–vector product per layer, never matrix × matrix.</span>
   </div>
   <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/mlp.html">Goodfellow §6.5.2 (chain rule)</a> · <a href="https://dlsyscourse.org/slides/4-automatic-differentiation.pdf">Carnegie Mellon “Deep Learning Systems”, lecture 4: Automatic Differentiation</a> · Griewank &amp; Walther, Evaluating Derivatives (2008)</span></div>
   <aside class="notes">Self-study. The order-of-multiplication point deserves the emphasis: left-to-right would be Jacobian-times-Jacobian (huge matrices); right-to-left keeps everything vector-sized because the thing we differentiate is one scalar. Forward-mode exists too and wins when outputs outnumber inputs — never our case in training.</aside>
@@ -1396,6 +1513,10 @@
       </svg>
     </div>
   </div>
+  <div class="gloss">
+    <span><b>unroll</b> — substitute the definition into itself until the pattern shows.</span>
+    <span><b>βᵏ</b> — β multiplied k times: the weight on a gradient k steps old; the weights fade geometrically.</span>
+  </div>
   <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/optimization.html">Goodfellow §8.3.2 (momentum, from p. 292)</a> · <a href="https://d2l.ai/chapter_optimization/momentum.html">Dive into Deep Learning §12.6 (momentum as leaky averages)</a></span></div>
   <aside class="notes">Self-study. Do the unroll in one substitution: m_t = (1−β)g_t + β·m_{t−1}, expand m_{t−1} once, spot the geometric pattern. The 1/(1−β) window: weights drop by factor e after about 1/(1−β) steps — the practical translation to carry.</aside>
 </section>
@@ -1437,6 +1558,10 @@
       </svg>
     </div>
   </div>
+  <div class="gloss">
+    <span><b>E[·]</b> — the average over minibatch randomness; <b>μ</b> “mu” — the true mean gradient.</span>
+    <span><b>1 − βᵗ</b> — the fraction of total weight the average has accumulated after t steps; dividing by it exactly undoes the zero start.</span>
+  </div>
   <div class="foot"><span>The same three lines, with runnable code: <a href="https://d2l.ai/chapter_optimization/adam.html">Dive into Deep Learning §12.10.1</a> · cosine formula with endpoint check: η<sub>t</sub> = η<sub>min</sub> + ½(η<sub>max</sub>−η<sub>min</sub>)(1+cos(π·t/T)) — t=0 → η<sub>max</sub>, t=T → η<sub>min</sub></span></div>
   <aside class="notes">Self-study. This is the derivation students pretend to know — it is three lines. Emphasize what it is NOT: not a heuristic warm-start, but an exact unbiasing of an exponentially-weighted average that was initialized at zero. It still doesn't fix the early variance of v̂ — which is why warmup exists.</aside>
 </section>
@@ -1453,8 +1578,8 @@
           ⟹ “add λθ to the gradient” and “shrink weights by (1−ηλ) each step” are <b>the same rule</b>
         </p>
       </div>
-      <div class="card" style="margin-top:1.2vh">
-        <p style="line-height:2.1">
+      <div class="card" style="margin-top:.8vh">
+        <p style="line-height:1.9">
           …but in Adam the λθ term rides through the adaptive ratio:&emsp;step ∝ m̂(g + λθ) / √v̂(g + λθ)<br>
           a parameter with a large gradient history (large v̂) has its decay term <span class="accent">divided by √v̂ → barely decayed</span> —<br>
           often exactly the weights that are overfitting. The equivalence is <b>broken</b>; AdamW restores it by applying −η<sub>t</sub>λθ outside the ratio.
@@ -1559,6 +1684,10 @@
       </svg>
     </div>
   </div>
+  <div class="gloss">
+    <span><b>x̄</b> “x-bar” — the sample mean; <b>Var(x̄)</b> — its spread over hypothetical repeats of the whole dataset.</span>
+    <span><b>Cov(x<sub>i</sub>,x<sub>j</sub>)</b> — how two samples co-move; here σ²ρ<sup>|i−j|</sup>: correlation fades by a factor ρ per step of separation.</span>
+  </div>
   <aside class="notes">Self-study. The matrix picture is the derivation: an n×n covariance matrix, σ² on the diagonal, σ²ρ on the first off-diagonals, σ²ρ² on the next, and Var(x̄) is the average of ALL its entries. Counting the off-diagonals by lag gives the (n−k) factor. Next slide: close the sum.</aside>
 </section>
 
@@ -1604,6 +1733,10 @@
         </g>
       </svg>
     </div>
+  </div>
+  <div class="gloss">
+    <span><b>Σ<sub>k</sub> ρᵏ = ρ/(1−ρ)</b> — the geometric series; the same identity that powered Adam’s bias correction.</span>
+    <span><b>≕</b> — “which defines”: we name n<sub>eff</sub> by matching the independent-sample formula σ²/n<sub>eff</sub>.</span>
   </div>
   <div class="foot"><span>Read: Wilks, Statistical Methods in the Atmospheric Sciences, ch. 5 §5.2.4 · <a href="https://atmos.uw.edu/~dennis/552_Notes_6a.pdf">Hartmann, Objective Analysis notes §6.1.5 (same formula, eq. 6.13b)</a></span></div>
   <aside class="notes">Self-study. Same geometric series as the Adam bias correction two slides back — noticing that is the fastest way to remember both. Leakage inflates the score; autocorrelation inflates the confidence — random splits get both wrong at once, which is the thesis of the whole lecture.</aside>
