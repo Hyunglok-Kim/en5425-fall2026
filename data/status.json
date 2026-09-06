@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T20:33:21+09:00",
+  "updated": "2026-09-06T22:17:07+09:00",
   "assignments": [
     {
       "id": "hw0",
@@ -400,7 +400,7 @@
         "vid10": "due",
         "vid11": "due",
         "vid12": "due",
-        "tool01": "due"
+        "tool01": "ok"
       }
     },
     {
@@ -473,7 +473,7 @@
       "sid_tag": "8034",
       "display": "Maja Gabriela Szerszen",
       "photo": "assets/students/5a398dd3e429.png",
-      "bio": null,
+      "bio": "I'm a 4th-year undergraduate exchange student, interested in deep learning.",
       "status": {
         "hw0": "due",
         "memo01": "ok",
