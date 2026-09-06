@@ -448,26 +448,37 @@
   <h2>Momentum: a heavy ball remembers its direction</h2>
   <div style="display:flex;gap:1.2vw;justify-content:center;align-items:flex-start;margin:.6vh 0">
     <figure style="margin:0;flex:1;max-width:32%;text-align:center">
-      <img src="img/fig-w2-d2l-gd-oscillate.svg" alt="Gradient descent zig-zagging across the steep direction of elongated contours" style="width:100%;border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:4px">
+      <span style="position:relative;display:block">
+        <img src="img/fig-w2-d2l-gd-oscillate.svg" alt="Gradient descent zig-zagging across the steep direction of elongated contours; a green star marks the minimum at the origin" style="width:100%;border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:4px">
+        <span style="position:absolute;left:85.5%;top:28%;transform:translate(-50%,-50%);color:#1a8917;font-size:clamp(10px,1.1vw,16px);line-height:1">★</span>
+        <span style="position:absolute;left:52%;top:16%;transform:translate(-50%,-50%);color:#5b7285;font-size:clamp(7px,.75vw,11px);white-space:nowrap">valley floor ↓</span>
+      </span>
       <figcaption class="small muted" style="margin-top:.4vh">η = 0.4 — zig-zags, crawls</figcaption>
     </figure>
     <figure style="margin:0;flex:1;max-width:32%;text-align:center">
-      <img src="img/fig-w2-d2l-gd-diverge2d.svg" alt="With a larger learning rate the zig-zag amplifies and diverges" style="width:100%;border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:4px">
+      <span style="position:relative;display:block">
+        <img src="img/fig-w2-d2l-gd-diverge2d.svg" alt="With a larger learning rate the zig-zag amplifies and diverges; a green star marks the minimum it never reaches" style="width:100%;border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:4px">
+        <span style="position:absolute;left:86.5%;top:33.8%;transform:translate(-50%,-50%);color:#1a8917;font-size:clamp(10px,1.1vw,16px);line-height:1">★</span>
+      </span>
       <figcaption class="small muted" style="margin-top:.4vh">η = 0.6 — explodes</figcaption>
     </figure>
     <figure style="margin:0;flex:1;max-width:32%;text-align:center">
-      <img src="img/fig-w2-d2l-momentum-damped.svg" alt="Momentum with the same larger learning rate converges with damped oscillation" style="width:100%;border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:4px">
+      <span style="position:relative;display:block">
+        <img src="img/fig-w2-d2l-momentum-damped.svg" alt="Momentum with the same larger learning rate converges with damped oscillation onto the green star at the origin" style="width:100%;border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:4px">
+        <span style="position:absolute;left:85.5%;top:42.9%;transform:translate(-50%,-50%);color:#1a8917;font-size:clamp(10px,1.1vw,16px);line-height:1">★</span>
+      </span>
       <figcaption class="small muted" style="margin-top:.4vh"><span class="accent">η = 0.6 + momentum — converges</span></figcaption>
     </figure>
   </div>
   <div class="card">
-    <p style="line-height:2">m ← β·m + (1−β)·g&emsp;·&emsp;step along m&emsp;<span class="muted">— an average of recent gradients: window ≈ 1/(1−β) steps&ensp;(β=0.9 → last ~10 · β=0.95 → ~20 · β=0.999 → ~1000)</span></p>
+    <p style="line-height:2">m ← β·m + (1−β)·g&emsp;·&emsp;step along m&emsp;<span class="muted">— average of recent gradients; window ≈ 1/(1−β): 0.9→~10 · 0.95→~20 · 0.999→~1000</span></p>
   </div>
   <div class="gloss">
     <span><b>g</b> — this step’s (noisy) minibatch gradient.</span>
     <span><b>m</b> — the “velocity”: a running average of recent g’s; the update follows m, not the raw g.</span>
     <span><b>β</b> “beta” — the memory knob (0–1): how much of the old average survives each step; effective window ≈ 1/(1−β) recent gradients.</span>
     <span><b>in the figures</b> — x₁, x₂: the two weights of a toy loss; blue rings: equal-loss contours, a map view of the valley (steep across, shallow along); orange dots: successive steps of the walk.</span>
+    <span><b>where is “down”?</b> — crowded lines = valley walls; the blank corridor along x₂ = 0 = the floor; the green ★ = the minimum (0,0). Dots bunching = arrived; fleeing the map = diverged.</span>
   </div>
   <div class="foot"><span>Figures: Dive into Deep Learning, d2l.ai (CC BY-SA 4.0) · same function, same steps — only memory added · unroll of the average: Appendix</span></div>
   <aside class="notes">~2 min. Walk the triptych left to right: "steep direction flips sign every step, flat direction agrees every step. Averaging kills what flips and keeps what agrees — so the SAME learning rate that exploded now converges." That's momentum's entire job: a low-pass filter on the gradient. The window numbers (10/20/1000) are the practical takeaways students should remember.</aside>
