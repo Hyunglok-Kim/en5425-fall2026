@@ -329,6 +329,7 @@
   <div class="gloss">
     <span><b>activations</b> — the tensors each layer outputs (and must keep) during the forward pass.</span>
     <span><b>∝</b> “proportional to” — grows in step with.</span>
+    <span><b>weights + Adam</b> — Adam carries <i>two ledgers per weight</i> — running averages of the gradient (m) and its square (v), each weight-sized — so the model side of memory ≈ 3× the weights. What m and v do: Part 2.</span>
     <span><b>finite differences</b> — the naive alternative: wiggle one weight, rerun the whole network, read off the change; repeat per weight.</span>
   </div>
   <div class="foot"><span><a href="https://arxiv.org/abs/1604.06174">Chen et al. 2016 (checkpointing)</a> · same op count in <a href="https://www.cs.toronto.edu/~rgrosse/courses/csc321_2017/readings/L06%20Backpropagation.pdf">Grosse’s U. Toronto backpropagation notes</a> · callback target: Week 12 fine-tuning lab</span></div>
