@@ -600,6 +600,7 @@
   <ul class="small">
     <li><b>Warmup</b>: for the first ~tens of steps, Adam’s “typical size” v is an average of almost nothing — dividing by it produces huge steps in random directions. Ramping η from 0 keeps those steps harmless. <span class="muted">Skip it and step 50 diverges.</span></li>
     <li><b>Cosine</b>: leave η<sub>max</sub> gently, land quietly near zero — and T is fixed in advance: <span class="accent">the schedule is a commitment to a compute budget</span>, very foundation-model culture. <span class="muted">η<sub>t</sub> = η<sub>min</sub> + ½·(η<sub>max</sub>−η<sub>min</sub>)·(1 + cos(π·t/T)) — check: t = 0 → η<sub>max</sub>, t = T → η<sub>min</sub>.</span></li>
+    <li>Every foundation-model paper this semester — GraphCast, MAE, Prithvi — writes the same optimization sentence, nearly verbatim: <span class="accent">“AdamW, linear warmup, cosine decay to zero.”</span> <span class="muted">AdamW: next slide; the side-by-side receipts: three slides ahead.</span></li>
   </ul>
   <div class="gloss">
     <span><b>η<sub>t</sub></b> — the learning rate at step t: no longer one constant but a planned schedule.</span>
