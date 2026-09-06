@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>EN5425 · Week 2 · Leakage-Safe Evaluation Design</title>
 <link rel="stylesheet" href="../assets/style.css">
-<link rel="stylesheet" href="deck.css">
-<script src="deck.js" defer></script>
-<script src="poll.js" defer></script>
+<link rel="stylesheet" href="deck.css?v=2">
+<script src="deck.js?v=2" defer></script>
+<script src="poll.js?v=2" defer></script>
 </head>
 <body>
 
@@ -211,13 +211,13 @@
   <p class="small muted" style="margin:.8vh 0 0;text-align:center">A 2-input sigmoid neuron as a circuit of tiny gates. Green: values flowing forward. Red: blame flowing backward — each gate multiplies the incoming red number by its own local slope. Figure: Stanford CS231n (cs231n.github.io)</p>
   <div class="quickpoll" data-pid="w02-s8-w0" data-answer="no">
     <div class="qp-row">
-      <span class="qp-q"><b>QUICK Q</b>&ensp;w₀가 1만큼 움직이면, 최종 sigmoid 값에 정확히 −0.2만큼 기여할까? <span class="muted">(빨강 −0.20 × 1)</span></span>
+      <span class="qp-q"><b>QUICK Q</b>&ensp;If w₀ moves by 1, does the final sigmoid value move by exactly −0.20? <span class="muted">(red −0.20 × 1)</span></span>
       <span class="qp-ui"></span>
     </div>
     <div class="qp-explain" hidden>
-      <p><b>NO — 방향은 맞지만 “정확히 −0.2”는 아니다.</b> 빨강 −0.20은 지금 지점에서의 <b>순간 기울기</b>(∂출력/∂w₀), 즉 아주 작은 걸음에만 정확한 1차 근사다.</p>
-      <p>실제로 w₀: 2→3이면 안쪽 합이 1→0이 되어 σ(1)=0.731 → σ(0)=0.500 — 실제 변화는 <b>−0.231</b>, 기울기의 예측은 −0.197. 시그모이드가 휘어 있어 큰 걸음에서는 어긋난다. 그래서 훈련은 gradient 방향으로 learning rate만큼 <b>조금씩</b> 걷는다.</p>
-      <p class="muted">상세 설명은 뒤 슬라이드(Part 2 · optimizer의 learning rate)에서 곧 나옵니다.</p>
+      <p><b>NO — right direction, wrong promise.</b> The red −0.20 is the <b>instantaneous slope</b> at this point (∂output/∂w₀) — a first-order approximation, exact only for tiny steps.</p>
+      <p>Actually move w₀: 2→3 and the inner sum goes 1→0, so σ(1)=0.731 → σ(0)=0.500 — the real change is <b>−0.231</b>, while the slope predicted −0.197. The sigmoid curves, so big steps drift; that's why training walks the gradient direction in <b>small steps</b> set by the learning rate.</p>
+      <p class="muted">The full story lands a few slides ahead — Part 2, the optimizer's learning rate.</p>
     </div>
   </div>
   <div class="gloss">
@@ -226,7 +226,7 @@
     <span><b>the gates</b> — ×, +, exp, 1/x … each knows its own one-line derivative; the circuit computes the sigmoid σ(x) = 1/(1+e⁻ˣ) of w₀x₀ + w₁x₁ + w₂.</span>
   </div>
   <div class="foot"><span>PyTorch’s <code>loss.backward()</code> is exactly this picture: record the circuit on the way forward, walk it in reverse multiplying local slopes.</span></div>
-  <aside class="notes">~1.5 min. Pick ONE gate and narrate it — e.g. the ×(−1) gate: red number comes in, gets multiplied by the local slope −1, passes on. Every gate is that dumb; intelligence is the bookkeeping. Close the loop with the software claim: autograd = record the graph forward, replay it in reverse. That is the entire mystery of loss.backward(). Then run the QUICK Q (signed-in students vote YES/NO live; 답 공개 button is PI-only): most vote YES; the reveal — gradients are local slopes, the real change is −0.231 — sets up the learning-rate slides in Part 2.</aside>
+  <aside class="notes">~1.5 min. Pick ONE gate and narrate it — e.g. the ×(−1) gate: red number comes in, gets multiplied by the local slope −1, passes on. Every gate is that dumb; intelligence is the bookkeeping. Close the loop with the software claim: autograd = record the graph forward, replay it in reverse. That is the entire mystery of loss.backward(). Then run the QUICK Q (signed-in students vote YES/NO live; the Reveal-answer button is PI-only): most vote YES; the reveal — gradients are local slopes, the real change is −0.231 — sets up the learning-rate slides in Part 2.</aside>
 </section>
 
 <section class="slide">
@@ -263,7 +263,7 @@
       </svg>
       <div style="display:flex;align-items:center;gap:1vw;border-top:1px dashed var(--hairline);padding-top:1vh">
         <img src="img/fig-w2-lee2026-jstars-method.png" data-zoom alt="Workflow of Lee et al. 2026: Sentinel-1 PolSAR preprocessing, metaheuristic feature selection scored on accuracy, CNN training evaluated on F1-score and IoU" title="Click to enlarge — Fig. 2, Lee et al. 2026 (IEEE JSTARS)" style="flex:0 0 auto;height:min(13vh,120px);width:auto;display:block;border-radius:8px;border:1px solid var(--hairline);background:#fff;padding:3px">
-        <p class="small" style="margin:0"><b class="accent">This slide is our lab's newest paper.</b> Lee et al. 2026 (IEEE JSTARS): Sentinel-1 flood mapping, <b>graded on F1 = 0.901 / IoU = 0.820</b> — and the feature-subset search runs <b>gradient-free</b> (bee colony · GA · SwarmSA), the metric itself as fitness. <a href="https://ieeexplore.ieee.org/document/11568476">Read it on IEEE Xplore</a> — open access.</p>
+        <p class="small" style="margin:0"><b class="accent">This slide is our lab's newest paper.</b> Lee et al. 2026 (IEEE JSTARS): Sentinel-1 flood mapping, <b>graded on F1 = 0.901 / IoU = 0.820</b> — and the feature-subset search runs <b>gradient-free</b> (bee colony · GA · SwarmSA). <span class="muted">Click the figure to enlarge ·</span> <a href="https://ieeexplore.ieee.org/document/11568476">full paper on IEEE Xplore</a> <span class="muted">(open access)</span></p>
       </div>
     </div>
   </div>

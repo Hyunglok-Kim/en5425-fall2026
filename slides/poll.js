@@ -9,7 +9,7 @@
      class app (tunnel / 127.0.0.1:8899) + signed in  → live voting, 2.5 s refresh
      class app, not signed in                          → question + sign-in link
      static Pages mirror or file://                    → question only (no UI)
-   The PI account additionally gets the live split and 공개/숨김/초기화 controls;
+   The PI account additionally gets the live split and reveal/hide/reset controls;
    reveal locks votes server-side and swaps the slide's gloss for .qp-explain. */
 document.addEventListener("DOMContentLoaded", () => {
   const widgets = [...document.querySelectorAll(".quickpoll[data-pid]")].map((el) => ({
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function adminSet(w, action) {
-    if (action === "reset" && !confirm("이 질문의 투표 기록을 모두 지울까요?")) return;
+    if (action === "reset" && !confirm("Clear all votes for this question?")) return;
     const fd = new FormData();
     fd.set("pid", w.pid); fd.set("action", action);
     try {
@@ -86,9 +86,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const s = w.state, ui = w.ui;
     ui.textContent = "";
 
-    if (role === "static") { ui.append(h("span", "qp-count", "투표는 수업용 사이트에서 열립니다")); return; }
+    if (role === "static") { ui.append(h("span", "qp-count", "voting opens on the class site")); return; }
     if (role === "anon") {
-      const a = h("a", "qp-btn", "로그인하고 투표하기");
+      const a = h("a", "qp-btn", "Sign in to vote");
       a.href = "/portal/login.html";
       ui.append(a);
       return;
@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       ui.append(h("span", "qp-count", `YES ${yes} · NO ${no}`));
     } else {
-      ui.append(h("span", "qp-count", s.total === 1 ? "1명 투표" : `${s.total}명 투표`));
+      ui.append(h("span", "qp-count", s.total === 1 ? "1 vote in" : `${s.total} votes in`));
     }
 
     if (role === "pi") {
@@ -127,19 +127,19 @@ document.addEventListener("DOMContentLoaded", () => {
         b.addEventListener("click", () => adminSet(w, action));
         return b;
       };
-      adm.append(revealed ? mk("다시 숨기기", "hide") : mk("답 공개", "reveal"), mk("초기화", "reset"));
+      adm.append(revealed ? mk("Hide again", "hide") : mk("Reveal answer", "reveal"), mk("Reset", "reset"));
       ui.append(adm);
     }
 
     if (revealed && !w.dismissed) {
       setExplain(w, true);
-      const x = h("button", "qp-btn qp-dismiss", "설명 접기");
+      const x = h("button", "qp-btn qp-dismiss", "Hide explanation");
       x.addEventListener("click", () => { w.dismissed = true; setExplain(w, false); render(w); });
       ui.append(x);
     } else {
       setExplain(w, false);
       if (revealed && w.dismissed) {
-        const x = h("button", "qp-btn qp-dismiss", "설명 보기");
+        const x = h("button", "qp-btn qp-dismiss", "Show explanation");
         x.addEventListener("click", () => { w.dismissed = false; render(w); });
         ui.append(x);
       }
