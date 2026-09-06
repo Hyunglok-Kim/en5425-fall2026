@@ -97,6 +97,7 @@
     <span><b>θ</b> “theta” — every weight in the model, gathered into one long list; training = choosing good values for θ.</span>
     <span><b>L</b> — the loss: ONE number scoring how wrong the current predictions are (smaller = better).</span>
     <span><b>∂L/∂θ</b> “partial L over partial theta” — the blame list: for each weight, how much L would move if that weight moved a hair.</span>
+    <span><b>“blame”</b> — a teaching nickname for the gradient, not a formal term; the textbook name for “who caused the error?” is <i>credit assignment</i> (Minsky 1961) — backprop is its answer.</span>
     <span><b>∇</b> “nabla” — the upside-down triangle means “the gradient of”: ∇L stacks all those slopes into one vector.</span>
     <span><b>θ ← θ − η∇L</b> — η (“eta”) is the step size; “←” = overwrite the old θ; subtracting η∇L nudges every weight slightly downhill.</span>
     <span><b>in the figure</b> — J(w₀, w₁) is MIT’s name for the loss (our L), drawn over just two weights w₀ and w₁ so it can be plotted; each ✚ is one trip around this loop.</span>
@@ -132,11 +133,12 @@
     <span><b>∂L/∂z</b> — “if z moved a hair, how much would L move?” For L = (z−y)² that slope is 2(z−y).</span>
     <span><b>∂z/∂w</b> — “if w moved a hair, how much would z move?” For z = w·x it is simply x.</span>
     <span><b>chain rule</b> — slopes along a chain multiply: w moves z, z moves L, so ∂L/∂w = ∂L/∂z × ∂z/∂w.</span>
+    <span><b>think exchange rates</b> — dollars→euros→won: “won per extra dollar” = the two rates multiplied. A gradient is the same thing — multiply every rate on the wire from w to L.</span>
     <span><b>η</b> “eta” — the learning rate: what fraction of the blame you apply as a correction (here 0.1).</span>
     <span><b>in the figure</b> — J(W) is again the loss (our L); ŷ “y-hat” — the model’s prediction; z₁ — the intermediate value between the two weights w₁ and w₂; each colored underline is one arrow’s local slope in the product.</span>
   </div>
   <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/mlp.html">Goodfellow §6.5</a> · <a href="https://cs231n.github.io/optimization-2/">CS231n “Backpropagation, Intuitions”</a> · full matrix version: Appendix</span></div>
-  <aside class="notes">~2.5 min — do the numbers OUT LOUD, pointing at each line; this is the slide that makes the whole part land. Script: "the loss is 16 and it blames z at a rate of −8; z moves 2 per unit of w; so w's blame is −16 — negative means raise w." Then run the payoff line: one step and the loss falls from 16 to 0.64. That falling number IS learning. The MIT figure on the right is the same product one layer deeper: their J is our L.</aside>
+  <aside class="notes">~2.5 min — do the numbers OUT LOUD, pointing at each line; this is the slide that makes the whole part land. Script: "the loss is 16 and it blames z at a rate of −8; z moves 2 per unit of w; so w's blame is −16 — negative means raise w." Then run the payoff line: one step and the loss falls from 16 to 0.64. That falling number IS learning. Exchange-rate analogy to say aloud: dollars→euros→won — how much won per extra dollar? Multiply the two rates. A gradient is exactly that: multiply every rate along the wire from w to the loss. The MIT figure on the right is the same product one layer deeper: their J is our L.</aside>
 </section>
 
 <section class="slide">
