@@ -50,6 +50,31 @@ body.shownotes .slide .notes { display:block; position:absolute; left:7vw; right
   border-radius:0 10px 10px 0; padding:1.5vh 1.2vw; font-size:clamp(12px,1.8vh,15px);
   color:var(--ink-2); max-height:30vh; overflow-y:auto; }
 
+/* quick polls — live YES/NO questions (slides/poll.js) */
+.quickpoll { margin-top:1vh; border-top:1px dashed var(--hairline); padding-top:.9vh; }
+.qp-row { display:flex; align-items:center; gap:.8vw; flex-wrap:wrap;
+  font-size:clamp(13px,2vh,18px); }
+.qp-q { min-width:0; }
+.qp-q > b:first-child { color:var(--accent); letter-spacing:.06em; }
+.qp-ui { display:inline-flex; align-items:center; gap:.5vw; margin-left:auto; flex-wrap:wrap; }
+.qp-btn { font:inherit; font-size:.92em; font-weight:650; padding:.4vh 1.2vw; border-radius:999px;
+  border:1.5px solid var(--hairline); background:var(--surface); color:var(--ink);
+  cursor:pointer; text-decoration:none; line-height:1.3; }
+.qp-btn:hover { border-color:var(--accent); }
+.qp-btn.sel { border-color:var(--accent); background:var(--accent); color:#fff; }
+.qp-btn.qp-correct { border-color:#2e9e5b; box-shadow:0 0 0 2.5px rgba(46,158,91,.3); }
+.qp-btn:disabled { opacity:.55; cursor:default; }
+.qp-btn:disabled.qp-correct, .qp-btn:disabled.sel { opacity:1; }
+.qp-admin { display:inline-flex; gap:.4vw; }
+.qp-admin .qp-btn, .qp-dismiss { font-weight:500; font-size:.8em; padding:.3vh .9vw; }
+.qp-bar { display:inline-flex; width:clamp(90px,9vw,160px); height:1.3vh; border-radius:999px;
+  overflow:hidden; border:1px solid var(--hairline); }
+.qp-bar i { display:block; height:100%; }
+.qp-count { color:var(--ink-2); font-size:.85em; white-space:nowrap; }
+.qp-explain { margin-top:.9vh; border-left:3px solid var(--accent); background:var(--surface);
+  border-radius:0 10px 10px 0; padding:1vh 1.2vw; }
+.qp-explain p { font-size:clamp(12.5px,1.9vh,17px); line-height:1.5; margin:.4vh 0; }
+
 /* chrome */
 #deckCounter { position:fixed; right:16px; bottom:12px; z-index:50; font-family:var(--mono);
   font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; }
@@ -61,6 +86,7 @@ body.shownotes .slide .notes { display:block; position:absolute; left:7vw; right
   body.deck .slide { display:flex !important; position:relative; inset:auto;
     width:100%; height:100vh; page-break-after:always; }
   #deckCounter, #deckHint { display:none; }
+  .qp-ui { display:none; }
   body.shownotes .slide .notes { position:relative; left:auto; right:auto; bottom:auto; margin-top:2vh; }
 }
 @page { size:landscape; margin:0; }

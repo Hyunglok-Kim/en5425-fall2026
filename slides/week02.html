@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="../assets/style.css">
 <link rel="stylesheet" href="deck.css">
 <script src="deck.js" defer></script>
+<script src="poll.js" defer></script>
 </head>
 <body>
 
@@ -186,8 +187,9 @@
         </g>
         <g font-family="var(--sans)" font-size="11.5" text-anchor="middle">
           <text x="140" y="52" fill="var(--accent)">blame from path 1</text>
-          <text x="60" y="170" fill="currentColor" opacity="0.75">total blame = sum of all 4 paths</text>
-          <text x="150" y="243" fill="currentColor" opacity="0.6">the contributions add — that’s the multivariable chain rule</text>
+          <text x="60" y="170" fill="currentColor" opacity="0.75">total blame</text>
+          <text x="60" y="185" fill="currentColor" opacity="0.75">= sum of all 4 paths</text>
+          <text x="180" y="243" fill="currentColor" opacity="0.6">the contributions add — that’s the multivariable chain rule</text>
         </g>
       </svg>
     </div>
@@ -207,13 +209,24 @@
     <img src="img/fig-w2-cs231n-backprop-circuit.png" alt="A sigmoid neuron drawn as a circuit of small gates, forward values written in green above each wire and backpropagated gradients in red below" style="max-width:min(96%,1100px);max-height:100%;border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:8px">
   </div>
   <p class="small muted" style="margin:.8vh 0 0;text-align:center">A 2-input sigmoid neuron as a circuit of tiny gates. Green: values flowing forward. Red: blame flowing backward — each gate multiplies the incoming red number by its own local slope. Figure: Stanford CS231n (cs231n.github.io)</p>
+  <div class="quickpoll" data-pid="w02-s8-w0" data-answer="no">
+    <div class="qp-row">
+      <span class="qp-q"><b>QUICK Q</b>&ensp;w₀가 1만큼 움직이면, 최종 sigmoid 값에 정확히 −0.2만큼 기여할까? <span class="muted">(빨강 −0.20 × 1)</span></span>
+      <span class="qp-ui"></span>
+    </div>
+    <div class="qp-explain" hidden>
+      <p><b>NO — 방향은 맞지만 “정확히 −0.2”는 아니다.</b> 빨강 −0.20은 지금 지점에서의 <b>순간 기울기</b>(∂출력/∂w₀), 즉 아주 작은 걸음에만 정확한 1차 근사다.</p>
+      <p>실제로 w₀: 2→3이면 안쪽 합이 1→0이 되어 σ(1)=0.731 → σ(0)=0.500 — 실제 변화는 <b>−0.231</b>, 기울기의 예측은 −0.197. 시그모이드가 휘어 있어 큰 걸음에서는 어긋난다. 그래서 훈련은 gradient 방향으로 learning rate만큼 <b>조금씩</b> 걷는다.</p>
+      <p class="muted">상세 설명은 뒤 슬라이드(Part 2 · optimizer의 learning rate)에서 곧 나옵니다.</p>
+    </div>
+  </div>
   <div class="gloss">
     <span><b>green</b> — the value each wire carries in the forward pass.</span>
     <span><b>red</b> — that wire’s blame: how much the final output moves per unit change here; each gate multiplies the red number it receives by its own local slope, nothing more.</span>
     <span><b>the gates</b> — ×, +, exp, 1/x … each knows its own one-line derivative; the circuit computes the sigmoid σ(x) = 1/(1+e⁻ˣ) of w₀x₀ + w₁x₁ + w₂.</span>
   </div>
   <div class="foot"><span>PyTorch’s <code>loss.backward()</code> is exactly this picture: record the circuit on the way forward, walk it in reverse multiplying local slopes.</span></div>
-  <aside class="notes">~1.5 min. Pick ONE gate and narrate it — e.g. the ×(−1) gate: red number comes in, gets multiplied by the local slope −1, passes on. Every gate is that dumb; intelligence is the bookkeeping. Close the loop with the software claim: autograd = record the graph forward, replay it in reverse. That is the entire mystery of loss.backward().</aside>
+  <aside class="notes">~1.5 min. Pick ONE gate and narrate it — e.g. the ×(−1) gate: red number comes in, gets multiplied by the local slope −1, passes on. Every gate is that dumb; intelligence is the bookkeeping. Close the loop with the software claim: autograd = record the graph forward, replay it in reverse. That is the entire mystery of loss.backward(). Then run the QUICK Q (signed-in students vote YES/NO live; 답 공개 button is PI-only): most vote YES; the reveal — gradients are local slopes, the real change is −0.231 — sets up the learning-rate slides in Part 2.</aside>
 </section>
 
 <section class="slide">
