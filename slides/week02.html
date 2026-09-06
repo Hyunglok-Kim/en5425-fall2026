@@ -525,8 +525,8 @@
         <li>Foundation-model settings: β₁ = 0.9, <b>β₂ = 0.95</b> (not the old 0.999 — a ~20-step variance memory reacts faster to loss spikes), ε = 10⁻⁸.</li>
       </ul>
     </div>
-    <div class="figure" style="margin:0">
-      <svg viewBox="0 0 360 240" role="img" aria-label="Block diagram: the gradient feeds two exponential averages, the smoothed direction over the typical size, scaled by the learning rate" style="width:min(100%,420px)">
+    <div class="figure" style="margin:0;flex-direction:column;gap:1vh">
+      <svg viewBox="0 0 360 240" role="img" aria-label="Block diagram: the gradient feeds two exponential averages, the smoothed direction over the typical size, scaled by the learning rate" style="width:min(100%,390px)">
         <defs><marker id="ad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker></defs>
         <g fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="16" y="98" width="58" height="40" rx="8"/>
@@ -550,6 +550,15 @@
           <text x="180" y="230" font-size="12" opacity="0.7">signal ÷ magnitude — the raw gradient scale cancels</text>
         </g>
       </svg>
+      <a href="https://www.youtube.com/watch?v=JXQT_vxqwIs" class="yt" data-id="JXQT_vxqwIs" style="display:block;width:min(82%,340px);margin:.8vh auto 0;text-decoration:none;color:inherit">
+        <span class="ytbox" style="position:relative;display:block">
+          <img src="img/yt-adam-ng.jpg" alt="Video thumbnail: Andrew Ng explains the Adam optimization algorithm" style="width:100%;border-radius:8px;display:block">
+          <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+            <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+          </span>
+        </span>
+        <p class="small muted" style="margin:.4vh 0 0;white-space:nowrap;text-align:center">Andrew Ng · Adam in 7 min — <span class="accent">click to play here</span></p>
+      </a>
     </div>
   </div>
   <div class="gloss">
@@ -559,7 +568,7 @@
     <span><b>sign(g)</b> — just the direction, +1 or −1: what the ratio collapses to when the gradient is steady.</span>
   </div>
   <div class="foot"><span><a href="https://arxiv.org/abs/1412.6980">Kingma &amp; Ba 2015 (Adam)</a> · Read: <a href="https://www.deeplearningbook.org/contents/optimization.html">Goodfellow §8.5.3</a> · <a href="https://d2l.ai/chapter_optimization/adam.html">Dive into Deep Learning §12.10</a></span></div>
-  <aside class="notes">~2 min. Run the constant-gradient thought experiment aloud — it is the fastest honest way to see what the ratio does, and it needs no algebra. Real gradients are noisy, so the step becomes roughly η × (signal/total magnitude) ≤ η: bold where the gradient is consistent, timid where it thrashes. One caveat sentence: the young averages start biased toward zero, so Adam divides by (1−βᵗ) to unbias them — exact three-line proof in the appendix; the practical guard is warmup, next slide.</aside>
+  <aside class="notes">~2 min. Run the constant-gradient thought experiment aloud — it is the fastest honest way to see what the ratio does, and it needs no algebra. Real gradients are noisy, so the step becomes roughly η × (signal/total magnitude) ≤ η: bold where the gradient is consistent, timid where it thrashes. One caveat sentence: the young averages start biased toward zero, so Adam divides by (1−βᵗ) to unbias them — exact three-line proof in the appendix; the practical guard is warmup, next slide. The in-slide video (Ng, 7 min) is the remedial dose — point at it, don't play it; anyone lost here watches it tonight.</aside>
 </section>
 
 <section class="slide">
