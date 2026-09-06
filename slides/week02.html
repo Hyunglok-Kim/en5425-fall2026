@@ -206,7 +206,7 @@
   <p class="kicker">Part 1 · A real circuit</p>
   <h2>Read one real circuit: forward in green, blame in red</h2>
   <div class="figure">
-    <img src="img/fig-w2-cs231n-backprop-circuit.png" alt="A sigmoid neuron drawn as a circuit of small gates, forward values written in green above each wire and backpropagated gradients in red below" style="max-width:min(96%,1100px);max-height:100%;border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:8px">
+    <img src="img/fig-w2-cs231n-backprop-circuit.png" data-zoom alt="A sigmoid neuron drawn as a circuit of small gates, forward values written in green above each wire and backpropagated gradients in red below" style="max-width:min(96%,1100px);max-height:100%;border-radius:10px;border:1px solid var(--hairline);background:#fff;padding:8px">
   </div>
   <p class="small muted" style="margin:.8vh 0 0;text-align:center">A 2-input sigmoid neuron as a circuit of tiny gates. Green: values flowing forward. Red: blame flowing backward — each gate multiplies the incoming red number by its own local slope. Figure: Stanford CS231n (cs231n.github.io)</p>
   <div class="quickpoll" data-pid="w02-s8-w0" data-answer="no">
@@ -235,7 +235,7 @@
   <div class="cols" style="grid-template-columns:1.15fr 1fr;align-items:center;gap:2.5vw">
     <div style="min-width:0">
       <div class="card">
-        <p style="line-height:1.9">
+        <p style="line-height:1.7">
           flood warning if ŷ &gt; 0.5&ensp;→&ensp;P = TP/(TP+FP),&ensp;R = TP/(TP+FN)<br>
           <span class="accent">F1 = 2PR/(P+R) = 2TP/(2TP+FP+FN)</span> — built from <b>counts</b><br>
           nudge w a hair → no warning flips → <b>∂F1/∂w = 0</b> almost everywhere<br>
@@ -247,8 +247,8 @@
         <li>RMSE = √MSE is the easy case: same minimizer — train on MSE, report RMSE.</li>
       </ul>
     </div>
-    <div class="figure" style="margin:0">
-      <svg viewBox="0 0 360 262" role="img" aria-label="Top: F1 versus one weight is a staircase whose slope is zero on every flat run; bottom: a cross-entropy surrogate is a smooth curve with a usable slope everywhere" style="width:min(100%,420px)">
+    <div class="figure" style="margin:0;flex-direction:column;gap:1.2vh">
+      <svg viewBox="0 0 360 262" role="img" aria-label="Top: F1 versus one weight is a staircase whose slope is zero on every flat run; bottom: a cross-entropy surrogate is a smooth curve with a usable slope everywhere" style="width:min(100%,350px)">
         <defs><marker id="sur" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker></defs>
         <g font-family="var(--sans)" font-size="12" fill="currentColor">
           <text x="28" y="16">the metric: F1(w) — a staircase</text>
@@ -261,6 +261,10 @@
         <text x="170" y="172" font-family="var(--sans)" font-size="11" fill="var(--accent)">a slope everywhere → follow it</text>
         <text x="183" y="256" font-family="var(--sans)" font-size="11" fill="currentColor" opacity="0.6" text-anchor="middle">the same w improves both — descend the smooth one, report F1</text>
       </svg>
+      <div style="display:flex;align-items:center;gap:1vw;border-top:1px dashed var(--hairline);padding-top:1vh">
+        <img src="img/fig-w2-lee2026-jstars-method.png" data-zoom alt="Workflow of Lee et al. 2026: Sentinel-1 PolSAR preprocessing, metaheuristic feature selection scored on accuracy, CNN training evaluated on F1-score and IoU" title="Click to enlarge — Fig. 2, Lee et al. 2026 (IEEE JSTARS)" style="flex:0 0 auto;height:min(13vh,120px);width:auto;display:block;border-radius:8px;border:1px solid var(--hairline);background:#fff;padding:3px">
+        <p class="small" style="margin:0"><b class="accent">This slide is our lab's newest paper.</b> Lee et al. 2026 (IEEE JSTARS): Sentinel-1 flood mapping, <b>graded on F1 = 0.901 / IoU = 0.820</b> — and the feature-subset search runs <b>gradient-free</b> (bee colony · GA · SwarmSA), the metric itself as fitness. <a href="https://ieeexplore.ieee.org/document/11568476">Read it on IEEE Xplore</a> — open access.</p>
+      </div>
     </div>
   </div>
   <div class="gloss">
@@ -271,7 +275,7 @@
     <span><b>loss ≠ metric</b> — the loss must produce gradients; the metric is the report card. Part 3 grades with metrics nobody trains on.</span>
   </div>
   <div class="foot"><span>Dice loss: <a href="https://arxiv.org/abs/1606.04797">Milletari et al. 2016 (V-Net)</a> · quantile / pinball loss: Koenker &amp; Bassett 1978 · the loss-vs-metric split is the door into Part 3</span></div>
-  <aside class="notes">~1.5 min, run as a question. Call back to the one-wire slide: MSE handed us −16 — an instruction. Then ask the room: "your metric is F1 — which way do you move w?" Let the silence sit; silence is the right answer — a hair's nudge flips no warning, the counts freeze, the slope is zero, and the training loop starves. The fix is a decoy: descend something smooth that wants the same thing — cross-entropy for accuracy, Dice for F1/IoU (Dice IS F1 with soft counts), pinball for quantiles — and grade on the real metric. If someone raises RMSE: √ is monotone, so it has the SAME minimizer as MSE — a reporting choice, not a training problem. Plant the flag: loss and metric are different objects; Part 3 lives on that distinction.</aside>
+  <aside class="notes">~1.5 min, run as a question. Call back to the one-wire slide: MSE handed us −16 — an instruction. Then ask the room: "your metric is F1 — which way do you move w?" Let the silence sit; silence is the right answer — a hair's nudge flips no warning, the counts freeze, the slope is zero, and the training loop starves. The fix is a decoy: descend something smooth that wants the same thing — cross-entropy for accuracy, Dice for F1/IoU (Dice IS F1 with soft counts), pinball for quantiles — and grade on the real metric. If someone raises RMSE: √ is monotone, so it has the SAME minimizer as MSE — a reporting choice, not a training problem. Plant the flag: loss and metric are different objects; Part 3 lives on that distinction. Close on the banner: this is OUR lab's newest paper (Lee et al. 2026 JSTARS, flood mapping) — graded on F1/IoU, and the feature-selection search is entirely gradient-free because the fitness IS the metric. Invite them to click through; it's open access — reading one real paper beats ten toy examples.</aside>
 </section>
 
 <section class="slide">

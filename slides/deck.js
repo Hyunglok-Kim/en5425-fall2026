@@ -85,6 +85,26 @@ document.addEventListener("DOMContentLoaded", () => {
         box.innerHTML = original;
     });
   });
+  /* click-to-zoom: any <img data-zoom> opens a lightbox (click or Esc closes) */
+  document.querySelectorAll("img[data-zoom]").forEach((img) => {
+    img.style.cursor = "zoom-in";
+    img.addEventListener("click", (e) => {
+      e.stopPropagation(); e.preventDefault();
+      const ov = document.createElement("div");
+      ov.style.cssText = "position:fixed;inset:0;z-index:200;background:rgba(8,9,12,.88);" +
+        "display:flex;align-items:center;justify-content:center;padding:3vh 3vw;cursor:zoom-out";
+      const big = document.createElement("img");
+      big.src = img.dataset.zoom || img.src;
+      big.alt = img.alt;
+      big.style.cssText = "max-width:100%;max-height:100%;border-radius:10px;background:#fff;padding:10px";
+      ov.appendChild(big);
+      const onkey = (ev) => { if (ev.key === "Escape") { ev.stopPropagation(); close(); } };
+      const close = () => { ov.remove(); document.removeEventListener("keydown", onkey, true); };
+      ov.addEventListener("click", (ev) => { ev.stopPropagation(); close(); });
+      document.addEventListener("keydown", onkey, true);
+      document.body.appendChild(ov);
+    });
+  });
   show(cur);
 
   document.addEventListener("keydown", (e) => {
