@@ -618,13 +618,13 @@
     <div style="min-width:0">
       <div class="card">
         <p style="line-height:1.6">
-          <b>weight decay</b> = a tiny diet, every step: shrink <i>every</i> weight toward 0 by the same small fraction — big memorize-the-noise weights hate it.<br>
+          <b>weight decay</b> = a tiny diet, every step:&ensp;<span class="accent">θ ← (1 − ηλ)·θ</span> − η·g&ensp;— a steady pull toward 0 that fights overfitting.<br>
           <b>the catch:</b> Adam pushes whatever you feed it through <span class="accent">÷√v</span> — its per-weight <b>volume knob</b>. Send the diet through the knob, and it's no longer the same diet for everyone.
         </p>
       </div>
       <ul class="small">
-        <li><b>Feel it with numbers</b> — you order a 1% shrink for all. Through the knob: a <b>busy</b> weight (√v = 10) gets <b>0.1%</b>, a <b>quiet</b> one (√v = 0.1) gets <b>10%</b>. And the busy ones are exactly the overfit-prone ones — <span class="accent">the diet lands backwards</span>.</li>
-        <li><b>AdamW = apply the shrink <span class="accent">after</span> the knob.</b> Every weight loses the same 1%; only the data gradient is steered per weight. That one move is the whole paper.</li>
+        <li><b>Feel it with numbers</b> — you order a 1% shrink for all. Through the knob: a <b>busy</b> weight (√v = 10) gets <b>0.1%</b>, a <b>quiet</b> one (√v = 0.1) gets <b>10%</b> — <span class="accent">backwards: the busy, overfit-prone ones diet least</span>.</li>
+        <li><b>AdamW = apply the shrink <span class="accent">after</span> the knob.</b> Every weight loses the same 1%; only g goes through the knob. That one move is the whole paper.</li>
         <li class="accent">The classic silent bug: PyTorch <code>Adam(weight_decay=…)</code> sends it through the knob (broken); <code>AdamW(weight_decay=…)</code> applies it after (this slide). Same argument name, different mathematics. <span class="muted">(Typical: λ = 0.05–0.1, η ~ 10⁻³–10⁻⁴.)</span></li>
       </ul>
     </div>
@@ -667,11 +667,11 @@
     </div>
   </div>
   <div class="gloss">
-    <span><b>λ</b> “lambda” — decay strength: each step multiplies every weight by (1 − ηλ) — the “1%” of the cartoon; θ ← (1 − ηλ)·θ − η·(data gradient).</span>
+    <span><b>λ</b> “lambda” — decay strength: (1 − ηλ) is the per-step shrink factor — the “1%” of the cartoon. <b>g</b> — the data gradient, as before.</span>
     <span><b>√v</b> — Adam’s memory of recent gradient size (two slides back): big for busy weights, tiny for quiet ones; everything entering the knob is divided by it.</span>
     <span><b>ℓ₂ penalty</b> — the older route: add (λ/2)·‖θ‖² to the loss so the shrink rides in with the gradient — identical in SGD, wrong inside Adam (two-line proof: Appendix).</span>
   </div>
-  <div class="foot"><span><a href="https://arxiv.org/abs/1711.05101">Loshchilov &amp; Hutter 2019</a> · Read: <a href="https://www.deeplearningbook.org/contents/regularization.html">Goodfellow §7.1</a> · <a href="https://d2l.ai/chapter_linear-regression/weight-decay.html">d2l §3.7</a> · the two-line SGD equivalence + where Adam breaks it: Appendix</span></div>
+  <div class="foot"><span><a href="https://arxiv.org/abs/1711.05101">Loshchilov &amp; Hutter 2019</a> · Read: <a href="https://www.deeplearningbook.org/contents/regularization.html">Goodfellow §7.1</a> · <a href="https://d2l.ai/chapter_linear-regression/weight-decay.html">d2l §3.7</a> · SGD equivalence proof: Appendix · <a href="https://www.youtube.com/watch?v=oWZbcq_figk" target="_blank" rel="noopener">▶ 3.5-min video (DataMListic)</a> — also playable on the Watch-at-home slide</span></div>
   <aside class="notes">~1.5 min. Run the numbers aloud, pointing at the bars: "you ordered a 1% diet for every weight. Ride it through the knob and the busy weight (√v = 10) pays 0.1%, the quiet one (√v = 0.1) pays 10% — and which weights overfit? The busy ones. The diet lands exactly backwards." That backwardness IS the bug; AdamW's whole contribution is: apply the shrink after the knob, so it stays 1% for everyone. Then the PyTorch trap, slowly — Adam(weight_decay=) is the broken route, AdamW(weight_decay=) the fixed one; half the room will hit this in their own sweeps this semester. This is why every paper writes "AdamW" and none write "Adam + ℓ₂". Exact update + SGD equivalence: Appendix.</aside>
 </section>
 
