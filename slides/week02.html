@@ -777,8 +777,9 @@
 <section class="slide">
   <p class="kicker">Part 3 · 25 min</p>
   <h2>What a random split does to a map</h2>
-  <div class="figure">
-    <svg viewBox="0 0 740 340" role="img" aria-label="Two map panels: random split interleaves train and test points so information leaks across short distances; spatial-block split holds out whole regions" style="width:min(94%,820px)">
+  <div class="cols" style="grid-template-columns:1.55fr .75fr;align-items:center;gap:2vw">
+    <figure class="figure" style="margin:0">
+    <svg viewBox="0 0 740 340" role="img" aria-label="Two map panels: random split interleaves train and test points so information leaks across short distances; spatial-block split holds out whole regions" style="width:100%">
       <g fill="none" stroke="currentColor" stroke-width="1.5">
         <rect x="20"  y="48" width="330" height="220" rx="12"/>
         <rect x="390" y="48" width="330" height="220" rx="12"/>
@@ -829,22 +830,38 @@
         <text x="398" y="330">test</text>
       </g>
     </svg>
+    </figure>
+    <figure style="margin:0;text-align:center">
+      <a href="https://hydroai.net/data" target="_blank" rel="noopener" data-zoom>
+        <img src="img/fig-w2-hydroai-hampyeong-map.jpg" alt="Our Hampyeong cal/val site: 47 soil-moisture stations clustered over a downscaled L-band soil moisture field" style="width:100%;border-radius:10px;border:1px solid var(--hairline)"></a>
+      <figcaption class="small muted" style="margin-top:.5vh">Real: our <b>Hampyeong cal/val</b> site — <a href="https://hydroai.net/data" target="_blank" rel="noopener"><b>hydroai.net/data</b></a>. 47 soil-moisture probes; neighbours share the same rain, soil, and season — <span class="accent">a random split scatters test dots right among them</span>.</figcaption>
+    </figure>
   </div>
-  <aside class="notes">~3 min on this figure alone — it is the core picture of the week. Left: every accent (test) dot has a training neighbor within the correlation range; the dashed 5-km pair is the leak. Right: the shaded block is the fold — every test point is at least a block-width from any training point. Same data, same model, two different questions being asked.</aside>
+  <div class="gloss">
+    <span><b>how far must the split separate points?</b> — measure it, don't guess: the <b>range</b> of the <i>residual</i> variogram (the distance where correlation dies) — full picture three slides on.</span>
+    <span><b>modern rule (kNNDM)</b> — match the test-to-train distance distribution to the distances you will predict at in deployment; too-large blocks make the test needlessly pessimistic, not honest.</span>
+  </div>
+  <div class="foot"><span>Live example: <a href="https://hydroai.net/data" target="_blank" rel="noopener">hydroai.net/data</a> (Hampyeong 47-station network) · criterion: <a href="https://doi.org/10.1111/2041-210X.13851">Milà et al. 2022 (kNNDM)</a> · <a href="https://doi.org/10.1111/2041-210X.13650">Meyer &amp; Pebesma 2021 (Area of Applicability)</a></span></div>
+  <aside class="notes">~3 min on this figure — the core picture of the week. Left cartoon: every accent (test) dot has a training neighbor within the correlation range; the dashed 5-km pair is the leak. Right — pull up hydroai.net/data live: our real Hampyeong network, 47 probes packed into a few km. Ask: "shuffle these into 80/20 and what is the nearest training probe to each test probe? A few hundred metres. That is not a test set." Then the two gloss criteria: residual-variogram range sets the floor; kNNDM matches test difficulty to deployment. Same data, same model, two different questions.</aside>
 </section>
 
 <section class="slide">
   <p class="kicker">Part 3 · 25 min</p>
   <h2>Time leaks the same way: today is mostly yesterday</h2>
-  <div class="cols" style="grid-template-columns:1.1fr 1fr;align-items:center;gap:2.5vw">
+  <div class="cols" style="grid-template-columns:1.05fr .92fr;align-items:center;gap:2.5vw">
     <ul style="margin:0">
       <li>Daily surface soil moisture: correlation between one day and the next ≈ 0.9–0.95; drydowns persist for days to weeks. Streamflow and land-surface temperature behave the same way.</li>
       <li>Random split over days: a test day sandwiched between two training days is scored on <span class="accent">interpolating memory, not modeling physics</span>.</li>
       <li>Seasonality is a second leak channel — the same phase of the annual cycle recurs in training even when the exact day is held out.</li>
       <li>Consequence: temporal splits must be contiguous blocks (whole years), with a gap at the seam.</li>
     </ul>
-    <div class="figure" style="margin:0">
-      <svg viewBox="0 0 380 260" role="img" aria-label="Top: a smooth daily time series with test days scattered between training days — each test day has same-week training neighbors. Bottom: contiguous training block, a gap, then a contiguous test block" style="width:min(100%,430px)">
+    <div class="figure" style="margin:0;flex-direction:column;display:flex;gap:1vh">
+      <figure style="margin:0;text-align:center;width:100%;order:2">
+        <a href="https://hydroai.net/data" target="_blank" rel="noopener" data-zoom>
+          <img src="img/fig-w2-hydroai-hampyeong-timeseries.png" alt="A year of daily soil moisture and soil temperature at our Hampyeong site: both curves are smooth day to day and follow the seasonal cycle" style="width:min(84%,340px);max-height:22vh;object-fit:contain;border-radius:8px;border:1px solid var(--hairline);background:#fff;padding:3px"></a>
+        <figcaption class="small muted" style="margin:.3vh 0 0;font-size:1.05vh">Real, our data — <a href="https://hydroai.net/data" target="_blank" rel="noopener"><b>hydroai.net/data</b></a>: <span class="accent">today ≈ yesterday</span>.</figcaption>
+      </figure>
+      <svg viewBox="0 0 380 260" role="img" aria-label="Top: a smooth daily time series with test days scattered between training days — each test day has same-week training neighbors. Bottom: contiguous training block, a gap, then a contiguous test block" style="width:min(96%,430px);order:1">
         <g font-family="var(--sans)" font-size="12.5" fill="currentColor">
           <text x="16" y="20">shuffled days — leaks</text>
           <text x="16" y="150" >whole years + gap — honest</text>
@@ -939,7 +956,8 @@
         <li>Close points agree → γ small; distant points are unrelated → γ flattens at the <b>sill</b> (the field’s total variance).</li>
         <li><b>Range</b> = the distance where the curve reaches the sill — beyond it, points are effectively independent.</li>
         <li class="accent">The range is the number your split needs: blocks smaller than the range still leak.</li>
-        <li>Estimate it from the target itself, or better, from your model’s residuals.</li>
+        <li>Estimate it from the target itself, or better, from your model’s <b>residuals</b> — the leak is in what the features fail to explain.</li>
+        <li class="muted">Newer criterion (kNNDM): don’t just clear the range — match the test-to-train distance distribution to your deployment distances, so the test is as hard as reality, no harder.</li>
       </ul>
     </div>
     <div class="figure" style="margin:0">
