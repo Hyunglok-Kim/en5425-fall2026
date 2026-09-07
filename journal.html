@@ -247,7 +247,7 @@ async function initTicketBoxes(scope) {
           if (!r.ok) throw new Error(j.detail || "login failed");
           if (j.must_change) { location.href = "/portal/login.html#change"; return; }
           $$("details.jcweek").forEach((d) => {
-      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); initTicketFeeds(d); initQuizBoxes(d); };
+      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); initTicketFeeds(d); initQuizBoxes(d); initPeerBoxes(d); };
       d.addEventListener("toggle", () => { if (d.open) initHere(); });
       if (d.open) initHere();
     });
@@ -367,6 +367,94 @@ async function initQuizBoxes(scope) {
   }
 }
 
+/* ---- peer review (web, per week) — rate your groupmates 1–10 -------------- */
+const PEER_LABELS = {
+  prep:    ["Prep",     "준비"],
+  part:    ["Partic.",  "참여"],
+  contrib: ["Contrib.", "기여"],
+  respect: ["Respect",  "태도"],
+  overall: ["Overall",  "종합"],
+};
+const PEER_TIP = {
+  prep:    ["came having read the paper", "논문을 성실히 읽고 준비"],
+  part:    ["engaged actively",           "토론에 적극 참여"],
+  contrib: ["deepened the discussion",    "질문·코멘트가 토론을 심화"],
+  respect: ["listened to & respected",    "다른 의견 경청·존중"],
+  overall: ["would discuss again",        "다시 토론하고 싶다"],
+};
+async function initPeerBoxes(scope) {
+  const boxes = $$(".peerbox:not([data-init])", scope || document);
+  boxes.forEach((b) => { b.dataset.init = "1"; });
+  if (!boxes.length) return;
+  const st = await apiStateOnce();
+  for (const b of boxes) {
+    const wn = b.dataset.week;
+    if (st.mode !== "authed") {
+      b.innerHTML = `<p class="sub" style="margin:10px 0 0">${t(
+        "Peer review — rate your discussion group after journal club. Sign in above.",
+        "동료 평가 — 저널클럽 후 우리 조원을 평가해요. 위에서 로그인하세요.")}</p>`;
+      continue;
+    }
+    if ((st.me.role || "student") !== "student") { b.innerHTML = ""; continue; }
+    let d;
+    try { d = await (await fetch(`/api/peer-review?week=${wn}`)).json(); } catch { b.innerHTML = ""; continue; }
+    if (!d.available) {
+      if (d.reason === "hidden") b.innerHTML = `<p class="sub" style="margin:10px 0 0">${t("Peer review opens when this week's groups are revealed (13:00 on class day).", "동료 평가는 이번 주 조 편성이 공개되면(수업 당일 13:00) 열려요.")}</p>`;
+      else b.innerHTML = "";
+      continue;
+    }
+    const crit = d.criteria;
+    const head = crit.map((k) => `<th title="${esc(t(PEER_TIP[k][0], PEER_TIP[k][1]))}">${esc(t(PEER_LABELS[k][0], PEER_LABELS[k][1]))}<span class="sub" style="display:block;margin:0;font-weight:400">1–10</span></th>`).join("");
+    const rows = d.peers.map((p, i) => {
+      const m = (d.mine && d.mine[i]) || {};
+      const cells = crit.map((k) => `<td><input type="number" min="1" max="10" data-k="${k}" value="${m[k] != null ? m[k] : ""}" style="width:52px;text-align:center;padding:5px 4px"></td>`).join("");
+      return `<tr data-i="${i}"><td style="text-align:left;font-weight:600">${esc(p.display)}</td>${cells}<td><input type="text" data-k="comment" maxlength="200" value="${m.comment ? esc(m.comment) : ""}" placeholder="${t("optional", "선택")}" style="width:100%;min-width:120px;padding:5px 7px"></td></tr>`;
+    }).join("");
+    const anyDone = (d.mine || []).some((x) => x);
+    b.innerHTML = `<div class="mybox-in" style="margin-top:12px">
+      <p class="mybox-t">${t("Peer review", "동료 평가")} — ${t("rate your group", "우리 조원 평가")}
+        <span class="sub" style="margin:0;display:inline">· ${t("1 = strongly disagree · 10 = strongly agree · PI/TA only, never shared with peers", "1 = 전혀 아니다 · 10 = 매우 그렇다 · PI·TA만 열람, 서로 비공개")}
+        ${anyDone ? ` · <b style="color:var(--ok)">${t("submitted", "제출됨")}</b>` : ""}</span></p>
+      <div class="scroll"><table class="peer-tbl" style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr><th style="text-align:left">${t("Groupmate", "조원")}</th>${head}<th>${t("One-line comment", "한 줄 코멘트")}</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>
+      <div class="mybox-foot" style="margin-top:8px">
+        <button class="btn primary">${anyDone ? t("Update review", "평가 수정") : t("Submit review", "평가 제출")}</button>
+        <span class="sub gerr" style="margin:0;color:var(--warn)"></span>
+      </div></div>`;
+    b.querySelector("button").addEventListener("click", async () => {
+      const err = b.querySelector(".gerr");
+      const out = [];
+      let bad = false;
+      b.querySelectorAll("tbody tr").forEach((tr) => {
+        const row = {};
+        let filled = 0, missing = 0;
+        tr.querySelectorAll("input").forEach((inp) => {
+          const k = inp.dataset.k;
+          if (k === "comment") { row.comment = inp.value; return; }
+          const v = inp.value.trim();
+          if (v === "") { missing++; return; }
+          const iv = Number(v);
+          if (!Number.isInteger(iv) || iv < 1 || iv > 10) bad = true;
+          row[k] = iv; filled++;
+        });
+        // a row is either fully scored, or fully blank (skipped)
+        if (filled === 0) { out.push(null); }
+        else if (missing > 0) { bad = true; out.push(row); }
+        else out.push(row);
+      });
+      if (bad) { err.textContent = t("Each rated groupmate needs all five scores, 1–10.", "평가한 조원은 다섯 항목 모두 1–10으로 채워 주세요."); return; }
+      const fd = new FormData(); fd.append("week", wn); fd.append("data", JSON.stringify(out));
+      try {
+        const r = await fetch("/api/peer-review", { method: "POST", headers: XH, body: fd });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.detail || "submit failed");
+        err.style.color = "var(--ok)"; err.textContent = t("Saved ✓", "저장됐어요 ✓");
+      } catch (e2) { err.style.color = "var(--warn)"; err.textContent = e2.message; }
+    });
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const el = $("#jc");
   let ko = false; try { ko = localStorage.getItem("en5425-lang") === "ko"; } catch {}
@@ -435,7 +523,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       h += `${w.n === 2 ? `<div class="mybox" data-aid="memo01" data-label="${t("My Week 1 ticket (Attention + ViT)", "내 1주차 티켓 (Attention + ViT)")}"></div>` : ""}
         <div class="mybox" data-aid="memo${pad(w.n)}" data-label="${t("My ticket for this week", "내 이번 주 티켓")}"></div>
-        <div class="qzbox" data-aid="qz${pad(w.n)}" data-week="${w.n}"></div>`;
+        <div class="qzbox" data-aid="qz${pad(w.n)}" data-week="${w.n}"></div>
+        <div class="peerbox" data-week="${w.n}"></div>`;
       return h;
     };
 
@@ -458,7 +547,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       t("Updated ", "업데이트 ") + (fmtDate(String(journal.updated).slice(0, 10)) || journal.updated))}</p>` : "");
 
     $$("details.jcweek").forEach((d) => {
-      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); initTicketFeeds(d); initQuizBoxes(d); };
+      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); initTicketFeeds(d); initQuizBoxes(d); initPeerBoxes(d); };
       d.addEventListener("toggle", () => { if (d.open) initHere(); });
       if (d.open) initHere();
     });

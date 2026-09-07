@@ -138,11 +138,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (st.mode === "authed" && !st.me.must_change) {
     if (st.me.role === "pi") {
       $("#gate").hidden = false;
+      let notesHtml = "";
+      try {
+        const d = await (await fetch("/api/notes", { cache: "no-store" })).json();
+        if (d && d.weeks && d.weeks.length) {
+          notesHtml = `<div class="card" style="border-style:dashed;border-color:var(--accent);margin-top:12px">
+            <b>${t("Lecture notes (private)", "강의노트 (나만 보기)")}</b>
+            <p class="sub" style="margin:6px 0 10px">${t("Only you — not the TA — and never published. Opens in a new tab; PDF to print.",
+              "나만 볼 수 있어요 — TA도 못 보고, 공개되지 않아요. 새 탭에서 열리고, PDF로 인쇄해요.")}</p>
+            ${d.weeks.sort((a, b) => a.week - b.week).map((w) =>
+              `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:5px 0">
+                 <a class="btn" target="_blank" rel="noopener" href="/api/note?week=${w.week}">📄 ${t("Week ", "")}${w.week}${t("", "주차")}${w.title ? ` — ${esc(w.title)}` : ""}</a>
+                 ${w.has_pdf ? `<a class="btn primary" target="_blank" rel="noopener" href="/api/note?week=${w.week}&fmt=pdf">PDF ${t("(print)", "(인쇄)")}</a>` : ""}
+               </div>`).join("")}
+          </div>`;
+        }
+      } catch {}
       $("#gate").innerHTML = `<div class="card" style="border-style:dashed;border-color:var(--accent)">
         <b>${t("PI account", "PI 계정")}</b>
         <p class="sub" style="margin:6px 0 10px">${t("Students see their personal dashboard here. Your view is the grade console.",
           "학생들은 여기서 개인 대시보드를 봐요. 교수님 화면은 성적 관리 콘솔이에요.")}</p>
-        <a class="btn primary" href="/portal/admin.html">${t("Open Grades →", "성적 관리 열기 →")}</a></div>`;
+        <a class="btn primary" href="/portal/admin.html">${t("Open Grades →", "성적 관리 열기 →")}</a></div>` + notesHtml;
     } else renderMine(st.me);
   } else renderGate(st);
 });
