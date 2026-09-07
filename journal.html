@@ -247,7 +247,7 @@ async function initTicketBoxes(scope) {
           if (!r.ok) throw new Error(j.detail || "login failed");
           if (j.must_change) { location.href = "/portal/login.html#change"; return; }
           $$("details.jcweek").forEach((d) => {
-      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); initTicketFeeds(d); };
+      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); initTicketFeeds(d); initQuizBoxes(d); };
       d.addEventListener("toggle", () => { if (d.open) initHere(); });
       if (d.open) initHere();
     });
@@ -296,6 +296,53 @@ async function initTicketBoxes(scope) {
         const j = await r.json();
         if (!r.ok) throw new Error(j.detail || "submit failed");
         location.reload();   /* journal.json was republished — show the ticket in place */
+      } catch (e2) { err.textContent = e2.message; }
+    });
+  }
+}
+
+/* ---- quiz write-up (PDF) — surfaced here so nobody leaves class without it -- */
+async function initQuizBoxes(scope) {
+  const boxes = $$(".qzbox:not([data-init])", scope || document);
+  boxes.forEach((b) => { b.dataset.init = "1"; });
+  if (!boxes.length) return;
+  const st = await apiStateOnce();
+  for (const b of boxes) {
+    const aid = b.dataset.aid, wn = b.dataset.week;
+    if (st.mode !== "authed") {
+      b.innerHTML = `<p class="sub" style="margin:10px 0 0">${t(
+        `Quiz write-up W${wn}: redo today's quiz in your own words — PDF, due before class ends (Mon 16:00). Sign in above to submit.`,
+        `퀴즈 정리 W${wn}: 오늘 퀴즈를 내 언어로 다시 풀어 PDF로 — 수업 끝나기 전(월 16:00) 마감. 위에서 로그인하면 제출할 수 있어요.`)}</p>`;
+      continue;
+    }
+    if ((st.me.role || "student") !== "student") { b.innerHTML = ""; continue; }
+    const row = (st.me.assignments || []).find((a) => a.id === aid);
+    if (!row) { b.innerHTML = ""; continue; }
+    const dueTxt = row.due ? `${fmtDate(row.due.slice(0, 10))} ${row.due.slice(11, 16)}` : "";
+    const done = !!row.submitted_at;
+    b.innerHTML = `<div class="mybox-in" style="margin-top:12px">
+      <p class="mybox-t">${esc(row.title || "Quiz write-up W" + wn)} <span class="sub" style="margin:0;display:inline">
+        · ${t("PDF, due before class ends", "PDF · 수업 끝나기 전까지")} — ${esc(dueTxt)}
+        ${done ? ` · <b style="color:var(--ok)">${t("submitted", "제출됨")} ${esc(String(row.submitted_at).slice(5, 16).replace("T", " "))}</b>${row.late ? ` <span class="tk-late">${t("late", "지각")}</span>` : ""}`
+               : ` · <b style="color:var(--warn)">${t("not submitted yet", "미제출")}</b>`}</span></p>
+      <p class="sub" style="margin:0 0 8px">${t("Redo today's quiz in your own words and upload it before you leave the room.",
+        "오늘 본 퀴즈를 내 언어로 다시 풀어, 강의실을 나가기 전에 올려 주세요.")}</p>
+      <div class="mybox-foot" style="margin-top:0">
+        <input type="file" accept="application/pdf,.pdf" style="font-size:12.5px">
+        <button class="btn primary">${done ? t("Resubmit PDF", "PDF 다시 제출") : t("Submit PDF", "PDF 제출")}</button>
+        <span class="sub" style="margin:0">${t("PDF only · ≤ 5 MB", "PDF만 · 5 MB 이하")}</span>
+      </div>
+      <p class="sub gerr" style="min-height:16px;margin:6px 0 0;color:var(--warn)"></p></div>`;
+    b.querySelector("button").addEventListener("click", async () => {
+      const inp = b.querySelector("input[type=file]");
+      const err = b.querySelector(".gerr");
+      if (!inp.files.length) { err.textContent = t("Choose your PDF first.", "PDF 파일을 먼저 선택해 주세요."); return; }
+      const fd = new FormData(); fd.append("aid", aid); fd.append("file", inp.files[0]);
+      try {
+        const r = await fetch("/api/submit", { method: "POST", headers: XH, body: fd });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.detail || "submit failed");
+        location.reload();
       } catch (e2) { err.textContent = e2.message; }
     });
   }
@@ -368,7 +415,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           }).join("")}</div>`;
       }
       h += `${w.n === 2 ? `<div class="mybox" data-aid="memo01" data-label="${t("My Week 1 ticket (Attention + ViT)", "내 1주차 티켓 (Attention + ViT)")}"></div>` : ""}
-        <div class="mybox" data-aid="memo${pad(w.n)}" data-label="${t("My ticket for this week", "내 이번 주 티켓")}"></div>`;
+        <div class="mybox" data-aid="memo${pad(w.n)}" data-label="${t("My ticket for this week", "내 이번 주 티켓")}"></div>
+        <div class="qzbox" data-aid="qz${pad(w.n)}" data-week="${w.n}"></div>`;
       return h;
     };
 
@@ -391,7 +439,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       t("Updated ", "업데이트 ") + (fmtDate(String(journal.updated).slice(0, 10)) || journal.updated))}</p>` : "");
 
     $$("details.jcweek").forEach((d) => {
-      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); initTicketFeeds(d); };
+      const initHere = () => { initTicketBoxes(d); initGroupBoxes(d); initTicketFeeds(d); initQuizBoxes(d); };
       d.addEventListener("toggle", () => { if (d.open) initHere(); });
       if (d.open) initHere();
     });
