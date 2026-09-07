@@ -48,6 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     { p: "note", en: "Research notes", ko: "연구노트", sEn: "weekly PDF", sKo: "주간 PDF" },
     { p: "book", en: "Book summaries", ko: "북 정리", sEn: "handwritten scan, no AI", sKo: "손글씨 스캔, AI 금지" },
     { p: "vid",  en: "Video summaries", ko: "영상 정리", sEn: "0.5-page PDF", sKo: "0.5페이지 PDF" },
+    { p: "qz",   en: "Quiz write-ups", ko: "퀴즈 정리", sEn: "redo this week's quiz in your own words, PDF", sKo: "이번 주 퀴즈를 내 언어로 다시 풀어 PDF 제출" },
     { p: "",     en: "HW0 & Capstone", ko: "HW0 · Capstone", sEn: "reports & milestones", sKo: "보고서 · 마일스톤" },
   ];
 
@@ -107,7 +108,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return base;
   };
   const secOf = (id) => id.startsWith("memo") ? 0 : id.startsWith("note") ? 1
-    : id.startsWith("book") ? 2 : id.startsWith("vid") ? 3 : 4;
+    : id.startsWith("book") ? 2 : id.startsWith("vid") ? 3 : id.startsWith("qz") ? 4 : 5;
   const submitted = (r) => r.status === "ok" || r.status === "late";
   const bySec = SECS.map(() => []);
   const dueNow = [];
