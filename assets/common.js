@@ -51,6 +51,7 @@ const NAV = [
   ["assignments", "Assignments", "과제 제출", "assignments.html"],
   ["present", "Presentations", "발표", "present.html"],
   ["myspace", "My Space", "내 공간", "myspace.html"],
+  ["admin", "Admin", "Admin", "portal/admin.html"],
 ];
 /* Semester tracker: W1 begins Mon 2026-08-31 (KST). */
 const SEMESTER_START = "2026-08-31";

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-06T22:17:07+09:00",
+  "updated": "2026-09-06T23:37:47+09:00",
   "assignments": [
     {
       "id": "hw0",
@@ -357,7 +357,7 @@
         "memo10": "due",
         "memo11": "due",
         "memo12": "due",
-        "note01": "due",
+        "note01": "ok",
         "note02": "due",
         "note03": "due",
         "note04": "due",
@@ -487,7 +487,7 @@
         "memo10": "due",
         "memo11": "due",
         "memo12": "due",
-        "note01": "due",
+        "note01": "ok",
         "note02": "due",
         "note03": "due",
         "note04": "due",
@@ -552,7 +552,7 @@
         "memo10": "due",
         "memo11": "due",
         "memo12": "due",
-        "note01": "due",
+        "note01": "ok",
         "note02": "due",
         "note03": "due",
         "note04": "due",
@@ -617,7 +617,7 @@
         "memo10": "due",
         "memo11": "due",
         "memo12": "due",
-        "note01": "due",
+        "note01": "ok",
         "note02": "due",
         "note03": "due",
         "note04": "due",
@@ -660,7 +660,7 @@
         "vid10": "due",
         "vid11": "due",
         "vid12": "due",
-        "tool01": "due"
+        "tool01": "ok"
       }
     },
     {
