@@ -70,7 +70,7 @@
   .grp-t { font-family:var(--serif); font-weight:700; font-size:13px; margin:0 0 8px; }
   .grp-m { display:flex; align-items:center; gap:8px; font-size:13px; padding:3px 0; }
   .grp-m .face { width:28px; height:28px; font-size:12px; }
-  .grp-m.lead span, .grp-m.pres span { font-weight:700; }
+  .grp-m.lead span, .grp-m.pres span, .grp-m.ques span { font-weight:700; }
   .grp-star { color:var(--accent); font-size:11px; font-weight:700; }
   @media (max-width:520px) {
     .face { width:36px; height:36px; }
@@ -84,15 +84,15 @@
   <h1><span class="lang-en">Journal Club</span><span class="lang-ko">저널클럽</span></h1>
   <p class="lede">
     <span class="lang-en">Journal-club weeks (2&ndash;7, 9&ndash;12) open with a 5-minute reading quiz; after the lecture we hold
-      a 30-minute discussion in groups of 3&ndash;4, shuffled every week, with two randomly drawn roles per
-      group &mdash; revealed at 13:00 on class day, so everyone prepares. (Week 2: the instructor
+      a 30-minute discussion in groups of 3&ndash;4, shuffled every week, with <b>three</b> randomly drawn roles per
+      group (leader, presenter, questioner) &mdash; revealed at 13:00 on class day, so everyone prepares. (Week 2: the instructor
       co-moderates to model the format.) Write and submit your entrance
       ticket <b>right on this page</b> (sign in below; due Sunday 13:00). Submitted tickets
       appear <b>right here</b>: until 13:00 on class day only the instructor and TA can read
       them; from 13:00 every ticket is visible to the whole class &mdash; they are the raw
       material of the discussion. You can withdraw and resubmit until it is graded.</span>
     <span class="lang-ko">저널클럽 주간(2&ndash;7, 9&ndash;12주차)은 5분 리딩 퀴즈로 시작하고, 강의 후에는 3&ndash;4명씩
-      30분 토론을 해요. 그룹은 매주 랜덤으로 섞이고, 그룹마다 두 역할이 랜덤 추첨되어 <b>수업 당일 13:00에
+      30분 토론을 해요. 그룹은 매주 랜덤으로 섞이고, 그룹마다 <b>세 역할</b>(리더·발표자·질문자)이 랜덤 추첨되어 <b>수업 당일 13:00에
       공개</b>돼요 — 누구든 뽑힐 수 있으니 모두가 준비해야 해요. (2주차는 교수가 함께 진행하며 포맷을 시범 보여요.)
       entrance ticket은 <b>바로 이 페이지에서</b> 작성하고 제출해요 (아래에서 로그인 · 마감 일요일 13:00).
       제출한 티켓은 <b>바로 이 페이지에 올라와요</b> — 수업 당일 13:00 전까지는 교수·조교만 읽을 수 있고,
@@ -116,7 +116,15 @@
         <li><span class="lang-en">Quotes the sharpest points from the group's tickets.</span><span class="lang-ko">그룹 티켓에서 가장 날카로웠던 포인트를 인용해요.</span></li>
       </ul>
     </div>
-    <p class="sub" style="flex-basis:100%;margin:0"><span class="lang-en">Roles are drawn at random (fairness-weighted, so everyone serves several times a semester) and count toward the discussion-leadership 9%.</span><span class="lang-ko">역할은 랜덤 추첨이에요 (공정 가중 — 학기 동안 모두 여러 번 맡게 돼요). 뽑힌 날의 수행이 토론 리더십 9% 평가에 반영돼요.</span></p>
+    <div class="role-card" style="border-left-color:#3b5670">
+      <p class="role-t"><span class="grp-star" style="color:#3b5670">?</span> <span class="lang-en">Questioner</span><span class="lang-ko">질문자</span></p>
+      <ul>
+        <li><span class="lang-en">Listens to <b>another group's</b> report and asks it a real question — the target group is shown on your group's card.</span><span class="lang-ko"><b>다른 그룹</b>의 발표를 듣고 질문해요 — 질문할 그룹은 우리 그룹 카드에 표시돼요.</span></li>
+        <li><span class="lang-en">Ask about something that would change the conclusion: an assumption, a missing control, a leak.</span><span class="lang-ko">결론을 바꿀 수 있는 지점을 물어요: 가정, 빠진 대조군, 누수 같은 것.</span></li>
+        <li><span class="lang-en">One sharp question beats three vague ones — prepare it while you listen.</span><span class="lang-ko">막연한 질문 셋보다 날카로운 질문 하나 — 들으면서 준비해요.</span></li>
+      </ul>
+    </div>
+    <p class="sub" style="flex-basis:100%;margin:0"><span class="lang-en">Three roles per group, drawn at random (fairness-weighted, so everyone serves each role several times a semester) and counted toward the discussion-leadership 9%.</span><span class="lang-ko">그룹마다 세 역할을 랜덤 추첨해요 (공정 가중 — 학기 동안 모두가 각 역할을 여러 번 맡아요). 뽑힌 날의 수행이 토론 리더십 9% 평가에 반영돼요.</span></p>
   </div>
 
   <div id="jc">
@@ -158,19 +166,20 @@ async function initGroupBoxes(scope) {
       b.innerHTML = `<h3>${t("Discussion groups", "토론 그룹")}${g.preview
         ? ` <span class="pill acc" style="vertical-align:2px">${t("PI preview — hidden from students until 13:00", "PI 미리보기 — 학생에겐 13:00까지 비공개")}</span>` : ""}</h3>
         <p class="sub" style="margin:0">${t(
-          `Groups, leaders, and presenters are revealed here at 13:00 on class day (${fmtDate(at.slice(0,10))}). Anyone can be drawn — prepare accordingly.`,
-          `그룹·리더·발표자는 수업 당일 13:00에 여기서 공개돼요 (${fmtDate(at.slice(0,10))}). 누구든 뽑힐 수 있으니 모두 준비해 오세요.`)}</p>`;
+          `Groups, leaders, presenters, and questioners are revealed here at 13:00 on class day (${fmtDate(at.slice(0,10))}). Anyone can be drawn — prepare accordingly.`,
+          `그룹·리더·발표자·질문자는 수업 당일 13:00에 여기서 공개돼요 (${fmtDate(at.slice(0,10))}). 누구든 뽑힐 수 있으니 모두 준비해 오세요.`)}</p>`;
       continue;
     }
     b.innerHTML = `<h3>${t("Discussion groups", "토론 그룹")}${g.preview
         ? ` <span class="pill acc" style="vertical-align:2px">${t("PI preview — hidden from students until 13:00", "PI 미리보기 — 학생에겐 13:00까지 비공개")}</span>` : ""}</h3>
       <div class="grp-grid">${(g.groups || []).map((grp, i) => `
         <div class="grp-card"><p class="grp-t">${t("Group", "그룹")} ${i + 1}</p>
-          ${grp.members.map((m) => `<div class="grp-m${m.leader ? " lead" : ""}${m.presenter ? " pres" : ""}">
+          ${grp.members.map((m) => `<div class="grp-m${m.leader ? " lead" : ""}${m.presenter ? " pres" : ""}${m.questioner ? " ques" : ""}">
             ${m.photo ? `<img class="face" src="${esc(m.photo)}" alt="">`
                       : `<div class="face av">${esc((m.display || "?")[0].toUpperCase())}</div>`}
-            <span>${esc(m.display)}${m.leader ? ` <span class="grp-star">★ ${t("leader", "리더")}</span>` : ""}${m.presenter ? ` <span class="grp-star" style="color:var(--ok)">◆ ${t("presenter", "발표자")}</span>` : ""}</span>
+            <span>${esc(m.display)}${m.leader ? ` <span class="grp-star">★ ${t("leader", "리더")}</span>` : ""}${m.presenter ? ` <span class="grp-star" style="color:var(--ok)">◆ ${t("presenter", "발표자")}</span>` : ""}${m.questioner ? ` <span class="grp-star" style="color:#3b5670">? ${t("questioner", "질문자")}</span>` : ""}</span>
           </div>`).join("")}
+          ${grp.asks_group ? `<p class="sub" style="margin:6px 0 0;font-size:11.5px">${t(`? questions Group ${grp.asks_group}'s report`, `? 질문자는 그룹 ${grp.asks_group} 발표에 질문해요`)}</p>` : ""}
         </div>`).join("")}</div>`;
   }
 }

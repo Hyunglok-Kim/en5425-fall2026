@@ -29,7 +29,7 @@
   .face.av { display:flex; align-items:center; justify-content:center; background:var(--wash);
     color:var(--ink-2); font-family:var(--serif); font-size:12px; font-weight:700; }
   .grp-star { color:var(--accent); font-size:11px; font-weight:700; }
-  .grp-m.lead span, .grp-m.pres span { font-weight:700; }
+  .grp-m.lead span, .grp-m.pres span, .grp-m.ques span { font-weight:700; }
   .slide-row { margin-top:10px; padding-top:10px; border-top:1px solid var(--hairline);
     display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:12.5px; }
   .upbox { border:1px dashed var(--accent); border-radius:10px; padding:12px 14px; margin:12px 0 4px;
@@ -116,8 +116,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         return `<p class="sub" style="margin:12px 0 0">${t("Groups are not made yet.", "아직 그룹 편성 전이에요.")}</p>`;
       if (g.hidden)
         return `<p class="sub" style="margin:12px 0 0">${t(
-          `Groups, leaders, and presenters are revealed at 13:00 on class day (${fmtDate(String(g.reveal_at).slice(0, 10))}).`,
-          `그룹·리더·발표자는 수업 당일 13:00에 공개돼요 (${fmtDate(String(g.reveal_at).slice(0, 10))}).`)}</p>`;
+          `Groups, leaders, presenters, and questioners are revealed at 13:00 on class day (${fmtDate(String(g.reveal_at).slice(0, 10))}).`,
+          `그룹·리더·발표자·질문자는 수업 당일 13:00에 공개돼요 (${fmtDate(String(g.reveal_at).slice(0, 10))}).`)}</p>`;
       const previewPill = g.preview
         ? `<p class="sub" style="margin:10px 0 0"><span class="pill acc">${t("PI preview — hidden from students until 13:00 on class day", "PI 미리보기 — 학생에게는 수업 당일 13:00까지 비공개")}</span></p>` : "";
       const slByG = {};
@@ -128,9 +128,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           ? `<a class="btn primary" href="/api/slides/file?week=${w.n}&g=${i + 1}" target="_blank" rel="noopener">${t("Open slides", "발표자료 열기")}${s2.ext ? ` (${esc(s2.ext.toUpperCase())})` : ""}</a>`
           : `<span class="sub" style="margin:0">${t("No slides yet.", "아직 업로드 전이에요.")}</span>`;
         return `<div class="grp-card"><p class="grp-t">${t("Group", "그룹")} ${i + 1}</p>
-          ${grp.members.map((m) => `<div class="grp-m${m.leader ? " lead" : ""}${m.presenter ? " pres" : ""}">
+          ${grp.members.map((m) => `<div class="grp-m${m.leader ? " lead" : ""}${m.presenter ? " pres" : ""}${m.questioner ? " ques" : ""}">
             ${face(m.display, m.photo)}
-            <span>${esc(m.display)}${m.leader ? ` <span class="grp-star">★ ${t("leader", "리더")}</span>` : ""}${m.presenter ? ` <span class="grp-star" style="color:var(--ok)">◆ ${t("presenter", "발표자")}</span>` : ""}</span>
+            <span>${esc(m.display)}${m.leader ? ` <span class="grp-star">★ ${t("leader", "리더")}</span>` : ""}${m.presenter ? ` <span class="grp-star" style="color:var(--ok)">◆ ${t("presenter", "발표자")}</span>` : ""}${m.questioner ? ` <span class="grp-star" style="color:#3b5670">? ${t("questioner", "질문자")}</span>` : ""}</span>
           </div>`).join("")}
           <div class="slide-row">${open}${s2.at ? `<span class="sub" style="margin:0">${esc(String(s2.at).slice(5, 16).replace("T", " "))}</span>` : ""}</div>
         </div>`;
