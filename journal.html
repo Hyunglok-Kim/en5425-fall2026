@@ -320,20 +320,28 @@ async function initQuizBoxes(scope) {
     if (!row) { b.innerHTML = ""; continue; }
     const dueTxt = row.due ? `${fmtDate(row.due.slice(0, 10))} ${row.due.slice(11, 16)}` : "";
     const done = !!row.submitted_at;
+    const graded = row.score !== null && row.score !== undefined;
+    const fileLink = (done && row.fname)
+      ? `<div class="qz-file" style="margin:2px 0 8px;padding:8px 11px;background:var(--page);border:1px solid var(--hairline);border-radius:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+           <span style="color:var(--ok);font-weight:700">✓ ${t("Submitted", "제출 완료")}</span>
+           <a href="/api/file?aid=${encodeURIComponent(aid)}&name=${encodeURIComponent(row.fname)}" target="_blank" rel="noopener" style="font-weight:600">📄 ${t("Open my PDF", "내 제출 PDF 열기")}</a>
+           <span class="sub" style="margin:0">${esc(String(row.submitted_at).slice(0, 16).replace("T", " "))}${row.late ? " · " + t("late", "지각") : ""}${graded ? " · " + t("graded", "채점됨") : ""} · ${t("click to download", "클릭해 다운로드")}</span>
+         </div>` : "";
     b.innerHTML = `<div class="mybox-in" style="margin-top:12px">
       <p class="mybox-t">${esc(row.title || "Quiz write-up W" + wn)} <span class="sub" style="margin:0;display:inline">
         · ${t("PDF, due before class ends", "PDF · 수업 끝나기 전까지")} — ${esc(dueTxt)}
-        ${done ? ` · <b style="color:var(--ok)">${t("submitted", "제출됨")} ${esc(String(row.submitted_at).slice(5, 16).replace("T", " "))}</b>${row.late ? ` <span class="tk-late">${t("late", "지각")}</span>` : ""}`
-               : ` · <b style="color:var(--warn)">${t("not submitted yet", "미제출")}</b>`}</span></p>
-      <p class="sub" style="margin:0 0 8px">${t("Redo today's quiz in your own words and upload it before you leave the room.",
-        "오늘 본 퀴즈를 내 언어로 다시 풀어, 강의실을 나가기 전에 올려 주세요.")}</p>
+        ${done ? "" : ` · <b style="color:var(--warn)">${t("not submitted yet", "미제출")}</b>`}</span></p>
+      ${fileLink}
+      ${done ? "" : `<p class="sub" style="margin:0 0 8px">${t("Redo today's quiz in your own words and upload it before you leave the room.",
+        "오늘 본 퀴즈를 내 언어로 다시 풀어, 강의실을 나가기 전에 올려 주세요.")}</p>`}
       <div class="mybox-foot" style="margin-top:0">
         <input type="file" accept="application/pdf,.pdf" style="font-size:12.5px">
-        <button class="btn primary">${done ? t("Resubmit PDF", "PDF 다시 제출") : t("Submit PDF", "PDF 제출")}</button>
-        <span class="sub" style="margin:0">${t("PDF only · ≤ 5 MB", "PDF만 · 5 MB 이하")}</span>
+        <button class="btn primary">${done ? t("Replace PDF", "다른 PDF로 교체") : t("Submit PDF", "PDF 제출")}</button>
+        ${done && !graded ? `<button class="btn qz-del" type="button">${t("Delete", "제출 삭제")}</button>` : ""}
+        <span class="sub" style="margin:0">${t("PDF only · ≤ 5 MB · resubmit until graded", "PDF만 · 5 MB 이하 · 채점 전까지 재제출/삭제")}</span>
       </div>
       <p class="sub gerr" style="min-height:16px;margin:6px 0 0;color:var(--warn)"></p></div>`;
-    b.querySelector("button").addEventListener("click", async () => {
+    b.querySelector("button.primary").addEventListener("click", async () => {
       const inp = b.querySelector("input[type=file]");
       const err = b.querySelector(".gerr");
       if (!inp.files.length) { err.textContent = t("Choose your PDF first.", "PDF 파일을 먼저 선택해 주세요."); return; }
@@ -344,6 +352,17 @@ async function initQuizBoxes(scope) {
         if (!r.ok) throw new Error(j.detail || "submit failed");
         location.reload();
       } catch (e2) { err.textContent = e2.message; }
+    });
+    const del = b.querySelector(".qz-del");
+    if (del) del.addEventListener("click", async () => {
+      if (!confirm(t("Delete your submitted quiz PDF?", "제출한 퀴즈 PDF를 삭제할까요?"))) return;
+      const fd = new FormData(); fd.append("aid", aid);
+      try {
+        const r = await fetch("/api/unsubmit", { method: "POST", headers: XH, body: fd });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.detail || "delete failed");
+        location.reload();
+      } catch (e2) { b.querySelector(".gerr").textContent = e2.message; }
     });
   }
 }
