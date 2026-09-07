@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const SECS = [
     { p: "memo", en: "Entrance tickets", ko: "입장 티켓", sEn: "due 24 h before class", sKo: "수업 24시간 전 마감" },
     { p: "note", en: "Research notes", ko: "연구노트", sEn: "weekly PDF", sKo: "주간 PDF" },
-    { p: "book", en: "Book summaries", ko: "북 정리", sEn: "handwritten scan, no AI", sKo: "손글씨 스캔, AI 금지" },
+    { p: "book", en: "Book summaries — OPTIONAL BONUS", ko: "북 정리 — 선택 (보너스)", sEn: "handwritten scan, no AI · each one forgives one wrong quiz answer", sKo: "손글씨 스캔, AI 금지 · 한 편당 퀴즈 오답 1개 면제" },
     { p: "vid",  en: "Video summaries", ko: "영상 정리", sEn: "0.5-page PDF", sKo: "0.5페이지 PDF" },
     { p: "qz",   en: "Quiz write-ups", ko: "퀴즈 정리", sEn: "redo today's quiz in your own words — PDF, due before class ends (Mon 16:00)", sKo: "오늘 퀴즈를 내 언어로 다시 풀어 PDF 제출 · 수업 끝나기 전(월 16:00) 마감" },
     { p: "",     en: "HW0 & Capstone", ko: "HW0 · Capstone", sEn: "reports & milestones", sKo: "보고서 · 마일스톤" },
@@ -103,7 +103,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       : r.id.startsWith("book") ? t(`Book summary — Week ${w}`, `북 정리 — ${w}주차`)
       : r.id.startsWith("vid") ? t(`Video summary — Week ${w}`, `영상 정리 — ${w}주차`)
       : CAP[r.id] ? t(CAP[r.id][0], CAP[r.id][1]) : r.id);
-    if (r.id.startsWith("book")) base += t(" — HANDWRITTEN, scanned to PDF, no AI", " — 손글씨 작성 후 스캔 PDF, AI 금지");
+    if (r.id.startsWith("book")) base += t(" — OPTIONAL bonus · HANDWRITTEN, scanned to PDF, no AI · forgives one wrong quiz answer",
+      " — 선택(보너스) · 손글씨 작성 후 스캔 PDF, AI 금지 · 퀴즈 오답 1개 면제");
     if (r.id.startsWith("vid")) base += t(" — 0.5-page PDF", " — 0.5페이지 PDF");
     return base;
   };

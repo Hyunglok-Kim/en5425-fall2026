@@ -225,7 +225,8 @@ function submitBoxHTML(row, mine, label) {
   const dueTxt = row.due ? `${fmtDate(row.due.slice(0, 10))} ${row.due.slice(11, 16)}` : "";
   const status = mine && mine.at
     ? t("submitted", "제출됨") + " " + String(mine.at).slice(5, 16).replace("T", " ") + (row.late || (mine && mine.late) ? ` · <span style="color:var(--warn);font-weight:700">${t("late", "지각")}</span>` : "")
-    : (row.status === "miss" ? `<span style="color:var(--warn)">${t("missing", "미제출")}</span>` : t("not submitted yet", "아직 제출 전"));
+    : (row.status === "miss" ? `<span style="color:var(--warn)">${t("missing", "미제출")}</span>`
+    : (row.status === "skip" ? t("optional — not taken", "선택 과제 — 미제출") : t("not submitted yet", "아직 제출 전")));
   const graded = row.score !== null && row.score !== undefined;
   return `<p class="mybox-t" style="font-weight:700;font-size:13.5px;margin:0 0 8px;font-family:var(--serif)">${esc(label)}
       <span class="sub" style="margin:0;display:inline"> · ${t("due", "마감")} ${esc(dueTxt)} · ${status}${graded

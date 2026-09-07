@@ -189,7 +189,8 @@ const chip = (s) =>
   s === "ok"   ? `<span class="st ok" title="${t("submitted", "제출 완료")}">&#10003;</span>` :
   s === "late" ? `<span class="st late" title="${t("submitted late", "지각 제출")}">!</span>` :
   s === "due"  ? `<span class="st due" title="${t("due", "진행 중")}">&#183;</span>` :
-  s === "miss" ? `<span class="st miss" title="${t("missing", "미제출")}">&#8212;</span>` : "";
+  s === "miss" ? `<span class="st miss" title="${t("missing", "미제출")}">&#8212;</span>` :
+  s === "skip" ? `<span class="st due" title="${t("optional — not taken, no penalty", "선택 과제 — 안 내도 감점 없어요")}">&#9675;</span>` : "";
 function fmtDT(iso) {
   if (!iso) return "";
   const d = new Date(iso);
@@ -210,9 +211,10 @@ function renderMine(me) {
   const rows = (me.assignments || []).filter((a) => a.type !== "score" && a.type !== "slides");
 
   /* ---- 2 · progress ---- */
-  const c = { ok: 0, late: 0, miss: 0, due: 0 };
+  const c = { ok: 0, late: 0, miss: 0, due: 0, skip: 0 };
   rows.forEach((a) => { if (c[a.status] !== undefined) c[a.status]++; });
-  const dueSoFar = rows.filter((a) => a.due && Date.parse(a.due) <= now);
+  /* optional items nobody took ("skip") must not drag the completion bar down */
+  const dueSoFar = rows.filter((a) => a.due && Date.parse(a.due) <= now && a.status !== "skip");
   const done = dueSoFar.filter((a) => a.submitted_at).length;
   const pct = dueSoFar.length ? Math.min(100, Math.round(100 * done / dueSoFar.length)) : 0;
   const upcoming = rows.filter((a) => a.due && !a.submitted_at && Date.parse(a.due) > now)

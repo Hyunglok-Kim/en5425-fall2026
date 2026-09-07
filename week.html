@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (n === 1) bx.push(["tool01", t("AI Toolkit Report (5-page PDF)", "AI 툴킷 활용 정리 (5페이지 PDF)")]);
         if (n === 1) bx.push(["hw0", t("HW0 — PDF report", "HW0 — PDF 보고서")]);
         if (teach) bx.push([`note${String(n).padStart(2, "0")}`, t(`My research note (Week ${n}, PDF)`, `내 연구노트 (${n}주차, PDF)`)]);
-        if (w.reading && w.reading.book) bx.push([`book${String(n).padStart(2, "0")}`, t(`Book summary (Week ${n} — HANDWRITTEN, scanned to PDF, no AI)`, `북 정리 (${n}주차 — 손글씨 작성 후 스캔 PDF, AI 금지)`)]);
+        if (w.reading && w.reading.book) bx.push([`book${String(n).padStart(2, "0")}`, t(`Book summary (Week ${n} — OPTIONAL bonus: forgives one wrong quiz answer · HANDWRITTEN, scanned to PDF, no AI)`, `북 정리 (${n}주차 — 선택·보너스: 퀴즈 오답 1개 면제 · 손글씨 작성 후 스캔 PDF, AI 금지)`)]);
         if (w.reading && w.reading.video) bx.push([`vid${String(n).padStart(2, "0")}`, t(`Video summary (Week ${n}, 0.5-page PDF)`, `영상 정리 (${n}주차, 0.5페이지 PDF)`)]);
         if (n === 8) bx.push(["proposal", t("Capstone proposal (PDF)", "Capstone 제안서 (PDF)")]);
         if (n === 13) bx.push(["m1", t("Milestone M1 (PDF)", "마일스톤 M1 (PDF)")]);
