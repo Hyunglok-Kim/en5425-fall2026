@@ -995,15 +995,15 @@
   <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
     <div style="min-width:0">
       <div class="card">
-        <p style="line-height:2.1">
+        <p style="line-height:1.7;margin:0">
           effective sample size:&emsp;<b>n<sub>eff</sub> = n·(1−ρ)/(1+ρ)</b>&emsp;<span class="muted">(neighbor correlation ρ)</span><br>
           ρ = 0.9 → n/19&emsp;·&emsp;ρ = 0.95 → n/39
         </p>
       </div>
       <ul>
         <li>Ten years of daily observations at one station: n = 3650, ρ ≈ 0.95 → <span class="accent"><b>≈ 94 independent samples</b></span>. A decade of data carries about three months of information.</li>
-        <li>Error bars computed with n are ~6× too tight — “significant” model improvements evaporate under blocked resampling.</li>
-        <li class="small muted">Two-line derivation (the same geometric series as Adam’s bias correction): Appendix. Blocked cross-validation is the honest approximation — folds separated at the correlation scale behave like ≈ n<sub>eff</sub> independent draws.</li>
+        <li>Uncertainty shrinks as <b>1/√n<sub>eff</sub></b>, not 1/√n — so quoting n makes every error bar <b>√(n/n<sub>eff</sub>) = √39 ≈ 6× too tight</b>. Widen them honestly and a model that “beat baseline significantly” often has <span class="accent">overlapping intervals — the improvement evaporates</span>.</li>
+        <li class="small muted">Two-line derivation (same geometric series as Adam’s bias correction): Appendix. Blocked CV is the honest approximation of this.</li>
       </ul>
     </div>
     <div class="figure" style="margin:0">
@@ -1034,6 +1034,7 @@
   <div class="gloss">
     <span><b>ρ</b> “rho” — the correlation between neighboring samples, in time or in space (0 = unrelated, 1 = identical).</span>
     <span><b>n<sub>eff</sub></b> — how many truly independent samples your n correlated ones are worth; honest error bars use n<sub>eff</sub>, not n.</span>
+    <span><b>two uses, one ρ</b> — τ = (1+ρ)/(1−ρ) ≈ 39 sets the <i>block &amp; gap size</i> (how far to separate); n<sub>eff</sub> = n/τ ≈ 94 is the <i>number of independent pieces</i> you then get — error bars and CV folds, not rows to delete.</span>
   </div>
   <div class="foot"><span>Read: Wilks, Statistical Methods in the Atmospheric Sciences, ch. 5 §5.2.4 · <a href="https://atmos.uw.edu/~dennis/552_Notes_6a.pdf">Hartmann, Objective Analysis notes §6.1.5</a> — linked on the Week 2 page</span></div>
   <aside class="notes">~2.5 min. Do the arithmetic live and slowly: 3650 days, divide by 39 — about 94. Say the punchline twice: "a decade of daily data carries three months of information." Then connect the two lies: leakage inflates the score, autocorrelation inflates the confidence — a random split gets BOTH wrong at once. Students who want the two-line proof: appendix, and it reuses the geometric series from Adam's bias correction (that callback earns a laugh).</aside>
