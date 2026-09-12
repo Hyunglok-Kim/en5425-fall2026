@@ -449,16 +449,56 @@
 <section class="slide">
   <p class="kicker">Part 2 · The death of download</p>
   <h2>Download-then-process is dead</h2>
-  <ul>
-    <li>ERA5 at 0.25°/hourly is petabyte-scale; the Sentinel-2 archive is tens of PB — <span class="accent">no one downloads the corpus anymore</span>.</li>
-    <li>Cloud-native flips the model: data sits in object storage (S3 or GCS &mdash; Google Cloud Storage); you issue <b>HTTP (HyperText Transfer Protocol) range requests</b> for exactly the bytes you need.</li>
-    <li>Three specs make that possible: <b>COG</b> (Cloud Optimized GeoTIFF — images), <b>Zarr</b> (N-dimensional arrays), <b>STAC</b> (SpatioTemporal Asset Catalog — search).</li>
-    <li class="muted">Throughput currency: useful bytes ÷ bytes moved. Everything today optimizes that ratio.</li>
-  </ul>
+  <div class="cols" style="grid-template-columns:1.05fr 1fr;align-items:center;gap:2.2vw">
+    <div style="min-width:0">
+      <ul class="small">
+        <li>ERA5 at 0.25°/hourly is petabyte-scale; the Sentinel-2 archive is tens of PB — <span class="accent">no one downloads the corpus anymore</span>.</li>
+        <li>Cloud-native flips the model: data sits in object storage (S3 or GCS &mdash; Google Cloud Storage); you issue <b>HTTP (HyperText Transfer Protocol) range requests</b> for exactly the bytes you need.</li>
+        <li>Three specs make that possible: <b>COG</b> (Cloud Optimized GeoTIFF — images), <b>Zarr</b> (N-dimensional arrays), <b>STAC</b> (SpatioTemporal Asset Catalog — search).</li>
+        <li class="muted">Throughput currency: useful bytes ÷ bytes moved. Everything today optimizes that ratio.</li>
+      </ul>
+    </div>
+    <div class="figure" style="min-width:0">
+      <svg viewBox="0 0 340 222" role="img" aria-label="A funnel in four stages: the whole archive, then only the scenes a search kept, then only the tiles under your window, then the chip the model actually eats. The arrows are labelled STAC, COG and Zarr, and range request. Each stage removes bytes that would otherwise have crossed the network." style="width:min(100%,360px)">
+          <text x="170" y="16" text-anchor="middle" font-size="9.5" fill="currentColor">every arrow removes bytes that never cross the network</text>
+          <g fill="none" stroke="currentColor" stroke-width="1.4">
+            <rect x="6"   y="58"  width="48" height="104" rx="5"/>
+            <rect x="106" y="78"  width="44" height="64"  rx="5"/>
+            <rect x="202" y="95"  width="40" height="30"  rx="5"/>
+          </g>
+          <rect x="294" y="103" width="40" height="14" rx="4" fill="var(--accent)" opacity=".85"/>
+          <g fill="none" stroke="currentColor" stroke-width="1.3">
+            <path d="M56 110 H100"/><path d="M152 110 H196"/><path d="M244 110 H288"/>
+            <path d="M96 106 L102 110 L96 114 Z" fill="currentColor" stroke="none"/>
+            <path d="M192 106 L198 110 L192 114 Z" fill="currentColor" stroke="none"/>
+            <path d="M284 106 L290 110 L284 114 Z" fill="currentColor" stroke="none"/>
+          </g>
+          <g font-size="9" fill="var(--accent)" text-anchor="middle" font-weight="700">
+            <text x="80" y="101">STAC</text>
+            <text x="176" y="101">COG &#183; Zarr</text>
+            <text x="268" y="101">range</text>
+          </g>
+          <g font-size="9.5" fill="currentColor" text-anchor="middle">
+            <text x="30"  y="180">the archive</text>
+            <text x="128" y="180">matching</text>
+            <text x="222" y="180">the tiles</text>
+            <text x="314" y="180">your chip</text>
+          </g>
+          <g font-size="8.5" fill="var(--muted)" text-anchor="middle">
+            <text x="30"  y="192">tens of PB</text>
+            <text x="128" y="192">scenes</text>
+            <text x="222" y="192">you need</text>
+            <text x="314" y="192">the payload</text>
+          </g>
+          <text x="170" y="214" text-anchor="middle" font-size="10" fill="var(--accent)" font-weight="700">useful bytes &#247; bytes moved &#8594; 1</text>
+        </svg>
+    </div>
+  </div>
   <div class="gloss">
     <span><b>object storage</b> &mdash; not a disk and not a file server: a flat pool of named objects (S3, GCS) you address by key over HTTP, which is why a thousand workers can read it at once.</span>
     <span><b>HTTP range request</b> &mdash; one line in the request header saying &ldquo;send me bytes 4096&ndash;8191&rdquo;; you get a slice of a 4&nbsp;GB file without ever downloading the file.</span>
-    <span><b>useful bytes &divide; bytes moved</b> &mdash; what your model actually consumed, divided by what crossed the network; the chunking slide two ahead puts real numbers on this ratio.</span>
+    <span><b>useful bytes &divide; bytes moved</b> &mdash; what your model consumed, over what crossed the network. It is the <i>currency</i> because in the cloud the bill and the wait are both paid in bytes moved, not in computation.</span>
+    <span><b>in the figure</b> &mdash; one request, four stages. Search discards whole scenes before a pixel is read; the formats let you open one file and take only part of it; the range request is the wire-level ask. Each arrow shrinks the denominator.</span>
     <span><b>COG &middot; Zarr &middot; STAC</b> &mdash; images, N-D arrays, search: three specs, one pipeline, not three rivals.</span>
   </div>
   <aside class="notes">1.5 min. Define "cloud-native" precisely: a format is cloud-native when a remote reader can fetch a small piece without reading the whole file — layout + metadata designed for partial reads over HTTP. Write the ratio on the board; the chunking slide quantifies it.</aside>
