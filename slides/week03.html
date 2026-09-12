@@ -519,7 +519,7 @@
     <span><b>consolidated metadata</b> &mdash; every array&rsquo;s shape, dtype and chunking gathered into one JSON document, so opening a petabyte store costs one round-trip instead of thousands.</span>
     <span><b>dims and coords</b> &mdash; xarray&rsquo;s labels: you slice by <code>level=500</code> and a date, not by integer positions you have to remember.</span>
   </div>
-  <div class="foot"><span>zarr-python · xarray · gcsfs/s3fs for the storage layer</span></div>
+  <div class="foot"><span>zarr-python · xarray · gcsfs/s3fs for the storage layer</span><span><b class="accent">Try it now:</b> <a href="https://colab.research.google.com/github/Hyunglok-Kim/en5425-student-template/blob/main/labs/week03_try.ipynb">open the 5-minute notebook in Colab</a> · <a href="https://storage.googleapis.com/weatherbench2/datasets/era5/1959-2023_01_10-6h-64x32_equiangular_conservative.zarr/.zmetadata">download the consolidated metadata &mdash; one 57 KB JSON file that describes 175 GB</a></span></div>
   <aside class="notes">1.5 min. Contrast with NetCDF/HDF5: same data model (labeled N-D arrays), but classic HDF5 assumed a local filesystem — remote partial reads are painful. Zarr's move: metadata in plain JSON, each chunk its own object. Opening WeatherBench2's ERA5 store takes seconds because metadata is consolidated into one JSON document.</aside>
 </section>
 <!-- 16 -->
@@ -539,7 +539,7 @@
     <span><b>eo:cloud_cover &lt; 20</b> &mdash; a filter on the Item&rsquo;s properties, answered by the STAC API (Application Programming Interface) before a pixel is touched.</span>
     <span><b>lazy datacube</b> &mdash; stackstac hands back an xarray shaped like the answer; nothing is read until you slice it.</span>
   </div>
-  <div class="foot"><span>Earth Search (Element 84) on AWS (Amazon Web Services): Sentinel-2 L2A · Copernicus Data Space and NASA CMR (Common Metadata Repository) also speak STAC</span></div>
+  <div class="foot"><span>Earth Search (Element 84) on AWS (Amazon Web Services): Sentinel-2 L2A · Copernicus Data Space and NASA CMR (Common Metadata Repository) also speak STAC</span><span><b class="accent">Try it now:</b> <a href="https://colab.research.google.com/github/Hyunglok-Kim/en5425-student-template/blob/main/labs/week03_try.ipynb">notebook in Colab</a> · <a href="https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items?bbox=126.7,35.1,127.0,35.35&amp;datetime=2026-05-01T00:00:00Z/2026-08-31T23:59:59Z&amp;limit=5">the search over GIST as raw JSON</a> · <a href="https://radiantearth.github.io/stac-browser/#/external/earth-search.aws.element84.com/v1/collections/sentinel-2-l2a">browse the collection</a></span></div>
   <aside class="notes">1.5 min. The last bullet is the sentence to remember — and it is now the only live mention of COG (card: Appendix A3) — the three specs are one pipeline, not three competing formats. In the lab, the chip pipe is literally: STAC query → filter by cloud metadata → stackstac windowed COG reads → write local chip store.</aside>
 </section>
 <!-- 17 -->

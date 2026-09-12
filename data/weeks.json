@@ -339,7 +339,38 @@
     ],
     "deliverable": "Reusable data/ module + Note 03 (chip gallery, anomaly map, weighted-vs-naive mean table). This chip store is reused in W7.",
     "deliverable_ko": "재사용 가능한 data/ 모듈 + Note 03(chip 갤러리, anomaly 지도, weighted vs naive 평균 표) · 이 chip store는 W7에서 재사용",
-    "homework": null
+    "homework": null,
+    "resources": [
+     {
+      "title": "▶ Try it now — Zarr and STAC in five minutes (Colab, no login; companion to slides 17–18)",
+      "link": "https://colab.research.google.com/github/Hyunglok-Kim/en5425-student-template/blob/main/labs/week03_try.ipynb",
+      "minutes": 5
+     },
+     {
+      "title": "Earth Search STAC API — the same Sentinel-2 search over GIST, as raw JSON in your browser",
+      "link": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items?bbox=126.7,35.1,127.0,35.35&datetime=2026-05-01T00:00:00Z/2026-08-31T23:59:59Z&limit=5"
+     },
+     {
+      "title": "STAC Browser — click through the sentinel-2-l2a collection",
+      "link": "https://radiantearth.github.io/stac-browser/#/external/earth-search.aws.element84.com/v1/collections/sentinel-2-l2a"
+     },
+     {
+      "title": "WeatherBench2 — data guide for the public ERA5 Zarr stores",
+      "link": "https://weatherbench2.readthedocs.io/en/latest/data-guide.html"
+     },
+     {
+      "title": "xarray — reading Zarr (open_zarr, consolidated metadata, lazy chunks)",
+      "link": "https://docs.xarray.dev/en/stable/user-guide/io.html#zarr"
+     },
+     {
+      "title": "pystac-client — search a STAC API from Python",
+      "link": "https://pystac-client.readthedocs.io/en/stable/usage.html"
+     },
+     {
+      "title": "Cloud Optimized GeoTIFF — the spec, and why range requests work",
+      "link": "https://cogeo.org/"
+     }
+    ]
    },
    "reading": {
     "memo": "standard",
