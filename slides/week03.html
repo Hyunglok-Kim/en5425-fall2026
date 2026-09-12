@@ -261,8 +261,8 @@
         <li class="muted">Consistent physics ≠ consistent accuracy: the observing system underneath still changes (satellite era ≫ pre-1979).</li>
       </ul>
     </div>
-    <div class="figure">
-      <svg viewBox="0 0 300 230" role="img" aria-label="Data assimilation cycle: a prior forecast and observations both feed a 4D-Var analysis, whose output initialises the next twelve-hour forecast, and a dashed line carries that forecast back to become the next prior forecast" style="width:min(100%,360px)">
+    <div class="figure" style="flex-direction:column;gap:.9vh">
+      <svg viewBox="0 0 300 230" role="img" aria-label="Data assimilation cycle: a prior forecast and observations both feed a 4D-Var analysis, whose output initialises the next twelve-hour forecast, and a dashed line carries that forecast back to become the next prior forecast" style="width:min(100%,250px)">
         <g fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="20" y="20" width="120" height="44" rx="9"/>
           <rect x="180" y="20" width="100" height="44" rx="9"/>
@@ -282,6 +282,15 @@
           <text x="283" y="120" font-size="10" transform="rotate(90 283 120)">cycle repeats</text>
         </g>
       </svg>
+      <a href="https://www.youtube.com/watch?v=xCC9e_jNKww" class="yt" data-id="xCC9e_jNKww" style="display:block;width:min(94%,250px);margin:0 auto;text-decoration:none;color:inherit">
+        <span class="ytbox" style="position:relative;display:block">
+          <img src="img/yt-w3-4dvar.jpg" alt="Animation produced for ECMWF showing observations arriving continuously across the assimilation window" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+          <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+            <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:.8vh 1.3vh;font-size:2vh;line-height:1">&#9654;</span>
+          </span>
+        </span>
+        <p class="small muted" style="margin:.4vh 0 0;white-space:nowrap;text-align:center">The window, in 90 s — <span class="accent">click to play</span></p>
+      </a>
     </div>
   </div>
   <div class="gloss">
@@ -292,7 +301,7 @@
     <span><b>in the figure</b> &mdash; read it as a loop: the prior forecast (left) and the observations (right) both feed the accent-coloured 4D-Var box; its output seeds the next 12 h forecast, and the dashed arrow returns it as the next prior.</span>
   </div>
   <div class="foot"><span>Hersbach et al. 2020, QJRMS (ERA5) · ERA5T preliminary stream runs ~5 days behind real time</span><span>Full derivation: <a href="https://www.youtube.com/watch?v=8niWYsM2akg">Amos Lawless, ESA EO Summer School</a> (56 min)</span></div>
-  <aside class="notes">2.5 min — this is the conceptual core of Part 1 and the only live seeding of discussion question 2; do not let it slip under 2.5. Walk the loop: the model forecasts, observations correct it, the corrected state seeds the next forecast. A reanalysis replays this loop for 80 years without upgrading the model, so trends aren't artifacts of software upgrades. Punchline for this course: when we "evaluate against ERA5," we evaluate against this loop's output — a model product. That is DQ2 in the reading discussion; plant it now.</aside>
+  <aside class="notes">2.5 min — this is the conceptual core of Part 1 and the only live seeding of discussion question 2; do not let it slip under 2.5. Walk the loop: the model forecasts, observations correct it, the corrected state seeds the next forecast. A reanalysis replays this loop for 80 years without upgrading the model, so trends aren't artifacts of software upgrades. The 90-second ECMWF animation under the diagram is the one thing that shows time running INSIDE the window — play it only if the room looks blank at "four-dimensional", it costs 90 of your 150 spare seconds. No one has made a short purpose-built "what is 4D-Var" explainer; the real derivation is the 56-minute Lawless lecture in the footer. Punchline for this course: when we "evaluate against ERA5," we evaluate against this loop's output — a model product. That is DQ2 in the reading discussion; plant it now.</aside>
 </section>
 <!-- 10 -->
 <section class="slide">
@@ -389,9 +398,9 @@
 <!-- 12 -->
 <section class="slide">
   <p class="kicker">Part 1 · Watch at home</p>
-  <h2>Four short films on where a gridded field comes from</h2>
+  <h2>Three short films on where a gridded field comes from</h2>
   <div style="display:flex;gap:1.2vw;margin-top:1.4vh;align-items:flex-start;justify-content:center">
-    <a href="https://www.youtube.com/watch?v=FAGobvUGl24" class="yt" data-id="FAGobvUGl24" style="flex:1;max-width:23%;text-decoration:none;color:inherit">
+    <a href="https://www.youtube.com/watch?v=FAGobvUGl24" class="yt" data-id="FAGobvUGl24" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
         <img src="img/yt-w3-reanalysis.jpg" alt="Copernicus C3S animation explaining reanalysis" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
         <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
@@ -400,7 +409,7 @@
       </span>
       <p class="small muted" style="margin:.5vh 0 0">Copernicus ECMWF · <i>What is reanalysis?</i> · 2 min — <span class="accent">click to play here</span> · observations are sparse and uneven; a model fills the gaps.</p>
     </a>
-    <a href="https://www.youtube.com/watch?v=YPAWYjPf_Pk" class="yt" data-id="YPAWYjPf_Pk" style="flex:1;max-width:23%;text-decoration:none;color:inherit">
+    <a href="https://www.youtube.com/watch?v=YPAWYjPf_Pk" class="yt" data-id="YPAWYjPf_Pk" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
         <img src="img/yt-w3-assimilation.jpg" alt="DARE Project video on data assimilation" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
         <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
@@ -409,7 +418,7 @@
       </span>
       <p class="small muted" style="margin:.5vh 0 0">DARE Project, Univ. of Reading · <i>Data Assimilation</i> · 3 min — one turn of the cycle in the figure two slides back: forecast, observe, correct, forecast again.</p>
     </a>
-    <a href="https://www.youtube.com/watch?v=NFRkotI_1IA" class="yt" data-id="NFRkotI_1IA" style="flex:1;max-width:23%;text-decoration:none;color:inherit">
+    <a href="https://www.youtube.com/watch?v=NFRkotI_1IA" class="yt" data-id="NFRkotI_1IA" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
         <img src="img/yt-w3-radar.jpg" alt="ESA explainer on how radar satellites work" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
         <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
@@ -418,23 +427,14 @@
       </span>
       <p class="small muted" style="margin:.5vh 0 0">European Space Agency · <i>How do radar satellites work?</i> · 8 min — why radar sees the flood that the optical scene lost to cloud.</p>
     </a>
-    <a href="https://www.youtube.com/watch?v=xCC9e_jNKww" class="yt" data-id="xCC9e_jNKww" style="flex:1;max-width:23%;text-decoration:none;color:inherit">
-      <span class="ytbox" style="position:relative;display:block">
-        <img src="img/yt-w3-4dvar.jpg" alt="Animation produced for ECMWF showing observations arriving continuously across the assimilation window" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
-        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
-          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
-        </span>
-      </span>
-      <p class="small muted" style="margin:.5vh 0 0">Animation for ECMWF · <i>Continuous Data Assimilation</i> · 90 s — observations arriving <i>across</i> the window: the time axis the cycle diagram cannot draw.</p>
-    </a>
   </div>
   <div class="gloss">
     <span><b>first guess</b> &mdash; the short-range forecast the assimilation starts from, before any observation is used; the correction applied to it is the <i>analysis increment</i>.</span>
     <span><b>reanalysis vs analysis</b> &mdash; same machinery, different intent: an analysis runs once, in real time; a reanalysis re-runs decades with one frozen model so the record is consistent end to end.</span>
-    <span><b>in the thumbnails</b> &mdash; scattered observation points over a globe; the forecast-observe-correct loop; a radar pulse and its echo; and observations arriving along a time axis. Four views of one question: where did this number come from?</span>
+    <span><b>in the thumbnails</b> &mdash; scattered observation points over a globe; the forecast-observe-correct loop; a radar pulse and its echo. Three views of one question: where did this number come from?</span>
   </div>
   <div class="foot"><span>None of these is the assigned video &mdash; the assigned one (ERA5 and ERA6, 15 min) is in the Appendix and its summary is due with Note 03</span></div>
-  <aside class="notes">Point at this slide for twenty seconds, do not play anything. Say: the two-minute one is the fastest honest answer to "why is ERA5 gap-free"; the radar one answers "why does Sentinel-1 see the Nepal flood on the title slide when Sentinel-2 mostly saw cloud"; and the 90-second ECMWF animation is the only thing here that shows time running inside the assimilation window, which is the "4D" the previous slide asserts. Note aloud that no one has made a short, purpose-built "what is 4D-Var" explainer — the real derivation is the 56-minute Lawless lecture linked on the previous slide. Optional, not assigned &mdash; keep the Note 03 requirement unambiguous.</aside>
+  <aside class="notes">Point at this slide for twenty seconds, do not play anything. Say: the two-minute one is the fastest honest answer to "why is ERA5 gap-free"; the radar one answers "why does Sentinel-1 see the Nepal flood on the title slide when Sentinel-2 mostly saw cloud". The 90-second ECMWF animation now sits on the reanalysis slide itself, beside the cycle diagram. Optional, not assigned &mdash; keep the Note 03 requirement unambiguous.</aside>
 </section>
 
 <!-- ============ PART 2 · CLOUD-NATIVE ============ -->
