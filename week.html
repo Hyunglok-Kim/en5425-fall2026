@@ -84,8 +84,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       ${w.async ? `<div class="note"><b>${t("Async week — no class meeting.", "원격 주간 — 수업 없음.")}</b> ${t("Capstone sprint continues on your own schedule; feedback via GitHub issues. Deliverables and due dates below.", "Capstone 스프린트는 각자 일정대로 진행하고, 피드백은 GitHub 이슈로 받습니다. 산출물과 마감은 아래를 확인하세요.")}</div>` : ""}
       ${!w.async && n !== 1 && n !== 8 && n !== 16 ? `<p class="sub" style="margin-top:14px">${t(
-        "Session rhythm: 5&#8242; reading quiz &#183; lecture &#183; 15&#8242; break &#183; 30&#8242; journal club &#183; 60&#8242; lab.",
-        "세션 구성: 리딩 퀴즈 5분 &#183; 강의 &#183; 휴식 15분 &#183; 저널클럽 30분 &#183; 실습 60분.")}</p>` : ""}
+        "Session rhythm: 5&#8242; reading quiz &#183; 50&#8242; lecture &#183; 15&#8242; break &#183; 30&#8242; journal club &#183; 60&#8242; lab.",
+        "세션 구성: 리딩 퀴즈 5분 &#183; 강의 50분 &#183; 휴식 15분 &#183; 저널클럽 30분 &#183; 실습 60분.")}</p>` : ""}
 
       <h2>${t("Lecture", "강의")}</h2>
       <div class="rows">${(w.concept || []).map((c) => `
@@ -104,8 +104,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       ${questions.length && n >= 2 && n <= 12 && n !== 8 && !w.async ? `<h2>${t("Journal club (30 min)", "저널클럽 (30분)")}</h2>
       <div class="card">
         <p style="margin:0" class="small">${t(
-          "Bring your entrance ticket (submitted on the sign-in area of this site 24 h before class). Groups of 4&#8211;5, the week's lead pair moderates; the class opens with a 5-minute closed-book reading quiz.",
-          "입장 티켓(수업 24시간 전까지 이 사이트 로그인에서 제출)을 가지고 4&#8211;5명씩 토론합니다. 이번 주 리드 조가 진행하고, 수업 시작은 5분 closed-book 리딩 퀴즈입니다.")}</p>
+          "Bring your entrance ticket (submitted on the sign-in area of this site 24 h before class). Groups of 3&#8211;4, with leader, presenter and questioner drawn at random and revealed at 13:00 on class day; the class opens with a 5-minute closed-book reading quiz.",
+          "입장 티켓(수업 24시간 전까지 이 사이트 로그인에서 제출)을 가지고 3&#8211;4명씩 토론합니다. 리더·발표자·질문자는 랜덤 추첨으로 수업 당일 13:00에 공개되며, 수업 시작은 5분 closed-book 리딩 퀴즈입니다.")}</p>
         <p class="kv">${t("Discussion questions", "토론 질문")}</p>
         <ol style="margin-top:4px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>
         <p style="margin:10px 0 0"><a class="btn" href="journal.html?w=${n}">${t("Read this week's tickets &#8594;", "이번 주 티켓 보기 &#8594;")}</a></p>
