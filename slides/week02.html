@@ -113,7 +113,7 @@
   <div class="cols" style="grid-template-columns:1.1fr 1fr;align-items:center;gap:2.5vw">
     <div style="min-width:0">
       <div class="card">
-        <p style="line-height:2.1">
+        <p style="line-height:1.75">
           x = 2,&ensp;w = 3&emsp;→&emsp;z = w·x = <b>6</b>&emsp;·&emsp;target y = 10&emsp;→&emsp;L = (z−y)² = <b>16</b><br>
           how much does L care about z?&emsp;∂L/∂z = 2(z−y) = <b>−8</b><br>
           how much does z move per unit of w?&emsp;∂z/∂w = x = <b>2</b><br>
@@ -134,9 +134,9 @@
     <span><b>∂L/∂z</b> — “if z moved a hair, how much would L move?” For L = (z−y)² that slope is 2(z−y).</span>
     <span><b>∂z/∂w</b> — “if w moved a hair, how much would z move?” For z = w·x it is simply x.</span>
     <span><b>chain rule</b> — slopes along a chain multiply: w moves z, z moves L, so ∂L/∂w = ∂L/∂z × ∂z/∂w.</span>
-    <span><b>think exchange rates</b> — dollars→euros→won: “won per extra dollar” = the two rates multiplied. A gradient is the same thing — multiply every rate on the wire from w to L.</span>
+    <span><b>think exchange rates</b> — dollars→euros→won: “won per extra dollar” is the two rates multiplied. A gradient is the same: multiply every rate on the wire.</span>
     <span><b>η</b> “eta” — the learning rate: what fraction of the blame you apply as a correction (here 0.1).</span>
-    <span><b>in the figure</b> — J(W) is again the loss (our L); ŷ “y-hat” — the model’s prediction; z₁ — the intermediate value between the two weights w₁ and w₂; each colored underline is one arrow’s local slope in the product.</span>
+    <span><b>in the figure</b> — J(W) is the loss (our L); ŷ “y-hat” the prediction; z₁ the value between weights w₁ and w₂. Each coloured underline is one arrow’s local slope.</span>
   </div>
   <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/mlp.html">Goodfellow §6.5</a> · <a href="https://cs231n.github.io/optimization-2/">CS231n “Backpropagation, Intuitions”</a> · full matrix version: Appendix</span></div>
   <aside class="notes">~2.5 min — do the numbers OUT LOUD, pointing at each line; this is the slide that makes the whole part land. Script: "the loss is 16 and it blames z at a rate of −8; z moves 2 per unit of w; so w's blame is −16 — negative means raise w." Then run the payoff line: one step and the loss falls from 16 to 0.64. That falling number IS learning. Exchange-rate analogy to say aloud: dollars→euros→won — how much won per extra dollar? Multiply the two rates. A gradient is exactly that: multiply every rate along the wire from w to the loss. The MIT figure on the right is the same product one layer deeper: their J is our L.</aside>
@@ -287,13 +287,13 @@
   <div class="cols" style="grid-template-columns:1.2fr 1fr;align-items:center;gap:2.5vw">
     <div style="min-width:0">
       <ul>
-        <li><b>Compute:</b> backward ≈ 2 × forward, so a whole training step ≈ 3 × forward — <span class="accent">at any parameter count</span>. Gradients of 10⁹ weights cost two extra passes, not 10⁹ evaluations (finite differences would).</li>
+        <li><b>Compute:</b> backward ≈ 2 × forward, so a training step ≈ 3 × forward — <span class="accent">at any parameter count</span>. Gradients of 10⁹ weights cost two extra passes, not 10⁹ evaluations.</li>
         <li><b>Memory:</b> every layer must <b>save its input</b> for the backward pass — activation memory ∝ depth × batch × sequence × width, and it dwarfs the weights. Activations set your batch-size ceiling.</li>
         <li><b>Gradient checkpointing</b>: save only some activations, recompute the rest — ≈ +33% compute for 5–10× less memory. <span class="muted">When you run out of GPU memory fine-tuning in Week 12: checkpointing / batch / precision — not a smaller model.</span></li>
       </ul>
     </div>
     <div style="min-width:0;display:flex;flex-direction:column;gap:1vh">
-      <svg viewBox="0 0 360 220" role="img" aria-label="Bar chart: forward pass one unit of compute, backward two units, whole step three; finite differences would need a billion" style="width:min(100%,400px)">
+      <svg viewBox="0 0 360 220" role="img" aria-label="Bar chart: forward pass one unit of compute, backward two units, whole step three; finite differences would need a billion" style="width:min(100%,320px)">
         <g font-family="var(--sans)" font-size="12.5" fill="currentColor">
           <text x="14" y="34">forward</text>
           <text x="14" y="84">backward</text>
@@ -311,7 +311,7 @@
           <text x="118" y="185" opacity="0.6">~10⁹× … one pass per parameter</text>
         </g>
       </svg>
-      <svg viewBox="0 0 360 210" role="img" aria-label="Memory bars: weights plus optimizer under four gigabytes; activations tens of gigabytes; checkpointing shrinks activations five to ten times" style="width:min(100%,400px)">
+      <svg viewBox="0 0 360 210" role="img" aria-label="Memory bars: weights plus optimizer under four gigabytes; activations tens of gigabytes; checkpointing shrinks activations five to ten times" style="width:min(100%,320px)">
         <g font-family="var(--sans)" font-size="12.5" fill="currentColor">
           <text x="14" y="36">weights + Adam</text>
           <text x="14" y="96">activations</text>
@@ -332,7 +332,7 @@
   <div class="gloss">
     <span><b>activations</b> — the tensors each layer outputs (and must keep) during the forward pass.</span>
     <span><b>∝</b> “proportional to” — grows in step with.</span>
-    <span><b>weights + Adam</b> — Adam carries <i>two ledgers per weight</i> — running averages of the gradient (m) and its square (v), each weight-sized — so the model side of memory ≈ 3× the weights. What m and v do: Part 2.</span>
+    <span><b>weights + Adam</b> — Adam carries <i>two ledgers per weight</i>, running averages of g and g², each weight-sized, so the model side of memory ≈ 3× the weights. What m and v do: Part 2.</span>
     <span><b>finite differences</b> — the naive alternative: wiggle one weight, rerun the whole network, read off the change; repeat per weight.</span>
   </div>
   <div class="foot"><span><a href="https://arxiv.org/abs/1604.06174">Chen et al. 2016 (checkpointing)</a> · same op count in <a href="https://www.cs.toronto.edu/~rgrosse/courses/csc321_2017/readings/L06%20Backpropagation.pdf">Grosse’s U. Toronto backpropagation notes</a> · callback target: Week 12 fine-tuning lab</span></div>
@@ -396,7 +396,7 @@
   <div class="cols" style="grid-template-columns:1.2fr 1fr;align-items:center;gap:2.5vw">
     <div style="min-width:0">
       <div class="card">
-        <p style="line-height:2.1"><b>θ ← θ − η ∇L</b>&emsp;<span class="muted">— the linear approximation says downhill is this way; take a small step η</span></p>
+        <p style="line-height:1.8"><b>θ ← θ − η ∇L</b>&emsp;<span class="muted">— the linear approximation says downhill is this way; take a small step η</span></p>
       </div>
       <ul>
         <li>That’s the whole theory: L(θ + Δ) ≈ L(θ) + ∇LᵀΔ, and Δ = −η∇L makes the right side smaller. <span class="muted">(That one line is the entire derivation.)</span></li>
@@ -414,7 +414,7 @@
     <span><b>η</b> “eta” — the learning rate: how far you step along −∇L each time.</span>
     <span><b>L(θ+Δ) ≈ L(θ) + ∇LᵀΔ</b> — “near θ, the loss looks like a tilted plane”; ∇LᵀΔ is slope × displacement (a dot product).</span>
     <span><b>unbiased</b> — right on average: the B-sample minibatch gradient equals the full gradient in expectation; <b>B</b> = batch size.</span>
-    <span><b>in the figure</b> — f(x) = ½x² (dashed) is a toy stand-in for the loss; the green line f′(x) is its derivative: where f′ &lt; 0 step right, where f′ &gt; 0 step left, and at f′ = 0 (the minimum) descent halts.</span>
+    <span><b>in the figure</b> — f(x) = ½x² (dashed) stands in for the loss; the green f′(x) is its derivative: f′ &lt; 0 step right, f′ &gt; 0 step left, f′ = 0 descent halts.</span>
   </div>
   <div class="foot"><span>Read: <a href="https://www.deeplearningbook.org/contents/optimization.html">Goodfellow §8.3</a> · <a href="https://d2l.ai/chapter_optimization/gd.html">Dive into Deep Learning §12.3–12.5</a></span></div>
   <aside class="notes">~1.5 min. Repeat the fog-hiker from Part 1 — same walk, now we engineer it. The minibatch bullet in one spoken line: "a cheap compass that's right on average — we'll buy accuracy with averaging (momentum, next) instead of with bigger batches." The first bullet IS the one-line Taylor derivation — read it once and move on.</aside>
@@ -477,8 +477,8 @@
     <span><b>g</b> — this step’s (noisy) minibatch gradient.</span>
     <span><b>m</b> — the “velocity”: a running average of recent g’s; the update follows m, not the raw g.</span>
     <span><b>β</b> “beta” — the memory knob (0–1): how much of the old average survives each step; effective window ≈ 1/(1−β) recent gradients.</span>
-    <span><b>in the figures</b> — x₁, x₂: the two weights of a toy loss; blue rings: equal-loss contours, a map view of the valley (steep across, shallow along); orange dots: successive steps of the walk.</span>
-    <span><b>where is “down”?</b> — crowded lines = valley walls; the blank corridor along x₂ = 0 = the floor; the green ★ = the minimum (0,0). Dots bunching = arrived; fleeing the map = diverged.</span>
+    <span><b>in the figures</b> — x₁, x₂: two weights of a toy loss; blue rings: equal-loss contours, a map view of the valley; orange dots: successive steps.</span>
+    <span><b>where is “down”?</b> — crowded lines = walls; the blank corridor along x₂ = 0 = the floor; green ★ = the minimum (0,0). Bunching = arrived, fleeing = diverged.</span>
   </div>
   <div class="foot"><span>Figures: Dive into Deep Learning, d2l.ai (CC BY-SA 4.0) · same function, same steps — only memory added · unroll of the average: Appendix</span></div>
   <aside class="notes">~2 min. Walk the triptych left to right: "steep direction flips sign every step, flat direction agrees every step. Averaging kills what flips and keeps what agrees — so the SAME learning rate that exploded now converges." That's momentum's entire job: a low-pass filter on the gradient. The window numbers (10/20/1000) are the practical takeaways students should remember.</aside>
@@ -1034,7 +1034,7 @@
   <div class="gloss">
     <span><b>ρ</b> “rho” — the correlation between neighboring samples, in time or in space (0 = unrelated, 1 = identical).</span>
     <span><b>n<sub>eff</sub></b> — how many truly independent samples your n correlated ones are worth; honest error bars use n<sub>eff</sub>, not n.</span>
-    <span><b>two uses, one ρ</b> — τ = (1+ρ)/(1−ρ) ≈ 39 sets the <i>block &amp; gap size</i> (how far to separate); n<sub>eff</sub> = n/τ ≈ 94 is the <i>number of independent pieces</i> you then get — error bars and CV folds, not rows to delete.</span>
+    <span><b>two uses, one ρ</b> — τ = (1+ρ)/(1−ρ) ≈ 39 sets the <i>block &amp; gap size</i>; n<sub>eff</sub> = n/τ ≈ 94 is the <i>number of independent pieces</i> — error bars and CV folds, not rows to delete.</span>
   </div>
   <div class="foot"><span>Read: Wilks, Statistical Methods in the Atmospheric Sciences, ch. 5 §5.2.4 · <a href="https://atmos.uw.edu/~dennis/552_Notes_6a.pdf">Hartmann, Objective Analysis notes §6.1.5</a> — linked on the Week 2 page</span></div>
   <aside class="notes">~2.5 min. Do the arithmetic live and slowly: 3650 days, divide by 39 — about 94. Say the punchline twice: "a decade of daily data carries three months of information." Then connect the two lies: leakage inflates the score, autocorrelation inflates the confidence — a random split gets BOTH wrong at once. Students who want the two-line proof: appendix, and it reuses the geometric series from Adam's bias correction (that callback earns a laugh).</aside>
@@ -1652,7 +1652,7 @@
   <div class="cols" style="grid-template-columns:1.35fr 1fr;align-items:center;gap:2.5vw">
     <div style="min-width:0">
       <div class="card">
-        <p style="line-height:2.1">
+        <p style="line-height:1.75">
           take expectations of the unrolled average, assuming E[g<sub>k</sub>] = μ:<br>
           E[m<sub>t</sub>] = (1−β)·(1 + β + β² + ⋯ + β<sup>t−1</sup>)·μ&emsp;=&emsp;(1−β)·<span class="accent">(1−βᵗ)/(1−β)</span>·μ&emsp;=&emsp;<b>(1−βᵗ)·μ</b><br>
           ⟹&emsp;m̂<sub>t</sub> ≔ m<sub>t</sub>/(1−βᵗ)&ensp;has&ensp;E[m̂<sub>t</sub>] = μ&emsp;<span class="muted">(same argument gives v̂<sub>t</sub> = v<sub>t</sub>/(1−β₂ᵗ))</span>
@@ -1661,7 +1661,7 @@
       <ul class="small">
         <li>The accent step is the finite geometric series Σ<sub>k=0</sub><sup>t−1</sup> βᵏ = (1−βᵗ)/(1−β) — the only identity in the whole derivation.</li>
         <li>Sanity check at t = 1: m₁ = (1−β)g₁ and 1−β¹ = 1−β, so m̂₁ = g₁ exactly — the correction undoes the zero initialization completely on step one.</li>
-        <li>It matters precisely when training is most fragile: for t ≪ 1/(1−β₂), uncorrected v is far too small → the step η·m/√v would be far too big. βᵗ falls to e⁻¹ by t = 1/(1−β) and the correction fades over a few multiples of the window — the early VARIANCE of v̂ remains, which is why warmup exists anyway.</li>
+        <li>It matters when training is most fragile: for t ≪ 1/(1−β₂), uncorrected v is far too small, so the step η·m/√v would be far too big. βᵗ falls to e⁻¹ by t = 1/(1−β); the early <i>variance</i> of v̂ remains, which is why warmup exists anyway.</li>
       </ul>
     </div>
     <div class="figure" style="margin:0">
@@ -1696,18 +1696,18 @@
   <h2>ℓ₂ penalty vs weight decay: identical in SGD, broken in Adam</h2>
   <div class="cols" style="grid-template-columns:1.4fr 1fr;align-items:center;gap:2.5vw">
     <div style="min-width:0">
-      <div class="card">
-        <p style="line-height:2.1">
+      <div class="card" style="padding:1.3vh 1.6vw">
+        <p style="line-height:1.65;margin:0">
           penalized loss:&emsp;L̃(θ) = L(θ) + (λ/2)·‖θ‖²&emsp;⟹&emsp;∇L̃ = g + λθ<br>
           gradient-descent step:&emsp;θ ← θ − η(g + λθ) = <b>(1 − ηλ)·θ − ηg</b><br>
           ⟹ “add λθ to the gradient” and “shrink weights by (1−ηλ) each step” are <b>the same rule</b>
         </p>
       </div>
-      <div class="card" style="margin-top:.8vh">
-        <p style="line-height:1.9">
-          …but in Adam the λθ term rides through the adaptive ratio:&emsp;step ∝ m̂(g + λθ) / √v̂(g + λθ)<br>
-          a parameter with a large gradient history (large v̂) has its decay term <span class="accent">divided by √v̂ → barely decayed</span> —<br>
-          often exactly the weights that are overfitting. The equivalence is <b>broken</b>; AdamW restores it by applying −η<sub>t</sub>λθ outside the ratio.
+      <div class="card" style="margin-top:.5vh;padding:1.3vh 1.6vw">
+        <p style="line-height:1.6;margin:0">
+          …but in Adam the λθ term rides through the adaptive ratio: step ∝ m̂(g + λθ) / √v̂(g + λθ)<br>
+          a parameter with a large gradient history (large v̂) has its decay <span class="accent">divided by √v̂ → barely decayed</span> —<br>
+          often exactly the weights that are overfitting. AdamW restores the equivalence by applying −η<sub>t</sub>λθ <b>outside</b> the ratio.
         </p>
       </div>
     </div>
