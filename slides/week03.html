@@ -68,20 +68,134 @@
 <section class="slide">
   <p class="kicker">Part 1 · The corpus is the prior</p>
   <h2>The corpus is the prior</h2>
-  <ul>
-    <li>A pretrained model can only know what its corpus sampled: <span class="accent">coverage, cadence, spectral content, and error character become the model's inductive prior</span>.</li>
-    <li>Prithvi saw HLS over the US → global transfer is an open question; Prithvi-WxC saw 160 MERRA-2 variables → it inherits MERRA-2's biases.</li>
-    <li>Every headline weather model — FourCastNet, Pangu, GraphCast, GenCast — is an ERA5 emulator first.</li>
-    <li class="muted">So "which dataset?" is a modeling decision, not a logistics one.</li>
-  </ul>
+  <div class="cols" style="grid-template-columns:1.05fr 1fr;align-items:center;gap:2.2vw">
+    <div style="min-width:0">
+      <ul>
+        <li>A pretrained model can only know what its corpus sampled: <span class="accent">coverage, cadence, spectral content, and error character become the model's inductive prior</span>.</li>
+        <li>Prithvi saw HLS over the US → global transfer is an open question; Prithvi-WxC saw 160 MERRA-2 variables → it inherits MERRA-2's biases.</li>
+        <li>Every headline weather model — FourCastNet, Pangu, GraphCast, GenCast — is an ERA5 emulator first.</li>
+        <li class="muted">So "which dataset?" is a modeling decision, not a logistics one.</li>
+      </ul>
+    </div>
+    <div class="figure" style="min-width:0">
+      <svg viewBox="0 0 330 280" role="img" aria-label="Four small panels, one per axis of a corpus: coverage shows a world outline with only one region shaded; cadence shows the same span of time sampled often on one row and rarely on the next; spectral content shows a wavelength axis carrying three visible bands plus near-infrared and short-wave infrared bands; error character shows a time series broken by a block-shaped gap rather than by scattered noise." style="width:min(100%,430px)">
+          <g fill="none" stroke="var(--hairline)" stroke-width="1">
+            <rect x="5" y="5" width="150" height="125" rx="6"/>
+            <rect x="175" y="5" width="150" height="125" rx="6"/>
+            <rect x="5" y="150" width="150" height="125" rx="6"/>
+            <rect x="175" y="150" width="150" height="125" rx="6"/>
+          </g>
+          <g font-size="11" font-weight="700" fill="var(--accent)" text-anchor="middle" letter-spacing=".06em">
+            <text x="80" y="22">COVERAGE</text>
+            <text x="250" y="22">CADENCE</text>
+            <text x="80" y="167">SPECTRAL</text>
+            <text x="250" y="167">ERROR CHARACTER</text>
+          </g>
+
+          <!-- coverage: a world outline, one region sampled -->
+          <g fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="20" y="34" width="120" height="62" rx="3"/>
+            <path d="M60 34 V96 M100 34 V96 M20 65 H140" stroke="var(--hairline)" stroke-width="1"/>
+          </g>
+          <rect x="35" y="44" width="30" height="19" rx="2" fill="var(--accent)" opacity=".8"/>
+          <text x="80" y="115" text-anchor="middle" font-size="9.5" fill="var(--muted)">one region, not the globe</text>
+
+          <!-- cadence: same span, two sampling rates -->
+          <g stroke="var(--hairline)" stroke-width="1">
+            <path d="M214 44 H320 M214 72 H320"/>
+          </g>
+          <g font-size="9" fill="var(--muted)" text-anchor="end">
+            <text x="208" y="47">often</text>
+            <text x="208" y="75">rarely</text>
+          </g>
+          <g fill="var(--accent)">
+            <circle cx="214" cy="44" r="2.6"/><circle cx="227" cy="44" r="2.6"/><circle cx="240" cy="44" r="2.6"/>
+            <circle cx="253" cy="44" r="2.6"/><circle cx="266" cy="44" r="2.6"/><circle cx="279" cy="44" r="2.6"/>
+            <circle cx="292" cy="44" r="2.6"/><circle cx="305" cy="44" r="2.6"/><circle cx="318" cy="44" r="2.6"/>
+            <circle cx="214" cy="72" r="2.6"/><circle cx="249" cy="72" r="2.6"/>
+            <circle cx="284" cy="72" r="2.6"/><circle cx="318" cy="72" r="2.6"/>
+          </g>
+          <text x="250" y="115" text-anchor="middle" font-size="9.5" fill="var(--muted)">same span, fewer looks</text>
+
+          <!-- spectral: which wavelengths were recorded -->
+          <path d="M20 226 H142" stroke="currentColor" stroke-width="1.2" fill="none"/>
+          <g fill="currentColor">
+            <rect x="30" y="204" width="4" height="22"/>
+            <rect x="38" y="204" width="4" height="22"/>
+            <rect x="46" y="204" width="4" height="22"/>
+          </g>
+          <g fill="var(--accent)">
+            <rect x="74" y="198" width="5" height="28"/>
+            <rect x="106" y="200" width="6" height="26"/>
+            <rect x="124" y="200" width="6" height="26"/>
+          </g>
+          <g font-size="8.5" fill="var(--muted)" text-anchor="middle">
+            <text x="40" y="238">VIS</text>
+            <text x="77" y="238">NIR</text>
+            <text x="118" y="238">SWIR</text>
+          </g>
+          <text x="80" y="260" text-anchor="middle" font-size="9.5" fill="var(--muted)">three bands, or thirteen?</text>
+
+          <!-- error character: a block-shaped hole, not scattered noise -->
+          <path d="M192 216 L200 206 L208 213 L216 201 L224 209 L232 199 L238 207" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M270 204 L278 197 L286 205 L294 191 L302 200 L310 194 L318 201" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <rect x="240" y="188" width="28" height="34" rx="2" fill="none" stroke="var(--accent)" stroke-width="1.3" stroke-dasharray="4 3"/>
+          <text x="254" y="183" text-anchor="middle" font-size="8.5" fill="var(--accent)">cloud</text>
+          <text x="250" y="238" text-anchor="middle" font-size="8.5" fill="var(--muted)">one week gone, all at once</text>
+          <text x="250" y="260" text-anchor="middle" font-size="9.5" fill="var(--muted)">gaps that are not random</text>
+        </svg>
+    </div>
+  </div>
   <div class="gloss">
     <span><b>corpus</b> &mdash; the pile of data a model was pretrained on; whatever the corpus never sampled, the model has no feel for.</span>
     <span><b>inductive prior</b> &mdash; the assumptions a model brings before it sees your data; here you do not choose them, you inherit them from the corpus.</span>
     <span><b>HLS</b> &mdash; Harmonized Landsat &amp; Sentinel-2, 30 m optical, US-heavy; <b>MERRA-2</b> &mdash; NASA's global atmospheric reanalysis. Prithvi ate the first, Prithvi-WxC the second.</span>
     <span><b>emulator</b> &mdash; a model trained to reproduce another model's output: an ERA5-trained forecaster has never seen a raw observation. Returns in W11.</span>
+    <span><b>in the figure</b> &mdash; one panel per axis: <i>where</i> it looked, <i>how often</i>, <i>which wavelengths</i>, and <i>how it fails</i>. Orange marks what the corpus actually recorded; everything unmarked is what the model will never have a feel for.</span>
   </div>
   <div class="foot"><span>Jakubik et al. 2023 (Prithvi) · Schmude et al. 2024 (Prithvi-WxC) · Rasp et al. 2024 (WeatherBench 2)</span></div>
   <aside class="notes">1.5 min. Frame hard: students often treat data choice as plumbing. Point out that a model trained purely on ERA5 has never seen an observation — it has seen a model's opinion of observations. That lands the whole lecture. Transition: so let's meet the animals.</aside>
+</section>
+
+<section class="slide">
+  <p class="kicker">Part 1 · Watch at home</p>
+  <h2>The two corpora on the last slide, in their own words</h2>
+  <div style="display:flex;gap:1.2vw;margin-top:1.4vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=LglZFsoEhS0" class="yt" data-id="LglZFsoEhS0" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w3-prithvi.jpg" alt="NASA IMPACT and IBM film about the Prithvi geospatial foundation model" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">NASA IMPACT &amp; IBM (WebsEdge Science) · <i>Geospatial AI Foundation Model</i> · 5 min — <span class="accent">click to play here</span> · the HLS corpus behind <b>Prithvi</b>, from the team that assembled it.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=NR5EkVRH-B8" class="yt" data-id="NR5EkVRH-B8" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w3-eo-fm-2025.jpg" alt="Geoawesome talk by IBM Research on the state of Earth-observation foundation models in 2025" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Geoawesome · IBM Research · <i>State of EO in 2025: The Impact of Geospatial AI Foundation Models</i> · 9 min — what a year of these models has and has not delivered.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=8LMqrInbd0o" class="yt" data-id="8LMqrInbd0o" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w3-merra2.jpg" alt="NASA GMAO webinar on reanalysis efforts from MERRA-2 to MERRA-3" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">UFS Webinars · Amal El Akkraoui, <b>NASA GMAO</b> · <i>From MERRA-2 to GEOS-R21C and MERRA-3</i> · 45 min — <b>the long one</b>: the first ten minutes are what <b>MERRA-2</b> is and why MERRA-3 is coming.</p>
+    </a>
+  </div>
+  <div class="gloss">
+    <span><b>Prithvi</b> &mdash; the NASA/IBM geospatial foundation model family; Prithvi-EO ate HLS imagery, Prithvi-WxC ate 160 MERRA-2 variables. Two corpora, two very different priors.</span>
+    <span><b>MERRA-3</b> &mdash; the successor now in production at NASA GMAO; when it lands, every model pretrained on MERRA-2 inherits a prior from a superseded reanalysis.</span>
+    <span><b>in the thumbnails</b> &mdash; left and middle, the optical-imagery side of the zoo; right, the reanalysis side. Slide 5&rsquo;s claim is that choosing between them is a modelling decision.</span>
+  </div>
+  <div class="foot"><span>Optional context, not assigned &mdash; the assigned video is in the Appendix</span><span>Hands-on: <a href="https://www.youtube.com/watch?v=CB3FKtmuPI8">AI for Good workshop on Prithvi-EO-2.0 and TerraTorch</a> (2 h)</span></div>
+  <aside class="notes">Twenty seconds, no playback. Say why the pairing exists: the last slide claimed the corpus becomes the prior, and these are the two corpora it named. The MERRA-2 webinar is long on purpose — it is the only place a student can hear a reanalysis team describe their own production line, and the MERRA-3 news at the end is the point: a corpus is not a fixed object. Anyone who wants to actually run Prithvi should take the two-hour workshop linked in the footer, not this slide.</aside>
 </section>
 <!-- 6 -->
 <section class="slide">
