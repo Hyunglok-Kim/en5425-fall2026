@@ -297,27 +297,27 @@
    "date": "2026-09-14",
    "concept": [
     {
-     "min": 15,
+     "min": 8,
      "topic": "The data zoo: SMAP L3/L4, ERA5/MERRA-2 (reanalysis ≠ observation ≠ analysis), MODIS, GPM IMERG, HLS, Sentinel-1/2; spatial/temporal resolutions, latencies, error characteristics.",
      "topic_ko": "데이터 동물원: SMAP L3/L4, ERA5/MERRA-2(reanalysis ≠ observation ≠ analysis), MODIS, GPM IMERG, HLS, Sentinel-1/2 · 시공간 해상도, latency, 오차 특성"
     },
     {
-     "min": 15,
+     "min": 10,
      "topic": "Cloud-native geospatial: COG, Zarr, STAC, chunking and why it dominates throughput; NASA Earthdata/earthaccess, Copernicus Data Space, Google/AWS public buckets, WeatherBench2's public ERA5 Zarr.",
      "topic_ko": "Cloud-native geospatial: COG, Zarr, STAC, chunking과 그것이 throughput을 지배하는 이유 · NASA Earthdata/earthaccess, Copernicus Data Space, Google/AWS 공개 버킷, WeatherBench2의 공개 ERA5 Zarr"
     },
     {
-     "min": 15,
-     "topic": "ERA5 as a pretraining corpus: equiangular grids, pressure levels, why area weighting exists — derive the cos-lat weighted mean; anomalies vs climatology (sets up ACC in W11); regridding: conservative vs bilinear remapping and when each is correct.",
-     "topic_ko": "pretraining corpus로서의 ERA5: 등각 격자, pressure level, 면적 가중이 존재하는 이유 — cos-lat weighted mean 직접 유도 · anomaly vs climatology(W11 ACC의 밑작업) · regridding: conservative vs bilinear remapping과 각각이 맞는 경우"
+     "min": 14,
+     "topic": "HEADLINE — ERA5 as a pretraining corpus: equiangular grids, pressure levels, why area weighting exists — derive the cos-lat weighted mean; anomalies vs climatology (sets up ACC in W11); regridding: conservative vs bilinear remapping and when each is correct.",
+     "topic_ko": "HEADLINE — pretraining corpus로서의 ERA5: 등각 격자, pressure level, 면적 가중이 존재하는 이유 — cos-lat weighted mean 직접 유도 · anomaly vs climatology(W11 ACC의 밑작업) · regridding: conservative vs bilinear remapping과 각각이 맞는 경우"
     },
     {
-     "min": 10,
+     "min": 8,
      "topic": "Designing dataset objects for pretraining: chips, tiles, per-pixel time series; normalization statistics done right (per-band, train-set-only).",
      "topic_ko": "pretraining용 dataset 객체 설계: chip, tile, per-pixel 시계열 · 제대로 된 normalization 통계(per-band, train-set-only)"
     },
     {
-     "min": 5,
+     "min": 3,
      "topic": "Lab briefing: what the agent will scaffold vs what you must verify.",
      "topic_ko": "lab 브리핑: 에이전트가 scaffold할 것 vs 직접 검증해야 할 것"
     }
