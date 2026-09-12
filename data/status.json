@@ -1,5 +1,5 @@
 {
-  "updated": "2026-09-07T10:19:25+09:00",
+  "updated": "2026-09-09T22:42:16+09:00",
   "assignments": [
     {
       "id": "hw0",
@@ -233,37 +233,37 @@
     },
     {
       "id": "book02",
-      "title": "Book summary W2",
+      "title": "Book summary W2 (optional bonus)",
       "due": "2026-09-13T23:59:00+09:00"
     },
     {
       "id": "book03",
-      "title": "Book summary W3",
+      "title": "Book summary W3 (optional bonus)",
       "due": "2026-09-20T23:59:00+09:00"
     },
     {
       "id": "book04",
-      "title": "Book summary W4",
+      "title": "Book summary W4 (optional bonus)",
       "due": "2026-09-27T23:59:00+09:00"
     },
     {
       "id": "book05",
-      "title": "Book summary W5",
+      "title": "Book summary W5 (optional bonus)",
       "due": "2026-10-04T23:59:00+09:00"
     },
     {
       "id": "book06",
-      "title": "Book summary W6",
+      "title": "Book summary W6 (optional bonus)",
       "due": "2026-10-18T23:59:00+09:00"
     },
     {
       "id": "book07",
-      "title": "Book summary W7",
+      "title": "Book summary W7 (optional bonus)",
       "due": "2026-11-01T23:59:00+09:00"
     },
     {
       "id": "book09",
-      "title": "Book summary W9",
+      "title": "Book summary W9 (optional bonus)",
       "due": "2026-11-15T23:59:00+09:00"
     },
     {
@@ -368,7 +368,7 @@
         "quiz10": "due",
         "quiz11": "due",
         "quiz12": "due",
-        "qz02": "due",
+        "qz02": "ok",
         "qz03": "due",
         "qz04": "due",
         "qz05": "due",
@@ -443,7 +443,7 @@
         "quiz10": "due",
         "quiz11": "due",
         "quiz12": "due",
-        "qz02": "due",
+        "qz02": "ok",
         "qz03": "due",
         "qz04": "due",
         "qz05": "due",
@@ -477,8 +477,8 @@
       "gh": "",
       "sid_tag": "8035",
       "display": "Magdalena Alicja Pacocha",
-      "photo": "assets/students/04c828fe4cb1.png",
-      "bio": "4th-year undergraduate exchange student, cloud computing specialization, exploring deep learning applications in environmental data.",
+      "photo": "assets/students/04c828fe4cb1.jpg",
+      "bio": "4th-year undergraduate exchange student, cloud computing specialization.",
       "status": {
         "hw0": "due",
         "memo01": "ok",
@@ -518,7 +518,7 @@
         "quiz10": "due",
         "quiz11": "due",
         "quiz12": "due",
-        "qz02": "due",
+        "qz02": "ok",
         "qz03": "due",
         "qz04": "due",
         "qz05": "due",
@@ -593,7 +593,7 @@
         "quiz10": "due",
         "quiz11": "due",
         "quiz12": "due",
-        "qz02": "due",
+        "qz02": "late",
         "qz03": "due",
         "qz04": "due",
         "qz05": "due",
@@ -668,7 +668,7 @@
         "quiz10": "due",
         "quiz11": "due",
         "quiz12": "due",
-        "qz02": "due",
+        "qz02": "ok",
         "qz03": "due",
         "qz04": "due",
         "qz05": "due",
@@ -743,7 +743,7 @@
         "quiz10": "due",
         "quiz11": "due",
         "quiz12": "due",
-        "qz02": "due",
+        "qz02": "miss",
         "qz03": "due",
         "qz04": "due",
         "qz05": "due",
@@ -818,7 +818,7 @@
         "quiz10": "due",
         "quiz11": "due",
         "quiz12": "due",
-        "qz02": "due",
+        "qz02": "miss",
         "qz03": "due",
         "qz04": "due",
         "qz05": "due",
@@ -857,7 +857,7 @@
       "status": {
         "hw0": "due",
         "memo01": "ok",
-        "memo02": "ok",
+        "memo02": "late",
         "memo03": "due",
         "memo04": "due",
         "memo05": "due",
@@ -893,7 +893,7 @@
         "quiz10": "due",
         "quiz11": "due",
         "quiz12": "due",
-        "qz02": "due",
+        "qz02": "ok",
         "qz03": "due",
         "qz04": "due",
         "qz05": "due",
