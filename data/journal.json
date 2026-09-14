@@ -1,7 +1,14 @@
 {
-  "updated": "2026-09-09T22:42:16+09:00",
+  "updated": "2026-09-14T22:53:24+09:00",
   "weeks": {
     "01": [
+      {
+        "gh": "",
+        "display": "Dowon Lee",
+        "photo": "assets/students/62781772eebc.jpg",
+        "at": "2026-09-06T04:09:38+09:00",
+        "late": false
+      },
       {
         "gh": "",
         "display": "Hakwon JEONG",
@@ -32,23 +39,9 @@
       },
       {
         "gh": "",
-        "display": "NGUYEN Van Huy",
-        "photo": "assets/students/ae7317e67aa7.png",
-        "at": "2026-09-06T02:29:34+09:00",
-        "late": false
-      },
-      {
-        "gh": "",
         "display": "Namhun Kim",
         "photo": "assets/students/d3ac08155dbd.png",
         "at": "2026-09-06T03:45:18+09:00",
-        "late": false
-      },
-      {
-        "gh": "",
-        "display": "Student 5145",
-        "photo": "assets/students/62781772eebc.png",
-        "at": "2026-09-06T04:09:38+09:00",
         "late": false
       },
       {
@@ -60,6 +53,13 @@
       }
     ],
     "02": [
+      {
+        "gh": "",
+        "display": "Dowon Lee",
+        "photo": "assets/students/62781772eebc.jpg",
+        "at": "2026-09-06T04:30:03+09:00",
+        "late": false
+      },
       {
         "gh": "",
         "display": "Hakwon JEONG",
@@ -90,23 +90,9 @@
       },
       {
         "gh": "",
-        "display": "NGUYEN Van Huy",
-        "photo": "assets/students/ae7317e67aa7.png",
-        "at": "2026-09-06T08:31:58+09:00",
-        "late": false
-      },
-      {
-        "gh": "",
         "display": "Namhun Kim",
         "photo": "assets/students/d3ac08155dbd.png",
         "at": "2026-09-06T03:49:56+09:00",
-        "late": false
-      },
-      {
-        "gh": "",
-        "display": "Student 5145",
-        "photo": "assets/students/62781772eebc.png",
-        "at": "2026-09-06T04:30:03+09:00",
         "late": false
       },
       {
@@ -115,6 +101,57 @@
         "photo": "assets/students/44766ad66201.png",
         "at": "2026-09-07T12:19:50+09:00",
         "late": true
+      }
+    ],
+    "03": [
+      {
+        "gh": "",
+        "display": "Dowon Lee",
+        "photo": "assets/students/62781772eebc.jpg",
+        "at": "2026-09-13T00:57:10+09:00",
+        "late": false
+      },
+      {
+        "gh": "",
+        "display": "Hakwon JEONG",
+        "photo": "assets/students/9f50b1bfdc42.png",
+        "at": "2026-09-13T12:37:32+09:00",
+        "late": false
+      },
+      {
+        "gh": "",
+        "display": "JunYoung Shin",
+        "photo": "assets/students/af43c6a9282d.png",
+        "at": "2026-09-12T23:31:24+09:00",
+        "late": false
+      },
+      {
+        "gh": "",
+        "display": "Magdalena Alicja Pacocha",
+        "photo": "assets/students/04c828fe4cb1.jpg",
+        "at": "2026-09-13T00:09:03+09:00",
+        "late": false
+      },
+      {
+        "gh": "",
+        "display": "Maja Gabriela Szerszen",
+        "photo": "assets/students/5a398dd3e429.png",
+        "at": "2026-09-13T02:32:54+09:00",
+        "late": false
+      },
+      {
+        "gh": "",
+        "display": "Namhun Kim",
+        "photo": "assets/students/d3ac08155dbd.png",
+        "at": "2026-09-13T12:05:54+09:00",
+        "late": false
+      },
+      {
+        "gh": "",
+        "display": "Yusang Oh",
+        "photo": "assets/students/44766ad66201.png",
+        "at": "2026-09-12T23:18:05+09:00",
+        "late": false
       }
     ]
   }
