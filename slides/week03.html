@@ -833,36 +833,8 @@ items = cat.search(
 <section class="slide">
   <p class="kicker">Part 4 · What is a sample</p>
   <h2>What is a training sample? Chips, tiles, pixel series</h2>
-  <div class="figure">
-    <svg viewBox="0 0 640 210" role="img" aria-label="A tile is the delivery granule; a chip is a small training window cut from it; a per-pixel time series is one pixel tracked through time" style="width:min(92%,740px)">
-      <g fill="none" stroke="currentColor" stroke-width="1.3">
-        <!-- tile -->
-        <rect x="25" y="35" width="130" height="130" rx="4"/>
-        <rect x="95" y="75" width="34" height="34" stroke="var(--accent)" fill="var(--wash)"/>
-        <!-- chip stack -->
-        <rect x="255" y="75" width="64" height="64" rx="3" stroke="var(--accent)"/>
-        <rect x="247" y="67" width="64" height="64" rx="3"/>
-        <rect x="239" y="59" width="64" height="64" rx="3"/>
-        <!-- pixel series -->
-        <rect x="450" y="45" width="26" height="26" rx="3"/>
-        <rect x="500" y="45" width="26" height="26" rx="3"/>
-        <rect x="550" y="45" width="26" height="26" rx="3"/>
-        <circle cx="463" cy="58" r="3" fill="var(--accent)" stroke="none"/>
-        <circle cx="513" cy="58" r="3" fill="var(--accent)" stroke="none"/>
-        <circle cx="563" cy="58" r="3" fill="var(--accent)" stroke="none"/>
-        <path d="M455 130 H600 M455 130 V95" stroke-width="1"/>
-        <path d="M460 122 L490 112 L520 125 L550 104 L580 110" stroke="var(--accent)"/>
-      </g>
-      <g font-size="12" fill="currentColor">
-        <text x="90" y="185" text-anchor="middle">tile · delivery granule</text>
-        <text x="90" y="200" text-anchor="middle" font-size="11">S2 MGRS: 110 km, 10,980² px</text>
-        <text x="279" y="165" text-anchor="middle">chip · training sample</text>
-        <text x="279" y="180" text-anchor="middle" font-size="11">64–512 px window × bands (× time)</text>
-        <text x="527" y="155" text-anchor="middle">per-pixel time series</text>
-        <text x="527" y="170" text-anchor="middle" font-size="11">one location, (T × C) sequence</text>
-        <text x="527" y="88" text-anchor="middle" font-size="11">t₁ → t₂ → t₃</text>
-      </g>
-    </svg>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:.3em 0 0">
+    <img src="img/fig-w3-sample-s2-gist.png?v=2" data-zoom alt="Real Sentinel-2 data at GIST in three panels. Left: the whole 110-kilometre tile 52SBE in true colour, with a small box marking where a chip is cut. Middle: that 64 by 64 pixel chip in true colour, stacked in front of its blue, near-infrared and shortwave-infrared bands. Right: the vegetation index of one pixel of the chip plotted across the clear dates of 2025, low in spring and high in summer." style="display:block;margin:0 auto;height:40vh;width:auto;max-width:100%">
   </div>
   <ul class="small">
     <li>The choice couples to architecture: masked-autoencoder Vision Transformers eat <b>chips</b> (SatMAE 224², Prithvi); Presto (about 400 thousand parameters) and TESSERA eat <b>pixel series</b>; tiles are for delivery and inference tiling, <span class="accent">never for batching</span>.</li>
@@ -871,9 +843,9 @@ items = cat.search(
     <span><b>tile</b> &mdash; the granule the agency ships you; for Sentinel-2 that is a 110 km MGRS (Military Grid Reference System) square, about 10,980 pixels on a side at 10 m.</span>
     <span><b>chip</b> &mdash; the small window your dataloader actually yields, cut out of a tile: 64 by 64 pixels &times; bands, sometimes &times; dates.</span>
     <span><b>pixel time series</b> &mdash; throw the neighbours away, keep one location through time: a T &times; C sequence &mdash; T time steps (dates) by C channels (bands and other variables) &mdash; which is what Presto and TESSERA eat.</span>
-    <span><b>in the figure</b> &mdash; left, one tile with the accent square marking where a chip is cut; middle, a stack of chips (bands or dates); right, one pixel followed across t&#8321; t&#8322; t&#8323; into the plotted curve.</span>
+    <span><b>in the figure</b> &mdash; the three objects in real Sentinel-2 data at GIST: tile 52SBE, one 64&times;64 chip in front of three of its bands, and one pixel of it through the clear dates of 2025. <b>NDVI</b> (Normalized Difference Vegetation Index) = (NIR &minus; red) / (NIR + red); it climbs as the field greens up.</span>
   </div>
-  <div class="foot"><span>Cong et al. 2022 (SatMAE) · Tseng et al. 2023 (Presto) · lab chips: 64×64 × 4 bands</span></div>
+  <div class="foot"><span>Cong et al. 2022 (SatMAE) · Tseng et al. 2023 (Presto) · lab chips: 64×64 × 4 bands · imagery: contains modified Copernicus Sentinel data 2025, via Earth Search</span></div>
   <aside class="notes">2 min. Vocabulary slide — nail the three words because papers blur them. A tile is what the agency ships; a chip is what your dataloader yields; a pixel series is the degenerate chip that turns EO into sequence modeling. Note the economy argument: Presto proves a 400K-param model on pixel series is competitive for many tasks — chips are not the only road to an FM, and that matters for capstone compute budgets.</aside>
 </section>
 <!-- 26 -->
