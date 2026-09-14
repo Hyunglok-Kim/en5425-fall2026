@@ -764,34 +764,29 @@ items = cat.search(
 <section class="slide">
   <p class="kicker">Part 3 · Regridding</p>
   <h2>Regridding: conservative vs bilinear</h2>
-  <div class="cols">
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.8vw">
     <div>
       <h3>Bilinear</h3>
-      <ul class="small">
-        <li>Interpolates <b>point values</b> from the 4 surrounding nodes; smooth output.</li>
-        <li>Right for smooth, <b>intensive</b> state fields: T, Z, wind — especially going finer.</li>
-        <li>Does not preserve integrals — it will quietly create or destroy total rainfall.</li>
-      </ul>
+      <ul class="small"><li>Blends the 4 nearest <b>point values</b>. For smooth <b>intensive</b> fields (temperature, wind); totals <span class="accent">not</span> preserved.</li></ul>
     </div>
     <div>
       <h3>Conservative</h3>
-      <ul class="small">
-        <li>Weights by <b>cell-overlap areas</b>; preserves area integrals (mass, energy, total precip).</li>
-        <li>Right for <b>fluxes and precipitation</b>, and for any coarsening (0.25° → 5.625° WB2 subsets).</li>
-        <li>Going finer it gives blocky fields — correct totals, ugly maps.</li>
-      </ul>
+      <ul class="small"><li>Weights by <b>cell-overlap area</b>, so totals are preserved. For rain, fluxes and <b>any coarsening</b>.</li></ul>
+    </div>
+    <div>
+      <h3>Nearest-neighbor</h3>
+      <ul class="small"><li>Copies one cell, never averages. The only legal choice for <b>class labels</b>: land cover, SCL (scene classification layer).</li></ul>
     </div>
   </div>
-  <ul class="small"><li>Categorical fields — land cover, SCL (scene classification layer) — <span class="accent">nearest-neighbor only</span>: you cannot average class 4 and class 6. Tools: xesmf/ESMF.</li></ul>
-  <div class="gloss">
-    <span><b>remapping</b> &mdash; the other word for regridding; the tool almost everyone uses is xESMF, a Python wrapper around ESMF, the Earth System Modeling Framework.</span>
-    <span><b>bilinear</b> &ldquo;bi-linear&rdquo; &mdash; blend the four surrounding grid nodes by distance, straight-line in each direction; you get a point value, not an amount.</span>
-    <span><b>conservative</b> &mdash; each new cell is the area-weighted average of the old cells it overlaps, using the same cos &phi; areas we just derived, so the map total is unchanged.</span>
-    <span><b>intensive</b> &mdash; a per-point quantity that does not add up when cells merge (T, Z, wind); a <i>flux</i> or amount per area, like rainfall, does add up and must be conserved.</span>
-    <span><b>nearest-neighbor</b> &mdash; copy the closest cell&rsquo;s value and never average; the only legal choice for class labels, where &ldquo;4.5&rdquo; means nothing.</span>
-    <span><b>5.625&deg;</b> &mdash; the coarse WeatherBench2 grid the lab reads; it was coarsened from 0.25&deg; ERA5 conservatively, so you are already living with this choice.</span>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:.2em 0 0">
+    <img src="img/fig-w3-regrid-examples.png?v=2" data-zoom alt="Left three panels: ERA5 six-hour rainfall of Typhoon Maysak over Korea and Japan at 0.25 degrees, then coarsened to 2 degrees bilinearly, which loses 4 percent of the total and cuts the peak from 95 to 42 millimetres, and conservatively, which keeps the total exactly and lowers the peak to 55 millimetres. Right three panels: a toy Sentinel-2 scene-classification map with land, water, a cloud and its shadow; nearest-neighbour keeps only real classes, bilinear invents a bare-soil strip along the shore and water where the cloud meets its shadow." style="display:block;margin:0 auto;height:34vh;width:auto;max-width:100%">
   </div>
-  <aside class="notes">2.5 min. Decision rule to dictate — if the clock is tight, dictate ONLY the rule and skip both columns: "Is the quantity a point sample of a smooth field, or an amount per area? Point → bilinear. Amount → conservative. Class label → nearest." Concrete failure: bilinearly regrid IMERG to 0.25° and continental total rainfall changes — a physics bug, not a rendering bug. The 5.625° ERA5 they use in lab was produced conservatively; they are consumers of this choice today. Time check: ~39 min in — HARD CHECK, this is where the lab’s fate is decided. Part 4 is lab pipe (b) stated in advance and is never the thing that absorbs an overrun.</aside>
+  <div class="gloss">
+    <span><b>intensive</b> &mdash; a per-point quantity like temperature that does not add up; rainfall is an amount and does. <b>xESMF</b> &mdash; the usual Python tool, built on ESMF (Earth System Modeling Framework).</span>
+    <span><b>in the figure, left</b> &mdash; real ERA5 rain as Typhoon Maysak reached Korea, 0.25&deg; coarsened to 2&deg;. Bilinear samples four points per cell and loses 4% of the rain, about 0.85&nbsp;km&sup3;; conservative lowers the peak but keeps every drop.</span>
+    <span><b>in the figure, right</b> &mdash; a toy Sentinel-2 SCL map: 3 cloud shadow, 4 vegetation, 5 not vegetated, 6 water, 9 cloud. Bilinear turns the 4|6 shoreline into 5, bare soil, and cloud beside shadow into 6, water. Red boxes mark labels that are not in the scene.</span>
+  </div>
+  <aside class="notes">2.5 min. Decision rule to dictate — if the clock is tight, dictate ONLY the rule and point at the figure: "Is the quantity a point sample of a smooth field, or an amount per area? Point → bilinear. Amount → conservative. Class label → nearest." Left panels are real ERA5 (WeatherBench2 0.25° store, 2020-09-02 18 UTC, Typhoon Maysak): coarsening to 2° bilinearly loses 4% of the domain's rain (20.96 → 20.11 km³) and the peak falls 95 → 42 mm; conservative keeps 20.96 km³ exactly, peak 55 mm — averaging lowers peaks, sampling loses mass. Right panels: the scary failure is not 3.5 (obviously invalid) but 5 and 6 — valid-looking wrong labels. The 5.625° ERA5 they use in lab was produced conservatively; they are consumers of this choice today. Time check: ~39 min in — HARD CHECK, this is where the lab’s fate is decided. Part 4 is lab pipe (b) stated in advance and is never the thing that absorbs an overrun.</aside>
 </section>
 
 <section class="slide">
@@ -875,7 +870,7 @@ items = cat.search(
   <div class="gloss">
     <span><b>tile</b> &mdash; the granule the agency ships you; for Sentinel-2 that is a 110 km MGRS (Military Grid Reference System) square, about 10,980 pixels on a side at 10 m.</span>
     <span><b>chip</b> &mdash; the small window your dataloader actually yields, cut out of a tile: 64 by 64 pixels &times; bands, sometimes &times; dates.</span>
-    <span><b>pixel time series</b> &mdash; throw the neighbours away, keep one location through time: a T &times; C sequence, which is what Presto and TESSERA eat.</span>
+    <span><b>pixel time series</b> &mdash; throw the neighbours away, keep one location through time: a T &times; C sequence &mdash; T time steps (dates) by C channels (bands and other variables) &mdash; which is what Presto and TESSERA eat.</span>
     <span><b>in the figure</b> &mdash; left, one tile with the accent square marking where a chip is cut; middle, a stack of chips (bands or dates); right, one pixel followed across t&#8321; t&#8322; t&#8323; into the plotted curve.</span>
   </div>
   <div class="foot"><span>Cong et al. 2022 (SatMAE) · Tseng et al. 2023 (Presto) · lab chips: 64×64 × 4 bands</span></div>
