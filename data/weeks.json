@@ -498,7 +498,8 @@
     "segmentation metrics",
     "multispectral input handling",
     "supervised baselines"
-   ]
+   ],
+   "slides": true
   },
   {
    "n": 5,

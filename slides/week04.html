@@ -1,0 +1,1146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Week 4 · CNNs and Spatiotemporal Modeling on Gridded Data</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="deck.css">
+<script src="deck.js" defer></script>
+</head>
+<body>
+
+
+<!-- 1 ─ Title -->
+
+<!-- 1 -->
+<section class="slide title" style="background:linear-gradient(rgba(10,12,18,.52),rgba(10,12,18,.82)),url('img/w4-title-sar.jpg') center/cover no-repeat">
+  <p class="kicker" style="color:#e8a07a">EN5425 / EV4240 · Week 4 · Fall 2026</p>
+  <h1 style="color:#f4efe5;text-shadow:0 2px 24px rgba(0,0,0,.6)">CNNs and Spatiotemporal Modeling on Gridded Data</h1>
+  <p class="big" style="color:#e8e2d8;text-shadow:0 1px 16px rgba(0,0,0,.6)">Radar saw this flood through the cloud that hid it from every optical sensor. The orange line is a human's answer. Today you build the machine that has to draw it.</p>
+  <div class="foot" style="color:#cfc8bc"><span>Deep Learning Applications in Environmental Big Data · Prof. Hyunglok Kim · GIST</span><span>Image: Sentinel-1 VV backscatter, Ghana flood 2018 — Sen1Floods11 hand-labeled chip 141910, speckle-filtered for display; the orange line is the hand label. Contains modified Copernicus Sentinel data, dataset CC BY 4.0 (Cloud to Street)</span></div>
+  <aside class="notes">Open: last week we learned to reach data and shape it into a corpus. Today we build the first real model on it — and it is not a foundation model, it is the thing every foundation model gets compared against. Timing: 55 min with the FLEX block, 50 without — 5-min quiz + 45 min core + one marked 5-min FLEX block. The convolution-arithmetic card, the full loss zoo, the metric card, the ConvLSTM equations, the dataset card with the per-event baseline table, the tiling recipe and the TerraTorch plug-in diagram all live in the APPENDIX after the lab slide — point students there for self-study; in class we teach the mechanism, the two board derivations and the numbers we measured ourselves. One Watch-at-home slide in Part 1 is a pointer, not playback — twenty seconds; never start a video in class.</aside>
+</section>
+
+<!-- 1b ─ Reading quiz -->
+
+<!-- 2 -->
+<section class="slide">
+  <p class="kicker">0:00 · Reading quiz</p>
+  <h2>Quiz first — 5 minutes, closed book</h2>
+  <ul>
+    <li>5 questions on this week’s paper (Ronneberger et al. 2015, U-Net).</li>
+    <li>No AI, no notes.</li>
+    <li>Swap with your neighbor to grade.</li>
+    <li>Pass = 3 of 5.</li>
+    <li>Best 8 of 10 count, 0.75% each — an optional handwritten book summary forgives one wrong answer.</li>
+  </ul>
+  <aside class="notes">Distribute at 0:00 sharp, collect at 0:05.</aside>
+</section>
+
+<!-- 2 ─ Roadmap -->
+
+<!-- 3 -->
+<section class="slide">
+  <p class="kicker">Week 4 · 55 min</p>
+  <h2>Today in five blocks + journal club</h2>
+  <ul>
+    <li><b>1 · Convolution and the U-Net</b> (12) — weight sharing, the receptive field derived on the board, and why the skips exist.</li>
+    <li><b>2 · Dense-prediction craft</b> (11 · <span class="accent">the headline</span>) — the imbalance arithmetic on today’s real data, losses, how you average, tiling.</li>
+    <li><b>3 · Spatiotemporal extensions</b> (8) — 3D convolution, ConvLSTM, factorized space–time; when convolution beats attention.</li>
+    <li><b>4 · The humbling, and multispectral input</b> (8.5) — PANGAEA’s verdict on geospatial foundation models, and how to feed a model more than three bands.</li>
+    <li><b>5 · Reading framing + the metric contract</b> (4 <span class="muted">+ 5 flex</span>) — U-Net in one slide, and the board exercise on five ways an IoU can lie.</li>
+    <li><b>Journal club</b> (30 · after break) — the three discussion questions from your entrance tickets; the drawn leader moderates. Lab briefing after.</li>
+  </ul>
+  <div class="foot"><span>Skills this week: dense-prediction heads · segmentation metrics · multispectral input handling · supervised baselines</span><span>Every formula card, derivation and reference table still ships in this deck — see the Appendix after the lab slide</span></div>
+  <aside class="notes">One sentence per block, 60 seconds total. Emphasize the arc: build the operator (Part 1) → make the number honest (Part 2) → add time (Part 3) → find out you are the baseline, not the challenger (Part 4). Say the through-line out loud once: every number on today’s slides about Sen1Floods11 was computed for this lecture from the 446 hand-labeled chips, and the lab reproduces it. The U-Net you build today becomes the standing supervised baseline for every capstone comparison in this course.</aside>
+</section>
+
+<!-- ============ PART 1 · CONVOLUTION AND THE U-NET ============ -->
+
+<!-- 4 -->
+<section class="slide section">
+  <p class="kicker">Part 1 · 12 min</p>
+  <h2>Convolution and the U-Net</h2>
+  <aside class="notes">12 minutes. Goal: not "what is a CNN" — they have seen that. The goal is two numbers they can compute on any architecture for the rest of their life: how many weights it costs, and how far one output pixel can see. The receptive-field recursion is the protected board derivation of this deck; do not let it slip under 3 minutes.</aside>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <p class="kicker">Part 1 · The second prior</p>
+  <h2>The architecture is the other prior</h2>
+  <div class="cols" style="grid-template-columns:1.05fr 1fr;align-items:center;gap:2.2vw">
+    <div style="min-width:0">
+      <ul class="small">
+        <li>Last week: the corpus is a prior. This week: <span class="accent">the operator is a prior too</span> — convolution, the operator a convolutional neural network (CNN) is built from, hard-codes two beliefs about the world.</li>
+        <li><b>Locality</b> — what a pixel is depends mostly on its neighbors. <b>Translation equivariance</b> — a flood edge is a flood edge wherever it sits in the chip.</li>
+        <li>The price of those beliefs is paid in weights: on a 64 × 64 × 4 chip, one fully connected layer to 64 channels costs ≈ <b>4.3 × 10<sup>9</sup></b> weights; one 3 × 3 convolution to 64 channels costs <span class="accent"><b>2,304</b></span>.</li>
+        <li class="muted">Six orders of magnitude, and the convolution generalizes better. That is what a correct prior buys.</li>
+      </ul>
+    </div>
+    <div class="figure" style="min-width:0">
+      <svg viewBox="0 0 340 250" role="img" aria-label="Two wiring diagrams. On the left, a fully connected layer: every input pixel is joined to every output pixel, and each line is its own weight. On the right, a convolution: one small three-by-three window of weights slides over the image, so the same nine numbers are reused at every position." style="width:min(100%,400px)">
+        <text x="85" y="14" text-anchor="middle" font-size="10.5" fill="currentColor" font-weight="700">fully connected</text>
+        <text x="255" y="14" text-anchor="middle" font-size="10.5" fill="var(--accent)" font-weight="700">convolution</text>
+        <!-- dense: every-to-every -->
+        <g stroke="currentColor" stroke-width=".35" opacity=".5">
+          <path d="M28 40 L28 150 M28 40 L58 150 M28 40 L88 150 M28 40 L118 150 M28 40 L142 150"/>
+          <path d="M58 40 L28 150 M58 40 L58 150 M58 40 L88 150 M58 40 L118 150 M58 40 L142 150"/>
+          <path d="M88 40 L28 150 M88 40 L58 150 M88 40 L88 150 M88 40 L118 150 M88 40 L142 150"/>
+          <path d="M118 40 L28 150 M118 40 L58 150 M118 40 L88 150 M118 40 L118 150 M118 40 L142 150"/>
+          <path d="M142 40 L28 150 M142 40 L58 150 M142 40 L88 150 M142 40 L118 150 M142 40 L142 150"/>
+        </g>
+        <g fill="currentColor">
+          <circle cx="28" cy="40" r="3"/><circle cx="58" cy="40" r="3"/><circle cx="88" cy="40" r="3"/><circle cx="118" cy="40" r="3"/><circle cx="142" cy="40" r="3"/>
+          <circle cx="28" cy="150" r="3"/><circle cx="58" cy="150" r="3"/><circle cx="88" cy="150" r="3"/><circle cx="118" cy="150" r="3"/><circle cx="142" cy="150" r="3"/>
+        </g>
+        <text x="85" y="172" text-anchor="middle" font-size="9" fill="var(--muted)">every line is its own weight</text>
+        <text x="85" y="186" text-anchor="middle" font-size="10" fill="currentColor" font-weight="700">4.3 × 10⁹</text>
+        <!-- conv: sliding window -->
+        <g fill="none" stroke="var(--hairline)" stroke-width="1">
+          <rect x="190" y="30" width="130" height="130" rx="3"/>
+          <path d="M216 30 V160 M242 30 V160 M268 30 V160 M294 30 V160 M190 56 H320 M190 82 H320 M190 108 H320 M190 134 H320"/>
+        </g>
+        <rect x="190" y="30" width="78" height="78" fill="var(--accent)" opacity=".16"/>
+        <rect x="190" y="30" width="78" height="78" fill="none" stroke="var(--accent)" stroke-width="1.8"/>
+        <rect x="242" y="82" width="78" height="78" fill="none" stroke="var(--accent)" stroke-width="1.3" stroke-dasharray="4 3"/>
+        <path d="M232 72 L275 118" stroke="var(--accent)" stroke-width="1" fill="none" stroke-dasharray="3 3"/>
+        <text x="255" y="178" text-anchor="middle" font-size="9" fill="var(--muted)">the same 9 weights, every position</text>
+        <text x="255" y="192" text-anchor="middle" font-size="10" fill="var(--accent)" font-weight="700">2,304</text>
+        <text x="170" y="222" text-anchor="middle" font-size="9.5" fill="currentColor">same layer, same input, same output shape</text>
+        <text x="170" y="238" text-anchor="middle" font-size="9.5" fill="var(--accent)" font-weight="700">the difference is entirely what you assumed</text>
+      </svg>
+    </div>
+  </div>
+  <div class="gloss">
+    <span><b>CNN</b> “convolutional neural network” — a network whose main operator is the sliding window above, rather than a full matrix multiply.</span>
+    <span><b>weight sharing</b> — the same small filter is applied at every position, so one pattern is learned once and recognized everywhere; it is why the count collapses from billions to thousands.</span>
+    <span><b>translation equivariance</b> — shift the input, and the output shifts the same way. Not the same as invariance: for segmentation you <i>want</i> the answer to move with the object.</span>
+    <span><b>where the numbers come from</b> — dense: 64·64·4 inputs × 64·64·64 outputs ≈ 4.3 × 10⁹. Convolution: 3 × 3 × 4 input channels × 64 output channels = 2,304 weights, plus 64 biases.</span>
+    <span><b>in the figure</b> — left, every input–output pair owns a private number; right, one 3 × 3 tile of numbers is dragged across the image. Same layer, two assumptions.</span>
+  </div>
+  <aside class="notes">1.5 min. Do the arithmetic out loud, slowly — it is the only slide where the dense count appears, and the six-orders-of-magnitude line is what makes the rest of the hour feel inevitable. Callback to W3: "the corpus is the prior" — now say the sentence that completes it: you choose the second prior when you choose the operator, and unlike the corpus this one you can change in one line. Warn against the usual misreading: convolution is not "cheaper deep learning", it is a different hypothesis space, and on satellite data it happens to be close to true. Transition: if the filter is 3 × 3, how does the model ever see a flood that is 5 km wide?</aside>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <p class="kicker">Part 1 · The receptive field, derived</p>
+  <h2>How far can one output pixel see?</h2>
+  <div class="cols" style="grid-template-columns:1fr 1.02fr;gap:2.2vw;align-items:center">
+    <div style="min-width:0">
+      <ul class="small">
+        <li>Two quantities, carried layer by layer: the <b>receptive field</b> r (how many input pixels reach this unit) and the <b>jump</b> j (how many input pixels one step here moves).</li>
+        <li><b>r<sub>ℓ</sub> = r<sub>ℓ−1</sub> + (k<sub>ℓ</sub> − 1) · j<sub>ℓ−1</sub></b> &nbsp;·&nbsp; <b>j<sub>ℓ</sub> = j<sub>ℓ−1</sub> · s<sub>ℓ</sub></b> &nbsp;<span class="muted">(r₀ = 1, j₀ = 1)</span></li>
+        <li>Five stacked 3 × 3 convolutions, stride 1: r = 1 + 5·2 = <b>11 px</b> — at 10 m ground sample distance that is <span class="accent">110 m</span>.</li>
+        <li>Stride and pooling are what make it grow fast: each 2 × 2 pool doubles j, so the <i>next</i> 3 × 3 convolution adds twice as much as the last one.</li>
+        <li class="muted">The original U-Net, four poolings deep, reaches <b>185 px</b> — 1.85 km at Sentinel-1 resolution.</li>
+      </ul>
+    </div>
+    <div class="figure" style="min-width:0">
+      <svg viewBox="0 0 396 250" role="img" aria-label="A stack of four layers drawn as rows. From one unit at the top, a cone widens downward to the input row. Without pooling the cone widens by two pixels per layer; after a pooling step the jump doubles and the cone widens by four, then eight." style="width:min(100%,400px)">
+        <g font-size="9.5" fill="var(--muted)" text-anchor="end">
+          <text x="60" y="34">output unit</text>
+          <text x="60" y="88">conv 3×3</text>
+          <text x="60" y="142">pool 2×2</text>
+          <text x="60" y="196">conv 3×3</text>
+          <text x="60" y="234">input</text>
+        </g>
+        <g stroke="var(--hairline)" stroke-width="1">
+          <path d="M70 30 H318 M70 84 H318 M70 138 H318 M70 192 H318 M70 230 H318"/>
+        </g>
+        <path d="M195 30 L163 84 L142 138 L100 192 L84 230 L306 230 L290 192 L248 138 L227 84 L195 30 Z"
+              fill="var(--accent)" opacity=".13" stroke="none"/>
+        <path d="M195 30 L163 84 L142 138 L100 192 L84 230 M195 30 L227 84 L248 138 L290 192 L306 230"
+              fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+        <g fill="var(--accent)"><circle cx="195" cy="30" r="3.4"/></g>
+        <g font-size="9" fill="currentColor" text-anchor="start">
+          <text x="392" y="88" text-anchor="end">r = 3, j = 1</text>
+          <text x="392" y="142" text-anchor="end">r = 5, j = 2</text>
+          <text x="392" y="196" text-anchor="end">r = 9, j = 2</text>
+        </g>
+        <text x="195" y="248" text-anchor="middle" font-size="9.5" fill="var(--accent)" font-weight="700">the cone on the input is the receptive field</text>
+      </svg>
+    </div>
+  </div>
+  <div class="gloss">
+    <span><b>receptive field</b> — the window of input pixels that can change one output value. Everything outside it is invisible to that prediction, no matter how deep the network is.</span>
+    <span><b>jump</b> j — the input-pixel spacing between neighboring units at this layer; it is the running product of all strides so far, and it is why pooling is the cheap way to buy context.</span>
+    <span><b>k, s</b> — kernel size and stride of layer ℓ. A 2 × 2 max-pool is just k = 2, s = 2.</span>
+    <span><b>GSD</b> “ground sample distance” — metres covered by one pixel; 10 m for Sentinel-1 and Sentinel-2. It is the exchange rate between pixels and the world, and it is the only reason 185 px means anything.</span>
+    <span><b>in the figure</b> — read bottom-up: one unit at the top, widening down to the input. The cone widens by 2 px per 3 × 3 convolution until the pool doubles j; after that the same convolution widens it by 4.</span>
+  </div>
+  <div class="foot"><span>Same recursion for dilated convolutions with k<sub>eff</sub> = d·(k − 1) + 1 — full layer-by-layer table in the Appendix</span></div>
+  <aside class="notes">3 min, and this is the board derivation of the deck — the Week 4 equivalent of last week's cos-latitude weight. Write the two recursions on the board and walk three layers by hand; do not read them off the slide. The rhetorical arc: ask first "how big is a flood?" (kilometres), then "how big is a 3 × 3 filter?" (30 m), and let the gap sit for two seconds before the recursion resolves it. The honest caveat to state once: this is the theoretical receptive field; the <i>effective</i> one is smaller, because contributions at the rim are weak — cite Luo et al. 2016 if someone asks, do not teach it. Every student should leave able to compute the receptive field of any architecture they are handed, including their capstone's. Transition: so the answer is pooling — and pooling is also what breaks segmentation.</aside>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <p class="kicker">Part 1 · Context vs location</p>
+  <h2>Pooling buys context and spends your boundary</h2>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:.2em 0 0">
+    <img src="img/fig-w4-receptive-field.png" data-zoom alt="Left: a 512 by 512 Sentinel-1 chip, 5.12 kilometres across, with the flood label outlined in blue, an 11-pixel white box and a 185-pixel orange box drawn on the same boundary. Right: the 185 by 185 pixel crop, showing the single pixel being labelled at its centre and the 11-pixel box inside it." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Deep enough to see the floodplain, sharp enough to place the waterline — <span class="accent">a plain encoder cannot do both</span>: by the bottleneck, that 185 px window has been reduced to a handful of cells.</li>
+    <li>The bottleneck knows <b>what</b> is here; it has thrown away <b>where</b> the edge was.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>the 11 px box</b> — everything five stacked 3 × 3 convolutions can use. At 10 m that is 110 m: enough to see that a pixel is dark, not enough to know whether it is a flood, a fish pond or a road.</span>
+    <span><b>the 185 px box</b> — the original U-Net's receptive field, 1.85 km. It contains the river, the levee and the dry fields, which is what makes the centre pixel decidable.</span>
+    <span><b>downsampling</b> — each pool halves the grid, so after four pools a 512 px chip is 32 px across and one cell stands for 160 m of ground. That is the resolution the bottleneck thinks in.</span>
+    <span><b>in the figure</b> — the flood is wider than the whole chip, and even the U-Net's window covers about a seventh of it. Context is not a luxury here; it is the task.</span>
+  </div>
+  <div class="foot"><span>Sen1Floods11 v1.1, Ghana chip 141910 · Sentinel-1 VV, 10 m · boxes drawn at true pixel scale</span></div>
+  <aside class="notes">1.5 min. Put the figure up and ask the room to decide the centre pixel from the 11 px box alone — they cannot, and someone will say so. Then show the 185 px crop: now it is obvious, because the river and the dry field are both inside the window. Name the trade in one sentence and write the two words on the board: pooling buys WHAT and spends WHERE. That framing is exactly discussion question 1 this afternoon, so plant it cleanly. Click the figure to enlarge if the back row complains.</aside>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <p class="kicker">Part 1 · The U-Net</p>
+  <h2>U-Net: pay for context, then buy the boundary back</h2>
+  <div class="figure">
+    <svg viewBox="0 0 680 300" role="img" aria-label="A U-shaped encoder-decoder. Four blocks step down and to the right, each narrower and taller than the last, to a wide bottleneck block at the bottom. Four mirrored blocks step back up on the right. Four dashed horizontal arrows carry each encoder block straight across to the decoder block of the same size." style="width:min(94%,880px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.3">
+        <rect x="118" y="48"  width="48" height="34" rx="3"/>
+        <rect x="152" y="94"  width="42" height="40" rx="3"/>
+        <rect x="186" y="142" width="36" height="46" rx="3"/>
+        <rect x="220" y="192" width="30" height="52" rx="3"/>
+        <rect x="430" y="192" width="30" height="52" rx="3"/>
+        <rect x="458" y="142" width="36" height="46" rx="3"/>
+        <rect x="486" y="94"  width="42" height="40" rx="3"/>
+        <rect x="514" y="48"  width="48" height="34" rx="3"/>
+      </g>
+      <rect x="290" y="240" width="100" height="36" rx="6" fill="var(--wash)" stroke="var(--accent)" stroke-width="1.6"/>
+      <text x="340" y="263" text-anchor="middle" font-size="11.5" fill="var(--accent)" font-weight="700">bottleneck</text>
+      <text x="340" y="291" text-anchor="middle" font-size="9" fill="var(--muted)">32² grid · 1024 ch · r = 185 px</text>
+      <g fill="none" stroke="currentColor" stroke-width="1.1">
+        <path d="M142 82 L173 94 M173 134 L204 142 M204 188 L235 192 M235 244 L290 254"/>
+        <path d="M390 254 L445 244 M445 192 L476 188 M476 142 L507 134 M507 94 L538 82"/>
+      </g>
+      <g stroke="var(--accent)" stroke-width="1.4" fill="none" stroke-dasharray="5 3">
+        <path d="M166 65 H508"/><path d="M194 114 H480"/><path d="M222 165 H452"/><path d="M250 218 H424"/>
+      </g>
+      <g fill="var(--accent)" stroke="none">
+        <path d="M508 61 L516 65 L508 69 Z"/><path d="M480 110 L488 114 L480 118 Z"/>
+        <path d="M452 161 L460 165 L452 169 Z"/><path d="M424 214 L432 218 L424 222 Z"/>
+      </g>
+      <text x="340" y="30" text-anchor="middle" font-size="11" fill="var(--accent)" font-weight="700">skip connections — the encoder map, copied across at full resolution</text>
+      <text x="340" y="44" text-anchor="middle" font-size="9.5" fill="var(--muted)">concatenated, not added: the decoder gets the coarse “what” and the fine “where” side by side</text>
+      <g font-size="9.5" fill="var(--muted)" text-anchor="end">
+        <text x="112" y="69">512² · 64</text>
+        <text x="146" y="118">256² · 128</text>
+        <text x="180" y="169">128² · 256</text>
+        <text x="214" y="222">64² · 512</text>
+      </g>
+      <text x="568" y="69" text-anchor="start" font-size="9.5" fill="var(--muted)">512² · 1 per-pixel score</text>
+      <g font-size="10" fill="currentColor" text-anchor="middle">
+        <text x="120" y="291">encoder — halve the grid, double the channels</text>
+        <text x="560" y="291">decoder — upsample, concatenate, convolve</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Each decoder level is handed two things: the upsampled semantic map from below, and <span class="accent">the encoder map from the same resolution</span>. Concatenate, then convolve — the network learns how much of each to trust.</li>
+    <li class="muted">That is all a skip connection is. It is also why U-Net is still the default dense-prediction architecture eleven years later.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>encoder–decoder</b> — the contracting half builds meaning at low resolution, the expanding half puts it back on the pixel grid. Alone, the decoder would be guessing where the edges were.</span>
+    <span><b>skip connection</b> — a direct copy of an encoder feature map into the decoder level of matching size, concatenated along the channel axis. Not the same as a residual connection, which adds.</span>
+    <span><b>upsampling</b> — going back up: either a learned transposed convolution or a plain interpolation followed by a convolution. The Appendix card says why the second is usually safer.</span>
+    <span><b>dense prediction</b> — one label for every pixel, as against one label per image. Segmentation, regression of a continuous field and change detection are all dense prediction.</span>
+    <span><b>in the figure</b> — the blocks narrow and deepen going down (grid halves, channels double) and the dashed orange lines are the skips, each joining levels of equal resolution.</span>
+  </div>
+  <div class="foot"><span>Ronneberger, Fischer &amp; Brox 2015, <a href="https://arxiv.org/abs/1505.04597">arXiv:1505.04597</a> — ~31 M parameters, trained on 30 images</span></div>
+  <aside class="notes">2.5 min. Draw the U on the board while you talk; the slide is the reference, the board is the explanation. Two claims to land: (1) the skip is a copy, not a clever module — the cleverness is that it exists at all; (2) concatenation beats addition here because the decoder gets to learn the mixing weights instead of having them fixed at one. Mention the parameter count and the thirty training images in one breath: this architecture was invented for a thirty-image biomedical dataset, which is why it survives in Earth observation where labels are scarce — that is the Part 4 argument arriving early. Transition: so what exactly is in the copied map?</aside>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <p class="kicker">Part 1 · What the skips carry</p>
+  <h2>The skips carry what the bottleneck cannot store</h2>
+  <ul class="small">
+    <li>The bottleneck is <b>32 × 32</b> for a 512 px chip: one cell per 160 m of ground. A waterline that moves by 3 pixels does not move at all in there.</li>
+    <li>The encoder's early map is the opposite: it holds edges, speckle texture and exact position, and knows almost nothing about what they mean.</li>
+    <li>The decoder needs both, at the same time, at the same place — <span class="accent">that is the whole design</span>.</li>
+    <li>On ImageNet a 3-pixel error moves a cat's ear. At 10 m GSD it is 30 m of floodplain, and the deliverable is a map someone evacuates from.</li>
+    <li class="muted">Ronneberger's network uses <b>valid</b> convolutions: a 572 px input yields a 388 px output. The 92-pixel border it drops is exactly the context each edge pixel would have been missing.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>valid vs same padding</b> — “valid” computes only where the filter fits entirely inside, so the output shrinks; “same” pads the border with zeros to keep the size, and quietly tells the network that the world outside the chip is zero.</span>
+    <span><b>572 → 388</b> — the U-Net paper's own numbers: 184 pixels lost, 92 on each side, which equals its receptive-field radius. The architecture refuses to answer where it cannot see.</span>
+    <span><b>high-frequency information</b> — edges and texture, the first thing downsampling destroys and the last thing a boundary metric forgives.</span>
+    <span><b>why 10 m matters</b> — the same pixel error means a different thing per sensor: 3 px is 30 m on Sentinel-2 and about 100 km on ERA5. Always quote errors in metres, not pixels.</span>
+  </div>
+  <div class="foot"><span>Discussion question 1 this afternoon: what exactly do the skips carry, and why does it matter more at 10 m than on ImageNet?</span></div>
+  <aside class="notes">2 min, and it is the live seed for discussion question 1 — do not answer the question, sharpen it. Best version of the argument: information destroyed by downsampling is not recoverable by a deeper decoder, because it was never encoded; the skip is a bypass around a lossy channel, and the loss is specifically positional. Ask the room the ImageNet contrast directly: why does a classifier not care? Because it pools everything to one vector on purpose — position is noise for that task and signal for ours. If someone asks about residual connections, be precise: ResNet adds to fix gradient flow within a stage; U-Net concatenates across stages to restore resolution. Same picture, different problem. Transition: hand off the rest to the videos, then to the part where the numbers live.</aside>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <p class="kicker">Part 1 · Watch at home</p>
+  <h2>The architecture twice: once in the abstract, once on satellite imagery</h2>
+  <div style="display:flex;gap:1.2vw;margin-top:1.4vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=azM57JuQpQI" class="yt" data-id="azM57JuQpQI" style="flex:1;max-width:44%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w4-unet.jpg" alt="DigitalSreeni video explaining the U-Net architecture block by block" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">DigitalSreeni (Sreenivas Bhattiprolu) · <i>Image Segmentation using U-Net, Part 1: what is U-Net?</i> · 18 min — <span class="accent">click to play here</span> · the architecture walked block by block, at the speed of someone who has built it.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=jvZm8REF2KY" class="yt" data-id="jvZm8REF2KY" style="flex:1;max-width:44%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w4-unet-satellite.jpg" alt="DigitalSreeni video segmenting aerial and satellite imagery with a U-Net" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">DigitalSreeni · <i>Semantic segmentation of aerial (satellite) imagery using U-Net</i> · 42 min — <b>the long one</b>: tiling a scene, patching, class imbalance and a real training run. Watch it beside your own lab code.</p>
+    </a>
+  </div>
+  <div class="gloss">
+    <span><b>patchify</b> — cutting a large scene into fixed-size tiles so a network can consume it; the second video does this live, and Part 2 explains why the tile borders then need care.</span>
+    <span><b>one-hot labels</b> — a mask stored with one channel per class instead of one integer per pixel; the usual first bug when a tutorial's class count does not match yours.</span>
+    <span><b>in the thumbnails</b> — left, the architecture in the abstract; right, the same network on imagery that looks like your lab's.</span>
+  </div>
+  <div class="foot"><span>Optional context, not assigned — the assigned video (AlexNet, 18 min) is in the Appendix and its summary is due with Note 04</span></div>
+  <aside class="notes">Twenty seconds, no playback. Say what each is for: the first if the architecture still feels like a diagram rather than a computation, the second if you want to watch someone hit the tiling and imbalance problems we are about to teach, in real time. Both are tutorials, not lectures — they are for the students who learn by watching hands. Keep the Note 04 requirement unambiguous: neither of these is the assigned video.</aside>
+</section>
+
+<!-- ============ PART 2 · DENSE-PREDICTION CRAFT ============ -->
+
+<!-- 11 -->
+<section class="slide section">
+  <p class="kicker">Part 2 · 11 min · the headline</p>
+  <h2>Dense-Prediction Craft</h2>
+  <aside class="notes">11 minutes, the headline of the day. Everything here is measured, not asserted: every Sen1Floods11 number on the next five slides was computed for this lecture from the 446 hand-labeled chips, and the lab reproduces it in the first twenty minutes. The thesis: the architecture is the easy part; the loss, the averaging and the split are where the number is decided.</aside>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <p class="kicker">Part 2 · Look at the data first</p>
+  <h2>One chip of today’s lab, four ways</h2>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:.2em 0 0">
+    <img src="img/fig-w4-sen1floods11-chip.png" data-zoom alt="Four panels of the same Sen1Floods11 chip over Ghana: Sentinel-1 VV backscatter in decibels showing dark flood water, the Sentinel-2 optical scene almost entirely covered by cloud, the hand label with 27 percent of pixels marked water, and the radar image again with the label boundary drawn on it." title="Click to enlarge" style="display:block;margin:0 auto;height:33vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Same place, same flood. The optical sensor lost it to cloud; the radar kept it — <span class="accent">this is why the lab's ablation is S1-only vs S2-only vs fused, and why the answer is not obvious</span>.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>VV</b> — a radar channel: transmitted vertically, received vertically. Smooth water reflects the pulse away from the satellite, so flooded ground goes dark; that darkness is the whole signal you are about to learn to segment.</span>
+    <span><b>speckle</b> — the grain in every SAR (synthetic aperture radar) image: wavelets scattered inside one pixel interfere. It is physics, not sensor noise, and it is the texture a convolution has to learn to see through.</span>
+    <span><b>dark ≠ water</b> — smooth roads, dry sand and radar shadow are dark too. Panel 4 shows dark areas outside the label; that is exactly why a threshold is not a flood map.</span>
+    <span><b>in the figure</b> — 85% of the optical chip is brighter than 0.16 top-of-atmosphere reflectance, which is cloud. The label still exists, because the annotator had the radar.</span>
+  </div>
+  <div class="foot"><span>Sen1Floods11 v1.1, Ghana chip 141910 · rendered for this lecture from <code>gs://sen1floods11</code> · Bonafilia et al. 2020, CVPR Workshops</span></div>
+  <aside class="notes">1.5 min. Rule of the course, said once more: look at the data before you model it. Put the four panels up and work left to right — radar sees it, optical does not, a human drew the line anyway, and panel 4 is the honest one because it shows dark radar pixels that are NOT labelled water. Ask what those are: roads, dry riverbed, radar shadow. That question is the reason the lab's baseline is a learned model rather than a threshold, and it sets up the next slide's number. Callback to W3: this chip came out of a public bucket of cloud-optimized GeoTIFFs with a STAC catalogue — you already know how to reach it.</aside>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <p class="kicker">Part 2 · The imbalance arithmetic</p>
+  <h2>Accuracy is a lie on this dataset — here is the receipt</h2>
+  <div class="card small">
+    <p style="margin:.2em 0"><b>All 446 hand-labeled Sen1Floods11 chips, 101.0 M valid pixels.</b> Water is <b>10.6%</b> of them. Per chip the median is <b>2.5%</b>, and <b>52 chips contain no water at all</b>.</p>
+    <table class="small" style="width:100%;margin-top:.8vh">
+      <thead><tr><th>Predictor</th><th class="num">Accuracy</th><th class="num">IoU (water)</th><th class="num">Precision</th><th class="num">Recall</th></tr></thead>
+      <tbody>
+        <tr><td><b>“always dry”</b> — predict zero everywhere, no model, no data</td><td class="num">89.4%</td><td class="num"><b>0.000</b></td><td class="num">—</td><td class="num">0.000</td></tr>
+        <tr><td><b>Otsu threshold on VV</b> — the classical method, shipped with the dataset</td><td class="num">92.2%</td><td class="num"><b class="accent">0.493</b></td><td class="num">0.616</td><td class="num">0.711</td></tr>
+      </tbody>
+    </table>
+    <p style="margin:.6em 0 .1em" class="muted">Accuracy separates a real method from doing nothing by <b>2.8 points</b>. Intersection over Union separates them by <b class="accent">everything</b>.</p>
+  </div>
+  <ul class="small">
+    <li><b>IoU</b> = TP / (TP + FP + FN) — the true negatives, which are 89% of the pixels, never enter the fraction. <span class="accent">That is the entire point.</span></li>
+    <li>Your report gets three rows, always: the do-nothing baseline, the classical baseline, your model.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>IoU</b> “intersection over union”, also called the Jaccard index — the overlap between predicted water and true water, divided by their union. 1.0 is perfect, 0 means you and the truth share no pixel.</span>
+    <span><b>TP, FP, FN, TN</b> — true positive, false positive, false negative, true negative. Accuracy is (TP + TN) / everything, which is why a rare-class problem hands it away for free.</span>
+    <span><b>Otsu's method</b> — a 1979 algorithm that picks the threshold splitting a histogram into two clumps. Sen1Floods11 ships it as a layer, so it is a free, honest, non-neural baseline.</span>
+    <span><b>precision, recall</b> — of the pixels you called water, how many were (precision); of the water that was there, how many you found (recall). The threshold you pick after training trades one for the other.</span>
+    <span><b>where these numbers come from</b> — computed for this lecture: <code>LabelHand</code> against <code>S1OtsuLabelHand</code>, all 446 chips, pixels valid in both. Nothing here is quoted from a paper; the lab recomputes it.</span>
+  </div>
+  <div class="foot"><span>Sen1Floods11 v1.1 hand-labeled subset · 10.7 M water pixels of 101.0 M valid · reproduce it in lab before you train anything</span></div>
+  <aside class="notes">2.5 min, protected. This is the slide of the day and it is a receipt, not an argument — so read the table slowly and let the 89.4% sit. Ask the room, before revealing the second row, what accuracy a model that predicts "dry" everywhere would earn on a flood dataset; take a guess from someone, then show 89.4%. Then the twist that matters more: even the classical method only gains 2.8 accuracy points, so a reviewer who accepts accuracy cannot tell the two apart at all, while IoU separates 0.000 from 0.493. Say the rule out loud and make them write it: every dense-prediction table in this course carries a do-nothing row and a classical row. The Otsu number is also their target — a U-Net that cannot beat 0.493 has not earned its parameters. Time check: ~0:21 in.</aside>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <p class="kicker">Part 2 · Losses</p>
+  <h2>Four losses, and what each one actually optimizes</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr;gap:2vw">
+    <div style="min-width:0">
+      <ul class="small">
+        <li><b>Cross-entropy</b> — per-pixel, decomposable, well-behaved gradients. Every pixel votes equally, so the rare class is outvoted 9 to 1.</li>
+        <li><b>Weighted CE</b> — multiply the rare class's term by w. One dial, immediate effect on recall, and it does not change what the model can represent, only what it cares about.</li>
+      </ul>
+    </div>
+    <div style="min-width:0">
+      <ul class="small">
+        <li><b>Dice</b> — <b>1 − 2|P∩G| / (|P| + |G|)</b>, a differentiable stand-in for IoU. Optimizes the shape of the whole prediction, not each pixel; unstable when the chip is empty.</li>
+        <li><b>Focal</b> — <b>−(1 − p)<sup>γ</sup> log p</b>, γ ≈ 2: down-weights the easy pixels the model already gets right, so gradient mass moves to the boundary.</li>
+      </ul>
+    </div>
+  </div>
+  <ul class="small">
+    <li>Practical recipe for the lab: <span class="accent">cross-entropy + Dice, summed</span> — CE keeps the gradients sane early, Dice pulls the metric you report. Add class weights only if recall stays dead.</li>
+    <li class="muted">The loss is a surrogate. You descend cross-entropy and you report IoU — exactly the W2 point about smooth stand-ins for a metric with no useful slope.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>decomposable</b> — a sum over pixels, so a batch's gradient is the average of per-pixel gradients. Dice is not: its value depends on every pixel in the chip at once, which is why an all-dry chip makes it wobble.</span>
+    <span><b>soft Dice</b> — computed on probabilities rather than hard labels, so it is differentiable; add a small ε to numerator and denominator or an empty chip divides by zero.</span>
+    <span><b>γ</b> “gamma” — the focusing exponent in focal loss. γ = 0 is plain cross-entropy; γ = 2 means a pixel already predicted at p = 0.9 contributes 1% of its usual gradient.</span>
+    <span><b>class weight w</b> — how much one water pixel counts against one dry pixel. Setting it to the inverse frequency (≈ 8.4 here) is the usual first guess, not a law.</span>
+  </div>
+  <div class="foot"><span>Milletari et al. 2016 (V-Net, Dice) · Lin et al. 2017 (focal loss) · full loss zoo with gradients: Appendix</span></div>
+  <aside class="notes">2.5 min. Do not derive anything — the Appendix card has the gradients. Teach the choice, not the formulas: cross-entropy asks "is each pixel right?", Dice asks "is the shape right?", focal asks "where is the model still wrong?". The honest warning students will hit within the hour: Dice alone on chips with no water gives a loss that is either 0 or 1 with nothing in between, and their loss curve will look broken. The last bullet is the callback that ties the week together — W2 taught surrogate versus reported metric on a classifier; this is the same lesson with a map. If asked about Tversky or boundary losses, point at the Appendix and move on.</aside>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <p class="kicker">Part 2 · How you average</p>
+  <h2>The same predictions score 0.49 or 0.22 — you choose</h2>
+  <div class="card small">
+    <p style="margin:.2em 0"><b>One predictor, the Otsu baseline. One dataset, all 446 chips. Four defensible numbers.</b></p>
+    <table class="small" style="width:100%;margin-top:.8vh">
+      <tbody>
+        <tr><td><b>Pooled over every pixel</b> (“micro”) — one confusion matrix for the whole set</td><td class="num"><b class="accent">IoU 0.493</b></td></tr>
+        <tr><td><b>Mean of per-chip IoU</b> (“macro”) — every chip counts the same, big flood or small</td><td class="num"><b>0.311</b></td></tr>
+        <tr><td><b>Median of per-chip IoU</b> — the typical chip, not the typical pixel</td><td class="num"><b>0.217</b></td></tr>
+        <tr><td><b>25 chips have no water in the truth and none predicted</b> — IoU is 0/0 there</td><td class="num"><b>undefined</b></td></tr>
+      </tbody>
+    </table>
+    <p style="margin:.6em 0 .1em" class="muted">Call those 25 chips 1.0 and the macro score jumps; call them 0.0 and it collapses. Nobody is cheating, and the headline moves by <b class="accent">more than a good architecture change</b>.</p>
+  </div>
+  <ul class="small">
+    <li>And it is not stable across space: the same method scores <b>0.78</b> on the Mekong chips and <b>0.15</b> on the Somalia ones.</li>
+    <li>So state it: <span class="accent">pooled or per-chip, how empty chips are handled, which events are in the test set</span> — three sentences in Note 04, before any model comparison.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>micro vs macro</b> — micro pools all pixels then divides once, so big floods dominate; macro averages per-chip scores, so a 40-pixel pond counts as much as a city under water.</span>
+    <span><b>the empty-chip problem</b> — IoU of an empty truth with an empty prediction is 0/0. Every library picks a convention; almost none of them document it on the plot.</span>
+    <span><b>per-event spread</b> — the same algorithm, eleven floods: Mekong 0.78, Bolivia 0.70, Spain 0.67, India 0.53, Ghana 0.41, Pakistan 0.15, Somalia 0.15. The method did not change; the landscape did.</span>
+    <span><b>why it is a W2 problem</b> — a random split mixes chips of one flood across train and test, so the easy events prop up the score. The Bolivia hold-out exists to stop that.</span>
+  </div>
+  <div class="foot"><span>All four numbers computed for this lecture from the same predictions · per-event table: Appendix</span></div>
+  <aside class="notes">1.5 min and no more, but do not cut it — this is the slide students quote back in their capstone. The move: show that four honest people, using the same predictions, publish four different headline numbers. Then the spatial version: 0.78 versus 0.15 across events is bigger than any architecture gap they will produce this semester, which is why the split is a scientific choice, not a formality — straight back to Week 2. Make the contract concrete: three sentences in Note 04, written BEFORE the model runs. If the clock is behind, cut the per-event line and keep the table.</aside>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <p class="kicker">Part 2 · Borders and tiling</p>
+  <h2>Every tile edge is a place the model was blind</h2>
+  <div class="cols" style="grid-template-columns:1.06fr 1fr;gap:2.2vw;align-items:center">
+    <div style="min-width:0">
+      <ul class="small">
+        <li>A scene is bigger than a chip, so inference is tiled — and at a tile's edge, half the receptive field is off the image.</li>
+        <li>Zero-padding tells the network the world ends in black; the visible result is a <b>seam</b> of wrong pixels on every tile boundary.</li>
+        <li>The fix is the U-Net paper's own: predict on <b>overlapping</b> tiles, keep only the middle, and mirror the image at the true scene edge. <span class="accent">Halo ≈ half the receptive field</span> — today that is ~92 px.</li>
+        <li class="muted">Same discipline when you cut training chips: a chip whose label touches the border teaches the model that floods stop at chip edges.</li>
+      </ul>
+    </div>
+    <div class="figure" style="min-width:0">
+      <svg viewBox="0 0 330 240" role="img" aria-label="Left, a scene cut into four tiles that touch, with a jagged seam drawn along the shared borders. Right, the same scene with tiles that overlap: each tile is predicted with a wide halo and only its central square is kept, so the seams disappear." style="width:min(100%,390px)">
+        <text x="82" y="14" text-anchor="middle" font-size="10" fill="currentColor" font-weight="700">tiles that touch</text>
+        <text x="248" y="14" text-anchor="middle" font-size="10" fill="var(--accent)" font-weight="700">tiles that overlap</text>
+        <g fill="none" stroke="currentColor" stroke-width="1.2">
+          <rect x="22" y="26" width="120" height="120" rx="3"/>
+          <path d="M82 26 V146 M22 86 H142"/>
+        </g>
+        <path d="M82 26 l3 10 l-6 10 l6 10 l-6 10 l6 10 l-6 10 l6 10 l-6 10 l6 10 l-3 10"
+              stroke="var(--accent)" stroke-width="2" fill="none"/>
+        <path d="M22 86 l10 3 l10 -6 l10 6 l10 -6 l10 6 l10 -6 l10 6 l10 -6 l10 6 l10 -3 l10 3 l10 -3"
+              stroke="var(--accent)" stroke-width="2" fill="none"/>
+        <text x="82" y="164" text-anchor="middle" font-size="9" fill="var(--accent)">a seam of pixels the model guessed</text>
+        <g fill="none" stroke="var(--hairline)" stroke-width="1.2">
+          <rect x="188" y="26" width="120" height="120" rx="3"/>
+        </g>
+        <g fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3">
+          <rect x="188" y="26" width="74" height="74"/>
+          <rect x="234" y="72" width="74" height="74"/>
+        </g>
+        <rect x="206" y="44" width="38" height="38" fill="var(--accent)" opacity=".2" stroke="var(--accent)" stroke-width="1.4"/>
+        <rect x="252" y="90" width="38" height="38" fill="var(--accent)" opacity=".2" stroke="var(--accent)" stroke-width="1.4"/>
+        <text x="248" y="164" text-anchor="middle" font-size="9" fill="var(--muted)">dashed = what the model reads</text>
+        <text x="248" y="176" text-anchor="middle" font-size="9" fill="var(--accent)">solid = what you keep</text>
+        <text x="165" y="202" text-anchor="middle" font-size="9.5" fill="currentColor">you pay for the halo in compute, once</text>
+        <text x="165" y="218" text-anchor="middle" font-size="9.5" fill="var(--accent)" font-weight="700">you pay for the seam forever, in the map</text>
+      </svg>
+    </div>
+  </div>
+  <div class="gloss">
+    <span><b>overlap-tile strategy</b> — the U-Net paper's name for it: read a tile with a margin, write only the interior. Standard in every production segmentation pipeline; absent from most tutorials.</span>
+    <span><b>halo, margin</b> — the extra border read but not written. Half the receptive field is the honest size; less is a choice to accept some seam.</span>
+    <span><b>mirror padding</b> — at the true edge of a scene there is no context to read, so the image is reflected outward. It is a lie, but a locally plausible one, unlike zeros.</span>
+    <span><b>in the figure</b> — left, four tiles meeting edge to edge and the seam that follows; right, each tile read wide (dashed) and written narrow (solid), so every written pixel had full context.</span>
+  </div>
+  <div class="foot"><span>Ronneberger et al. 2015, §2 — the overlap-tile strategy and mirroring · full recipe with numbers: Appendix</span></div>
+  <aside class="notes">2 min. Everyone who deploys a segmentation model meets the seam, usually in a figure a supervisor points at. Make it a rule with a number in it: halo equals half the receptive field, which you can now compute — that is the payoff for Part 1's recursion arriving eight minutes later. Two extras worth saying: (1) averaging overlapping predictions with a cosine or tapered weight is smoother than hard-cropping and costs nothing; (2) the training-time version is subtler — chips cut so that labels touch borders teach the network that objects stop at borders. Time check: ~0:29 in — HARD CHECK. If you are past 0:30, Part 3 loses the ConvLSTM equations slide, not the cost slide.</aside>
+</section>
+
+<!-- ============ PART 3 · SPATIOTEMPORAL ============ -->
+
+<!-- 17 -->
+<section class="slide section">
+  <p class="kicker">Part 3 · 8 min</p>
+  <h2>Spatiotemporal Extensions</h2>
+  <aside class="notes">8 minutes. Environmental data is a cube, not an image: the same place, again and again, irregularly. Three ways to spend parameters on that third axis, then the question this course keeps returning to — when is convolution still the right answer in 2026?</aside>
+</section>
+
+<!-- 18 -->
+<section class="slide">
+  <p class="kicker">Part 3 · Three ways to spend time</p>
+  <h2>Three ways to put time into a convolution</h2>
+  <div class="figure">
+    <svg viewBox="0 0 690 215" role="img" aria-label="Three schematics over the same stack of dated images. First, a small cube moving through the stack, labelled 3D convolution. Second, a flat square filter applied within each date followed by a short line across dates, labelled factorized space-then-time. Third, a chain of cells, one per date, each passing a state to the next, labelled ConvLSTM." style="width:min(94%,880px)">
+      <g font-size="10.5" font-weight="700" text-anchor="middle">
+        <text x="105" y="16" fill="currentColor">3D convolution</text>
+        <text x="345" y="16" fill="var(--accent)">factorized: space, then time</text>
+        <text x="585" y="16" fill="currentColor">ConvLSTM</text>
+      </g>
+      <!-- 3D conv -->
+      <g fill="none" stroke="var(--hairline)" stroke-width="1">
+        <rect x="30" y="46" width="90" height="70"/><rect x="45" y="36" width="90" height="70"/><rect x="60" y="26" width="90" height="70"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="62" y="62" width="26" height="22"/><rect x="70" y="55" width="26" height="22"/><rect x="78" y="48" width="26" height="22"/>
+      </g>
+      <text x="105" y="136" text-anchor="middle" font-size="9.5" fill="currentColor">one kernel across x, y and t</text>
+      <text x="105" y="152" text-anchor="middle" font-size="10" fill="currentColor" font-weight="700">27 C²  weights</text>
+      <text x="105" y="168" text-anchor="middle" font-size="9" fill="var(--muted)">= 110,592 at C = 64</text>
+      <text x="105" y="190" text-anchor="middle" font-size="9" fill="var(--muted)">strongest, hungriest; needs the most data</text>
+      <!-- factorized -->
+      <g fill="none" stroke="var(--hairline)" stroke-width="1">
+        <rect x="270" y="46" width="90" height="70"/><rect x="285" y="36" width="90" height="70"/><rect x="300" y="26" width="90" height="70"/>
+      </g>
+      <g fill="none" stroke="var(--accent)" stroke-width="1.6">
+        <rect x="318" y="48" width="26" height="22"/>
+        <path d="M331 70 L323 80 M323 80 L315 90"/>
+      </g>
+      <circle cx="331" cy="70" r="2.6" fill="var(--accent)" stroke="none"/><circle cx="323" cy="80" r="2.6" fill="var(--accent)" stroke="none"/><circle cx="315" cy="90" r="2.6" fill="var(--accent)" stroke="none"/>
+      <text x="345" y="136" text-anchor="middle" font-size="9.5" fill="currentColor">3 × 3 within a date, then 3 across dates</text>
+      <text x="345" y="152" text-anchor="middle" font-size="10" fill="var(--accent)" font-weight="700">12 C²  weights</text>
+      <text x="345" y="168" text-anchor="middle" font-size="9" fill="var(--muted)">= 49,152 — 2.25× cheaper, one extra non-linearity</text>
+      <text x="345" y="190" text-anchor="middle" font-size="9" fill="var(--accent)">the default when data is scarce</text>
+      <!-- convlstm -->
+      <g fill="none" stroke="currentColor" stroke-width="1.3">
+        <rect x="500" y="46" width="40" height="34" rx="5"/>
+        <rect x="556" y="46" width="40" height="34" rx="5"/>
+        <rect x="612" y="46" width="40" height="34" rx="5"/>
+        <path d="M540 63 H556 M596 63 H612"/>
+        <path d="M520 100 V82 M576 100 V82 M632 100 V82"/>
+      </g>
+      <g fill="currentColor" stroke="none">
+        <path d="M550 59 L556 63 L550 67 Z"/><path d="M606 59 L612 63 L606 67 Z"/>
+        <path d="M516 86 L520 80 L524 86 Z"/><path d="M572 86 L576 80 L580 86 Z"/><path d="M628 86 L632 80 L636 86 Z"/>
+      </g>
+      <g font-size="8.5" fill="var(--muted)" text-anchor="middle">
+        <text x="520" y="112">t − 2</text><text x="576" y="112">t − 1</text><text x="632" y="112">t</text>
+      </g>
+      <text x="576" y="136" text-anchor="middle" font-size="9.5" fill="currentColor">a state map carried forward, gated</text>
+      <text x="576" y="152" text-anchor="middle" font-size="10" fill="currentColor" font-weight="700">4 · 2 · 9 C²  weights</text>
+      <text x="576" y="168" text-anchor="middle" font-size="9" fill="var(--muted)">= 294,912, reused at every step</text>
+      <text x="576" y="190" text-anchor="middle" font-size="9" fill="var(--muted)">variable-length input; sequential, so slower</text>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Counts are for one layer, 3 × 3 kernels, C = 64 channels in and out. <span class="accent">The ranking is not about accuracy — it is about how much data each one demands before it beats the cheaper option.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>3D convolution</b> — the kernel has a depth in time as well as height and width, so it learns motion directly. Also the fastest way to overfit 200 labelled chips.</span>
+    <span><b>factorized space–time</b>, also “(2+1)D” — do the spatial convolution and the temporal one as separate layers. Fewer weights, and the non-linearity between them buys back much of what the full cube offered.</span>
+    <span><b>ConvLSTM</b> — a recurrent cell whose gates are convolutions instead of matrix multiplies, so the memory it carries is a feature <i>map</i>, not a vector.</span>
+    <span><b>C</b> — channel count, in and out. Weights scale with C², which is why doubling the width costs four times as much on every one of these.</span>
+    <span><b>in the figure</b> — same stack of dates three times: a cube sliding through it, a square then a line, and a chain of cells passing a state rightward.</span>
+  </div>
+  <div class="foot"><span>Shi et al. 2015 (ConvLSTM), <a href="https://arxiv.org/abs/1506.04214">arXiv:1506.04214</a> · Tran et al. 2018 (R(2+1)D) · full arithmetic: Appendix</span></div>
+  <aside class="notes">2.5 min. Lead with the shape of the data, not the architectures: your lab's chips are single-date, but every capstone that touches vegetation, snow or soil moisture is a cube. Then walk the three counts — the useful takeaway is the 2.25× factorization saving and the fact that ConvLSTM's larger count is amortized because the same weights run at every time step. Say the selection rule plainly: with a few hundred labelled cubes, factorized first; full 3D only when you can show it beats it. Honest aside if asked why not just stack dates as channels: you can, and it works, but it fixes the number and order of dates at build time — fatal for irregular satellite revisit.</aside>
+</section>
+
+<!-- 19 -->
+<section class="slide">
+  <p class="kicker">Part 3 · ConvLSTM</p>
+  <h2>ConvLSTM: the gates stop being matrices</h2>
+  <ul class="small">
+    <li>An LSTM (long short-term memory) cell computes its gates as <b>W·x + U·h</b>. Replace both products with convolutions and everything else stays:</li>
+  </ul>
+  <p class="big" style="font-family:var(--serif);margin:.6vh 0">i<sub>t</sub> = σ( W<sub>xi</sub> ∗ X<sub>t</sub> + W<sub>hi</sub> ∗ H<sub>t−1</sub> + b<sub>i</sub> ) &nbsp;&nbsp; … and the same for f, o</p>
+  <ul class="small">
+    <li>C<sub>t</sub> and H<sub>t</sub> are now <b>feature maps</b>, not vectors — the cell remembers <i>where</i> things were, which is the whole point for a moving rain field.</li>
+    <li>What you gain: variable-length, irregular sequences, and a state that is spatially structured. <span class="accent">What you pay: the time steps run one after another</span>, so you cannot parallelize across t the way a 3D convolution or an attention layer can.</li>
+    <li class="muted">This is the 2015 paper that made deep nowcasting work, and it is still a strong baseline on radar sequences in 2026.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>∗</b> — convolution, as against · for a matrix product. That single substitution is the whole paper.</span>
+    <span><b>i, f, o</b> — input, forget and output gates: how much new information to admit, how much memory to keep, how much of the memory to expose. Each is a number per pixel per channel, between 0 and 1.</span>
+    <span><b>σ</b> “sigmoid” — squashes to (0, 1), so a gate is a soft switch.</span>
+    <span><b>C<sub>t</sub>, H<sub>t</sub></b> — the cell state carried forward and the hidden state handed out at step t; in a ConvLSTM both keep the spatial grid.</span>
+    <span><b>nowcasting</b> — forecasting 0–2 hours ahead from radar, where extrapolating the field you can see beats running physics.</span>
+  </div>
+  <div class="foot"><span>Shi et al. 2015, <i>Convolutional LSTM Network: A Machine Learning Approach for Precipitation Nowcasting</i> — full gate equations in the Appendix</span></div>
+  <aside class="notes">2 min, and it is the slide to sacrifice first if Part 2 ran long — the Appendix carries the full equations. Teach one idea: an LSTM's memory is a vector, so it must flatten the map and lose position; a ConvLSTM's memory is a map, so position survives. Everything else about LSTMs they can look up. Plant discussion question 3 here without answering it: this architecture lost the global medium-range weather race to graph and transformer models, and yet it is alive and well in nowcasting — ask them to hold the contradiction until the journal club. Transition: which is the cue for the last question of this part.</aside>
+</section>
+
+<!-- 20 -->
+<section class="slide">
+  <p class="kicker">Part 3 · Conv vs attention</p>
+  <h2>When convolution still beats attention</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr;gap:2.2vw">
+    <div style="min-width:0">
+      <h3 class="small">Convolution wins when…</h3>
+      <ul class="small">
+        <li>Labels are scarce — a strong prior is worth more than flexibility. Sen1Floods11 gives you <b>446</b> labelled chips, not 14 million.</li>
+        <li>The signal is local — a flood edge is decided by its neighbourhood, not by a pixel 4 km away.</li>
+        <li>You need every pixel out: attention over a 64 × 64 chip means <b>4,096</b> tokens and <b>16.8 million</b> pairwise scores per head per layer — so transformers patchify, and <span class="accent">the patch is exactly what blurs your boundary</span>.</li>
+      </ul>
+    </div>
+    <div style="min-width:0">
+      <h3 class="small">Attention wins when…</h3>
+      <ul class="small">
+        <li>The dependency is genuinely long-range: a blocking high over Siberia changes Korea's weather next week. Global forecasting went graph and transformer for that reason.</li>
+        <li>You have a planet of unlabelled data and a self-supervised objective to spend it on — which is next week's story.</li>
+        <li class="muted">And it is not either/or: the strongest dense-prediction systems put a transformer encoder on a convolutional decoder. The U-shape survives the backbone swap.</li>
+      </ul>
+    </div>
+  </div>
+  <ul class="small">
+    <li>Nowcasting is the clean case: DeepMind's radar model was judged against <b>PySTEPS, a U-Net and an attention model</b> — and its published advantage over the U-Net is <span class="accent">sharpness</span>, because a model trained to minimize a per-pixel loss over many possible futures draws their average.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>token</b> — the unit attention compares; one per pixel is exact and quadratic, one per 16 × 16 patch is affordable and coarse.</span>
+    <span><b>O(N²) vs O(N·k²)</b> — attention compares every token with every other; a convolution touches k² neighbours per output. At N = 4,096 and k = 3 that is 16.8 M against 9.</span>
+    <span><b>blurring</b> — averaging over futures. It is not a bug in the network but the correct answer to the question the loss asked; fixing it means changing the question (adversarial or probabilistic training), not the architecture.</span>
+    <span><b>PySTEPS</b> — the operational optical-flow nowcasting system, i.e. the classical baseline of that field, exactly like Otsu is for flood mapping.</span>
+  </div>
+  <div class="foot"><span>Ravuri et al. 2021, <i>Skilful precipitation nowcasting using deep generative models of radar</i>, Nature — baselines: PySTEPS, U-Net, axial attention</span></div>
+  <aside class="notes">2.5 min. This is the slide that stops the room from assuming transformers are simply better, which is the default belief they walk in with — and it is the honest setup for Week 5 onward, where we do spend the semester on attention. Make the blurring point carefully because it recurs all semester: least-squares and cross-entropy both reward the conditional mean, so a deterministic model facing a spread of futures paints the average of them. Nowcasting made this visible first; W11's probabilistic scores are the same problem with a metric attached. Time check: ~0:37 in.</aside>
+</section>
+
+<!-- ============ PART 4 · THE HUMBLING + MULTISPECTRAL ============ -->
+
+<!-- 21 -->
+<section class="slide section">
+  <p class="kicker">Part 4 · 8.5 min</p>
+  <h2>The Humbling, and Feeding More Than Three Bands</h2>
+  <aside class="notes">8.5 minutes. The first half is the most important attitude adjustment of the course: the thing you built today is not the loser in the foundation-model story, it is the reigning baseline. The second half is a practical block they will need in the lab within the hour.</aside>
+</section>
+
+<!-- 22 -->
+<section class="slide">
+  <p class="kicker">Part 4 · PANGAEA</p>
+  <h2>A well-tuned U-Net still beats a lot of foundation models</h2>
+  <div class="cols" style="grid-template-columns:1.04fr 1fr;gap:2.2vw;align-items:center">
+    <div style="min-width:0">
+      <ul class="small">
+        <li><b>PANGAEA</b> (2024) evaluated the popular open geospatial foundation models on one standardized protocol — many datasets, several sensors, resolutions and tasks, deliberately not only North America and Europe.</li>
+        <li>The finding, in the authors' own words: geospatial foundation models <span class="accent">“do not consistently outperform supervised baselines”</span> — a plain U-Net and a vanilla Vision Transformer, trained from scratch.</li>
+        <li>They struggle most where the task is furthest from the pretraining corpus — SAR, unusual bands, regions and seasons the corpus under-sampled — and in the limited-label settings they were supposed to rescue.</li>
+        <li class="muted">GEO-Bench-2 finds the mirror image on high-resolution optical data, where general vision backbones sometimes win. Neither result says foundation models are useless; both say <b>the comparison is empirical</b>.</li>
+      </ul>
+    </div>
+    <div class="figure" style="min-width:0">
+      <svg viewBox="0 0 320 250" role="img" aria-label="A decision map with two axes: how many labels you have, running left to right, and how far your task sits from the pretraining corpus, running bottom to top. The lower-right region is marked as the supervised U-Net's, the lower-left as where a foundation model is most likely to help, and the top band as the region where the benchmark shows no reliable winner." style="width:min(100%,360px)">
+        <g fill="none" stroke="currentColor" stroke-width="1.2">
+          <path d="M40 210 H300 M40 210 V24"/>
+          <path d="M292 206 L300 210 L292 214 M36 32 L40 24 L44 32"/>
+        </g>
+        <rect x="40" y="120" width="130" height="90" fill="var(--accent)" opacity=".14"/>
+        <rect x="170" y="120" width="130" height="90" fill="var(--wash)"/>
+        <rect x="40" y="24" width="260" height="96" fill="none" stroke="var(--hairline)" stroke-width="1" stroke-dasharray="4 3"/>
+        <g font-size="9.5" text-anchor="middle">
+          <text x="105" y="158" fill="var(--accent)" font-weight="700">a foundation model</text>
+          <text x="105" y="172" fill="var(--accent)" font-weight="700">has the best case here</text>
+          <text x="235" y="158" fill="currentColor" font-weight="700">your U-Net wins,</text>
+          <text x="235" y="172" fill="currentColor" font-weight="700">and cheaply</text>
+          <text x="170" y="62" fill="var(--muted)">far from the corpus — SAR, odd bands,</text>
+          <text x="170" y="76" fill="var(--muted)">under-sampled regions:</text>
+          <text x="170" y="94" fill="currentColor" font-weight="700">no reliable winner. Measure it.</text>
+        </g>
+        <g font-size="9.5" fill="var(--muted)">
+          <text x="46" y="228">few labels</text>
+          <text x="300" y="228" text-anchor="end">many labels</text>
+          <text x="14" y="120" transform="rotate(-90 14 120)" text-anchor="middle">distance from the pretraining corpus →</text>
+        </g>
+        <text x="170" y="245" text-anchor="middle" font-size="8.5" fill="var(--muted)">a heuristic, not a measured boundary</text>
+      </svg>
+    </div>
+  </div>
+  <div class="gloss">
+    <span><b>GFM</b> “geospatial foundation model” — a large model pretrained on unlabelled Earth-observation data and then adapted to tasks; Prithvi and its relatives. Week 7 builds one.</span>
+    <span><b>supervised baseline</b> — a model trained from scratch on the task's own labels only, no pretraining. The U-Net you build today is exactly this.</span>
+    <span><b>standardized protocol</b> — same splits, same augmentations, same fine-tuning budget for every model. Without it, “our model wins” often means “we tuned ours longer”.</span>
+    <span><b>in the figure</b> — the horizontal axis is how many labels you have, the vertical is how unlike the pretraining corpus your data is. The dashed upper band is where published results stop agreeing.</span>
+  </div>
+  <div class="foot"><span>Marsocci et al. 2024, <i>PANGAEA: a global and inclusive benchmark for geospatial foundation models</i>, <a href="https://arxiv.org/abs/2412.04204">arXiv:2412.04204</a> · GEO-Bench-2, arXiv:2511.15658</span></div>
+  <aside class="notes">3 min, and set the tone carefully — this is not cynicism about foundation models, it is the reason this course spends a week on U-Nets before spending eight on transformers. Read the quoted finding verbatim so nobody thinks it is my opinion. The argument to make: a benchmark is only interesting if the baseline is strong, and most GFM papers before PANGAEA compared against baselines they had not tuned. Be explicit about the figure's status — a heuristic, drawn from the benchmark's qualitative findings, not a measured boundary; it is there to tell them where to spend a week of compute. If someone asks which is better, refuse the question and give them the correct one: better for which task, with how many labels, how far from which corpus?</aside>
+</section>
+
+<!-- 23 -->
+<section class="slide">
+  <p class="kicker">Part 4 · The rule</p>
+  <h2>Your capstone's baseline row is not optional</h2>
+  <ul>
+    <li>Every model comparison in this course carries three rows: <b>do-nothing</b> · <b>classical method</b> · <b>supervised U-Net trained on your labels</b>. Then your foundation model.</li>
+    <li>The U-Net you train today is that third row. <span class="accent">Keep the checkpoint, the config and the split</span> — Weeks 7, 8 and the capstone all compare against it.</li>
+    <li>A foundation model that does not beat it has told you something true and publishable. A missing baseline row has told a reviewer you did not look.</li>
+    <li class="muted">Budget honestly too: report what each row cost in GPU-hours. “Better” at ten times the compute is a different claim from “better”.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>checkpoint</b> — the saved weights plus the exact config that produced them. Without the config it is not a baseline, it is a file.</span>
+    <span><b>frozen vs fine-tuned</b> — when Week 7 compares, it must say whether the foundation model's encoder was frozen and only a head trained, or the whole thing updated. They are different experiments with different costs.</span>
+    <span><b>GPU-hour</b> — the honest denominator of every comparison in this field, and the one most papers omit.</span>
+  </div>
+  <div class="foot"><span>Note 04 deliverable: an IoU table with three input configurations against the always-dry baseline, plus four prediction panels</span></div>
+  <aside class="notes">1.5 min, delivered as a rule rather than a discussion. Tie it back to the receipt in Part 2: they have already seen that a do-nothing predictor scores 89.4% accuracy, so they know what an unchallenged baseline row hides. Say the capstone consequence out loud — the checkpoint saved this week is reused in W7 and in the final comparison table, so a sloppy run today is a debt they pay in November. Compute reporting is a course norm from here on, not a suggestion.</aside>
+</section>
+
+<!-- 24 -->
+<section class="slide">
+  <p class="kicker">Part 4 · Multispectral input</p>
+  <h2>More than three channels: what actually changes</h2>
+  <div class="cols" style="grid-template-columns:1.06fr 1fr;gap:2.2vw;align-items:center">
+    <div style="min-width:0">
+      <ul class="small">
+        <li><b>The first layer, and only the first layer.</b> A 3 × 3 convolution from 13 bands to 64 channels is 7,488 weights instead of 1,728 — nothing else in the network notices.</li>
+        <li><b>Pretrained weights are the catch</b>: an ImageNet encoder has exactly 3 input channels. Copy the RGB (red-green-blue) filters, then either repeat or average them into the new bands and rescale so activations keep their size.</li>
+        <li><b>Normalize per band, with training-set statistics</b> — Sentinel-2 reflectance and Sentinel-1 decibels differ by orders of magnitude, and last week's rule still holds: the statistics ship with the corpus.</li>
+        <li><b>Band dropout as augmentation</b> — randomly zero whole bands during training. <span class="accent">The model stops depending on any single band, and it still works when one is missing or broken.</span></li>
+      </ul>
+    </div>
+    <div class="figure" style="min-width:0">
+      <svg viewBox="-22 0 366 238" role="img" aria-label="A stack of labelled band planes feeding one convolution block. Two of the planes are crossed out to show band dropout, and a small formula beside the block shows the weight count growing only in the first layer." style="width:min(100%,360px)">
+        <g stroke="currentColor" stroke-width="1" fill="none">
+          <rect x="24" y="30" width="72" height="18" rx="2"/>
+          <rect x="24" y="52" width="72" height="18" rx="2"/>
+          <rect x="24" y="74" width="72" height="18" rx="2"/>
+          <rect x="24" y="96" width="72" height="18" rx="2"/>
+          <rect x="24" y="118" width="72" height="18" rx="2"/>
+          <rect x="24" y="140" width="72" height="18" rx="2"/>
+        </g>
+        <g font-size="9" fill="var(--muted)">
+          <text x="30" y="43">B02 blue</text><text x="30" y="65">B03 green</text><text x="30" y="87">B04 red</text>
+          <text x="30" y="109">B08 NIR</text><text x="30" y="131">B11 SWIR</text><text x="30" y="153">VV / VH</text>
+        </g>
+        <g stroke="var(--accent)" stroke-width="1.6">
+          <path d="M26 52 L94 70 M94 52 L26 70"/>
+          <path d="M26 118 L94 136 M94 118 L26 136"/>
+        </g>
+        <text x="62" y="172" text-anchor="middle" font-size="9" fill="var(--accent)">band dropout: two bands hidden</text>
+        <g fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="148" y="72" width="58" height="46" rx="6"/>
+          <path d="M96 94 H148 M206 94 H258"/>
+          <path d="M142 90 L148 94 L142 98 Z" fill="currentColor" stroke="none"/>
+          <path d="M252 90 L258 94 L252 98 Z" fill="currentColor" stroke="none"/>
+        </g>
+        <text x="177" y="98" text-anchor="middle" font-size="10" fill="currentColor">conv 3×3</text>
+        <text x="177" y="132" text-anchor="middle" font-size="9" fill="var(--muted)">3·3·<tspan font-weight="700" fill="currentColor">C_in</tspan>·64 weights</text>
+        <text x="177" y="146" text-anchor="middle" font-size="9" fill="var(--accent)">the only layer that knows C_in</text>
+        <g fill="none" stroke="var(--hairline)" stroke-width="1.2">
+          <rect x="258" y="66" width="40" height="58" rx="4"/>
+        </g>
+        <text x="278" y="99" text-anchor="middle" font-size="9.5" fill="currentColor">the rest</text>
+        <text x="278" y="112" text-anchor="middle" font-size="9.5" fill="currentColor">of the net</text>
+        <text x="160" y="200" text-anchor="middle" font-size="9.5" fill="currentColor">every band arrives standardized by its own μ and σ</text>
+        <text x="160" y="216" text-anchor="middle" font-size="9.5" fill="var(--accent)" font-weight="700">computed on the training split only</text>
+      </svg>
+    </div>
+  </div>
+  <div class="gloss">
+    <span><b>multispectral</b> — more bands than the eye has: Sentinel-2 carries 13, spanning visible, near-infrared and shortwave infrared. Each is a different physical measurement, not a colour channel.</span>
+    <span><b>NIR, SWIR</b> — near-infrared and shortwave infrared. Water absorbs strongly in both, which is why they dominate any optical water index.</span>
+    <span><b>filter inflation</b> — the trick for reusing a 3-channel pretrained first layer on 13 bands: copy, then rescale so the output activations keep roughly their original magnitude.</span>
+    <span><b>band dropout</b> — augmentation by deletion. It is also a rehearsal for the real world, where a band is cloudy, saturated or simply missing from an archive.</span>
+    <span><b>in the figure</b> — the band stack on the left with two planes struck out, one convolution that knows how many bands there are, and a network behind it that does not.</span>
+  </div>
+  <div class="foot"><span>Related in W7: SatMAE's band groups and DOFA's wavelength-conditioned embeddings — architectures that treat bands as first-class rather than stacking them</span></div>
+  <aside class="notes">2.5 min, and it is deliberately practical: they hit every line of this in the lab's fused S1+S2 configuration within the hour. The one conceptual point worth pressing: stacking bands into channels is the cheap answer and it silently assumes the band order and count are fixed forever — that is why sensor-agnostic foundation models exist and why W7 looks different. The normalization line is a direct W3 callback; ask who stored per-band statistics beside their chip store last week, and remind them that reusing a pretrained encoder means reusing its statistics, not recomputing your own. Time check: ~0:45:30 — HARD CHECK before Part 5.</aside>
+</section>
+
+<!-- ============ PART 5 · READING FRAMING + THE CONTRACT ============ -->
+
+<!-- 25 -->
+<section class="slide">
+  <p class="kicker">Part 5 · Reading: Ronneberger et al. 2015 · 4 min</p>
+  <h2>The paper in one slide — and why Earth observation adopted it</h2>
+  <ul class="small">
+    <li>The setting was not satellites: <b>30 training images</b> of electron-microscopy cell membranes, a competition, and no hope of a big labelled corpus.</li>
+    <li>Three moves, all still standard: the <b>skip connections</b>; heavy <b>elastic-deformation augmentation</b> to survive 30 images; a <b>weighted loss</b> that pays extra attention to the thin gaps between touching cells.</li>
+    <li>Why our field took it: Earth observation has the same shape of problem — <span class="accent">abundant pixels, scarce labels, and boundaries that are the answer</span>.</li>
+    <li>And the honest reading for 2026: it is the architecture that every geospatial foundation model is still measured against, eleven years on. <b>Ask why nothing has replaced it for dense prediction</b> — that is a better question than whether transformers are better.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>elastic deformation</b> — warping an image with a smooth random field, so a cell (or a river) bends into a shape the model has not seen but nature could produce. The cheapest way to multiply 30 images.</span>
+    <span><b>the weight map</b> — the U-Net paper's loss weights every pixel, with a large bonus on the narrow background gaps between touching objects, so the network is punished hardest exactly where it wants to merge things. Formula in the Appendix.</span>
+    <span><b>biomedical → geospatial</b> — the transfer worked because the constraint was the same: labels are expensive because an expert has to draw them, which is exactly why Sen1Floods11 has 446 hand-labeled chips and not 446,000.</span>
+  </div>
+  <div class="foot"><span>Ronneberger, Fischer &amp; Brox 2015, <i>U-Net: Convolutional Networks for Biomedical Image Segmentation</i>, <a href="https://arxiv.org/abs/1505.04597">arXiv:1505.04597</a> (MICCAI) · optional: Shi et al. 2015, ConvLSTM</span></div>
+  <aside class="notes">2 min framing, no more. The point to make is historical and it lands well: this architecture was designed under a label famine, and that is precisely the condition of environmental machine learning, which is why a 2015 biomedical paper is still the backbone of a 2026 flood-mapping pipeline. Flag the weight map as the ancestor of every class-imbalance trick in Part 2 — they were solving our problem before we had it. Then set up discussion question 1: the leader should open by reproducing figure 1 and asking what the crop-and-copy arrows actually carry.</aside>
+</section>
+
+<!-- 26 -->
+<section class="slide">
+  <p class="kicker">Part 5 · The contract</p>
+  <h2>Write the evaluation down before the model runs</h2>
+  <div class="card small">
+    <p style="margin:.2em 0"><b>Note 04 opens with five sentences, written before training:</b></p>
+    <ol style="margin:.4em 0 0">
+      <li>What the <b>split</b> is, and along which axis it separates — chips, or whole flood events.</li>
+      <li>Whether IoU is <b>pooled over pixels or averaged over chips</b>, and what happens to empty chips.</li>
+      <li>Which pixels are <b>excluded</b> — no-data, and the tile borders your inference did not write.</li>
+      <li>The <b>threshold</b> turning probabilities into a map, and how you chose it — on validation, never on test.</li>
+      <li>The <b>baseline rows</b>: always-dry and Otsu, computed on the same pixels as your model.</li>
+    </ol>
+  </div>
+  <ul class="small">
+    <li>Sen1Floods11 hands you both splits: the official <b>IID split</b> (252 / 89 / 90 chips), and <b>Bolivia — 15 chips of a flood held out entirely</b>. <span class="accent">Report both numbers.</span> The gap between them is the only honest estimate of how your model travels.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>IID split</b> — independent and identically distributed: chips shuffled at random, so the same flood appears in train and test. Comfortable, and optimistic — the Week 2 lesson, in this dataset's own file names.</span>
+    <span><b>held-out event</b> — a whole flood the model never saw: different country, different landscape, different radar geometry. This is the number a user of your map would care about.</span>
+    <span><b>the threshold</b> — a segmentation model outputs a probability per pixel; 0.5 is a convention, not a result. Sweeping it on the test set is leakage wearing a lab coat.</span>
+  </div>
+  <div class="foot"><span>Bonafilia et al. 2020 · splits shipped with the dataset · the same discipline as Week 2's leakage checklist, applied to a map</span></div>
+  <aside class="notes">2 min. Deliver this as a contract, not advice — it is graded. The killer detail is that Sen1Floods11 ships both splits, so nobody has to construct the honest experiment: refusing to report the Bolivia number is now a choice, and it is the choice reviewers look for. Tell them what they will most likely see — the held-out event score lower, sometimes much lower — and that reporting that gap is the strongest thing in their note, not the weakest. End of the live budget: ~0:49:30. Read the clock here: ≤ 0:50 → run the FLEX board exercise; past it → hand the board to the journal-club leader and go to break.</aside>
+</section>
+
+<!-- 27 -->
+<section class="slide">
+  <p class="kicker">Part 5 · FLEX ~5 min · teach or skip</p>
+  <h2>Board exercise: five ways to raise an IoU without improving the model</h2>
+  <ul>
+    <li>Collect on the board: <span class="accent">five decisions that move the reported number while the weights stay untouched</span>.</li>
+    <li>Each one must name the sentence in Note 04 that closes it.</li>
+    <li class="muted">We photograph this board and hold it against your capstone tables in Weeks 7 and 13.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>the rule</b> — “train longer” is not an answer; we want decisions made after the predictions exist.</span>
+    <span><b>why five</b> — you have already seen four on today's slides, measured. The fifth is the one your own pipeline will invent.</span>
+  </div>
+  <div class="foot"><span>Rule: every proposal must be defensible in public — these are choices honest people make differently, not frauds</span></div>
+  <aside class="notes">5 min, FLEX — teach or skip per the clock rule on the previous slide. If skipped, the fallback is MANDATORY: say out loud "leader, the five-ways board is your journal-club opener." Target list to steer toward, do not reveal upfront: (1) pooled versus per-chip averaging — we measured 0.493 against 0.217; (2) what you do with the 25 empty chips; (3) the probability threshold, swept after seeing the test set; (4) which events land in test — 0.78 on the Mekong, 0.15 on Somalia; (5) quietly dropping no-data pixels, or tile borders, or chips with less than 1% water. If the room is quick, add the two subtler ones: selecting the best epoch on test, and reporting the fused configuration only because it happened to win. Close by naming the pattern: none of these is fraud, all of them are a missing sentence.</aside>
+</section>
+
+<!-- 28 -->
+<section class="slide">
+  <p class="kicker">Journal club · 30 min · after break · 0 lecture minutes</p>
+  <h2>Ronneberger et al. 2015 — discussion questions</h2>
+  <ol>
+    <li>Exactly what information do skip connections carry that the bottleneck destroys, and why does that matter more at 10 m ground sample distance than on ImageNet?</li>
+    <li>Where should a pretrained foundation model plug into a U-Net-style decoder (this is what TerraTorch and Prithvi do)?</li>
+    <li>Why did ConvLSTM lose to transformers for global weather but survive for nowcasting (MetNet-3)?</li>
+  </ol>
+  <p class="small muted">Groups of 3–4, working from your published entrance tickets (Journal Club tab on the course site) · the drawn leader moderates, the presenter reports back, the questioner takes another group’s report · these three questions are the agenda.</p>
+  <div class="foot"><span>Leader opens with one reproduced figure · roles revealed at 13:00 on the course site · optional: <a href="https://arxiv.org/abs/1506.04214">Shi et al. 2015, ConvLSTM</a></span></div>
+  <aside class="notes">Journal club: 30 min in groups of 3–4, drawn leader moderating, presenter reporting back; harvest in the last 5 min. DQ1 harvests the receptive-field and skip slides into a precise answer — good answers say "position at full resolution", better ones say the bottleneck's grid cell is 160 m wide so a 30 m error is invisible to it. DQ2: the appendix card on TerraTorch is the crib — the foundation model replaces the encoder, a neck reshapes its tokens back into a pyramid, and the decoder stays convolutional; the interesting part is that the skips now have to come from somewhere else. DQ3: the honest answer is about what each regime needs — nowcasting is local advection over minutes with a short context and hard sharpness demands; global medium-range is long-range teleconnection over a small planet-sized grid. Close with a one-line bridge to lab.</aside>
+</section>
+
+<!-- 29 -->
+<section class="slide">
+  <p class="kicker">Lab briefing · 3 min · after journal club</p>
+  <h2>Today’s lab: one U-Net, three inputs, one honest table</h2>
+  <div class="card small">
+    <p><b>Data.</b> The Sen1Floods11 hand-labeled subset — 512 × 512 chips at 10 m, Sentinel-1 VV/VH and Sentinel-2, from the public bucket <code>gs://sen1floods11</code> (cloud-optimized GeoTIFFs with a STAC catalog — last week's skills, reused). <span class="pill">446 chips</span> <span class="pill">IID split 252/89/90</span> <span class="pill">Bolivia held out</span></p>
+    <p><b>Model.</b> The agent scaffolds a U-Net (<code>segmentation-models-pytorch</code>; TerraTorch ships a <code>sen1floods11</code> data module, or read the bucket directly); <span class="accent">you define the evaluation</span> and run the ablation: <b>S1-only vs S2-only vs fused</b>. <span class="pill">PyTorch</span> <span class="pill">W&amp;B</span></p>
+    <p><b>Deliverable — Note 04.</b> The five-sentence evaluation contract, an IoU table of the three input configurations against <b>always-dry</b> and <b>Otsu</b>, both splits reported, and four prediction panels including one failure. <b>Keep the checkpoint: this U-Net is your standing baseline from here to the capstone.</b></p>
+  </div>
+  <ul class="small">
+    <li>Verify, do not trust: <span class="accent">recompute the 89.4% and the 0.493 yourself</span> before training — if your numbers differ, your masking is wrong, and every later number would have inherited it.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>ablation</b> — the same model and protocol, one input changed at a time, so a difference is attributable. S1-only tests whether radar alone suffices; S2-only inherits the cloud problem you saw in Part 2.</span>
+    <span><b>failure panel</b> — one prediction that went wrong, chosen and explained. It is graded: a note with four successes and no failure has not been read by its author.</span>
+    <span><b>W&amp;B</b> “Weights &amp; Biases” — the experiment tracker; one run per configuration, config logged, so the table in your note is reconstructible.</span>
+  </div>
+  <div class="foot"><span>Stuck in lab? → Appendix: convolution arithmetic (A1) · loss formulas (A4) · metric definitions (A5) · the dataset card and per-event baseline (A6) · tiling recipe (A9)</span></div>
+  <aside class="notes">3 min. Set the verification contract explicitly — three checks: (1) before training, reproduce today's two baseline numbers from the labels themselves; (2) after training, look at the predictions, not only the table — the failure panel is where the learning is; (3) confirm the split you report is the split you trained on, and that the Bolivia number was computed on a model that never saw Bolivia. The most common agent-scaffold bugs to warn about, in one breath: no-data pixels silently counted as dry, the S2 chips normalized with S1 statistics, and the metric computed on resized 256 px outputs rather than the full chip. Dismiss to lab. (Slides after this one are the self-study appendix — tell them it exists, then stop here.)</aside>
+</section>
+
+<!-- ============ APPENDIX · SELF-STUDY ============ -->
+
+<!-- 30 -->
+<section class="slide section">
+  <p class="kicker">Appendix · self-study</p>
+  <h2>The formula cards and the reference tables</h2>
+  <p class="big muted">Reference material; not covered live.</p>
+  <aside class="notes">Not taught in class. These eleven cards hold everything that came off the live path when this lecture was cut to 50 minutes: the convolution and receptive-field arithmetic, the U-Net paper's own numbers, the full loss and metric definitions, the dataset card with the per-event baseline table, the ConvLSTM equations, the cost arithmetic, the tiling recipe, and where a foundation model plugs into all of it. Say the appendix exists, say what is in it, and stop.</aside>
+</section>
+
+<!-- 31 -->
+<section class="slide">
+  <p class="kicker">Appendix A1 · Convolution arithmetic</p>
+  <h2>Every number you need to size a convolutional block</h2>
+  <div class="card small">
+    Output size: <b>n<sub>out</sub> = ⌊(n<sub>in</sub> + 2p − k) / s⌋ + 1</b> &nbsp;·&nbsp; dilation d enlarges the kernel to <b>k<sub>eff</sub> = d·(k − 1) + 1</b><br>
+    Weights in one layer: <b>k · k · C<sub>in</sub> · C<sub>out</sub></b> (+ C<sub>out</sub> biases) &nbsp;·&nbsp; multiply–accumulates: <b>k² · C<sub>in</sub> · C<sub>out</sub> · H<sub>out</sub> · W<sub>out</sub></b><br>
+    <span class="muted">“same” padding at stride 1 means p = (k − 1)/2 — and it invents a border of zeros the network then learns from.</span>
+  </div>
+  <ul class="small">
+    <li><b>Transposed convolution vs upsample-then-convolve.</b> A stride-2 transposed convolution with k = 3 covers output pixels unevenly and prints a checkerboard; nearest or bilinear upsampling followed by a 3 × 3 convolution avoids it and costs about the same. Use k divisible by s if you do use transposed convolutions.</li>
+    <li><b>Dilation as a pooling substitute.</b> Stacking 3 × 3 convolutions with dilations 1, 2, 4, 8 reaches a receptive field of <b>31 px</b> with no downsampling at all — full resolution kept, at the price of gridding artifacts if you never mix scales.</li>
+    <li><b>Depthwise separable.</b> k²·C + C·C′ instead of k²·C·C′ — about a 9× saving at k = 3, and the standard trick when the chip count is small.</li>
+    <li class="muted">Receipt for Part 1's headline: 3 · 3 · 4 · 64 = <b>2,304</b> weights, against (64·64·4) · (64·64·64) ≈ <b>4.3 × 10⁹</b> for the fully connected equivalent.</li>
+  </ul>
+  <div class="foot"><span>Odena et al. 2016, <i>Deconvolution and checkerboard artifacts</i> (Distill) · Yu &amp; Koltun 2016 (dilated convolutions)</span></div>
+  <aside class="notes">Not taught in class. This is the card to keep open while reading any architecture table; every row of a model summary is one line of it.</aside>
+</section>
+
+<!-- 32 -->
+<section class="slide">
+  <p class="kicker">Appendix A2 · Receptive field</p>
+  <h2>The U-Net encoder, layer by layer</h2>
+  <div class="scroll"><table class="small">
+    <thead><tr><th>Layer</th><th class="num">k, s</th><th class="num">jump j</th><th class="num">receptive field r</th><th class="num">at 10 m</th></tr></thead>
+    <tbody>
+      <tr><td>input</td><td class="num">—</td><td class="num">1</td><td class="num">1</td><td class="num">10 m</td></tr>
+      <tr><td>conv, conv (level 1)</td><td class="num">3, 1</td><td class="num">1</td><td class="num">5</td><td class="num">50 m</td></tr>
+      <tr><td>max-pool</td><td class="num">2, 2</td><td class="num">2</td><td class="num">6</td><td class="num">60 m</td></tr>
+      <tr><td>conv, conv (level 2)</td><td class="num">3, 1</td><td class="num">2</td><td class="num">14</td><td class="num">140 m</td></tr>
+      <tr><td>max-pool</td><td class="num">2, 2</td><td class="num">4</td><td class="num">16</td><td class="num">160 m</td></tr>
+      <tr><td>conv, conv (level 3)</td><td class="num">3, 1</td><td class="num">4</td><td class="num">32</td><td class="num">320 m</td></tr>
+      <tr><td>max-pool</td><td class="num">2, 2</td><td class="num">8</td><td class="num">36</td><td class="num">360 m</td></tr>
+      <tr><td>conv, conv (level 4)</td><td class="num">3, 1</td><td class="num">8</td><td class="num">68</td><td class="num">680 m</td></tr>
+      <tr><td>max-pool</td><td class="num">2, 2</td><td class="num">16</td><td class="num">76</td><td class="num">760 m</td></tr>
+      <tr><td><b>conv, conv (bottleneck)</b></td><td class="num">3, 1</td><td class="num">16</td><td class="num"><b>140</b></td><td class="num"><b>1.40 km</b></td></tr>
+    </tbody>
+  </table></div>
+  <ul class="small">
+    <li>Recursion used: <b>r<sub>ℓ</sub> = r<sub>ℓ−1</sub> + (k<sub>ℓ</sub> − 1)·j<sub>ℓ−1</sub></b>, <b>j<sub>ℓ</sub> = j<sub>ℓ−1</sub>·s<sub>ℓ</sub></b>, starting from r = j = 1.</li>
+    <li>The decoder adds more: the paper's own size relation is the number to quote — a <b>572 px input yields a 388 px output</b>, so one output pixel is decided by a <b class="accent">185 px window</b> and every prediction carries a 92 px context margin. Exact counts through up-convolutions depend on the upsampling operator, which is why the size relation is the honest statement.</li>
+    <li class="muted">The <b>effective</b> receptive field is smaller than the theoretical one — contributions fall off toward the rim, roughly Gaussian (Luo et al. 2016). Never assume the last few pixels of the cone matter.</li>
+  </ul>
+  <div class="foot"><span>Computed for this lecture from the original U-Net configuration · Luo et al. 2016, <i>Understanding the effective receptive field</i></span></div>
+  <aside class="notes">Not taught in class — the live slide derives the recursion and the class computes two rows; this card carries the rest. Students should be able to rebuild it for whatever encoder their capstone ends up using, including a Vision Transformer, where the answer is trivially "the whole image" and that is exactly the difference worth noticing.</aside>
+</section>
+
+<!-- 33 -->
+<section class="slide">
+  <p class="kicker">Appendix A3 · The paper's own numbers</p>
+  <h2>U-Net 2015, in specifications</h2>
+  <ul class="small">
+    <li><b>Shape.</b> 4 downsampling levels, 64 → 1024 channels, two 3 × 3 valid convolutions per level, 2 × 2 max-pooling, 2 × 2 up-convolutions, a final 1 × 1 convolution to class scores. About <b>31 million parameters</b>.</li>
+    <li><b>Sizes.</b> 572 × 572 input → 388 × 388 output; the crop-and-copy arrows exist because the skip map is larger than the decoder map it joins.</li>
+    <li><b>Data.</b> 30 training images (ISBI electron-microscopy segmentation challenge), augmented with random elastic deformations — smooth displacement fields, the augmentation that made 30 images enough.</li>
+    <li><b>Loss.</b> Pixel-wise softmax with cross-entropy, weighted by a precomputed map<br>
+      <b>w(x) = w<sub>c</sub>(x) + w<sub>0</sub> · exp( −(d<sub>1</sub>(x) + d<sub>2</sub>(x))² / 2σ² )</b>, with w<sub>0</sub> = 10 and σ ≈ 5 px,<br>
+      where d<sub>1</sub>, d<sub>2</sub> are the distances to the nearest and second-nearest object. <span class="muted">A hand-built boundary loss, eight years before anyone called it that.</span></li>
+    <li><b>Inference.</b> The overlap-tile strategy with mirror padding at the scene edge, so arbitrarily large images can be segmented seamlessly.</li>
+  </ul>
+  <div class="foot"><span>Ronneberger, Fischer &amp; Brox 2015, <a href="https://arxiv.org/abs/1505.04597">arXiv:1505.04597</a>, §2–3</span></div>
+  <aside class="notes">Not taught in class. Worth reading before the journal club: three of the four moves on this card are answers to "we have almost no labels", which is the permanent condition of environmental machine learning. The weight map in particular is the ancestor of every class-imbalance trick in Part 2.</aside>
+</section>
+
+<!-- 34 -->
+<section class="slide">
+  <p class="kicker">Appendix A4 · The loss zoo</p>
+  <h2>Segmentation losses, in full</h2>
+  <div class="card small">
+    <b>Binary cross-entropy</b> &nbsp; L = −[ y log p + (1 − y) log(1 − p) ] &nbsp;·&nbsp; gradient with respect to the logit is simply <b>p − y</b><br>
+    <b>Weighted CE</b> &nbsp; L = −[ w · y log p + (1 − y) log(1 − p) ], w often set to the inverse class frequency (<b>≈ 8.4</b> on Sen1Floods11)<br>
+    <b>Soft Dice</b> &nbsp; L = 1 − (2 Σ p y + ε) / (Σ p + Σ y + ε) &nbsp;·&nbsp; ε guards the empty chip<br>
+    <b>Tversky</b> &nbsp; TP / (TP + α FN + β FP) — α = β = 0.5 gives Dice, α = β = 1 gives IoU; raise α to buy recall<br>
+    <b>Focal</b> &nbsp; L = −α (1 − p)<sup>γ</sup> log p, γ ≈ 2 &nbsp;·&nbsp; a pixel already at p = 0.9 keeps 1% of its gradient
+  </div>
+  <ul class="small">
+    <li><b>Why combine.</b> Cross-entropy has a well-conditioned, per-pixel gradient and trains stably from random weights; Dice optimizes the overlap you report but is noisy on nearly-empty chips. CE + Dice is the default for a reason.</li>
+    <li><b>Why not optimize IoU directly.</b> It is piecewise constant in the predictions — zero gradient almost everywhere, exactly the W2 point about accuracy and F1. The soft losses are surrogates that give the slope back.</li>
+    <li class="muted">Diagnose before you reach for a fancier loss: dead recall usually means the threshold, the class weight or the split — not the loss family.</li>
+  </ul>
+  <div class="foot"><span>Milletari et al. 2016 (V-Net) · Salehi et al. 2017 (Tversky) · Lin et al. 2017 (focal) · inverse frequency computed from the 446 hand-labeled chips: 89.4 / 10.6 ≈ 8.4</span></div>
+  <aside class="notes">Not taught in class. The live slide teaches the choice; this card is for the lab, when a loss curve looks wrong. The most useful line here is the last one — students reach for focal loss when their real problem is that they are reporting at threshold 0.5 on a model whose probabilities were never calibrated.</aside>
+</section>
+
+<!-- 35 -->
+<section class="slide">
+  <p class="kicker">Appendix A5 · Metrics</p>
+  <h2>The confusion matrix and everything derived from it</h2>
+  <div class="card small">
+    <b>IoU</b> = TP / (TP + FP + FN) &nbsp;·&nbsp; <b>F1 / Dice</b> = 2TP / (2TP + FP + FN) &nbsp;·&nbsp; they are locked together: <b>IoU = F1 / (2 − F1)</b><br>
+    <b>precision</b> = TP / (TP + FP) &nbsp;·&nbsp; <b>recall</b> = TP / (TP + FN) &nbsp;·&nbsp; <b>accuracy</b> = (TP + TN) / all — the only one that sees TN, which is why it is useless here<br>
+    <span class="muted">mIoU averages IoU over classes; with two classes, the background's IoU is near 1 and flatters everything. Report the water class alone.</span>
+  </div>
+  <ul class="small">
+    <li><b>Micro (pooled).</b> Sum TP, FP, FN over all pixels of all chips, then divide once. Large floods dominate. <span class="accent">0.493</span> for the Otsu baseline.</li>
+    <li><b>Macro (per chip).</b> Compute IoU per chip, then average. Every chip counts equally. <b>0.311</b> mean, <b>0.217</b> median for the same predictions.</li>
+    <li><b>Empty chips.</b> 25 of 446 have no water in the truth and none predicted: IoU is 0/0. Conventions in the wild include 1.0, 0.0 and “drop it”, and they disagree by several points. State yours.</li>
+    <li class="muted">A calibrated probability map also deserves a threshold-free number — average precision, or the precision–recall curve itself. Choose the operating threshold on validation, then report the curve.</li>
+  </ul>
+  <div class="foot"><span>All numbers computed for this lecture from Sen1Floods11 v1.1, <code>LabelHand</code> vs <code>S1OtsuLabelHand</code>, pixels valid in both</span></div>
+  <aside class="notes">Not taught in class beyond the IoU definition. The IoU = F1/(2 − F1) identity is worth knowing: it means reporting both adds no information, and a paper that reports Dice while a competitor reports IoU is comparing the same thing in two costumes.</aside>
+</section>
+
+<!-- 36 -->
+<section class="slide">
+  <p class="kicker">Appendix A6 · Lab reference</p>
+  <h2>Sen1Floods11, and the baseline you have to beat</h2>
+  <ul class="small" style="margin:.6vh 0 0">
+    <li><b>4,831 chips</b> of 512 × 512 at 10 m over 11 flood events, ~120,000 km²; <b>446 hand-labeled</b>, the rest weak labels (814 permanent-water chips from the Landsat-derived JRC product; 4,385 classified from Sentinel-2 and 4,385 from Sentinel-1).</li>
+    <li><b>Layers</b>: <code>S1Hand</code> (VV, VH in dB) · <code>S2Hand</code> (13 bands, top-of-atmosphere reflectance × 10,000) · <code>LabelHand</code> (−1 no-data, 0 dry, 1 water) · <code>S1OtsuLabelHand</code> (the classical baseline).</li>
+    <li><b>Access</b>: <code>gs://sen1floods11</code>, ~14 GB, cloud-optimized GeoTIFFs with a STAC catalog. Splits ship with it: <b>IID 252/89/90</b>, plus <b>Bolivia (15 chips) held out</b> as an unseen event.</li>
+  </ul>
+  <div class="cols" style="gap:2vw;margin-top:.8vh;flex:0 0 auto">
+    <div class="scroll" style="min-width:0"><table class="small">
+      <thead><tr><th>Event</th><th class="num">chips</th><th class="num">water %</th><th class="num">Otsu IoU</th></tr></thead>
+      <tbody>
+        <tr><td>Mekong</td><td class="num">30</td><td class="num">24.1</td><td class="num">0.780</td></tr>
+        <tr><td>Bolivia <span class="muted">(held out)</span></td><td class="num">15</td><td class="num">15.9</td><td class="num">0.697</td></tr>
+        <tr><td>Spain</td><td class="num">30</td><td class="num">13.2</td><td class="num">0.670</td></tr>
+        <tr><td>Sri-Lanka</td><td class="num">42</td><td class="num">11.8</td><td class="num">0.649</td></tr>
+        <tr><td>Nigeria</td><td class="num">18</td><td class="num">23.5</td><td class="num">0.643</td></tr>
+        <tr><td>India</td><td class="num">68</td><td class="num">12.4</td><td class="num">0.529</td></tr>
+      </tbody>
+    </table></div>
+    <div class="scroll" style="min-width:0"><table class="small">
+      <thead><tr><th>Event</th><th class="num">chips</th><th class="num">water %</th><th class="num">Otsu IoU</th></tr></thead>
+      <tbody>
+        <tr><td>USA</td><td class="num">69</td><td class="num">4.6</td><td class="num">0.508</td></tr>
+        <tr><td>Paraguay</td><td class="num">67</td><td class="num">8.4</td><td class="num">0.440</td></tr>
+        <tr><td>Ghana</td><td class="num">53</td><td class="num">6.3</td><td class="num">0.408</td></tr>
+        <tr><td>Pakistan</td><td class="num">28</td><td class="num">7.5</td><td class="num">0.152</td></tr>
+        <tr><td>Somalia</td><td class="num">26</td><td class="num">6.5</td><td class="num">0.151</td></tr>
+        <tr><td><b>all events</b></td><td class="num"><b>446</b></td><td class="num"><b>10.6</b></td><td class="num"><b class="accent">0.493</b></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="foot"><span>Bonafilia, Tellman, Anderson &amp; Issenberg 2020, CVPR Workshops · table computed for this lecture, pooled per event over pixels valid in both layers</span></div>
+  <aside class="notes">Not taught in class. This is the card to keep open in a second tab during lab. Two uses: the layer names are the ones your loader must ask for, and the table is the target — your model's per-event numbers belong beside this column, not beside a single headline. If your S1-only model cannot beat 0.493 pooled, something is wrong with the training, not with the idea. The spread from 0.78 to 0.15 is also the honest answer to "why does my score move so much when I change the split".</aside>
+</section>
+
+<!-- 37 -->
+<section class="slide">
+  <p class="kicker">Appendix A7 · ConvLSTM</p>
+  <h2>The full gate equations</h2>
+  <div class="card small">
+    i<sub>t</sub> = σ( W<sub>xi</sub> ∗ X<sub>t</sub> + W<sub>hi</sub> ∗ H<sub>t−1</sub> + W<sub>ci</sub> ∘ C<sub>t−1</sub> + b<sub>i</sub> )<br>
+    f<sub>t</sub> = σ( W<sub>xf</sub> ∗ X<sub>t</sub> + W<sub>hf</sub> ∗ H<sub>t−1</sub> + W<sub>cf</sub> ∘ C<sub>t−1</sub> + b<sub>f</sub> )<br>
+    C<sub>t</sub> = f<sub>t</sub> ∘ C<sub>t−1</sub> + i<sub>t</sub> ∘ tanh( W<sub>xc</sub> ∗ X<sub>t</sub> + W<sub>hc</sub> ∗ H<sub>t−1</sub> + b<sub>c</sub> )<br>
+    o<sub>t</sub> = σ( W<sub>xo</sub> ∗ X<sub>t</sub> + W<sub>ho</sub> ∗ H<sub>t−1</sub> + W<sub>co</sub> ∘ C<sub>t</sub> + b<sub>o</sub> )<br>
+    H<sub>t</sub> = o<sub>t</sub> ∘ tanh( C<sub>t</sub> )<br>
+    <span class="muted">∗ is convolution, ∘ is elementwise (Hadamard) product. X, H and C are all feature maps with a spatial grid.</span>
+  </div>
+  <ul class="small">
+    <li>Every difference from a vanilla LSTM is in the operator: matrix products became convolutions, and the state became a map. The gating logic is untouched.</li>
+    <li>The W<sub>c</sub> terms are <b>peephole</b> connections — the gates get to look at the cell state directly. Common in 2015, often dropped today with little loss.</li>
+    <li class="muted">Initialize H₀ and C₀ to zero, and remember the boundary: a convolution over the state map needs padding at the grid edge, so the state slowly leaks a border artifact over long sequences.</li>
+  </ul>
+  <div class="foot"><span>Shi, Chen, Wang, Yeung, Wong &amp; Woo 2015, <a href="https://arxiv.org/abs/1506.04214">arXiv:1506.04214</a>, §3.1</span></div>
+  <aside class="notes">Not taught in class — the live slide shows one gate and the substitution. If a student wants to implement this from scratch, the only subtlety is stacking the input and hidden maps along the channel axis and doing all four gates in one convolution, which is what every efficient implementation does.</aside>
+</section>
+
+<!-- 38 -->
+<section class="slide">
+  <p class="kicker">Appendix A8 · Cost arithmetic</p>
+  <h2>What each temporal operator costs</h2>
+  <div class="card small">
+    One layer, 3 × 3 spatial kernels, C = 64 channels in and out, T time steps:<br>
+    <b>3D convolution</b> (3 × 3 × 3): k³·C² = 27 C² = <b>110,592</b> weights · applied once over the whole cube<br>
+    <b>Factorized (2+1)D</b>: k²C² + kC² = 12 C² = <b>49,152</b> weights · <span class="accent">2.25× cheaper</span>, plus one extra non-linearity between the two<br>
+    <b>ConvLSTM</b>: 4 gates × (W<sub>x</sub> + W<sub>h</sub>) = 4 · 2 · k²C² = 72 C² = <b>294,912</b> weights · reused at every one of the T steps<br>
+    <span class="muted">Stacking dates as channels: k²·(T·C)·C — cheapest of all, and it fixes T and the date order at build time.</span>
+  </div>
+  <ul class="small">
+    <li>Weights are not the whole story. The 3D convolution and the factorized pair parallelize across time; the ConvLSTM cannot — its wall-clock cost grows linearly in T no matter how many GPUs you have.</li>
+    <li>Memory, though, runs the other way: the recurrent model holds one state map, while the 3D convolution holds the whole cube of activations for the backward pass.</li>
+    <li class="muted">Selection rule for a capstone: factorized first, full 3D only when you can show it wins, recurrent when the sequence length varies between samples.</li>
+  </ul>
+  <div class="foot"><span>Tran et al. 2018, <i>A closer look at spatiotemporal convolutions</i> (R(2+1)D) · Shi et al. 2015 (ConvLSTM)</span></div>
+  <aside class="notes">Not taught in class. The pedagogically useful number is the 2.25×, because students expect factorization to be a large saving and it is modest — the real reason to factorize is the extra non-linearity and the better-conditioned optimization, not the parameter count.</aside>
+</section>
+
+<!-- 39 -->
+<section class="slide">
+  <p class="kicker">Appendix A9 · Inference</p>
+  <h2>The tiling recipe, with numbers</h2>
+  <div class="card small">
+    1 · Compute the receptive field r of your network. Set the <b>halo h = ⌈r / 2⌉</b> — for the original U-Net, 92 px.<br>
+    2 · Read tiles of size <b>t + 2h</b>, write only the central <b>t × t</b>. Step the window by exactly t, so writes tile the scene with no gaps and no double-writes.<br>
+    3 · At the true edge of the scene, <b>mirror</b> the image outward by h. Never zero-pad at the edge of real data.<br>
+    4 · If you do blend overlapping predictions, weight with a raised-cosine taper rather than averaging equally — the rim pixels are the weak ones.<br>
+    5 · Compute metrics on the <b>written</b> pixels only, and say so in the note.
+  </div>
+  <ul class="small">
+    <li>Cost of the halo: reading 512 + 184 = 696 px tiles instead of 512 px ones is about <b>1.85×</b> the compute, once, at inference. The seam it removes would be in every figure you ever publish from that model.</li>
+    <li class="muted">Training-time mirror image of the same idea: if a training chip's label touches its border, the network learns that objects end at borders. Crop labels with a margin, or sample chips centred on objects.</li>
+  </ul>
+  <div class="foot"><span>Ronneberger et al. 2015 §2 (overlap-tile) · the halo number follows from the Appendix A2 receptive field</span></div>
+  <aside class="notes">Not taught in class beyond the live figure. The 1.85× is the number that ends the argument when someone objects to the cost: it is a one-off inference expense, paid once per map, against an artifact that is permanent and visible.</aside>
+</section>
+
+<!-- 40 -->
+<section class="slide">
+  <p class="kicker">Appendix A10 · Forward pointer to W7</p>
+  <h2>Where a foundation model plugs into all of this</h2>
+  <div class="figure">
+    <svg viewBox="0 0 640 176" role="img" aria-label="A four-stage chain: a pretrained backbone produces tokens, a neck reshapes those tokens into a feature pyramid, a convolutional decoder consumes the pyramid, and a head emits per-pixel class scores. A note marks that the skip connections now come out of the neck rather than out of an encoder." style="width:min(94%,820px)">
+      <g fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="16"  y="44" width="132" height="52" rx="8" stroke="var(--accent)"/>
+        <rect x="186" y="44" width="112" height="52" rx="8"/>
+        <rect x="336" y="44" width="132" height="52" rx="8"/>
+        <rect x="506" y="44" width="112" height="52" rx="8"/>
+        <path d="M148 70 H186 M298 70 H336 M468 70 H506"/>
+      </g>
+      <g fill="currentColor" stroke="none">
+        <path d="M180 66 L186 70 L180 74 Z"/><path d="M330 66 L336 70 L330 74 Z"/><path d="M500 66 L506 70 L500 74 Z"/>
+      </g>
+      <g font-size="12" text-anchor="middle">
+        <text x="82"  y="68" fill="var(--accent)" font-weight="700">backbone</text>
+        <text x="242" y="68" fill="currentColor">neck</text>
+        <text x="402" y="68" fill="currentColor">decoder</text>
+        <text x="562" y="68" fill="currentColor">head</text>
+      </g>
+      <g font-size="9.5" fill="var(--muted)" text-anchor="middle">
+        <text x="82"  y="86">pretrained, often frozen</text>
+        <text x="242" y="86">tokens → feature pyramid</text>
+        <text x="402" y="86">convolutional, U-shaped</text>
+        <text x="562" y="86">per-pixel class scores</text>
+      </g>
+      <g font-size="9.5" fill="var(--muted)" text-anchor="middle">
+        <text x="82"  y="136">Prithvi, SatMAE, DOFA…</text>
+        <text x="242" y="136">the part nobody writes about</text>
+        <text x="402" y="136">the U-Net you built today</text>
+      </g>
+      <path d="M242 96 V114 H402 V96" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="4 3"/>
+      <text x="322" y="164" text-anchor="middle" font-size="10" fill="var(--accent)" font-weight="700">the skips now leave from here — a transformer has no encoder pyramid to copy from</text>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>A Vision Transformer emits tokens at <b>one</b> resolution. The decoder wants feature maps at four. The neck fabricates that pyramid — by reshaping tokens and taking several transformer layers as if they were encoder stages.</li>
+    <li class="muted">Which is discussion question 2: the interesting part is not that the backbone can be swapped, it is that the skip connections — Part 1's whole argument — have to be manufactured after the fact.</li>
+  </ul>
+  <div class="foot"><span>The backbone / neck / decoder factoring is how TerraTorch composes Prithvi-family models — check the current config schema in its docs before you copy a YAML</span></div>
+  <aside class="notes">Not taught in class; it is the crib for discussion question 2 and the bridge into Week 7. The sentence worth remembering: a foundation model gives you a better "what" and no "where", so the decoder and the neck are where all the dense-prediction quality actually comes from. That is also why PANGAEA's supervised U-Net does so well — it never had to fake a pyramid.</aside>
+</section>
+
+<!-- 41 -->
+<section class="slide">
+  <p class="kicker">Appendix A11 · Watch at home</p>
+  <h2>This week’s assigned video — where convolutions won</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr;align-items:center;gap:2.5vw">
+    <div style="min-width:0">
+      <a href="https://www.youtube.com/watch?v=UZDiGooFs54" class="yt" data-id="UZDiGooFs54" style="text-decoration:none;color:inherit;display:block">
+        <span class="ytbox" style="position:relative;display:block">
+          <img src="img/yt-w4-alexnet.jpg" alt="Welch Labs video thumbnail: The moment we stopped understanding AI, on AlexNet" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+          <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+            <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+          </span>
+        </span>
+        <p class="small muted" style="margin:.6vh 0 0">Welch Labs · <i>The moment we stopped understanding AI [AlexNet]</i> · 18 min — <span class="accent">click to play here</span></p>
+      </a>
+    </div>
+    <div style="min-width:0">
+      <ul class="small">
+        <li>This is <b>this week's assigned video</b> — the half-page summary is due with Note 04 on Sunday, 23:59 KST (Korea Standard Time).</li>
+        <li>Watch it for what a convolutional filter actually learns, seen rather than asserted: the first-layer edge and colour detectors, and what the deeper ones turn into.</li>
+        <li>Listen for the turn the title points at — the moment the features stopped being things a human had designed. <span class="accent">Every filter in today's U-Net is in that lineage.</span></li>
+        <li class="muted">Then reread Part 1: weight sharing is why those filters could be learned at all.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Assigned video · <a href="https://www.youtube.com/watch?v=UZDiGooFs54">youtube.com/watch?v=UZDiGooFs54</a></span><span>Summary due with Note 04 · Goodfellow Ch. 9 §9.1–9.5 is the companion reading</span></div>
+  <aside class="notes">Not taught in class. It is the assigned video and it pairs with Goodfellow chapter 9 — the video for intuition about what filters become, the chapter for why the operator has the properties it has. If someone only has twenty minutes this week, this is the twenty minutes.</aside>
+</section>
+
+</body>
+</html>
