@@ -589,7 +589,8 @@
     "exposure bias",
     "hydrologic metrics (NSE)",
     "time-series heads"
-   ]
+   ],
+   "slides": true
   },
   {
    "n": 6,
