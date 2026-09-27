@@ -45,44 +45,69 @@
 <!-- 3 -->
 <section class="slide">
   <p class="kicker">Week 5 · 55 min</p>
-  <h2>Today in five blocks + journal club</h2>
-  <ul>
-    <li><b>1 · Memory: recurrence, the long short-term memory (LSTM) cell, and the river</b> (11) — why gradients die across time, how the LSTM fixed it, and why it still rules rainfall–runoff.</li>
-    <li><b>2 · Autoregressive forecasting as a discipline</b> (14 · <span class="accent">the headline</span>) — teacher forcing vs free running, the error recursion derived on the board, and how GraphCast and Pangu-Weather train for it.</li>
-    <li><b>3 · Stability and blurring</b> (7.5) — why a squared-error forecast regresses to the mean, and the double penalty.</li>
-    <li><b>4 · Probabilistic outputs</b> (7) — quantile and likelihood heads, and a first look at the score Week 11 is built on.</li>
-    <li><b>5 · Reading framing + the rollout contract</b> (4 <span class="muted">+ 5 flex</span>) — Kratzert et al. 2019 in one slide, and five ways to make a forecast look better than it is.</li>
-    <li><b>Journal club</b> (30 · after break) — the three discussion questions from your entrance tickets; the drawn leader moderates. Lab briefing after.</li>
+  <h2>Today in five blocks — and one chain of cause and effect</h2>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 118" role="img" aria-label="Seven boxes joined left to right by arrows: the river remembers; so the model must remember, the LSTM; a forecast eats its own output; so errors compound; squared error then hedges; the hedge looks like blur; so ask for a distribution instead. Brackets under the boxes mark which of the four lecture parts each box belongs to." style="width:min(98%,1100px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="4" y="22" width="112" height="50" rx="8"/><rect x="134" y="22" width="112" height="50" rx="8"/>
+        <rect x="264" y="22" width="112" height="50" rx="8" stroke="var(--accent)" stroke-width="1.8"/><rect x="394" y="22" width="112" height="50" rx="8" stroke="var(--accent)" stroke-width="1.8"/>
+        <rect x="524" y="22" width="112" height="50" rx="8"/><rect x="654" y="22" width="112" height="50" rx="8"/><rect x="784" y="22" width="112" height="50" rx="8"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M116 47 H134 M246 47 H264 M376 47 H394 M506 47 H524 M636 47 H654 M766 47 H784"/></g>
+      <g fill="currentColor" stroke="none"><path d="M128 43 L134 47 L128 51 Z"/><path d="M258 43 L264 47 L258 51 Z"/><path d="M388 43 L394 47 L388 51 Z"/><path d="M518 43 L524 47 L518 51 Z"/><path d="M648 43 L654 47 L648 51 Z"/><path d="M778 43 L784 47 L778 51 Z"/></g>
+      <g font-size="10.5" fill="currentColor" text-anchor="middle">
+        <text x="60" y="43">the river</text><text x="60" y="57">remembers</text>
+        <text x="190" y="43">so the model must:</text><text x="190" y="57">the LSTM</text>
+        <text x="320" y="43" fill="var(--accent)" font-weight="700">a forecast eats</text><text x="320" y="57" fill="var(--accent)" font-weight="700">its own output</text>
+        <text x="450" y="43" fill="var(--accent)" font-weight="700">so errors</text><text x="450" y="57" fill="var(--accent)" font-weight="700">compound</text>
+        <text x="580" y="43">squared error</text><text x="580" y="57">hedges</text>
+        <text x="710" y="43">the hedge</text><text x="710" y="57">looks like blur</text>
+        <text x="840" y="43">so ask for a</text><text x="840" y="57">distribution</text>
+      </g>
+      <g fill="none" stroke="var(--muted)" stroke-width="1"><path d="M4 84 V90 H246 V84 M264 84 V90 H506 V84 M524 84 V90 H766 V84 M784 84 V90 H896 V84"/></g>
+      <g font-size="9.5" fill="var(--muted)" text-anchor="middle">
+        <text x="125" y="106">Part 1 · memory (13 min)</text><text x="385" y="106">Part 2 · rollout (14 min · the headline)</text><text x="645" y="106">Part 3 · blur (7.5 min)</text><text x="840" y="106">Part 4 · probability (7)</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li><b>1 · Memory</b> — why gradients die across time, the long short-term memory (LSTM) cell that fixed it, why it still rules rainfall–runoff — and this week’s paper in one slide. <b>2 · Rollout</b> — teacher forcing vs free running, the error recursion on the board, how GraphCast and Pangu-Weather train for it.</li>
+    <li><b>3 · Blur</b> — why a squared-error forecast regresses to the mean; the double penalty. <b>4 · Probability</b> — quantile and likelihood heads, and the score Week 11 is built on. <b>5 · The contract</b> (2 <span class="muted">+ 5 flex</span>) — the five sentences Note 05 opens with, and five ways to flatter a forecast.</li>
+    <li class="muted"><b>Journal club</b> (30 · after break) — the three discussion questions; the drawn leader moderates. Lab briefing after.</li>
   </ul>
   <div class="foot"><span>Skills this week: autoregressive rollout · rollout-curriculum training · exposure bias · hydrologic metrics · time-series heads</span><span>Every derivation, equation card and reference table still ships in this deck — see the Appendix after the lab slide</span></div>
-  <aside class="notes">One sentence per block, 60 seconds total. The arc: learn to remember (Part 1) → learn to forecast from your own output (Part 2) → discover what squared error does to a long forecast (Part 3) → stop asking for one number (Part 4). Say the through-line once: every number on today's slides about CAMELS rivers was computed for this lecture from the public data set, and the lab puts an LSTM through exactly the experiment Part 2 runs on a two-line linear model. Part 2 is the headline because it is the mechanism every ML weather model lives or dies by — GraphCast's 10-day forecast is forty of its own outputs fed back in.</aside>
+  <aside class="notes">One minute. Read the chain left to right, once, out loud — it is the whole lecture: the river remembers, so the model must; a forecast is a model eating its own output, so errors compound; a squared-error model that knows its errors will be large hedges, and hedging looks like blur; so stop asking for one number. Every Part follows the same three beats — the phenomenon measured, the mechanism derived, the remedy and where it is used — and each divider slide says so. Say the through-line once: every CAMELS number on today's slides was computed for this lecture, and the lab puts an LSTM through exactly the experiment Part 2 runs on a two-line linear model.</aside>
 </section>
-
-<!-- ============ PART 1 · MEMORY ============ -->
 
 <!-- 4 -->
 <section class="slide section">
-  <p class="kicker">Part 1 · 11 min</p>
+  <p class="kicker">Part 1 · 13 min</p>
   <h2>Memory: Recurrence, the LSTM, and the River</h2>
-  <aside class="notes">11 minutes. Goal: not "what is an RNN" — the assigned CS231N lecture does that in 72 minutes. The goal is one causal chain they can say in a sentence: rivers store water for months → a model must carry information for hundreds of steps → a plain recurrence multiplies its gradient by a factor per step and loses it → the LSTM replaces that product with an addition the network controls. Then the CAMELS evidence and the two metrics they will report all semester.</aside>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>A river that stores snow for five months; why a plain recurrence cannot carry that; the LSTM’s memory lane; persistence across 671 basins; the two metrics you will report all semester; this week’s paper in one slide.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>Memory is physical here — snow, soil, groundwater — and the LSTM is still the state of the art in rainfall–runoff: Google’s public flood forecasts run on it.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Today’s lab and this week’s paper · Google Flood Hub · pixel time series in Earth observation · Week 6, where attention removes the product of steps you meet on slide 6.</p></div>
+  </div>
+  <aside class="notes">13 minutes. Read the three cards — what, why, where — in thirty seconds; they are the map of the part. Goal: not "what is an RNN" — the assigned CS231N lecture does that in 72 minutes. The goal is one causal chain they can say in a sentence: rivers store water for months → a model must carry information for hundreds of steps → a plain recurrence multiplies its gradient by a factor per step and loses it → the LSTM replaces that product with an addition the network controls. Then the CAMELS evidence and the two metrics they will report all semester.</aside>
 </section>
 
 <!-- 5 -->
 <section class="slide">
   <p class="kicker">Part 1 · Why memory</p>
   <h2>The input that matters arrived five months earlier</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> the input that decides the April flood arrived in December. &nbsp;·&nbsp; <b class="accent">Where</b> snow-fed and groundwater-fed rivers — most of the CAMELS West; soil moisture memory everywhere. &nbsp;·&nbsp; <b class="accent">Do</b> hand the model temperature, not only rain.</p>
   <div class="figure" style="flex:0 0 auto;display:block;margin:.2em 0 0">
-    <img src="img/fig-w5-snow-memory.png" data-zoom alt="Water year 2008 on the Fish River in northern Maine. Top: daily precipitation bars, pale blue from December to March where it fell as snow, darker blue where it fell as rain. Bottom: streamflow stays near 1 millimetre per day all winter, then rises in late April to a peak of 19.4 millimetres per day on 30 April 2008." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
+    <img src="img/fig-w5-snow-memory.png" data-zoom alt="Water year 2008 on the Fish River in northern Maine. Top: daily precipitation bars, pale blue from December to March where it fell as snow, darker blue where it fell as rain. Bottom: streamflow stays near 1 millimetre per day all winter, then rises in late April to a peak of 19.4 millimetres per day on 30 April 2008." title="Click to enlarge" style="display:block;margin:0 auto;height:31vh;width:auto;max-width:100%">
   </div>
   <ul class="small">
     <li>414 mm fell as snow from December to March and the river barely moved. Then it all left in a few weeks. <span class="accent">In all 34 water years 1981–2014 the annual peak came between 8 April and 18 May — 155 to 198 days after the first snowfall.</span></li>
     <li>A model that predicts the April flood has to carry December across ~150 daily steps. That is the memory problem of this lecture.</li>
   </ul>
   <div class="gloss">
-    <span><b>water year</b> — October to September, the hydrologist's year: it starts when the soils are driest, so one year's snow and its melt stay in the same record.</span>
+    <span><b>water year</b> — October to September: it starts when soils are driest, so one year's snow and its melt stay in the same record.</span>
     <span><b>mm/day</b> — streamflow divided by basin area, so it is directly comparable with rain. 19.4 mm/day over this 2,260 km² basin is about 500 m³ of water every second.</span>
     <span><b>snow vs rain</b> — classified by the day's mean air temperature (below 0 °C = snow): crude, but exactly what a sequence of rain and temperature hands a model.</span>
-    <span><b>in the figure</b> — precipitation hangs from the top, flow grows from the bottom. The pale bars in the shaded winter band produce almost no flow until the air warms in April.</span>
+    <span><b>in the figure</b> — precipitation hangs from the top, flow grows from the bottom; the pale winter bars produce almost no flow until April.</span>
   </div>
   <div class="foot"><span>Fish River near Fort Kent, Maine (USGS 01013500) · Daymet basin-mean forcing and USGS discharge from CAMELS (Catchment Attributes and MEteorology for Large-sample Studies) · computed for this lecture</span></div>
   <aside class="notes">1.5 min. Let the figure do the work: point at the pale winter bars, then at the flat line under them, then at the April peak, and ask "where did that water come from?" before saying snow. The number worth writing on the board is the lag: 155–198 days, every year for 34 years — it is not an anecdote, it is the climate of the basin. Callback to Week 3: the input you choose is a prior, and this model has to be handed temperature, not only rain, or the snow is invisible. Transition: so the model must carry information for 150 steps. What happens to a gradient over 150 steps?</aside>
@@ -92,13 +117,14 @@
 <section class="slide">
   <p class="kicker">Part 1 · Gradients through time</p>
   <h2>Recurrence shares weights across time — and multiplies its gradient</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> a 150-step memory needs a gradient that survives 150 steps. &nbsp;·&nbsp; <b class="accent">Where</b> every recurrent model — and it is why Transformers exist (Week 6). &nbsp;·&nbsp; <b class="accent">Do</b> compute the factor once; never trust a plain RNN with long memory.</p>
   <div class="cols" style="grid-template-columns:1.08fr 1fr;gap:2.2vw;align-items:center">
     <div style="min-width:0">
       <ul class="small">
         <li>A recurrent neural network (RNN) reads one step at a time and carries a state: <b>h<sub>t</sub> = tanh(W·h<sub>t−1</sub> + U·x<sub>t</sub> + b)</b>. The same W and U at every step — last week a convolution shared weights across space; this shares them across time.</li>
         <li>Training unrolls the loop and backpropagates through it. The gradient that reaches step t is <span class="accent">a product with one factor per step in between</span>: ∂h<sub>T</sub>/∂h<sub>t</sub> = ∏ diag(1 − h<sub>k</sub>²)·W.</li>
         <li>A factor of 0.9 per day over 150 days: <b>0.9¹⁵⁰ ≈ 1.4 × 10⁻⁷</b>. A factor of 1.1: <b>1.6 × 10⁶</b>. It vanishes or it explodes; it almost never survives.</li>
-        <li class="muted">Exploding has a fix you already own — clip the gradient norm (Week 2). Vanishing has no optimizer fix; the architecture has to change.</li>
+        <li class="muted">Exploding has a fix you already own — clip the gradient norm (Week 2). Vanishing has no clipping fix — the path has to change, or be gated and initialized with care.</li>
       </ul>
     </div>
     <div class="figure" style="min-width:0">
@@ -158,8 +184,9 @@
 <section class="slide">
   <p class="kicker">Part 1 · The LSTM</p>
   <h2>The LSTM adds to its memory instead of rewriting it</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> it replaces the product with a gate the network controls. &nbsp;·&nbsp; <b class="accent">Where</b> Kratzert’s CAMELS models, Google Flood Hub, today’s lab; last week’s ConvLSTM. &nbsp;·&nbsp; <b class="accent">Do</b> name the lane and the three gates on any LSTM diagram.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
-    <svg viewBox="0 0 660 196" role="img" aria-label="An LSTM cell. Across the top runs the cell state, a straight horizontal lane from the previous cell state on the left to the new cell state on the right, touched only by a multiplication with the forget gate and an addition of new content. Below, four small boxes compute the forget gate, the input gate, the candidate content and the output gate from the previous hidden state and the current input. On the right the cell state passes through tanh and is multiplied by the output gate to give the new hidden state." style="width:min(94%,860px)">
+    <svg viewBox="0 0 660 196" role="img" aria-label="An LSTM cell. Across the top runs the cell state, a straight horizontal lane from the previous cell state on the left to the new cell state on the right, touched only by a multiplication with the forget gate and an addition of new content. Below, four small boxes compute the forget gate, the input gate, the candidate content and the output gate from the previous hidden state and the current input. On the right the cell state passes through tanh and is multiplied by the output gate to give the new hidden state." style="width:min(84%,760px)">
       <path d="M20 40 H640" stroke="var(--accent)" stroke-width="3" fill="none"/>
       <path d="M632 35 L641 40 L632 45 Z" fill="var(--accent)"/>
       <text x="22" y="28" font-size="11" fill="var(--accent)" font-weight="700">c<tspan font-size="8" dy="2">t−1</tspan></text>
@@ -199,14 +226,14 @@
   </div>
   <p class="big" style="font-family:var(--serif);margin:.2vh 0;max-width:none">c<sub>t</sub> = f<sub>t</sub> ⊙ c<sub>t−1</sub> + i<sub>t</sub> ⊙ g<sub>t</sub> &nbsp;&nbsp;·&nbsp;&nbsp; h<sub>t</sub> = o<sub>t</sub> ⊙ tanh(c<sub>t</sub>)</p>
   <ul class="small">
-    <li>Along the lane the step derivative is just <b>∂c<sub>t</sub>/∂c<sub>t−1</sub> = f<sub>t</sub></b> — a gate the network sets, not W squashed through tanh. <span class="accent">When f ≈ 1, December’s error signal reaches April intact.</span></li>
-    <li class="muted">The gated recurrent unit (GRU) merges the lane into the hidden state and uses two gates instead of three; on small data it usually ties. Last week’s ConvLSTM is this cell with every product turned into a convolution.</li>
+    <li>Along the lane the direct step derivative is just <b>∂c<sub>t</sub>/∂c<sub>t−1</sub> = f<sub>t</sub></b> (gates held fixed) — a gate the network sets, not W squashed through tanh. <span class="accent">When f ≈ 1, December’s error signal reaches April intact.</span></li>
+    <li class="muted">The gated recurrent unit (GRU) merges the lane into the hidden state with two gates; on small data it usually ties. Last week’s ConvLSTM is this cell with every matrix product turned into a convolution.</li>
   </ul>
   <div class="gloss">
     <span><b>LSTM</b> “long short-term memory” — Hochreiter &amp; Schmidhuber 1997; the forget gate was added by Gers, Schmidhuber &amp; Cummins 2000.</span>
     <span><b>f, i, o</b> — forget, input and output gates, each σ(W·[h<sub>t−1</sub>, x<sub>t</sub>] + b): a number between 0 and 1 per memory cell. <b>g</b> — the candidate content, a tanh of the same inputs.</span>
     <span><b>⊙</b> — elementwise product: each memory cell is gated on its own.</span>
-    <span><b>in the figure</b> — the orange lane is the cell state. Everything that touches it is a multiplication by a gate or an addition; that is the whole reason gradients survive along it.</span>
+    <span><b>in the figure</b> — the orange lane is the cell state; everything that touches it is a gate multiplication or an addition, which is why gradients survive along it.</span>
   </div>
   <aside class="notes">2.5 min. Draw only the orange lane on the board, then the two operations on it: times f, plus i·g. The one line to land: backward along the lane the factor is f, which the network learns to hold near 1 for as long as it needs the memory — Hochreiter and Schmidhuber called it the constant error carrousel (their spelling). Contrast with the previous slide: there the factor was W times tanh's slope at every step, not under anyone's control. GRU in one sentence, no equations (Appendix A2). The hydrologist's reading, which sets up the next slide: the lane is a storage — snowpack, soil water — the input gate is accumulation, the forget gate is loss, the output gate is release. That is a bucket model, learned.</aside>
 </section>
@@ -215,12 +242,13 @@
 <section class="slide">
   <p class="kicker">Part 1 · The CAMELS story</p>
   <h2>How much of tomorrow’s river is already in today’s?</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> persistence is the do-nothing forecast your model must beat at every lead time. &nbsp;·&nbsp; <b class="accent">Where</b> today’s lab; Week 12’s baseline set (persistence, climatology). &nbsp;·&nbsp; <b class="accent">Do</b> compute it before you train anything.</p>
   <div class="figure" style="flex:0 0 auto;display:block;margin:.2em 0 0">
     <img src="img/fig-w5-camels-persistence-map.png" data-zoom alt="Two maps of the contiguous United States with 671 river gauges coloured by how well tomorrow's flow is predicted by today's flow. At one day ahead the median score is 0.48, with dark high-skill dots across the snowy West and in Florida; at three days ahead the median falls to minus 0.19 and most of the East and South turn grey, meaning worse than the mean." title="Click to enlarge" style="display:block;margin:0 auto;height:27vh;width:auto;max-width:100%">
   </div>
   <ul class="small">
     <li><b>CAMELS</b> (Catchment Attributes and MEteorology for Large-sample Studies) — 671 US basins, 35 years of daily basin-mean weather, USGS streamflow and catchment attributes: hydrology’s ImageNet, and your lab.</li>
-    <li>One-day persistence skill tracks snow fraction (r = 0.59) and baseflow index (r = 0.43), not basin area (r = 0.09): <span class="accent">memory is stored water</span> — what an LSTM cell learns to hold. Kratzert et al. 2018 found a cell that fills below freezing and drains in the thaw.</li>
+    <li>One-day persistence skill tracks snow fraction (r = 0.59) and baseflow index (r = 0.43), not basin size (r = 0.09 with log area): <span class="accent">memory is stored water</span> — what an LSTM cell learns to hold. Kratzert et al. 2018 found a cell that fills below freezing and drains in the thaw.</li>
     <li class="muted">2019: one LSTM for 531 basins beats per-basin calibration (this week’s paper). 2024: the same family forecasts floods in ungauged basins worldwide (Nearing et al., Nature).</li>
   </ul>
   <div class="gloss">
@@ -237,6 +265,7 @@
 <section class="slide">
   <p class="kicker">Part 1 · The two metrics</p>
   <h2>NSE and KGE — and what doing nothing scores on each</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> the same do-nothing forecast scores 0.48 on one metric and 0.74 on the other. &nbsp;·&nbsp; <b class="accent">Where</b> every hydrology paper; Note 05; the capstone hydrology track. &nbsp;·&nbsp; <b class="accent">Do</b> put the benchmark row on the metric you report.</p>
   <div class="card small" style="line-height:1.65">
     <b>NSE</b> = 1 − Σ(q̂<sub>t</sub> − q<sub>t</sub>)² / Σ(q<sub>t</sub> − q̄)² &emsp;<span class="muted">1 is perfect · 0 is “as good as the observed mean” · below 0 is worse than the mean</span><br>
     <b>KGE</b> = 1 − √[ (r − 1)² + (α − 1)² + (β − 1)² ] &emsp;<span class="muted">r correlation · α = σ̂/σ variability ratio · β = μ̂/μ bias ratio</span>
@@ -244,25 +273,67 @@
   <div class="scroll"><table class="small" style="width:100%;margin-top:.6vh">
     <thead><tr><th>Do-nothing predictor, 671 basins, test years 1989–1999</th><th class="num">median NSE</th><th class="num">median KGE</th></tr></thead>
     <tbody>
-      <tr><td>A constant: the training-period mean flow</td><td class="num">−0.01</td><td class="num">−0.43</td></tr>
+      <tr><td>A constant: the training-period mean flow</td><td class="num">−0.01</td><td class="num">−0.42</td></tr>
       <tr><td>Each calendar day’s average flow (day-of-year climatology)</td><td class="num">0.07</td><td class="num">−0.05</td></tr>
       <tr><td>Persistence: tomorrow equals today</td><td class="num">0.48</td><td class="num"><b class="accent">0.74</b></td></tr>
     </tbody>
   </table></div>
   <ul class="small">
-    <li>NSE is mean squared error divided by the variance of the observations — <span class="accent">everything Part 3 says about squared error applies to it</span>.</li>
+    <li>NSE is 1 minus the mean squared error divided by the variance of the observations — <span class="accent">everything Part 3 says about squared error applies to it</span>.</li>
     <li>The same do-nothing forecast scores 0.48 on one metric and 0.74 on the other. Every table in Note 05 carries the benchmark row on the metric it reports.</li>
   </ul>
   <div class="gloss">
     <span><b>NSE</b> “Nash–Sutcliffe efficiency” (1970) — the field’s default score. <b>KGE</b> “Kling–Gupta efficiency” (Gupta et al. 2009) — splits the error into timing, spread and bias.</span>
     <span><b>why persistence wins on KGE</b> — a copy of yesterday has exactly the right mean and spread (α = β = 1), so KGE only sees its lag-1 correlation.</span>
-    <span><b>−0.41</b> — any constant forecast scores KGE ≤ 1 − √2 ≈ −0.41, so a KGE of 0 is not “no skill”, unlike an NSE of 0 (Knoben et al. 2019).</span>
+    <span><b>−0.41</b> — any constant forecast scores KGE ≤ 1 − √2 ≈ −0.41 (taking r = 0, since a constant has no correlation), so a KGE of 0 is not “no skill”, unlike an NSE of 0 (Knoben et al. 2019).</span>
   </div>
   <div class="foot"><span>Nash &amp; Sutcliffe 1970 · Gupta et al. 2009, J. Hydrol. · Knoben, Freer &amp; Woods 2019, Hydrology and Earth System Sciences (HESS) · table computed for this lecture · decompositions: Appendix A4</span></div>
-  <aside class="notes">1.8 min. The table is the point, not the formulas. Ask before revealing the last row: what does "tomorrow equals today" score? NSE 0.48 — then the twist, KGE 0.74, because a copy of the river has perfect mean and perfect variability and KGE rewards exactly that. So a KGE of 0.74 can be a do-nothing model. Two rules to say out loud: know your benchmark on the metric you report, and never compare an NSE with a KGE. Plant the Part 3 line: NSE is MSE in a normalized costume, so it inherits squared error's appetite for smooth, damped forecasts — we will see that as a formula. Time check: ~0:17 in.</aside>
+  <aside class="notes">1.8 min. The table is the point, not the formulas. Ask before revealing the last row: what does "tomorrow equals today" score? NSE 0.48 — then the twist, KGE 0.74, because a copy of the river has perfect mean and perfect variability and KGE rewards exactly that. So a KGE of 0.74 can be a do-nothing model. Two rules to say out loud: know your benchmark on the metric you report, and never compare an NSE with a KGE. Plant the Part 3 line: NSE is MSE in a normalized costume, so it inherits squared error's appetite for smooth, damped forecasts — we will see that as a formula. Time check: ~0:17 in; the paper slide follows and ends Part 1 at ~0:19.</aside>
 </section>
 
 <!-- 10 -->
+<section class="slide">
+  <p class="kicker">Part 1 · This week’s paper · 2 min</p>
+  <h2>The paper in one slide — and the vocabulary it predates</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> the moment one model trained on hundreds of rivers beat one model tuned per river. &nbsp;·&nbsp; <b class="accent">Where</b> Google Flood Hub is its descendant; the capstone hydrology track conditions on static attributes the same way. &nbsp;·&nbsp; <b class="accent">Do</b> map its vocabulary onto ours before the journal club.</p>
+  <ul class="small">
+    <li><b>One LSTM for 531 CAMELS basins</b>, trained on all of them at once, with 27 static catchment attributes fed in beside the daily weather.</li>
+    <li><b>The EA-LSTM</b> routes the static attributes into the input gate only (figure), so each basin gets a fixed vector that decides which memory cells it uses — <span class="accent">an embedding of the basin, learned from data</span>.</li>
+    <li><b>The result</b>: one regional model beat every conceptual model calibrated basin by basin — median NSE <b>0.74</b> for the EA-LSTM ensemble against <b>0.68</b> for the best of them (HBV) and 0.60 for SAC-SMA, on the 447 basins every model covers. <span class="accent">Large-sample training overtook per-site calibration.</span></li>
+    <li class="muted">Read it with this course’s vocabulary in hand — pretraining, conditioning, embedding, fine-tuning. The paper says “embedding” but never “pretraining” or “fine-tuning”; discussion question 1 asks you to supply the mapping.</li>
+  </ul>
+  <div class="figure" style="flex:0 0 auto;margin:.2vh 0 .6vh">
+    <svg viewBox="0 0 700 118" role="img" aria-label="The entity-aware LSTM. On the left, a box of static catchment attributes feeds only the input gate, drawn as a constant per basin. Below it, a box of daily weather feeds the forget gate, the candidate content and the output gate. All gates enter one LSTM cell in the middle, which emits streamflow on the right." style="width:min(62%,560px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="8" y="10" width="170" height="38" rx="7"/><rect x="8" y="68" width="170" height="38" rx="7"/>
+        <rect x="400" y="30" width="160" height="58" rx="9" stroke="var(--accent)" stroke-width="1.8"/>
+      </g>
+      <g font-size="10.5" fill="currentColor" text-anchor="middle">
+        <text x="93" y="26">27 static attributes x<tspan font-size="8" dy="2">s</tspan></text><text x="93" y="40" font-size="9" fill="var(--muted)">climate · soil · vegetation · slope</text>
+        <text x="93" y="84">daily weather d<tspan font-size="8" dy="2">t</tspan></text><text x="93" y="98" font-size="9" fill="var(--muted)">rain · temperature · radiation</text>
+        <text x="480" y="55">LSTM cell</text><text x="480" y="70" font-size="9" fill="var(--muted)">one weight set, 531 basins</text>
+      </g>
+      <g fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M178 29 H300 V45 H400"/></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M178 87 H300 V73 H400 M560 59 H628"/></g>
+      <g fill="var(--accent)" stroke="none"><path d="M394 41 L400 45 L394 49 Z"/></g>
+      <g fill="currentColor" stroke="none"><path d="M394 69 L400 73 L394 77 Z"/><path d="M622 55 L628 59 L622 63 Z"/></g>
+      <text x="290" y="20" text-anchor="middle" font-size="10" fill="var(--accent)" font-weight="700">input gate — set once per basin</text>
+      <text x="290" y="105" text-anchor="middle" font-size="10" fill="currentColor">the other gates — driven by the weather</text>
+      <text x="632" y="63" font-size="10.5" fill="currentColor">streamflow</text>
+    </svg>
+  </div>
+  <div class="gloss">
+    <span><b>EA-LSTM</b> “entity-aware LSTM” — the paper’s variant: the input gate is i = σ(W x<sub>s</sub> + b), computed once per basin from the static inputs; the dynamic inputs drive everything else.</span>
+    <span><b>static attributes</b> — per-basin numbers that do not change day to day: mean precipitation, aridity, snow fraction, soil depth, slope.</span>
+    <span><b>calibrated basin by basin</b> — tune a conceptual bucket model separately for every gauge. SAC-SMA is the Sacramento Soil Moisture Accounting model; HBV the Swedish Hydrologiska Byråns Vattenbalansavdelning model.</span>
+    <span><b>forcing</b> — the paper uses the Maurer gridded weather product; this deck's numbers use Daymet, another of the three CAMELS ships.</span>
+    <span><b>NSE*</b> — the paper's loss: squared error weighted per basin by 1/(σ<sub>basin</sub> + ε)², so flashy high-variance basins do not dominate the gradient.</span>
+  </div>
+  <div class="foot"><span>Kratzert, Klotz, Shalev, Klambauer, Hochreiter &amp; Nearing 2019, HESS 23:5089 · full title and the paper’s own equations: Appendix A3 · optional: Nearing et al. 2024, Nature</span></div>
+  <aside class="notes">2 min, closing Part 1 while the CAMELS numbers are still on the board. The story to tell: before this paper, a hydrological model meant one calibration per river; after it, the default became one model trained on hundreds of rivers, told which river it is looking at. Flag the input-gate embedding as the technical idea worth stealing — it is conditioning, and every foundation model in this course conditions on something (location, sensor, date). Do not answer DQ1 — the leader should open by reproducing the paper's embedding/clustering figure and asking what, exactly, was pretrained.</aside>
+</section>
+
+<!-- 11 -->
 <section class="slide">
   <p class="kicker">Part 1 · Watch at home</p>
   <h2>The cell, slowly — then the people who took it to the rivers</h2>
@@ -295,6 +366,7 @@
       <p class="small muted" style="margin:.5vh 0 0">Google Research · <i>How AI is Improving Global Access to Reliable Flood Forecasts</i> · 2 min — where the 2019 model ended up: the optional reading, as a product.</p>
     </a>
   </div>
+  <p class="small" style="margin:1.2vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Week 6.</b> Attention connects every step to every other step directly — no product of 150 factors. That is why Transformers replaced recurrent networks almost everywhere, and why the LSTM survived exactly where memory is physical: a river, a snowpack.</p>
   <div class="gloss">
     <span><b>large-sample hydrology</b> — training one model on hundreds of basins at once instead of one model per basin; the idea the Kratzert talk and this week’s paper are about.</span>
     <span><b>in the thumbnails</b> — the cell in the abstract, the cell on 531 rivers, the cell as a public flood service.</span>
@@ -305,19 +377,36 @@
 
 <!-- ============ PART 2 · AUTOREGRESSIVE FORECASTING ============ -->
 
-<!-- 11 -->
+<!-- 12 -->
 <section class="slide section">
   <p class="kicker">Part 2 · 14 min · the headline</p>
   <h2>Autoregressive Forecasting as a Discipline</h2>
-  <aside class="notes">14 minutes, the headline of the day. Every machine-learning weather model — GraphCast, Pangu-Weather, FourCastNet, AIFS — is a one-step model applied to its own output again and again. The thesis: the one-step loss you train on and the multi-step forecast you run are different objects, and the gap between them has a formula. The formula is the board derivation of this deck, the Week 5 equivalent of the receptive field and the cos-latitude weight; do not let it slip under 3 minutes.</aside>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>A model that scores 0.90 one day ahead scores 0.35 fifteen days ahead — with perfect rain. Then the one-line formula for why, and two ways the weather models fight it.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>Every headline machine-learning weather model — GraphCast, Pangu-Weather, FuXi, AIFS — is a one-step model run on its own output: GraphCast 40 times for ten days. Your W11 lab does the same twelve times; the capstone weather track lives or dies by it.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>GraphCast, Pangu-Weather, FuXi and AIFS (the European weather centre’s Artificial Intelligence Forecasting System) · Google Flood Hub's forecast LSTM · large language models, one token at a time · today's lab, one day at a time.</p></div>
+  </div>
+  <div style="display:flex;gap:1.2vw;align-items:center;justify-content:center;margin-top:1.6vh">
+    <a href="https://www.youtube.com/watch?v=-KFO0pES-zQ" class="yt" data-id="-KFO0pES-zQ" style="display:block;width:min(30%,250px);flex:0 0 auto;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-graphcast.jpg" alt="Google DeepMind video: why AI creates better weather forecasts" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+    </a>
+    <p class="small muted" style="margin:0;max-width:44ch">Google DeepMind · <i>Why AI Creates Better Weather Forecasts</i> · 2 min — <span class="accent">click to play here</span> · GraphCast in its makers’ words: one 6-hour step, applied to its own output, forty times. Play it only if the room has never seen a machine-learning weather model.</p>
+  </div>
+  <aside class="notes">14 minutes, the headline of the day. Read the three cards in order: what, why, where — thirty seconds; the two-minute DeepMind clip is optional and costs two of the fourteen. The thesis: the one-step loss you train on and the multi-step forecast you run are different objects, and the gap between them has a formula. The formula is the board derivation of this deck; do not let it slip under 3 minutes.</aside>
 </section>
 
-<!-- 12 -->
+<!-- 13 -->
 <section class="slide">
   <p class="kicker">Part 2 · Two regimes</p>
   <h2>Two ways to feed a model its own past</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> the model you train and the forecast you run are different objects. &nbsp;·&nbsp; <b class="accent">Where</b> GraphCast (40 self-fed steps), the W11 lab (12), today’s lab (15). &nbsp;·&nbsp; <b class="accent">Do</b> score skill at every lead time, never at one.</p>
   <div class="figure" style="flex:0 0 auto;margin:0">
-    <svg viewBox="0 0 660 212" role="img" aria-label="Two rows of the same one-step model. Top row, teacher forcing: every box receives the observed value, drawn as a black dot, and its prediction, an orange ring, is compared with the next observed value. Bottom row, free running: only the first box sees an observation; every later box receives the previous box's orange prediction." style="width:min(92%,800px)">
+    <svg viewBox="0 0 660 212" role="img" aria-label="Two rows of the same one-step model. Top row, teacher forcing: every box receives the observed value, drawn as a black dot, and its prediction, an orange ring, is compared with the next observed value. Bottom row, free running: only the first box sees an observation; every later box receives the previous box's orange prediction." style="width:min(84%,700px)">
       <text x="12" y="18" font-size="11" fill="currentColor" font-weight="700">teacher forcing — how the model is trained</text>
       <text x="12" y="120" font-size="11" fill="var(--accent)" font-weight="700">free running — how the forecast is run</text>
       <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
@@ -348,7 +437,7 @@
   <ul class="small">
     <li><b>Autoregressive</b>: ŷ<sub>t+1</sub> = f(y<sub>t</sub>, x<sub>t+1</sub>); a k-step forecast feeds f its own output k times. GraphCast steps 6 hours at a time, so its 10-day forecast is <span class="accent">40 of its own outputs fed back in</span>.</li>
   </ul>
-  <div class="quickpoll" data-pid="w05-s12-w0" data-answer="no">
+  <div class="quickpoll" data-pid="w05-s13-w0" data-answer="no">
     <div class="qp-row">
       <span class="qp-q"><b>QUICK Q</b>&ensp;The model on the next slide scores NSE 0.90 one day ahead and is handed the <i>observed</i> rain for all 15 future days. Does it still score above 0.7 at 15 days? <span class="muted">(the rain is perfect)</span></span>
       <span class="qp-ui"></span>
@@ -360,20 +449,22 @@
     </div>
   </div>
   <div class="gloss">
-    <span><b>teacher forcing</b> — training with the observed value as the next input (Williams &amp; Zipser 1989): every step starts from the truth, so every step is an easy one-step problem.</span>
+    <span><b>teacher forcing</b> — training with the observed value as the next input (Williams &amp; Zipser 1989): every step starts from the truth, so every step is easy.</span>
     <span><b>free running</b> — the model's own output is the next input; the only way a forecast can run, because the future is not observed yet.</span>
+    <span><b>issue time</b> — the last day whose observations the forecast may use; everything after it must come from the model or from a weather forecast.</span>
     <span><b>lead time</b> — how far ahead the forecast is, in steps or days. Skill is a curve over lead time, never one number.</span>
     <span><b>in the figure</b> — solid dots are observations, orange rings are predictions. Top: every ring is scored and then discarded. Bottom: every ring becomes the next input.</span>
   </div>
   <aside class="notes">2 min including the poll. Draw the two rows on the board as you say them; the only difference is where the arrow into each box comes from. Say the GraphCast number — forty self-fed steps for ten days — because it tells them this is not a hydrology curiosity. Then run the QUICK Q before revealing the next slide: most rooms say yes, because the rain is perfect. Reveal only after the next slide is up, or reveal here if the room is split — the explanation replaces the gloss. The phrase to leave on the board: one-step skill describes the model you trained; lead-time skill describes the forecast you run.</aside>
 </section>
 
-<!-- 13 -->
+<!-- 14 -->
 <section class="slide">
   <p class="kicker">Part 2 · The receipt</p>
   <h2>Same model, same river: 0.90 on day 1, 0.35 on day 15</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> the number in an abstract or a notebook is usually the one-step number. &nbsp;·&nbsp; <b class="accent">Where</b> Note 05, your W11 emulator, any paper that says “forecast”. &nbsp;·&nbsp; <b class="accent">Do</b> plot skill against lead time, with persistence beside it.</p>
   <div class="figure" style="flex:0 0 auto;display:block;margin:.2em 0 0">
-    <img src="img/fig-w5-rollout.png" data-zoom alt="Left: three months of observed streamflow on the Narraguagus River in autumn 1996, black, with orange 15-day forecasts launched every three days, each starting on the observed flow and drifting from it. Right: skill against lead time from 1 to 15 days. The model falls from 0.90 at one day to 0.35 at fifteen days; persistence falls from 0.81 to minus 0.29; a version trained on a three-step rollout is almost on top of the first." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
+    <img src="img/fig-w5-rollout.png" data-zoom alt="Left: three months of observed streamflow on the Narraguagus River in autumn 1996, black, with orange 15-day forecasts launched every three days, each starting on the observed flow and drifting from it. Right: skill against lead time from 1 to 15 days. The model falls from 0.90 at one day to 0.35 at fifteen days; persistence falls from 0.81 to minus 0.29; a version trained on a three-step rollout is almost on top of the first." title="Click to enlarge" style="display:block;margin:0 auto;height:30vh;width:auto;max-width:100%">
   </div>
   <ul class="small">
     <li>A linear model — 91% of yesterday’s flow plus rain and temperature terms — fitted by one-step least squares, then run free for 15 days <b>with the observed rain</b>: <span class="accent">NSE 0.90 → 0.64 at 3 days → 0.49 at 7 → 0.35 at 15</span>. Persistence: 0.81 → 0.29 → −0.03 → −0.29.</li>
@@ -381,29 +472,30 @@
   </ul>
   <div class="gloss">
     <span><b>fitted by one-step least squares</b> — teacher forcing for a linear model: regress tomorrow's flow on today's observed flow and the forcing. Nothing about day 15 enters the fit.</span>
-    <span><b>observed rain</b> — the rollout is handed the rain that actually fell: a hindcast with a perfect weather forecast. A real forecast would do worse, never better.</span>
+    <span><b>observed rain</b> — the rollout is handed the rain that actually fell: a hindcast with a perfect weather forecast. A real forecast would normally do worse.</span>
     <span><b>NSE over start days</b> — at each lead k, one pair per test day: the forecast issued that day for k days later, against what the river did.</span>
-    <span><b>in the figure</b> — each orange strand is one 15-day run; watch the strands that start before a storm. The dashed blue line is the same model trained on a 3-step loss — slide 16.</span>
+    <span><b>in the figure</b> — each orange strand is one 15-day run; watch the strands that start before a storm. The dashed blue line is the same model trained on a 3-step loss — slide 17.</span>
   </div>
-  <div class="foot"><span>Narraguagus River at Cherryfield, Maine (USGS 01022500) · fitted Oct 1999 – Sep 2008, scored Oct 1989 – Sep 1999 (the CAMELS test years of this week’s paper) · computed for this lecture</span></div>
-  <aside class="notes">2.5 min, protected. This is the receipt of the day, the Week 5 twin of last week's 89.4% accuracy. Read the four numbers slowly: 0.90, 0.64, 0.49, 0.35 — and repeat that the rain was perfect. Point at the left panel: the strands launched just before the big December storm fall short, and the strands launched on the recession sag below the river — both are the model's own errors being fed back. Then the honest second line: it still beats persistence everywhere, so the model is not bad; the one-day number was simply answering a different question. Ask the room what the lab's LSTM will do — the lab measures exactly this curve. Time check: ~0:22 in.</aside>
+  <div class="foot"><span>Narraguagus River at Cherryfield, Maine (USGS 01022500) · fitted Oct 1999 – Sep 2008, scored Oct 1989 – Sep 1999, this week’s paper’s split · computed for this lecture</span></div>
+  <aside class="notes">2.5 min, protected. This is the receipt of the day, the Week 5 twin of last week's 89.4% accuracy. Read the four numbers slowly: 0.90, 0.64, 0.49, 0.35 — and repeat that the rain was perfect. Point at the left panel: the strands launched just before the big December storm fall short, and the strands launched on the recession sag below the river — both are the model's own errors being fed back. Then the honest second line: it still beats persistence everywhere, so the model is not bad; the one-day number was simply answering a different question. Ask the room what the lab's LSTM will do — the lab measures exactly this curve. Time check: ~0:24 in.</aside>
 </section>
 
-<!-- 14 -->
+<!-- 15 -->
 <section class="slide">
   <p class="kicker">Part 2 · The error recursion, derived</p>
   <h2>Why errors pile up: one line, unrolled</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> it separates the two things that can be wrong — the step (σ²) or the feedback (a) — and the one-step score shows only one. &nbsp;·&nbsp; <b class="accent">Where</b> the error-growth step inside every data-assimilation cycle (Week 3); predictability limits; every rollout diagnostic in Week 11. &nbsp;·&nbsp; <b class="accent">Do</b> know your a.</p>
   <div class="cols" style="grid-template-columns:1.12fr 1fr;gap:2.2vw;align-items:center">
     <div style="min-width:0">
       <div class="card small" style="line-height:1.7">
         Truth: <b>y<sub>k+1</sub> = f(y<sub>k</sub>) − δ<sub>k+1</sub></b> &ensp;<span class="muted">δ = the model’s one-step error</span><br>
         Forecast: <b>ŷ<sub>k+1</sub> = f(ŷ<sub>k</sub>)</b>. Subtract, linearize with <b>a = ∂f/∂y</b>:<br>
-        <span class="accent"><b>e<sub>k+1</sub> ≈ a·e<sub>k</sub> + δ<sub>k+1</sub></b></span> &ensp;→&ensp; <b>e<sub>k</sub> = Σ<sub>j</sub> a<sup>k−j</sup> δ<sub>j</sub></b><br>
-        Independent δ’s of variance σ²: &ensp;<b>Var(e<sub>k</sub>) = σ² (1 − a<sup>2k</sup>) / (1 − a²)</b>
+        <span class="accent"><b>e<sub>k+1</sub> ≈ a·e<sub>k</sub> + δ<sub>k+1</sub></b></span> &ensp;— unroll it: e<sub>2</sub> = aδ<sub>1</sub> + δ<sub>2</sub>, &ensp;e<sub>3</sub> = a²δ<sub>1</sub> + aδ<sub>2</sub> + δ<sub>3</sub><br>
+        so <b>e<sub>k</sub> = Σ<sub>j</sub> a<sup>k−j</sup> δ<sub>j</sub></b> &ensp;⇒&ensp; <b>Var(e<sub>k</sub>) = σ² (1 − a<sup>2k</sup>) / (1 − a²)</b>
       </div>
       <ul class="small">
         <li><b>|a| &lt; 1</b> — saturates at σ²/(1 − a²): the system forgets old errors, as a river does. <b>a = 1</b> — grows like k. <b>|a| &gt; 1</b> — grows like a<sup>2k</sup>: an unstable model, or a chaotic atmosphere.</li>
-        <li><span class="accent">Teacher forcing measures σ². It never measures a.</span> Our river model has a = 0.911, so its error variance settles near <b>5.9×</b> the one-step variance.</li>
+        <li><span class="accent">The one-step score reports σ². It hides how a compounds it.</span> Our river model has a = 0.911, so its error variance settles near <b>5.9×</b> the one-step variance.</li>
       </ul>
     </div>
     <div class="figure" style="min-width:0">
@@ -425,18 +517,19 @@
     </div>
   </div>
   <div class="gloss">
-    <span><b>e<sub>k</sub></b> — the forecast error k steps into the run, ŷ<sub>k</sub> − y<sub>k</sub>. <b>δ</b> — the fresh error one step adds even from a perfect input: exactly what teacher forcing measures.</span>
+    <span><b>e<sub>k</sub></b> — the forecast error k steps into the run, ŷ<sub>k</sub> − y<sub>k</sub>. <b>δ</b> — the fresh error one step adds even from a perfect input, exactly what teacher forcing measures; the variance line assumes the δ’s are independent with variance σ².</span>
     <span><b>a</b> — how much of an input error survives one step: the model's slope, ∂f/∂y. For a vector state it is the Jacobian matrix and its largest eigenvalues play the role of |a|.</span>
     <span><b>5.9×</b> — 1/(1 − 0.911²) for our river model: the long-lead error variance, relative to the one-step variance that the training loss saw.</span>
     <span><b>in the figure</b> — identical one-step error in all three curves. What separates saturate, crawl and explode is a, which the one-step loss never looked at.</span>
   </div>
-  <aside class="notes">3.5 min, and this is the board derivation of the deck — write it, do not read it. Three lines: truth equals model step minus one-step error; subtract the forecast; linearize — e_{k+1} = a·e_k + δ. Then unroll twice by hand (e₂ = aδ₁ + δ₂, e₃ = a²δ₁ + aδ₂ + δ₃) until the geometric sum is obvious, and write the variance. The payoff sentence, underlined: teacher forcing measures σ², never a. That is discussion question 2 in one line, so stop there — the remedies are theirs to argue. The honest caveats if asked: δ's are not independent in practice (errors are correlated in time) and a varies along the trajectory; the three regimes survive both. Chaos is |a| > 1 in the true system itself, which is why weather has a predictability limit no model removes. Full vector version: Appendix A6.</aside>
+  <aside class="notes">3.5 min, and this is the board derivation of the deck — write it, do not read it. Three lines: truth equals model step minus one-step error; subtract the forecast; linearize — e_{k+1} = a·e_k + δ. Then unroll twice by hand (e₂ = aδ₁ + δ₂, e₃ = a²δ₁ + aδ₂ + δ₃) until the geometric sum is obvious, and write the variance. The payoff sentence, underlined: the one-step score reports σ² and hides a — for our linear model a is even a fitted coefficient, and the score still says nothing about what it does over 15 steps. That is discussion question 2 in one line, so stop there — the remedies are theirs to argue. The honest caveats if asked: δ's are not independent in practice (errors are correlated in time) and a varies along the trajectory; the three regimes survive both. Chaos is |a| > 1 in the true system itself, which is why weather has a predictability limit no model removes. Full vector version: Appendix A6.</aside>
 </section>
 
-<!-- 15 -->
+<!-- 16 -->
 <section class="slide">
   <p class="kicker">Part 2 · Exposure bias</p>
   <h2>Exposure bias: trained on the truth, run on its own guesses</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> it is why a goes uncontrolled: training never showed the model its own mistakes. &nbsp;·&nbsp; <b class="accent">Where</b> machine translation, where it was named; weather-model drift; an LSTM fed its own streamflow. &nbsp;·&nbsp; <b class="accent">Do</b> show the model its errors during training — next slide.</p>
   <div class="cols" style="grid-template-columns:1.1fr 1fr;gap:2.2vw;align-items:center">
     <div style="min-width:0">
       <ul class="small">
@@ -473,18 +566,19 @@
   <aside class="notes">2 min. The conceptual link to make explicit: the recursion said the slope a decides everything; this slide says why a is uncontrolled — the slope of f off the data manifold is whatever the optimizer happened to leave there. Use the river model's 0.911 as the concrete shortcut: teacher forcing rewards "copy yesterday" because yesterday is the truth. Callback to Week 2 in one sentence: distribution shift, but self-inflicted. Do not list remedies beyond the next slide — noise injection and scheduled sampling are part of discussion question 2 and the appendix card is their crib.</aside>
 </section>
 
-<!-- 16 -->
+<!-- 17 -->
 <section class="slide">
   <p class="kicker">Part 2 · Remedy: train on the rollout</p>
   <h2>Put the rollout inside the loss</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> the only fix that lets the loss see a. &nbsp;·&nbsp; <b class="accent">Where</b> FourCastNet’s 2-step fine-tune, GraphCast’s 12-step curriculum, your lab’s K = 3. &nbsp;·&nbsp; <b class="accent">Do</b> implement it — five lines.</p>
   <div class="cols" style="grid-template-columns:1fr 1.08fr;gap:2.2vw;align-items:center">
     <div style="min-width:0">
 <pre style="margin:0;line-height:1.55"><code>y_hat = y[t]                  # start from the truth
 loss = 0
 for k in range(1, K + 1):     # K = 3 in the lab
-    y_hat = model(y_hat, x[t + k])   # its own output
-    loss = loss + mse(y_hat, y[t + k])
-(loss / K).backward()         # through all K steps</code></pre>
+    y_hat = model(y_hat, x[t + k])   # its own output: the line the lab changes
+    loss = loss + mse(y_hat, y[t + k])   # state and graph stay attached
+(loss / K).backward()         # gradients through all K steps</code></pre>
     </div>
     <div style="min-width:0">
       <ul class="small">
@@ -503,12 +597,13 @@ for k in range(1, K + 1):     # K = 3 in the lab
   <aside class="notes">1.7 min. Read the code's three comments and nothing else: start from the truth, feed your own output, backpropagate through all of it. The honest number is the point of the third bullet — for our linear model the fix barely moves the curve, and that is a prediction, not a disappointment: exposure bias needs a model flexible enough to exploit the teacher's input, and an LSTM is. Write "linear: +0.02 — LSTM: ?" on the board and leave it there for the lab. If asked why not K = 15: memory, and the curriculum argument on the next slide.</aside>
 </section>
 
-<!-- 17 -->
+<!-- 18 -->
 <section class="slide">
   <p class="kicker">Part 2 · How the weather models do it</p>
   <h2>Two answers from weather: a rollout curriculum, and fewer steps</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> the recursion’s two knobs, a and k, engineered at planet scale. &nbsp;·&nbsp; <b class="accent">Where</b> the W11 lab schedule; the capstone weather track. &nbsp;·&nbsp; <b class="accent">Do</b> read any training schedule and say which knob it turns.</p>
   <div class="figure" style="flex:0 0 auto;margin:0">
-    <svg viewBox="0 0 700 214" role="img" aria-label="Left: a GraphCast training schedule. The number of autoregressive steps in the loss stays at one for about three hundred thousand updates, drawn compressed, then climbs as a staircase from two to twelve over the last eleven thousand updates. Right: Pangu-Weather reaching a 56-hour lead time. The top row makes five jumps of 24, 24, 6, 1 and 1 hours; the bottom row makes fifty-six one-hour steps." style="width:min(96%,900px)">
+    <svg viewBox="0 0 700 214" role="img" aria-label="Left: a GraphCast training schedule. The number of autoregressive steps in the loss stays at one for about three hundred thousand updates, drawn compressed, then climbs as a staircase from two to twelve over the last eleven thousand updates. Right: Pangu-Weather reaching a 56-hour lead time. The top row makes five jumps of 24, 24, 6, 1 and 1 hours; the bottom row makes fifty-six one-hour steps." style="width:min(84%,780px)">
       <text x="10" y="16" font-size="11" fill="currentColor" font-weight="700">GraphCast — steps in the loss, over training</text>
       <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M40 170 V30 M40 170 H330"/></g>
       <g font-size="9" fill="var(--muted)" text-anchor="end"><text x="34" y="164">1</text><text x="34" y="104">6</text><text x="34" y="44">12</text></g>
@@ -545,43 +640,69 @@ for k in range(1, K + 1):     # K = 3 in the lab
     <span><b>in the figure</b> — left, the loss's rollout length against training updates (the long first phase is drawn compressed); right, one 56-hour forecast built from 5 large jumps or from 56 small ones.</span>
   </div>
   <div class="foot"><span>Lam et al. 2023 (GraphCast), Science · Bi et al. 2023 (Pangu-Weather), Nature · exact schedules and the papers’ own words: Appendix A8</span></div>
-  <aside class="notes">2 min. Two engineering answers to the same recursion, and both map onto it cleanly: GraphCast attacks a (train on the rollout, so the model learns states it can recover from), Pangu attacks k (take fewer steps, so fewer errors are compounded). Say why the curriculum exists: from random weights a 12-step rollout is noise feeding noise, so learn the step first — the rollout phase is 11,000 of 311,000 updates, about 3.5%. Plant Part 3: GraphCast's authors say this very rollout loss is what makes their long-lead forecasts blurry. The Pangu arithmetic lands well: 168 calls versus 7. The price of Pangu's trick is four separate models and a lead-time grid tied to their step sizes. Time check: ~0:31:30 — HARD CHECK. If past 0:33, Part 3 loses the NSE slide (it is in Appendix A4), not the double penalty.</aside>
-</section>
-
-<!-- ============ PART 3 · STABILITY AND BLURRING ============ -->
-
-<!-- 18 -->
-<section class="slide section">
-  <p class="kicker">Part 3 · 7.5 min</p>
-  <h2>Stability and Blurring</h2>
-  <aside class="notes">7.5 minutes. Part 2 was about errors growing. This part is about what a model trained on squared error does when it knows its errors will be large: it hedges, and hedging looks like blur. Three slides: the conditional mean (the reason), the double penalty (the mechanism in time), and NSE's own version of it (the reason your flood peaks come out low).</aside>
+  <aside class="notes">2 min. Two engineering answers to the same recursion, and both map onto it cleanly: GraphCast attacks a (train on the rollout, so the model learns states it can recover from), Pangu attacks k (take fewer steps, so fewer errors are compounded). Say why the curriculum exists: from random weights a 12-step rollout is noise feeding noise, so learn the step first — the rollout phase is 11,000 of 311,000 updates, about 3.5%. Plant Part 3: GraphCast's authors say this very rollout loss is what makes their long-lead forecasts blurry. The Pangu arithmetic lands well: 168 calls versus 7. The price of Pangu's trick is four separate models and a lead-time grid tied to their step sizes. Time check: ~0:33:30 — HARD CHECK. If past 0:35, Part 3 loses the NSE slide (it is in Appendix A4), not the double penalty.</aside>
 </section>
 
 <!-- 19 -->
 <section class="slide">
-  <p class="kicker">Part 3 · The conditional mean</p>
-  <h2>Squared error asks for the average of every possible future</h2>
-  <div class="figure" style="flex:0 0 auto;display:block;margin:.2em 0 0">
-    <img src="img/fig-w5-lorenz-blur.png" data-zoom alt="Left: 200 runs of the Lorenz-63 system started 0.001 apart. They agree until about 6.5 time units, then fan out; every run keeps sharp oscillations, while their mean, drawn thick orange, flattens toward zero. Right: mean squared error against lead time. A single run's error rises to about twice the climate variance, the mean's to about once." title="Click to enlarge" style="display:block;margin:0 auto;height:31vh;width:auto;max-width:100%">
+  <p class="kicker">Part 2 · Watch at home</p>
+  <h2>Teacher forcing with code on screen, and GraphCast from its authors</h2>
+  <div style="display:flex;gap:1.2vw;margin-top:1.4vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=Ik8qFu5UolM" class="yt" data-id="Ik8qFu5UolM" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w5-teacher-forcing.jpg" alt="Purdue lecture video on training sequence models with teacher forcing" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Aly El Gamal (Purdue) · <i>Training with Teacher Forcing</i> · 9 min — <span class="accent">click to play here</span> · slide 13’s two regimes, with the training loop written out.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=asMwIPZh-zg" class="yt" data-id="asMwIPZh-zg" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w5-graphcast-5min.jpg" alt="Five-minute walkthrough of the GraphCast paper" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">5 Minute Papers on AI for the Planet · <i>Learning Better Weather Forecasts with AI</i> · 5 min — the GraphCast paper, figure by figure.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=lZlm1YSdQ9E" class="yt" data-id="lZlm1YSdQ9E" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w5-graphcast-lam.jpg" alt="Remi Lam presenting GraphCast at a CMCC seminar" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Remi Lam (Google DeepMind) · <i>GraphCast: learning skillful medium-range global weather forecasting</i> · 60 min — the curriculum of slide 18, explained by its author.</p>
+    </a>
   </div>
-  <ul class="small">
-    <li>The c that minimizes E[(Y − c)²] is <b>c = E[Y | what you know]</b> — differentiate, set to zero, two lines on the board. <span class="accent">A forecast trained on mean squared error (MSE) is a conditional mean, by construction.</span></li>
-    <li>Early, the possible futures agree and their mean is sharp. Later they fan out and the mean flattens toward climatology. Measured here: once the runs separate, a sharp run scores <b>1.96×</b> the squared error of the blurred mean — so training on squared error will always pick the blur.</li>
-  </ul>
   <div class="gloss">
-    <span><b>conditional mean</b> — the average of Y over every future consistent with the inputs. When those futures disagree, their average is smoother than any one of them.</span>
-    <span><b>climatology</b> — the long-run average state; the forecast you are left with when the inputs carry no more information about the future.</span>
-    <span><b>Lorenz-63</b> — three coupled equations (Lorenz 1963), the smallest system that shows why weather has a predictability limit; here a stand-in for an atmosphere.</span>
-    <span><b>in the figure</b> — right: past the split, a sharp run’s error nears 2 × the climate variance and the mean’s 1 × — the arithmetic of two independent draws.</span>
+    <span><b>encode–process–decode</b> — GraphCast’s shape: the lat–lon grid is encoded onto an icosahedral mesh, message-passing runs on the mesh, the result is decoded back to the grid. Week 11 opens it up.</span>
+    <span><b>in the thumbnails</b> — the training loop in code, the paper in five minutes, the author for an hour.</span>
   </div>
-  <div class="foot"><span>GraphCast’s own paper: a longer rollout in the MSE loss “encourages it to express its uncertainty by predicting spatially smoothed outputs, leading to blurrier forecasts at longer lead times” (Lam et al. 2023) · Lorenz 1963 · computed for this lecture</span></div>
-  <aside class="notes">2.7 min. Do the two-line proof on the board: d/dc E[(Y−c)²] = −2E[Y−c] = 0, so c = E[Y]. Then point at the figure: until 6.5 time units all 200 runs agree and the orange mean is as sharp as any of them; after that the runs split into the two lobes of the attractor and the mean slides to zero. The sentence to land: blurring is not a bug in the network, it is the correct answer to the question the loss asked — "what single number minimizes squared error when you do not know which future happens?". The factor 1.96 is our measurement of the textbook factor two. Read the GraphCast quote in the foot aloud: the remedy of Part 2 — a longer rollout in an MSE loss — is exactly what makes a model blur more, so stability and sharpness pull against each other. Callback: Week 4's nowcasting slide said this about radar U-Nets; W11 gives the probabilistic fix a score.</aside>
+  <div class="foot"><span>Optional context, not assigned · longer: Google DeepMind, <i>How AI is transforming weather prediction</i> (Hannah Fry with Peter Battaglia, 44 min) on the Part 4 watch slide</span></div>
+  <aside class="notes">Twenty seconds, no playback. The Purdue clip is for anyone who wants to see the teacher-forcing loop as code before the lab; the five-minute paper walkthrough is the cheapest way to have seen GraphCast's figures before Week 11; Lam's talk is for the student who will build the weather-track capstone. None is assigned.</aside>
 </section>
 
+<!-- ============ PART 3 · STABILITY AND BLURRING ============ -->
+
 <!-- 20 -->
+<section class="slide section">
+  <p class="kicker">Part 3 · 7.5 min</p>
+  <h2>Stability and Blurring</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Three numbers showing that a late peak scores worse than no peak; two hundred runs of a small chaotic system whose mean — the MSE-optimal forecast — goes flat; hydrology’s own version of the same hedge.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>The blur in every squared-error forecast — GraphCast’s day-10 maps, Week 4’s nowcasting U-Net, your lab’s shaved peaks — is a property of the loss, not of the architecture.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Week 11’s rollout engineering and power-spectrum checks · capstone weather-track ablations · every hydrograph you will ever tune to NSE.</p></div>
+  </div>
+  <aside class="notes">7.5 minutes. Read the three cards first: what you will see, why it matters, where it is used. Part 2 was about errors growing. This part is about what a model trained on squared error does when it knows its errors will be large: it hedges, and hedging looks like blur. Three slides: the conditional mean (the reason), the double penalty (the mechanism in time), and NSE's own version of it (the reason your flood peaks come out low).</aside>
+</section>
+
+<!-- 21 -->
 <section class="slide">
   <p class="kicker">Part 3 · The double penalty</p>
   <h2>A peak two hours late is punished twice</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> squared error charges a right-but-late peak twice, so it scores worse than no peak at all. &nbsp;·&nbsp; <b class="accent">Where</b> high-resolution rain verification, flood-peak timing, Week 11’s power-spectrum checks. &nbsp;·&nbsp; <b class="accent">Do</b> never rank fine-scale forecasts by squared error alone.</p>
   <div class="figure" style="flex:0 0 auto;margin:0">
     <svg viewBox="0 0 690 196" role="img" aria-label="Three small forecast panels against the same truth, a single sharp peak of height 10 at hour 10. Panel one: the forecast has the right peak two hours late; its summed squared error is 200. Panel two: the forecast is flat at zero; error 100. Panel three: a low smear of height 2 from hour 8 to 12; error 80. Squared error ranks the smear best and the only forecast with the right peak last." style="width:min(94%,880px)">
       <g font-size="10.5" font-weight="700" text-anchor="middle">
@@ -617,14 +738,37 @@ for k in range(1, K + 1):     # K = 3 in the lab
     <span><b>timing error</b> — right shape, wrong time. In space the same thing is a displacement error: the right storm 20 km off.</span>
     <span><b>in the figure</b> — solid bars are the truth, orange outlines the forecast; the numbers are the squared errors summed over the whole window.</span>
   </div>
-  <div class="foot"><span>Week 11 scores forecasts with tolerance for displacement (neighbourhood scores such as the fractions skill score) and with probabilistic scores — the way operational verification escapes this</span></div>
+  <div class="foot"><span>Week 11 checks forecasts with power spectra and scores them with probabilistic scores — the two ways operational verification escapes this</span></div>
   <aside class="notes">2.5 min. Work the three numbers on the board from the picture, slowly — 200, 100, 80 — and then ask which forecast a flood manager wants. It is the one squared error ranks last. The generalization: any point-by-point squared loss is minimized by hedging on timing and position, so a model trained on it learns smear; this is the same conditional-mean story as the last slide, seen in time instead of across futures. Tie it back to persistence: it is nothing but a timing error, and look how fast its NSE died. If a student asks for the fix: probabilistic training (Part 4) and displacement-tolerant scores (W11).</aside>
 </section>
 
-<!-- 21 -->
+<!-- 22 -->
+<section class="slide">
+  <p class="kicker">Part 3 · The conditional mean</p>
+  <h2>Squared error asks for the average of every possible future</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> blur is not a bug in the architecture; it is the correct answer to the question squared error asks. &nbsp;·&nbsp; <b class="accent">Where</b> GraphCast’s day-10 maps, Week 4’s nowcasting U-Net, damped hydrographs. &nbsp;·&nbsp; <b class="accent">Do</b> change the question (Part 4), not the backbone.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:.2em 0 0">
+    <img src="img/fig-w5-lorenz-blur.png" data-zoom alt="Left: 200 runs of the Lorenz-63 system started 0.001 apart. They agree until about 6.5 time units, then fan out; every run keeps sharp oscillations, while their mean, drawn thick orange, flattens toward zero. Right: mean squared error against lead time. A single run's error rises to about twice the climate variance, the mean's to about once." title="Click to enlarge" style="display:block;margin:0 auto;height:26vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>The c that minimizes E[(Y − c)²] is <b>c = E[Y | what you know]</b> — differentiate, set to zero, two lines on the board. <span class="accent">A forecast trained on mean squared error (MSE) is pulled toward the conditional mean — that is what the loss rewards.</span></li>
+    <li>Early, the possible futures agree and their mean is sharp. Later they fan out and the mean flattens toward climatology. Measured: once the runs separate, a sharp run scores <b>1.96×</b> the squared error of the blurred mean — squared error will always pick the blur.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>conditional mean</b> — the average of Y over every future consistent with the inputs. When those futures disagree, their average is smoother than any one of them.</span>
+    <span><b>climatology</b> — the long-run average state; the forecast you are left with when the inputs carry no more information about the future.</span>
+    <span><b>Lorenz-63</b> — three coupled equations (Lorenz 1963), the smallest system that shows why weather has a predictability limit; here a stand-in for an atmosphere.</span>
+    <span><b>in the figure</b> — right: past the split, a sharp run’s error nears 2 × the climate variance and the mean’s 1 × — the arithmetic of two independent draws.</span>
+  </div>
+  <div class="foot"><span>GraphCast’s own paper: a longer rollout in the MSE loss “encourages it to express its uncertainty by predicting spatially smoothed outputs, leading to blurrier forecasts at longer lead times” (Lam et al. 2023) · Lorenz 1963 · computed for this lecture</span></div>
+  <aside class="notes">2.7 min. Do the two-line proof on the board: d/dc E[(Y−c)²] = −2E[Y−c] = 0, so c = E[Y]. Then point at the figure: until 6.5 time units all 200 runs agree and the orange mean is as sharp as any of them; after that the runs split into the two lobes of the attractor and the mean slides to zero. The sentence to land: blurring is not a bug in the network, it is the correct answer to the question the loss asked — "what single number minimizes squared error when you do not know which future happens?". The factor 1.96 is our measurement of the textbook factor two. Read the GraphCast quote in the foot aloud: the remedy of Part 2 — a longer rollout in an MSE loss — is exactly what makes a model blur more, so stability and sharpness pull against each other. Callback: Week 4's nowcasting slide said this about radar U-Nets; W11 gives the probabilistic fix a score.</aside>
+</section>
+
+<!-- 23 -->
 <section class="slide">
   <p class="kicker">Part 3 · Hydrology’s version</p>
   <h2>NSE rewards a damped river: the best variability is r</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> hydrology’s own metric rewards shaving floods. &nbsp;·&nbsp; <b class="accent">Where</b> every NSE-optimized model, including the one you train today. &nbsp;·&nbsp; <b class="accent">Do</b> report KGE beside NSE, and look at the peaks.</p>
   <div class="cols" style="grid-template-columns:1.1fr 1fr;gap:2.2vw;align-items:center">
     <div style="min-width:0">
       <ul class="small">
@@ -653,25 +797,72 @@ for k in range(1, K + 1):     # K = 3 in the lab
   <div class="gloss">
     <span><b>r</b> — correlation between simulated and observed flow: timing and shape. <b>α</b> — the ratio of their standard deviations: how big the swings are.</span>
     <span><b>β<sub>n</sub></b> — the bias, (mean simulated − mean observed) / σ<sub>observed</sub>. Set to 0 in the figure.</span>
-    <span><b>in the figure</b> — NSE for a fixed r = 0.8: the peak sits at α = 0.8, left of the honest α = 1. A model that shrinks every flood by 20% scores better.</span>
+    <span><b>in the figure</b> — NSE for a fixed r = 0.8: the peak sits at α = 0.8, left of the honest α = 1. A model that shrinks every swing about the mean by 20% scores better.</span>
   </div>
   <div class="foot"><span>Gupta, Kling, Yilmaz &amp; Martinez 2009, <i>Decomposition of the mean squared error and NSE performance criteria</i>, J. Hydrol. 377 · derivation: Appendix A4</span></div>
   <aside class="notes">2 min, and the slide to sacrifice first if the 0:31:30 check was missed — Appendix A4 carries it. The point: Part 3's two slides said squared error rewards smoothness; this is the same fact written in the hydrologist's own metric, with a one-line derivative that lands the number. Say it concretely: if your model's timing is only 80% right, the NSE-optimal thing to do is to make every flood 20% smaller. That is why hydrologists invented KGE, and why the lab reports both. Transition: if one number must hedge, stop asking for one number.</aside>
 </section>
 
+<!-- 24 -->
+<section class="slide">
+  <p class="kicker">Part 3 · Watch at home</p>
+  <h2>Why every forecast loses its skill — chaos, from three angles</h2>
+  <div style="display:flex;gap:1.2vw;margin-top:1.4vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=fDek6cYijxI" class="yt" data-id="fDek6cYijxI" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w5-veritasium-chaos.jpg" alt="Veritasium video on chaos and the butterfly effect" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Veritasium · <i>Chaos: The Science of the Butterfly Effect</i> · 13 min — <span class="accent">click to play here</span> · Lorenz’s discovery, and why two runs 0.001 apart end up anywhere.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=Q_f1vRLAENA" class="yt" data-id="Q_f1vRLAENA" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w5-mit-lorenz.jpg" alt="Cleve Moler on the Lorenz attractor, MIT OpenCourseWare" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Cleve Moler (MIT OpenCourseWare) · <i>Lorenz Attractor and Chaos</i> · 10 min — the three equations behind slide 22, computed live.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=o808OnudGRk" class="yt" data-id="o808OnudGRk" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w5-palmer-mit.jpg" alt="Tim Palmer lecturing at MIT on chaos and probabilistic weather prediction" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Tim Palmer (MIT EAPS) · <i>From Determinism to Probability in Numerical Weather Prediction</i> · 22 min — how chaos forced forecasting to go probabilistic: the bridge to Part 4.</p>
+    </a>
+  </div>
+  <div class="gloss">
+    <span><b>butterfly effect</b> — Lorenz’s name for sensitive dependence on initial conditions: a change too small to measure grows until the forecast is worthless. The |a| &gt; 1 case of slide 15, in the atmosphere itself.</span>
+    <span><b>in the thumbnails</b> — the idea for everyone, the equations for the curious, the operational consequence for forecasters.</span>
+  </div>
+  <div class="foot"><span>Optional context, not assigned · shorter: Met Office, <i>Chaos Theory</i> (4 min) · <a href="https://www.youtube.com/watch?v=Wps2vtzi1TU" target="_blank" rel="noopener">youtube.com/watch?v=Wps2vtzi1TU</a></span></div>
+  <aside class="notes">Twenty seconds, no playback. Veritasium is the one to recommend to the whole room; Moler for anyone who wants to re-run slide 22's experiment in twenty lines; Palmer for the students heading to the weather track — it is the historical argument for why ensembles exist, from the person who built ECMWF's.</aside>
+</section>
+
 <!-- ============ PART 4 · PROBABILISTIC OUTPUTS ============ -->
 
-<!-- 22 -->
+<!-- 25 -->
 <section class="slide section">
   <p class="kicker">Part 4 · 7 min</p>
   <h2>Probabilistic Outputs on Time Series</h2>
-  <aside class="notes">7 minutes. The constructive half of Part 3: if a single number has to hedge between futures, let the network describe the futures instead. Two heads that cost one line each in the lab — a quantile head and a Gaussian likelihood head — one measured band on our river, and the score Week 11 is built on, previewed in one line.</aside>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Two output heads that cost one line each, and a measured 90% band on our river that caught 91% of test days.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>Decisions are thresholds — will tomorrow exceed bankfull? — and a hedged mean cannot answer that. Distributions also end the blur problem, because the head no longer has to hedge.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Google Flood Hub’s distribution head · GenCast and the AIFS-ENS ensemble of the European Centre for Medium-Range Weather Forecasts (ECMWF) · Week 11’s continuous ranked probability score (CRPS) and spread–skill · the Week 12 lab’s CRPS mini-ensemble.</p></div>
+  </div>
+  <aside class="notes">7 minutes. Read the three cards first — the "where" card is the one to linger on: Google Flood Hub ships a distribution, not a number. The constructive half of Part 3: if a single number has to hedge between futures, let the network describe the futures instead. Two heads that cost one line each in the lab — a quantile head and a Gaussian likelihood head — one measured band on our river, and the score Week 11 is built on, previewed in one line.</aside>
 </section>
 
-<!-- 23 -->
+<!-- 26 -->
 <section class="slide">
   <p class="kicker">Part 4 · Heads</p>
   <h2>Ask the network for a distribution, not a number</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> one number must hedge; a distribution need not. &nbsp;·&nbsp; <b class="accent">Where</b> Google Flood Hub’s distribution head, GenCast and AIFS-ENS ensembles, the W12 lab’s CRPS mini-ensemble. &nbsp;·&nbsp; <b class="accent">Do</b> change one layer and one loss.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
     <svg viewBox="0 0 660 150" role="img" aria-label="One LSTM box on the left feeds three alternative output heads. A point head gives a single spike. A quantile head gives three vertical ticks at the 5th, 50th and 95th percentiles. A Gaussian head gives a bell curve described by a mean and a spread." style="width:min(92%,840px)">
       <rect x="14" y="52" width="92" height="44" rx="8" fill="var(--wash)" stroke="currentColor" stroke-width="1.3"/>
@@ -691,7 +882,7 @@ for k in range(1, K + 1):     # K = 3 in the lab
   </div>
   <ul class="small">
     <li>Same network, different last layer. A <b>quantile head</b> emits one number per probability level τ; a <b>Gaussian head</b> emits a mean μ and a spread σ; a mixture head emits several of those with weights.</li>
-    <li>The Gaussian head trains on the negative log-likelihood, <b>L = log σ + (y − μ)² / 2σ²</b>. Where errors are large the cheapest way to lower L is a larger σ — <span class="accent">the model learns how wrong it is about to be</span>. Keep σ positive with a softplus.</li>
+    <li>The Gaussian head trains on the negative log-likelihood, <b>L = log σ + (y − μ)² / 2σ²</b>. Where errors are large the cheapest way to lower L is a larger σ — <span class="accent">the model learns how uncertain it should be</span>. Keep σ positive with a softplus.</li>
     <li class="muted">Why bother: decisions are thresholds — the chance that tomorrow’s flow exceeds bankfull — and a mean cannot answer that.</li>
   </ul>
   <div class="gloss">
@@ -701,22 +892,23 @@ for k in range(1, K + 1):     # K = 3 in the lab
     <span><b>in the figure</b> — the same hidden state read out three ways: one spike, three ticks, one bell. Only the last layer and the loss differ.</span>
   </div>
   <div class="foot"><span>Klotz et al. 2022, <i>Uncertainty estimation with deep learning for rainfall–runoff modeling</i>, HESS — the mixture heads compared on CAMELS · derivations: Appendix A9</span></div>
-  <aside class="notes">3 min. Make it concrete for the lab: the change is one output layer and one loss function, nothing else in the LSTM moves. Derive the Gaussian NLL's σ behaviour in words, not on the board: for a fixed error, L is minimized at σ equal to the error's size, so the head learns the error it will make — a heteroscedastic noise model for free. The warning for the lab: an unconstrained σ collapses toward zero on the training set and explodes the loss on the test set; softplus plus a small floor. Mixture heads in one breath: Klotz and colleagues compared several on CAMELS, and that line of work fed the Google flood model.</aside>
+  <aside class="notes">3 min. Make it concrete for the lab: the change is one output layer and one loss function, nothing else in the LSTM moves. Derive the Gaussian NLL's σ behaviour in words, not on the board: for a fixed error, L is minimized at σ equal to the error's size, so the head learns the spread of the errors it makes — a heteroscedastic noise model for free. The warning for the lab: an unconstrained σ collapses toward zero on the training set and explodes the loss on the test set; softplus plus a small floor. Mixture heads in one breath: Klotz and colleagues compared several on CAMELS, and that line of work fed the Google flood model.</aside>
 </section>
 
-<!-- 24 -->
+<!-- 27 -->
 <section class="slide">
   <p class="kicker">Part 4 · The pinball loss</p>
   <h2>The pinball loss — and a band you can check</h2>
+  <p class="small" style="margin:-1.6vh 0 1.3vh;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;line-height:1.45"><b class="accent">Why</b> the pinball loss learns a quantile with no distributional assumption. &nbsp;·&nbsp; <b class="accent">Where</b> ECMWF’s AIFS-ENS trains on a CRPS-based loss — the pinball loss integrated over τ; flood and energy forecasting. &nbsp;·&nbsp; <b class="accent">Do</b> report coverage with every band.</p>
   <div class="figure" style="flex:0 0 auto;display:block;margin:.2em 0 0">
-    <img src="img/fig-w5-quantile-band.png" data-zoom alt="Autumn 1996 on the Narraguagus River, one day ahead: the observed flow in black inside a shaded orange band between the 5th and 95th percentile forecasts, with the median forecast as an orange line. The band is narrow at low flow and several times wider during the December storms; two observations fall outside it." title="Click to enlarge" style="display:block;margin:0 auto;height:26vh;width:auto;max-width:100%">
+    <img src="img/fig-w5-quantile-band.png" data-zoom alt="Autumn 1996 on the Narraguagus River, one day ahead: the observed flow in black inside a shaded orange band between the 5th and 95th percentile forecasts, with the median forecast as an orange line. The band is narrow at low flow and several times wider during the December storms; two observations fall outside it." title="Click to enlarge" style="display:block;margin:0 auto;height:23vh;width:auto;max-width:100%">
   </div>
   <div class="cols" style="grid-template-columns:1.25fr 1fr;gap:2vw;align-items:center;flex:0 0 auto">
     <div style="min-width:0">
       <ul class="small">
         <li><b>ρ<sub>τ</sub>(u) = max(τu, (τ − 1)u)</b>, u = y − q: under-prediction costs τ per unit, over-prediction 1 − τ. Its minimizer is the τ-quantile.</li>
         <li>Measured, one day ahead: the 5–95% band caught <b>91.0%</b> of 3,650 test days, and is <b>3.7 mm/day</b> wide on high-flow days against 0.6 on low-flow days — <span class="accent">it learned that a swollen river is less certain</span>.</li>
-        <li class="muted">Average the pinball loss over every τ and you get the CRPS — Week 11’s score.</li>
+        <li class="muted">Integrate the pinball loss over every τ, times two, and you get the CRPS — Week 11’s score.</li>
       </ul>
     </div>
     <div class="figure" style="min-width:0">
@@ -735,27 +927,27 @@ for k in range(1, K + 1):     # K = 3 in the lab
     </div>
   </div>
   <div class="gloss">
-    <span><b>coverage</b> — the fraction of observations inside the band. It is the check you report: a 90% band that catches 60% is overconfident; one that catches 99% is uselessly wide.</span>
+    <span><b>coverage</b> — the fraction of observations inside the band, the check you report: a 90% band that catches 60% is overconfident; one that catches 99% is probably too wide — check its width too.</span>
     <span><b>CRPS</b> “continuous ranked probability score” — E|X − y| − ½E|X − X′|: accuracy of the forecast distribution minus credit for its spread. For a single number it is the absolute error.</span>
     <span><b>in the figure</b> — each head is its own linear model on the observed flow, rain and temperature, trained with its own τ; blue rings mark the days outside the band.</span>
   </div>
   <div class="foot"><span>Koenker &amp; Bassett 1978 (quantile regression) · Gneiting &amp; Raftery 2007 (CRPS) · band computed for this lecture on USGS 01022500, fitted 1999–2008, scored 1989–1999</span></div>
-  <aside class="notes">3.3 min. Explain the asymmetry with the τ = 0.9 arm: being below the truth costs nine times more than being above it, so the optimal q sits where only 10% of outcomes exceed it. Then the measured band: 91.0% coverage for a nominal 90%, and a width that grows sixfold on high-flow days — nobody told the model that; the loss discovered it. Make coverage a rule: every probabilistic claim in Note 05 carries its measured coverage. The CRPS line is a foreshadow only; the identity "CRPS = pinball loss averaged over all τ" is in Appendix A9, and Week 11 builds ensemble verification on it — ECMWF's machine-learning ensemble is trained on a CRPS loss. Time check: ~0:46 — HARD CHECK before Part 5.</aside>
+  <aside class="notes">3.3 min. Explain the asymmetry with the τ = 0.9 arm: being below the truth costs nine times more than being above it, so the optimal q sits where only 10% of outcomes exceed it. Then the measured band: 91.0% coverage for a nominal 90%, and a width that grows sixfold on high-flow days — nobody told the model that; the loss discovered it. Make coverage a rule: every probabilistic claim in Note 05 carries its measured coverage. The CRPS line is a foreshadow only; the identity "CRPS = pinball loss averaged over all τ" is in Appendix A9, and Week 11 builds ensemble verification on it — ECMWF's machine-learning ensemble is trained on a CRPS loss. Time check: ~0:48 — HARD CHECK before Part 5.</aside>
 </section>
 
-<!-- 25 -->
+<!-- 28 -->
 <section class="slide">
   <p class="kicker">Part 4 · Watch at home</p>
-  <h2>Why forecasts lose skill, and what an ensemble buys back</h2>
+  <h2>What an ensemble buys back — and why DeepMind went probabilistic</h2>
   <div style="display:flex;gap:1.2vw;margin-top:1.4vh;align-items:flex-start;justify-content:center">
-    <a href="https://www.youtube.com/watch?v=Wps2vtzi1TU" class="yt" data-id="Wps2vtzi1TU" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+    <a href="https://www.youtube.com/watch?v=O_EWbnkjXdk" class="yt" data-id="O_EWbnkjXdk" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
-        <img src="img/yt-w5-metoffice-chaos.jpg" alt="Met Office video on chaos theory and weather forecasting" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <img src="img/yt-w5-deepmind-battaglia.jpg" alt="Hannah Fry in conversation with Peter Battaglia of Google DeepMind about AI weather prediction" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
         <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
           <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
         </span>
       </span>
-      <p class="small muted" style="margin:.5vh 0 0">Met Office · <i>Chaos Theory</i> · 4 min — <span class="accent">click to play here</span> · Part 3’s Lorenz runs, from the people who issue the forecasts.</p>
+      <p class="small muted" style="margin:.5vh 0 0">Google DeepMind · <i>How AI is transforming weather prediction</i> (Hannah Fry with Peter Battaglia) · 44 min — <span class="accent">click to play here</span> · from GraphCast’s single forecast to GenCast’s many: why they went probabilistic.</p>
     </a>
     <a href="https://www.youtube.com/watch?v=Oje9LHlFNGo" class="yt" data-id="Oje9LHlFNGo" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
@@ -780,34 +972,13 @@ for k in range(1, K + 1):     # K = 3 in the lab
     <span><b>ensemble</b> — many forecasts from slightly different starts or models. Its members stay sharp; its spread is the uncertainty, and its mean is the blur of Part 3.</span>
     <span><b>MDN</b> “mixture density network” — a network whose head outputs a mixture of distributions; the talk’s version of Part 4’s mixture head.</span>
   </div>
-  <div class="foot"><span>Longer, optional: the European Centre for Medium-Range Weather Forecasts (ECMWF), <i>Ensemble probabilistic forecasting at ECMWF</i> (26 min) — including the machine-learning ensemble trained with a CRPS loss · <a href="https://www.youtube.com/watch?v=SOC4Ia0bAvo" target="_blank" rel="noopener">youtube.com/watch?v=SOC4Ia0bAvo</a></span></div>
-  <aside class="notes">Twenty seconds, no playback. The two Met Office clips are four minutes each and are the most economical way to get the chaos and ensemble intuition that Week 11 assumes; the Klotz talk is for students who want to put a mixture head on the lab LSTM. None of them is assigned.</aside>
+  <div class="foot"><span>Optional, not assigned · longer: ECMWF, <i>Introduction to AIFS ENS v1</i> (39 min) — the operational ML ensemble trained on a CRPS loss · <a href="https://www.youtube.com/watch?v=pWxkf7cGI9k" target="_blank" rel="noopener">youtube.com/watch?v=pWxkf7cGI9k</a> · shorter: Meerkat Statistics, <i>Quantile Loss</i> (6 min) · <a href="https://www.youtube.com/watch?v=f_XfuS8NwQ4" target="_blank" rel="noopener">youtube.com/watch?v=f_XfuS8NwQ4</a></span></div>
+  <aside class="notes">Twenty seconds, no playback. The Met Office clip is four minutes and is the most economical way to get the ensemble intuition Week 11 assumes; the Klotz talk is for students who want to put a mixture head on the lab LSTM; the DeepMind conversation is the story of Part 3 turning into Part 4 at planet scale — GraphCast was deterministic, GenCast is an ensemble, and Battaglia says why. None of them is assigned.</aside>
 </section>
 
 <!-- ============ PART 5 · READING FRAMING + THE CONTRACT ============ -->
 
-<!-- 26 -->
-<section class="slide">
-  <p class="kicker">Part 5 · Reading: Kratzert et al. 2019 · 2 min</p>
-  <h2>The paper in one slide — and the vocabulary it predates</h2>
-  <ul class="small">
-    <li><b>One LSTM for 531 CAMELS basins</b>, trained on all of them at once, with 27 static catchment attributes — climate, soils, vegetation, topography — fed in beside the daily weather.</li>
-    <li><b>The EA-LSTM</b> routes the static attributes into the input gate only, so each basin gets a fixed vector that decides which memory cells it uses — <span class="accent">an embedding of the basin, learned from data</span>.</li>
-    <li><b>The result</b>: one regional model beat every conceptual model calibrated basin by basin — median NSE <b>0.74</b> for the EA-LSTM ensemble against <b>0.68</b> for the best of them (HBV) and 0.60 for SAC-SMA, on the 447 basins every model covers. <span class="accent">Large-sample training overtook per-site calibration.</span></li>
-    <li class="muted">Read it with this course’s vocabulary in hand — pretraining, conditioning, embedding, fine-tuning. The paper does not use those words; discussion question 1 asks you to supply them.</li>
-  </ul>
-  <div class="gloss">
-    <span><b>EA-LSTM</b> “entity-aware LSTM” — the paper’s variant: static inputs set the input gate once per basin, dynamic inputs drive everything else.</span>
-    <span><b>static attributes</b> — per-basin numbers that do not change day to day: mean precipitation, aridity, snow fraction, soil depth, forest fraction, slope.</span>
-    <span><b>calibrated basin by basin</b> — tune a conceptual bucket model separately for every gauge. SAC-SMA is the Sacramento Soil Moisture Accounting model; HBV the Swedish Hydrologiska Byråns Vattenbalansavdelning model.</span>
-    <span><b>forcing</b> — the paper uses the Maurer gridded weather product; CAMELS ships three (Daymet, Maurer and the North American Land Data Assimilation System), and this deck's numbers use Daymet.</span>
-    <span><b>NSE*</b> — the paper's loss: squared error weighted per basin by 1/(σ<sub>basin</sub> + ε)², so flashy high-variance basins do not dominate the gradient.</span>
-  </div>
-  <div class="foot"><span>Kratzert, Klotz, Shalev, Klambauer, Hochreiter &amp; Nearing 2019, <i>Towards learning universal, regional, and local hydrological behaviors via machine learning applied to large-sample datasets</i>, HESS 23 · optional: Nearing et al. 2024, Nature</span></div>
-  <aside class="notes">2 min framing, no more. The story to tell: before this paper, a hydrological model meant one calibration per river; after it, the default became one model trained on hundreds of rivers, told which river it is looking at. Flag the input-gate embedding as the technical idea worth stealing — it is conditioning, and every foundation model in this course conditions on something (location, sensor, date). Do not answer DQ1 — the leader should open by reproducing the paper's embedding/clustering figure and asking what, exactly, was pretrained.</aside>
-</section>
-
-<!-- 27 -->
+<!-- 29 -->
 <section class="slide">
   <p class="kicker">Part 5 · The contract</p>
   <h2>Write the forecast protocol down before the model runs</h2>
@@ -833,7 +1004,7 @@ for k in range(1, K + 1):     # K = 3 in the lab
   <aside class="notes">2 min. Deliver it as a contract, the same shape as last week's five sentences, because it is graded the same way. The killer sentence is number 2: almost every "streamflow forecast" skill in a student report is a hindcast with observed rain, and it must say so — our 0.35 at 15 days is exactly such a number. Number 3 is the lesson of Part 1: a model that does not beat persistence at every lead has not earned its parameters. End of the live budget: ~0:50. Read the clock here: ≤ 0:50 → run the FLEX board exercise; past it → hand the board to the journal-club leader and go to break.</aside>
 </section>
 
-<!-- 28 -->
+<!-- 30 -->
 <section class="slide">
   <p class="kicker">Part 5 · FLEX ~5 min · teach or skip</p>
   <h2>Board exercise: five ways to make a forecast look better than it is</h2>
@@ -847,10 +1018,10 @@ for k in range(1, K + 1):     # K = 3 in the lab
     <span><b>why five</b> — you have already seen three today, measured. The other two are the ones your own pipeline will invent.</span>
   </div>
   <div class="foot"><span>Rule: every proposal must be defensible in public — these are choices honest people make differently, not frauds</span></div>
-  <aside class="notes">5 min, FLEX — teach or skip per the clock rule on the previous slide. If skipped, the fallback is MANDATORY: say out loud "leader, the five-ways board is your journal-club opener." Target list, do not reveal upfront: (1) report the teacher-forced one-step score as "the forecast" — 0.90 against 0.35; (2) feed observed future rain and call it a forecast; (3) compare against the mean-flow benchmark (NSE 0) instead of persistence (0.48 median, 0.81 on our river); (4) report KGE without its benchmark — persistence already scores 0.74; (5) restart every run from the observed flow each day and report the average over lead times, which is dominated by day 1. Subtler ones if the room is quick: averaging NSE instead of taking the median (or dropping basins below zero), normalizing with statistics from all years, and choosing the lead time where the model looks best. Close by naming the pattern: none is fraud, all are a missing sentence.</aside>
+  <aside class="notes">5 min, FLEX — teach or skip per the clock rule on the previous slide. If skipped, the fallback is MANDATORY: say out loud "leader, the five-ways board is your journal-club opener." Target list, do not reveal upfront: (1) report the teacher-forced one-step score as "the forecast" — 0.90 against 0.35; (2) feed observed future rain and call it a forecast; (3) compare against the mean-flow benchmark (NSE 0) instead of persistence (0.48 median, 0.81 on our river); (4) report KGE without its benchmark — persistence already scores 0.74; (5) restart every run from the observed flow each day and report the average over lead times, which is dominated by day 1. Subtler ones if the room is quick: averaging NSE instead of taking the median (or dropping basins below zero), normalizing with statistics from all years, and choosing the lead time where the model looks best. Close by naming the pattern: none is fraud if it is disclosed before the result; all are a missing sentence.</aside>
 </section>
 
-<!-- 29 -->
+<!-- 31 -->
 <section class="slide">
   <p class="kicker">Journal club · 30 min · after break · 0 lecture minutes</p>
   <h2>Kratzert et al. 2019 — discussion questions</h2>
@@ -861,10 +1032,10 @@ for k in range(1, K + 1):     # K = 3 in the lab
   </ol>
   <p class="small muted">Groups of 3–4, working from your published entrance tickets (Journal Club tab on the course site) · the drawn leader moderates, the presenter reports back, the questioner takes another group’s report · these three questions are the agenda.</p>
   <div class="foot"><span>Leader opens with one reproduced figure · roles revealed at 13:00 on the course site · optional: <a href="https://doi.org/10.1038/s41586-024-07145-1">Nearing et al. 2024, Nature</a></span></div>
-  <aside class="notes">Journal club: 30 min in groups of 3–4, drawn leader moderating, presenter reporting back; harvest in the last 5 min. DQ1: good answers say the regional training over 531 basins is the pretraining and the static attributes are conditioning; better ones notice the EA-LSTM's input-gate vector is an embedding, and that per-basin fine-tuning is exactly what the paper argued you no longer need. DQ2: the board derivation is the crib — the one-step loss measures σ², never a — and the three remedies map onto the recursion: multi-step loss and curriculum shape a, noise injection shows the model inputs off the data; Appendix A7 has the family. DQ3: the honest answer is "zero-shot with respect to the target basin, conditioned on its attributes" — which is only possible because the attributes are available everywhere; the optional Nature paper is the operational test. Close with a one-line bridge to lab.</aside>
+  <aside class="notes">Journal club: 30 min in groups of 3–4, drawn leader moderating, presenter reporting back; harvest in the last 5 min. DQ1: good answers say the regional training over 531 basins is the pretraining and the static attributes are conditioning; better ones notice the EA-LSTM's input-gate vector is an embedding, and that per-basin fine-tuning is exactly what the paper argued you no longer need. DQ2: the board derivation is the crib — the one-step score reports σ² and hides a — and the three remedies map onto the recursion: multi-step loss and curriculum shape a, noise injection shows the model inputs off the data; Appendix A7 has the family. DQ3: the honest answer is "zero-shot with respect to the target basin, conditioned on its attributes" — which is only possible because the attributes are available everywhere; the optional Nature paper is the operational test. Close with a one-line bridge to lab.</aside>
 </section>
 
-<!-- 30 -->
+<!-- 32 -->
 <section class="slide">
   <p class="kicker">Lab briefing · 3 min · after journal club</p>
   <h2>Today’s lab: one LSTM, two training regimes, one curve each</h2>
@@ -872,7 +1043,7 @@ for k in range(1, K + 1):     # K = 3 in the lab
     <p><b>Data.</b> CAMELS-US for ~30 basins — daily basin-mean forcing (rain, temperature, radiation, vapour pressure) and USGS streamflow, the files this deck was computed from. <span class="pill">~30 basins</span> <span class="pill">train 1999–2008</span> <span class="pill">test 1989–1999</span></p>
     <p><b>Model.</b> An LSTM (NeuralHydrology or plain PyTorch) that also sees yesterday’s flow. Train it teacher-forced, then again with a <b>3-step rollout loss</b>; run both free for <b>15 days</b> and plot <span class="accent">NSE against lead time</span>, with persistence on the same axes. <span class="pill">PyTorch</span> <span class="pill">W&amp;B</span></p>
     <p><b>Teaser, last 20 min.</b> Open the WeatherBench2 ERA5 Zarr at 5.625° and train a single-variable next-step model — the seed of the weather direction.</p>
-    <p><b>Deliverable — Note 05.</b> The five-sentence contract, NSE-vs-lead-time curves for both regimes against persistence, hydrograph panels including one failure, and the ERA5 next-step result against persistence.</p>
+    <p><b>Deliverable — Note 05.</b> The five-sentence contract, NSE-vs-lead-time curves for both regimes against persistence — same start days, forcing, masks and basins for every curve — hydrograph panels including one failure, and the ERA5 next-step result against persistence.</p>
   </div>
   <ul class="small">
     <li>Verify, do not trust: <span class="accent">recompute persistence NSE for your basins first</span> — our river scores 0.81 at one day, the CAMELS median is 0.48. If your one-day score sits well below persistence, check that the model really receives the observed flow.</li>
@@ -888,7 +1059,7 @@ for k in range(1, K + 1):     # K = 3 in the lab
 
 <!-- ============ APPENDIX · SELF-STUDY ============ -->
 
-<!-- 31 -->
+<!-- 33 -->
 <section class="slide section">
   <p class="kicker">Appendix · self-study</p>
   <h2>The derivations and the reference cards</h2>
@@ -896,7 +1067,7 @@ for k in range(1, K + 1):     # K = 3 in the lab
   <aside class="notes">Not taught in class. These eleven cards hold everything that came off the live path: backpropagation through time in full, the LSTM, GRU and EA-LSTM equations with parameter counts, the NSE and KGE algebra with the benchmark identities, the CAMELS card with our baseline table, the error recursion for a vector state, the rollout-training family in code, the weather models' exact schedules, the quantile, likelihood and CRPS derivations, the ERA5 teaser card, and the assigned video. Say the appendix exists, say what is in it, and stop.</aside>
 </section>
 
-<!-- 32 -->
+<!-- 34 -->
 <section class="slide">
   <p class="kicker">Appendix A1 · Backpropagation through time</p>
   <h2>Why the product vanishes, in full</h2>
@@ -907,7 +1078,7 @@ for k in range(1, K + 1):     # K = 3 in the lab
     Shared weights sum over time: <b>∂L/∂W = Σ<sub>t</sub> diag(1 − h<sub>t</sub>²) (∂L/∂h<sub>t</sub>) h<sub>t−1</sub><sup>⊤</sup></b> — Week 4’s shared filter, along the other axis
   </div>
   <ul class="small">
-    <li><b>Truncated BPTT.</b> Backpropagate only through a window of k steps. It caps memory and compute, and it also caps the dependency length gradients can teach — Kratzert’s 270-day input windows are exactly this.</li>
+    <li><b>Truncated BPTT.</b> Backpropagate only through a window of k steps. It caps memory and compute, and it also caps the dependency length gradients can teach — Kratzert’s 270-day input windows are the finite-window cousin of this.</li>
     <li><b>Exploding.</b> Clip the global norm, g ← g · min(1, c/‖g‖), the Week 2 safety net. <b>Vanishing.</b> No clipping helps; change the path — the LSTM’s additive lane, or next week’s attention, which connects every step to every other directly.</li>
     <li class="muted">The bound is sufficient, not necessary: a large ‖W‖ does not guarantee explosion, because saturated tanh units have slopes near 0. That is why real RNNs mostly vanish.</li>
   </ul>
@@ -915,14 +1086,14 @@ for k in range(1, K + 1):     # K = 3 in the lab
   <aside class="notes">Not taught in class. This is the derivation behind the 0.9¹⁵⁰ line of slide 6. Students preparing for the Book Check should be able to reproduce the step Jacobian and the norm bound from Goodfellow §10.7 without notes.</aside>
 </section>
 
-<!-- 33 -->
+<!-- 35 -->
 <section class="slide">
   <p class="kicker">Appendix A2 · LSTM and GRU</p>
   <h2>The full equations, and what they cost</h2>
   <div class="card small" style="line-height:1.75">
     <b>LSTM</b> &ensp; f<sub>t</sub>, i<sub>t</sub>, o<sub>t</sub> = σ(W<sub>f,i,o</sub>[h<sub>t−1</sub>, x<sub>t</sub>] + b<sub>f,i,o</sub>) &ensp;·&ensp; g<sub>t</sub> = tanh(W<sub>g</sub>[h<sub>t−1</sub>, x<sub>t</sub>] + b<sub>g</sub>)<br>
     &emsp;&emsp;&emsp;&ensp; c<sub>t</sub> = f<sub>t</sub> ⊙ c<sub>t−1</sub> + i<sub>t</sub> ⊙ g<sub>t</sub> &ensp;·&ensp; h<sub>t</sub> = o<sub>t</sub> ⊙ tanh(c<sub>t</sub>)<br>
-    <b>GRU</b> &ensp; z<sub>t</sub>, r<sub>t</sub> = σ(W<sub>z,r</sub>[h<sub>t−1</sub>, x<sub>t</sub>]) &ensp;·&ensp; h̃<sub>t</sub> = tanh(W<sub>h</sub>[r<sub>t</sub> ⊙ h<sub>t−1</sub>, x<sub>t</sub>]) &ensp;·&ensp; <b>h<sub>t</sub> = (1 − z<sub>t</sub>) ⊙ h<sub>t−1</sub> + z<sub>t</sub> ⊙ h̃<sub>t</sub></b><br>
+    <b>GRU</b> (biases omitted) &ensp; z<sub>t</sub>, r<sub>t</sub> = σ(W<sub>z,r</sub>[h<sub>t−1</sub>, x<sub>t</sub>]) &ensp;·&ensp; h̃<sub>t</sub> = tanh(W<sub>h</sub>[r<sub>t</sub> ⊙ h<sub>t−1</sub>, x<sub>t</sub>]) &ensp;·&ensp; <b>h<sub>t</sub> = (1 − z<sub>t</sub>) ⊙ h<sub>t−1</sub> + z<sub>t</sub> ⊙ h̃<sub>t</sub></b><br>
     <b>Parameters</b> &ensp; LSTM 4·H·(H + D + 1) &ensp;·&ensp; GRU 3·H·(H + D + 1) &ensp;<span class="muted">H hidden units, D inputs</span>
   </div>
   <ul class="small">
@@ -934,7 +1105,7 @@ for k in range(1, K + 1):     # K = 3 in the lab
   <aside class="notes">Not taught in class. The parameter count is worth doing once by hand for the lab model — it is small enough that the LSTM is never the memory problem; the activations of a 270-day window across a batch are.</aside>
 </section>
 
-<!-- 34 -->
+<!-- 36 -->
 <section class="slide">
   <p class="kicker">Appendix A3 · This week’s paper</p>
   <h2>The EA-LSTM and the NSE* loss, as the paper writes them</h2>
@@ -946,7 +1117,7 @@ for k in range(1, K + 1):     # K = 3 in the lab
   </div>
   <ul class="small">
     <li><b>Setup.</b> 531 basins (area &lt; 2,000 km², area estimates within 10%), 27 static attributes, Maurer forcing, 270-day input windows, training Oct 1999 – Sep 2008, test Oct 1989 – Sep 1999, ensembles of 8 seeds.</li>
-    <li><b>Results</b> (median NSE, the 447 basins every benchmark covers): LSTM + static <b>0.758</b> · EA-LSTM <b>0.742</b> · HBV 0.676 · mHM 0.666 · FUSE 0.62–0.65 · SAC-SMA 0.603 · VIC 0.551 — all calibrated per basin. Regionally calibrated mHM and VIC: 0.527 and 0.307.</li>
+    <li><b>Results</b> (median NSE, the 447 basins every benchmark covers): LSTM + static <b>0.758</b> · EA-LSTM <b>0.742</b> · HBV 0.676 (itself an ensemble of 100 calibrations) · mHM 0.666 · FUSE 0.62–0.65 · SAC-SMA 0.603 · VIC 0.551 — all calibrated per basin. Regionally calibrated mHM and VIC: 0.527 and 0.307.</li>
     <li><b>The embedding.</b> k-means on the 256-number input-gate vectors separates basins more cleanly than clustering the raw attributes (best silhouette at 5 clusters against 6) — hydrological similarity, learned.</li>
     <li class="muted">Why NSE*: pooled MSE is dominated by the few basins with huge flows; dividing by each basin’s variance turns it into a per-basin NSE, so every river counts.</li>
   </ul>
@@ -954,7 +1125,7 @@ for k in range(1, K + 1):     # K = 3 in the lab
   <aside class="notes">Not taught in class; the crib for the paper and for the two quiz questions. Note the honest detail in the results line: the plain LSTM with static inputs is slightly better than the EA-LSTM — the EA-LSTM's point is interpretability (the embedding), not accuracy. Every model was trained with 8 random seeds and the 8 predictions averaged (§2.6) — the ensemble numbers are those averages.</aside>
 </section>
 
-<!-- 35 -->
+<!-- 37 -->
 <section class="slide">
   <p class="kicker">Appendix A4 · The metrics, derived</p>
   <h2>NSE, KGE and their benchmarks, in full</h2>
@@ -962,7 +1133,7 @@ for k in range(1, K + 1):     # K = 3 in the lab
     MSE = σ<sub>s</sub>² + σ<sub>o</sub>² − 2σ<sub>s</sub>σ<sub>o</sub>r + (μ<sub>s</sub> − μ<sub>o</sub>)² &emsp;⇒&emsp; <b>NSE = 1 − MSE/σ<sub>o</sub>² = 2αr − α² − β<sub>n</sub>²</b><br>
     α = σ<sub>s</sub>/σ<sub>o</sub>, &ensp;β<sub>n</sub> = (μ<sub>s</sub> − μ<sub>o</sub>)/σ<sub>o</sub> &emsp;·&emsp; ∂NSE/∂α = 2r − 2α = 0 &ensp;⇒&ensp; <b class="accent">α* = r</b>: damped whenever r &lt; 1<br>
     <b>KGE = 1 − √[(r − 1)² + (α − 1)² + (β − 1)²]</b>, β = μ<sub>s</sub>/μ<sub>o</sub> — each part optimal at 1, independently<br>
-    <b>Persistence at lead k</b> is a shifted copy (α = β = 1): &ensp;<b>NSE = 2ρ<sub>k</sub> − 1</b>, &ensp;<b>KGE = ρ<sub>k</sub></b>, ρ<sub>k</sub> the lag-k autocorrelation
+    <b>Persistence at lead k</b> is a shifted copy (α ≈ β ≈ 1 over a long, stationary record): &ensp;<b>NSE = 2ρ<sub>k</sub> − 1</b>, &ensp;<b>KGE = ρ<sub>k</sub></b>, ρ<sub>k</sub> the lag-k autocorrelation
   </div>
   <ul class="small">
     <li><b>The identity explains slide 9.</b> CAMELS median persistence NSE 0.475 ⇒ ρ₁ ≈ 0.74, and the measured median KGE is 0.738. Our river: NSE 0.81 ⇒ ρ₁ ≈ 0.91.</li>
@@ -973,12 +1144,12 @@ for k in range(1, K + 1):     # K = 3 in the lab
   <aside class="notes">Not taught in class. The persistence identity is the most useful line for the lab: once you know a basin's lag-1 autocorrelation you know its persistence NSE and KGE without running anything, and the two numbers on slide 9 stop looking like a paradox.</aside>
 </section>
 
-<!-- 36 -->
+<!-- 38 -->
 <section class="slide">
   <p class="kicker">Appendix A5 · Lab reference</p>
   <h2>CAMELS, and the do-nothing baselines you have to beat</h2>
   <ul class="small" style="margin:.6vh 0 0">
-    <li><b>671 basins</b> across the contiguous US, median area 330 km²; daily basin-mean forcing 1980–2014 from three products (Daymet, Maurer, and the North American Land Data Assimilation System), USGS discharge, and about 57 attributes in six classes — topography, climate, streamflow, land cover, soil, geology.</li>
+    <li><b>671 basins</b> across the contiguous US, median area 330 km²; daily basin-mean forcing from three products (Daymet 1980–2014, Maurer to 2008, and the North American Land Data Assimilation System), USGS discharge, and about 57 attributes in six classes — topography, climate, streamflow, land cover, soil, geology.</li>
     <li><b>The 531-basin subset</b> of this week’s paper drops basins over 2,000 km² or with area estimates that disagree by more than 10%. Its list ships with NeuralHydrology (<code>531_basin_list.txt</code>).</li>
     <li><b>Access.</b> The 3.4 GB time-series archive is mirrored on Zenodo (record 15529996); this deck read only the streamflow and Daymet members with HTTP (Hypertext Transfer Protocol) range requests — Week 3’s lesson, applied.</li>
   </ul>
@@ -996,7 +1167,7 @@ for k in range(1, K + 1):     # K = 3 in the lab
   <aside class="notes">Not taught in class. Keep this card open in a second tab during lab: your basins' persistence numbers belong beside this table, and your model's curve has to clear the persistence row at every lead. The 90th-percentile column is the snowmelt and groundwater rivers — for them even 7-day persistence is hard to beat, which is worth knowing before you conclude your model is bad.</aside>
 </section>
 
-<!-- 37 -->
+<!-- 39 -->
 <section class="slide">
   <p class="kicker">Appendix A6 · The error recursion, in full</p>
   <h2>A vector state, a Jacobian, and chaos</h2>
@@ -1008,14 +1179,14 @@ for k in range(1, K + 1):     # K = 3 in the lab
   </div>
   <ul class="small">
     <li><b>Model error vs initial error.</b> The recursion above is a model feeding on itself. A chaotic atmosphere adds a second source: even a perfect model grows a tiny initial error as e<sup>λt</sup>, λ the largest Lyapunov exponent.</li>
-    <li><b>Lorenz-63 as a check.</b> λ ≈ 0.91 per time unit, so a 10⁻³ difference needs about ln(10³)/0.91 ≈ 7.6 units to reach order one — the runs of slide 19 split at about 6.5–7.</li>
+    <li><b>Lorenz-63 as a check.</b> λ ≈ 0.91 per time unit, so a 10⁻³ difference needs about ln(10³)/0.91 ≈ 7.6 units to reach order one — the runs of slide 22 split at about 6.5–7.</li>
     <li class="muted">Correlated one-step errors change the saturation level but not the three regimes. Rollout training attacks model-error amplification; ensembles attack initial-condition uncertainty. Weather needs both.</li>
   </ul>
-  <div class="foot"><span>Lorenz 1963 · Kalnay 2003, <i>Atmospheric Modeling, Data Assimilation and Predictability</i>, Ch. 6 · the scalar case is slide 14</span></div>
+  <div class="foot"><span>Lorenz 1963 · Kalnay 2003, <i>Atmospheric Modeling, Data Assimilation and Predictability</i>, Ch. 6 · the scalar case is slide 15</span></div>
   <aside class="notes">Not taught in class. The Kalman-filter line is the bridge back to Week 3: the forecast step of data assimilation is exactly this covariance recursion, which is why operational centres think about forecast error the way this card does.</aside>
 </section>
 
-<!-- 38 -->
+<!-- 40 -->
 <section class="slide">
   <p class="kicker">Appendix A7 · Rollout training</p>
   <h2>The rollout loss and its cheaper relatives, in code</h2>
@@ -1046,7 +1217,7 @@ loss = mse(model(y1, x[t + 2]), y[t + 2])</code></pre>
   <aside class="notes">Not taught in class; the crib for discussion question 2's "noise injection". The unifying sentence: every one of these shows the model, during training, inputs that look like its own mistakes — they differ only in how faithfully and at what cost.</aside>
 </section>
 
-<!-- 39 -->
+<!-- 41 -->
 <section class="slide">
   <p class="kicker">Appendix A8 · The weather models</p>
   <h2>How four weather models handle their own rollout</h2>
@@ -1058,10 +1229,10 @@ loss = mse(model(y1, x[t + 2]), y[t + 2])</code></pre>
     <li class="muted">An absolute-error loss is minimized by the conditional median rather than the mean — still one number, still a hedge between futures.</li>
   </ul>
   <div class="foot"><span>Lam et al. 2023, Science 382 (arXiv:2212.12794, Supp. 4.2 and 4.5) · Bi et al. 2023, Nature 619 · Chen et al. 2023, npj Clim. Atmos. Sci. · Pathak et al. 2022, arXiv:2202.11214</span></div>
-  <aside class="notes">Not taught in class. Read it as four placements on the recursion of slide 14: GraphCast and FourCastNet shape a by training on the rollout; Pangu and FuXi reduce k or give each lead-time range its own model. None of them removes the blur — that needs Part 4's move to distributions.</aside>
+  <aside class="notes">Not taught in class. Read it as four placements on the recursion of slide 15: GraphCast and FourCastNet shape a by training on the rollout; Pangu and FuXi reduce k or give each lead-time range its own model. None of them removes the blur — that needs Part 4's move to distributions.</aside>
 </section>
 
-<!-- 40 -->
+<!-- 42 -->
 <section class="slide">
   <p class="kicker">Appendix A9 · Probabilistic losses</p>
   <h2>Quantile, likelihood and CRPS, derived</h2>
@@ -1080,7 +1251,7 @@ loss = mse(model(y1, x[t + 2]), y[t + 2])</code></pre>
   <aside class="notes">Not taught in class. The pinball derivation is two lines and worth doing once: it is why a quantile head needs no distributional assumption at all. The CRPS identity with the pinball loss is the bridge to Week 11 — a set of quantile heads was already estimating the CRPS.</aside>
 </section>
 
-<!-- 41 -->
+<!-- 43 -->
 <section class="slide">
   <p class="kicker">Appendix A10 · Lab reference</p>
   <h2>The ERA5 next-step teaser, and the numbers to beat</h2>
@@ -1098,11 +1269,11 @@ loss = mse(model(y1, x[t + 2]), y[t + 2])</code></pre>
       <tr><td>operational ECMWF forecast (IFS)</td><td class="num"><b>154</b></td><td class="num"><b>334</b></td></tr>
     </tbody>
   </table></div>
-  <div class="foot"><span>Rasp et al. 2020, <i>WeatherBench: a benchmark data set for data-driven weather forecasting</i>, JAMES, Table 2 · Rasp et al. 2024, WeatherBench 2, JAMES · IFS: the European Centre for Medium-Range Weather Forecasts’ Integrated Forecasting System</span></div>
+  <div class="foot"><span>Rasp et al. 2020, <i>WeatherBench: a benchmark data set for data-driven weather forecasting</i>, JAMES (Journal of Advances in Modeling Earth Systems), Table 2 · Rasp et al. 2024, WeatherBench 2, JAMES · IFS: the European Centre for Medium-Range Weather Forecasts’ Integrated Forecasting System</span></div>
   <aside class="notes">Not taught in class. The table is for when students roll the teaser out to 3 and 5 days — at 6 hours persistence is far better than these numbers. The honest expectation to set: a 20-minute model will beat persistence at 6 hours and lose most of that edge by day 3, which is Part 2 again on a planet-sized grid.</aside>
 </section>
 
-<!-- 42 -->
+<!-- 44 -->
 <section class="slide">
   <p class="kicker">Appendix A11 · Watch at home</p>
   <h2>This week’s assigned video — the recurrent network, from the source course</h2>
@@ -1126,8 +1297,40 @@ loss = mse(model(y1, x[t + 2]), y[t + 2])</code></pre>
       </ul>
     </div>
   </div>
-  <div class="foot"><span>Assigned video · <a href="https://www.youtube.com/watch?v=kG2lAPBF7zA" target="_blank" rel="noopener">youtube.com/watch?v=kG2lAPBF7zA</a></span><span>Summary due with Note 05 · Goodfellow Ch. 10 §10.1–10.7 is the companion reading</span></div>
+  <div class="foot"><span>Assigned video · <a href="https://www.youtube.com/watch?v=kG2lAPBF7zA" target="_blank" rel="noopener">youtube.com/watch?v=kG2lAPBF7zA</a></span><span>Summary due with Note 05 · Goodfellow Ch. 10 §10.1–10.7 (and §10.10 for the LSTM) is the companion reading</span></div>
   <aside class="notes">Not taught in class. It is the assigned video and it pairs with Goodfellow chapter 10 — the video for intuition and the famous interpretable-cell figures, the chapter for the derivations. Three quiz questions next week come from it. It opens in a new tab because the Stanford channel disables embedded playback.</aside>
+</section>
+
+<!-- 45 -->
+<section class="slide">
+  <p class="kicker">Appendix A12 · More to watch</p>
+  <h2>The video shelf — verified, embeddable, optional</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr;gap:2.5vw;flex:0 0 auto">
+    <div style="min-width:0">
+      <h3 class="small" style="margin:.4vh 0">Part 1 · memory and rivers</h3>
+      <ul class="small" style="margin:0">
+        <li><a href="https://www.youtube.com/watch?v=AsNTP8Kwu80" target="_blank" rel="noopener">StatQuest, <i>Recurrent Neural Networks, Clearly Explained</i></a> · 17 min — unrolling, vanishing and exploding, before the LSTM.</li>
+        <li><a href="https://www.youtube.com/watch?v=6niqTuYFZLQ" target="_blank" rel="noopener">Stanford CS231n 2017, <i>Lecture 10: Recurrent Neural Networks</i></a> · 73 min — the embeddable edition of the assigned lecture.</li>
+        <li><a href="https://www.youtube.com/watch?v=d02VkQ9MP44" target="_blank" rel="noopener">MIT 6.S191, <i>RNNs, Transformers, and Attention</i></a> · 58 min — the bridge to Week 6 in one lecture.</li>
+        <li><a href="https://www.youtube.com/watch?v=QU9x1TLCBgM" target="_blank" rel="noopener">ECMWF, <i>Rainfall–runoff simulation using LSTMs</i> (Acuña Espinoza, KIT)</a> · 38 min.</li>
+        <li><a href="https://www.youtube.com/watch?v=7gDPVa74Flk" target="_blank" rel="noopener">Kratzert, <i>LSTM networks for rainfall–runoff modelling</i> (EURO-FRIEND 2022)</a> · 46 min — NeuralHydrology, by its author.</li>
+        <li><a href="https://www.youtube.com/watch?v=Fy3bh8KBCgk" target="_blank" rel="noopener">Water Edu Hub, <i>NSE, KGE, RMSE explained</i></a> · 13 min.</li>
+      </ul>
+    </div>
+    <div style="min-width:0">
+      <h3 class="small" style="margin:.4vh 0">Parts 2–4 · rollout, blur, probability</h3>
+      <ul class="small" style="margin:0">
+        <li><a href="https://www.youtube.com/watch?v=k4-gu1nX0Y8" target="_blank" rel="noopener">Lingxi Xie, <i>Pangu-Weather</i> (ICBS 2024)</a> · 54 min — hierarchical temporal aggregation by an author.</li>
+        <li><a href="https://www.youtube.com/watch?v=m4K_gtn_bYg" target="_blank" rel="noopener">Machine Learning &amp; Simulation, <i>Autoregressive neural emulator for Lorenz in JAX</i></a> · 43 min — slide 15’s error growth, coded.</li>
+        <li><a href="https://www.youtube.com/watch?v=sTtQ1TZfwZw" target="_blank" rel="noopener">Grey Nearing, <i>Forecasting and decision making with Google Flood Hub</i></a> · 26 min — the optional reading, by its first author.</li>
+        <li><a href="https://www.youtube.com/watch?v=TCaZhysrTx8" target="_blank" rel="noopener">Martin Gauch (Google), <i>Deep learning for flood forecasting</i></a> · 55 min.</li>
+        <li><a href="https://www.youtube.com/watch?v=SOC4Ia0bAvo" target="_blank" rel="noopener">ECMWF, <i>Ensemble probabilistic forecasting at ECMWF</i></a> · 26 min · <a href="https://www.youtube.com/watch?v=OZuWzKju1TA" target="_blank" rel="noopener">Bergmeir, <i>Evaluation of probabilistic forecasts</i></a> · 9 min.</li>
+        <li><a href="https://www.youtube.com/watch?v=1nydD0QSnXk" target="_blank" rel="noopener">LMU Statistical Learning, <i>Proper scoring rules</i></a> · 35 min — why CRPS and the log score cannot be gamed.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Every id checked on 27 September 2026 for embeddability and length · none assigned · the assigned video is A11</span></div>
+  <aside class="notes">Not taught in class. A shelf, not a syllabus: point students to the one that matches their track — hydrology students to Nearing and Gauch, weather-track students to Xie and the AIFS ENS introduction, everyone who found slide 15 too fast to the JAX emulator video.</aside>
 </section>
 
 </body>
