@@ -86,7 +86,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const s = w.state, ui = w.ui;
     ui.textContent = "";
 
-    if (role === "static") { ui.append(h("span", "qp-count", "voting opens on the class site")); return; }
+    if (role === "static") {
+      // a quickpoll marked data-quiet shows nothing at all in the static (GitHub Pages) view
+      const quiet = w.section && w.section.querySelector(".quickpoll[data-quiet]");
+      if (!quiet) ui.append(h("span", "qp-count", "voting opens on the class site"));
+      return;
+    }
     if (role === "anon") {
       const a = h("a", "qp-btn", "Sign in to vote");
       a.href = "/portal/login.html";
