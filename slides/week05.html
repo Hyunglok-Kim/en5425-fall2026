@@ -817,22 +817,22 @@ for k in range(1, K+1):  # K = 3 in lab
 <!-- 22 -->
 <section class="slide xl">
   <p class="kicker">Part 2 · How the weather models do it</p>
-  <h2>Two answers from weather: a rollout curriculum, and fewer steps</h2>
-  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">The recursion’s two knobs, a and k, engineered at planet scale; every training schedule turns one of them.</p>
+  <h2>Weather models: train on the rollout, or take fewer steps</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Two fixes: shrink a by training on rollouts (GraphCast), or shrink k with bigger jumps per call (Pangu-Weather).</p>
   <div class="figure" style="flex:0 0 auto;margin:0">
-    <svg viewBox="0 0 700 214" role="img" aria-label="Left: a GraphCast training schedule. The number of autoregressive steps in the loss stays at one for about three hundred thousand updates, drawn compressed, then climbs as a staircase from two to twelve over the last eleven thousand updates. Right: Pangu-Weather reaching a 56-hour lead time. The top row makes five jumps of 24, 24, 6, 1 and 1 hours; the bottom row makes fifty-six one-hour steps." style="width:min(86%,1000px)">
-      <text x="10" y="16" font-size="13" fill="currentColor" font-weight="700">GraphCast — steps in the loss, over training</text>
+    <svg viewBox="0 0 700 214" role="img" aria-label="Left: a GraphCast training schedule. The number of rollout steps K inside the loss stays at one for about three hundred thousand updates, drawn compressed, then climbs as a staircase from two to twelve over the last eleven thousand updates. Right: Pangu-Weather reaching a 56-hour lead time. The top row makes five jumps of 24, 24, 6, 1 and 1 hours; the bottom row makes fifty-six one-hour steps." style="width:min(86%,1000px)">
+      <text x="10" y="16" font-size="13" fill="currentColor" font-weight="700">GraphCast — K in the loss, as training goes on</text>
       <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M40 170 V30 M40 170 H330"/></g>
       <g font-size="11" fill="var(--muted)" text-anchor="end"><text x="34" y="164">1</text><text x="34" y="104">6</text><text x="34" y="44">12</text></g>
       <path d="M40 158 H176" stroke="var(--accent)" stroke-width="2.4" fill="none"/>
       <g stroke="var(--muted)" stroke-width="1.2"><path d="M178 176 L186 164 M186 176 L194 164"/></g>
       <path d="M196 158 H206 V146 H216 V134 H226 V122 H236 V110 H246 V98 H256 V86 H266 V74 H276 V62 H286 V50 H296 V38 H306 V30 H316" stroke="var(--accent)" stroke-width="2.4" fill="none"/>
-      <text x="120" y="150" text-anchor="middle" font-size="11" fill="currentColor">≈ 300,000 updates, 1 step</text>
-      <text x="100" y="186" text-anchor="middle" font-size="11" fill="var(--muted)">learn the step (compressed)</text>
-      <text x="262" y="186" text-anchor="middle" font-size="11" fill="var(--muted)">last 11,000 updates: 2 → 12</text>
-      <text x="236" y="44" text-anchor="end" font-size="11.5" fill="var(--accent)" font-weight="700">12 × 6 h = 3 days</text>
-      <text x="185" y="206" text-anchor="middle" font-size="11.5" fill="currentColor">learn the step, then learn to live with your own errors</text>
-      <text x="372" y="16" font-size="13" fill="currentColor" font-weight="700">Pangu-Weather — reaching a 56-hour forecast</text>
+      <text x="120" y="150" text-anchor="middle" font-size="11" fill="currentColor">300,000 updates at K = 1</text>
+      <text x="100" y="186" text-anchor="middle" font-size="11" fill="var(--muted)">learn one step (axis squeezed)</text>
+      <text x="262" y="186" text-anchor="middle" font-size="11" fill="var(--muted)">last 11,000 updates: K 2 → 12</text>
+      <text x="236" y="44" text-anchor="end" font-size="11.5" fill="var(--accent)" font-weight="700">K = 12 × 6 h = 3 days</text>
+      <text x="185" y="206" text-anchor="middle" font-size="11.5" fill="currentColor">learn one step first, then to handle your own errors</text>
+      <text x="372" y="16" font-size="13" fill="currentColor" font-weight="700">Pangu-Weather — a 56-hour forecast in 5 calls</text>
       <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M380 118 H680"/></g>
       <g font-size="11" fill="var(--muted)" text-anchor="middle"><text x="380" y="134">0 h</text><text x="508.6" y="134">24</text><text x="637.1" y="134">48</text><text x="680" y="134">56</text></g>
       <g fill="none" stroke="var(--accent)" stroke-width="2">
@@ -841,20 +841,21 @@ for k in range(1, K+1):  # K = 3 in lab
       </g>
       <g font-size="11.5" fill="var(--accent)" text-anchor="middle" font-weight="700"><text x="444" y="66">24 h</text><text x="573" y="66">24 h</text><text x="653" y="82">6</text></g>
       <text x="682" y="98" font-size="11" fill="var(--accent)" text-anchor="end">1, 1</text>
-      <text x="530" y="36" text-anchor="middle" font-size="11.5" fill="var(--accent)">5 model calls, largest steps first</text>
+      <text x="530" y="36" text-anchor="middle" font-size="11.5" fill="var(--accent)">5 calls: the biggest jump that fits, then the next</text>
       <g stroke="var(--muted)" stroke-width="1"><path d="M380 150 v8 M385.4 150 v8 M390.7 150 v8 M396.1 150 v8 M401.4 150 v8 M406.8 150 v8 M412.1 150 v8 M417.5 150 v8 M422.9 150 v8 M428.2 150 v8 M433.6 150 v8 M438.9 150 v8 M444.3 150 v8 M449.6 150 v8 M455 150 v8 M460.4 150 v8 M465.7 150 v8 M471.1 150 v8 M476.4 150 v8 M481.8 150 v8 M487.1 150 v8 M492.5 150 v8 M497.9 150 v8 M503.2 150 v8 M508.6 150 v8 M513.9 150 v8 M519.3 150 v8 M524.6 150 v8 M530 150 v8 M535.4 150 v8 M540.7 150 v8 M546.1 150 v8 M551.4 150 v8 M556.8 150 v8 M562.1 150 v8 M567.5 150 v8 M572.9 150 v8 M578.2 150 v8 M583.6 150 v8 M588.9 150 v8 M594.3 150 v8 M599.6 150 v8 M605 150 v8 M610.4 150 v8 M615.7 150 v8 M621.1 150 v8 M626.4 150 v8 M631.8 150 v8 M637.1 150 v8 M642.5 150 v8 M647.9 150 v8 M653.2 150 v8 M658.6 150 v8 M663.9 150 v8 M669.3 150 v8 M674.6 150 v8 M680 150 v8"/></g>
-      <text x="530" y="176" text-anchor="middle" font-size="11.5" fill="var(--muted)">the same lead time with a 1-hour model: 56 calls</text>
-      <text x="530" y="206" text-anchor="middle" font-size="11.5" fill="currentColor">fewer steps = fewer δ’s and fewer factors of a</text>
+      <text x="530" y="176" text-anchor="middle" font-size="11.5" fill="var(--muted)">the same 56 hours with a 1-hour model: 56 calls</text>
+      <text x="530" y="206" text-anchor="middle" font-size="11.5" fill="currentColor">fewer calls = fewer fresh misses, fewer × a</text>
     </svg>
   </div>
   <ul class="small">
-    <li><b>GraphCast</b> learns the step first, then lets the loss roll out 2 → 12 steps in the last 3.5% of training. <b>Pangu-Weather</b> trains 1-, 3-, 6- and 24-hour models and chains the largest that fits: <span class="accent">7 days is 7 calls, not 168</span>.</li>
+    <li><b>GraphCast</b> (one call = 6 h): first learn the single step, then in the last 3.5% of training roll the loss out 2 → 12 steps — slide 21’s K, grown slowly. <b>Pangu-Weather</b>: four models jumping 1, 3, 6 or 24 h per call; use the biggest that fits — <span class="accent">7 days is 7 calls, not 168</span>.</li>
   </ul>
   <div class="gloss">
-    <span><b>curriculum</b> — the rollout length inside the loss grows as training proceeds. <b>greedy chaining</b> — the largest step that fits, then the next: 56 h = 24 + 24 + 6 + 1 + 1.</span>
+    <span><b>step</b> — one model call, one time interval forward (6 h for GraphCast, 1 day for our river). <b>update</b> — one weight change in training.</span>
+    <span><b>curriculum</b> — K in the loss grows as training goes on. <b>greedy chaining</b> — biggest jump that fits, then the next: 56 = 24 + 24 + 6 + 1 + 1.</span>
   </div>
   <div class="foot"><span>Lam et al. 2023 (GraphCast), Science · Bi et al. 2023 (Pangu-Weather), Nature · exact schedules: Appendix A8</span></div>
-  <aside class="notes">1.5 min. Two engineering answers to the same recursion, and both map onto it cleanly: GraphCast attacks a (train on the rollout, so the model learns states it can recover from), Pangu attacks k (take fewer steps, so fewer errors are compounded). Say why the curriculum exists: from random weights a 12-step rollout is noise feeding noise, so learn the step first — the rollout phase is 11,000 of 311,000 updates, about 3.5%. Plant Part 3: GraphCast's authors say this very rollout loss is what makes their long-lead forecasts blurry. The Pangu arithmetic lands well: 168 calls versus 7. The price of Pangu's trick is four separate models and a lead-time grid tied to their step sizes. Time check: ~0:36 — HARD CHECK. If past 0:37:30, Part 3 loses the NSE slide (it is in Appendix A4), not the double penalty.</aside>
+  <aside class="notes">1.5 min. Say the two letters in plain words before touching the figures: a is the share of yesterday's error that survives one model call; k is how many calls it takes to reach the lead time; a "step" is one call, an "update" is one weight change during training, and the left axis is training time. Two engineering answers to the same recursion, and both map onto it cleanly: GraphCast attacks a (train on the rollout, so the model learns states it can recover from), Pangu attacks k (take fewer steps, so fewer errors are compounded). Say why the curriculum exists: from random weights a 12-step rollout is noise feeding noise, so learn the step first — the rollout phase is 11,000 of 311,000 updates, about 3.5%. Plant Part 3: GraphCast's authors say this very rollout loss is what makes their long-lead forecasts blurry. The Pangu arithmetic lands well: 168 calls versus 7. The price of Pangu's trick is four separate models and a lead-time grid tied to their step sizes. Time check: ~0:36 — HARD CHECK. If past 0:37:30, Part 3 loses the NSE slide (it is in Appendix A4), not the double penalty.</aside>
 </section>
 
 <!-- 23 -->
