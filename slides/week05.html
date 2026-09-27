@@ -486,8 +486,8 @@
     <b>1</b> · the fresh miss, from the true input: &ensp;δ<sub>k+1</sub> = f(y<sub>k</sub>) − y<sub>k+1</sub><br>
     <b>2</b> · the forecast error: &ensp;e<sub>k+1</sub> = f(ŷ<sub>k</sub>) − y<sub>k+1</sub> = <b>[f(ŷ<sub>k</sub>) − f(y<sub>k</sub>)]</b> + δ<sub>k+1</sub><br>
     <b>3</b> · linearize the bracket, a = ∂f/∂y: &ensp;<span class="accent"><b>e<sub>k+1</sub> ≈ a · e<sub>k</sub> + δ<sub>k+1</sub></b></span><br>
-    unroll: &ensp;e<sub>2</sub> = aδ<sub>1</sub> + δ<sub>2</sub>, &ensp;e<sub>3</sub> = a²δ<sub>1</sub> + aδ<sub>2</sub> + δ<sub>3</sub>, &ensp;…<br>
-    &ensp;<b>e<sub>k</sub> = Σ<sub>j</sub> a<sup>k−j</sup> δ<sub>j</sub></b> — every past miss, faded by a per step<br>
+    start on the truth, e<sub>0</sub> = 0: &ensp;e<sub>1</sub> = δ<sub>1</sub>, &ensp;e<sub>2</sub> = a·e<sub>1</sub> + δ<sub>2</sub> = aδ<sub>1</sub> + δ<sub>2</sub>,<br>
+    &ensp;e<sub>3</sub> = a·e<sub>2</sub> + δ<sub>3</sub> = a²δ<sub>1</sub> + aδ<sub>2</sub> + δ<sub>3</sub>, &ensp;… &ensp;<b>e<sub>k</sub> = Σ<sub>j</sub> a<sup>k−j</sup> δ<sub>j</sub></b><br>
     independent misses, each of variance σ²:<br>
     &ensp;<b><span style="white-space:nowrap">Var(e<sub>k</sub>) = σ² (1 + a² + a⁴ + …)</span> = <span style="white-space:nowrap">σ² (1 − a<sup>2k</sup>) ⁄ (1 − a²)</span></b>
   </div>
@@ -584,7 +584,7 @@
     <span><b>geometric sum</b> — <span style="white-space:nowrap">1 + r + r² + … → 1 ⁄ (1 − r)</span> for |r| &lt; 1; here r = a². <b>assumed</b> — misses independent with equal variance, a constant, no error at step 0.</span>
   </div>
   <div class="foot"><span>Board derivation · correlated misses, a vector state and the covariance recursion: Appendix A6</span></div>
-  <aside class="notes">2.5 min, and this is the board derivation of the deck — write it, do not read it. Line 1 is a definition: δ is the model's miss when it is handed the truth, exactly what teacher forcing measures. Line 2 is add-and-subtract f(y_k). Line 3 is the only approximation: the bracket is f evaluated at two nearby inputs, so it is the slope times the gap. Then unroll twice by hand until the pattern is obvious, and take variances assuming the misses are independent — say that assumption out loud, the river breaks it on the next slide. Point at the bars while you say "geometric": the top block of every bar is today's miss, the same height every day; the blocks under it are yesterday's and the day before's, shrinking by a squared each step, so the stack cannot grow past 1 over 1 minus a squared. Payoff sentence, underlined: the one-step score reports σ² and hides a. Stop there — the remedies are discussion question 2.</aside>
+  <aside class="notes">2.5 min, and this is the board derivation of the deck — write it, do not read it. Line 1 is a definition: δ is the model's miss when it is handed the truth, exactly what teacher forcing measures. Line 2 is add-and-subtract f(y_k). Line 3 is the only approximation: the bracket is f evaluated at two nearby inputs, so it is the slope times the gap. Then unroll twice by hand from e_0 = 0 — the rollout launches from the observed value, so e_1 = δ_1, which is why a² multiplies δ_1 and not a separate e_1 — until the pattern is obvious, and take variances assuming the misses are independent — say that assumption out loud, the river breaks it on the next slide. Point at the bars while you say "geometric": the top block of every bar is today's miss, the same height every day; the blocks under it are yesterday's and the day before's, shrinking by a squared each step, so the stack cannot grow past 1 over 1 minus a squared. Payoff sentence, underlined: the one-step score reports σ² and hides a. Stop there — the remedies are discussion question 2.</aside>
 </section>
 <!-- 17 -->
 <section class="slide xl">
