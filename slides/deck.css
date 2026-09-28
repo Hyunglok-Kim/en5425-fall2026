@@ -104,3 +104,25 @@ body.shownotes .slide .notes { display:block; position:absolute; left:7vw; right
 .slide.xl h2 { margin:0 0 2.2vh; }
 .slide.xl .qp-row { font-size:clamp(15px,2.5vh,22px); }
 .slide.xl .qp-explain p { font-size:clamp(14px,2.2vh,19px); }
+
+/* ink — stylus drawing overlay and its tool bar (slides/ink.js) */
+#ink { position:fixed; inset:0; z-index:150; pointer-events:none; }
+#ink canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+body.inkall #ink { pointer-events:auto; touch-action:none; cursor:crosshair; }
+body.inking { cursor:crosshair; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+#inkBar { position:fixed; left:10px; top:50%; transform:translateY(-50%); z-index:160;
+  display:flex; flex-direction:column; align-items:center; gap:2px; padding:5px; border-radius:999px;
+  background:var(--surface); border:1px solid var(--hairline); box-shadow:0 6px 24px rgba(0,0,0,.14); }
+#inkBar:not(.open) { background:none; border-color:transparent; box-shadow:none; }
+#inkBar:not(.open) > :not(.toggle) { display:none; }
+#inkBar:not(.open) .toggle { color:var(--muted); opacity:.5; }
+#inkBar button { width:36px; height:36px; border-radius:50%; border:0; padding:0; background:none;
+  color:var(--ink-2); display:grid; place-items:center; cursor:pointer; font:inherit; }
+#inkBar button svg { width:18px; height:18px; }
+@media (hover:hover) { #inkBar button:hover { background:var(--page); color:var(--ink); } }
+#inkBar button.sel { background:var(--accent); color:var(--accent-ink); }
+#inkBar .sep { width:22px; height:1px; background:var(--hairline); margin:3px 0; }
+#inkBar .sw i { display:block; width:16px; height:16px; border-radius:50%; background:var(--c); }
+#inkBar .sw.sel { background:none; box-shadow:inset 0 0 0 2px var(--c); }
+@media (pointer:coarse) { #inkBar button { width:42px; height:42px; } #inkBar button svg { width:21px; height:21px; } }
+@media print { #ink, #inkBar { display:none !important; } }

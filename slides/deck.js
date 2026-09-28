@@ -91,6 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
     img.addEventListener("click", (e) => {
       e.stopPropagation(); e.preventDefault();
       const ov = document.createElement("div");
+      ov.className = "lightbox";
       ov.style.cssText = "position:fixed;inset:0;z-index:200;background:rgba(8,9,12,.88);" +
         "display:flex;align-items:center;justify-content:center;padding:3vh 3vw;cursor:zoom-out";
       const big = document.createElement("img");
