@@ -1224,17 +1224,69 @@ for k in range(1, K+1):  # K = 3 in lab
     </svg>
   </div>
   <ul class="small">
-    <li>Same network, different last layer: a <b>quantile head</b> emits one number per level τ; a <b>Gaussian head</b> emits μ and σ, trained on <b>L = log σ + (y − μ)² / 2σ²</b> — where errors are large the cheapest fix is a larger σ, so <span class="accent">the model learns how uncertain it should be</span>.</li>
+    <li>Same network, different last layer: a <b>quantile head</b> emits one number per level τ; a <b>Gaussian head</b> emits μ and σ, trained on <b>L = log σ + (y − μ)² / 2σ²</b> (next slide) — where errors are large the cheapest fix is a larger σ, so <span class="accent">the model learns how uncertain it should be</span>.</li>
   </ul>
   <div class="gloss">
     <span><b>τ</b> “tau” — a quantile’s probability level: q<sub>0.95</sub> is the value the flow stays below 95% of the time. <b>NLL</b> “negative log-likelihood” — minus the log density given to what happened; keep σ positive with a softplus.</span>
     <span><b>in the figure</b> — one hidden state read out three ways: a spike, three ticks, a bell. Only the last layer and the loss differ.</span>
   </div>
   <div class="foot"><span>Klotz et al. 2022, <i>Uncertainty estimation with deep learning for rainfall–runoff modeling</i>, HESS · derivations: Appendix A9</span></div>
-  <aside class="notes">2.7 min. Make it concrete for the lab: the change is one output layer and one loss function, nothing else in the LSTM moves. Derive the Gaussian NLL's σ behaviour in words, not on the board: for a fixed error, L is minimized at σ equal to the error's size, so the head learns the spread of the errors it makes — a heteroscedastic noise model for free. The warning for the lab: an unconstrained σ collapses toward zero on the training set and explodes the loss on the test set; softplus plus a small floor. Mixture heads in one breath: Klotz and colleagues compared several on CAMELS, and that line of work fed the Google flood model.</aside>
+  <aside class="notes">2.2 min. Make it concrete for the lab: the change is one output layer and one loss function, nothing else in the LSTM moves. Derive the Gaussian NLL's σ behaviour in words, not on the board: for a fixed error, L is minimized at σ equal to the error's size, so the head learns the spread of the errors it makes — a heteroscedastic noise model for free. The warning for the lab: an unconstrained σ collapses toward zero on the training set and explodes the loss on the test set; softplus plus a small floor. Mixture heads in one breath: Klotz and colleagues compared several on CAMELS, and that line of work fed the Google flood model.</aside>
 </section>
 
 <!-- 33 -->
+<section class="slide xl">
+  <p class="kicker">Part 4 · The Gaussian head’s loss</p>
+  <h2>One bell, two charges: the loss that teaches σ</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">The negative log-likelihood charges the miss in units of the claimed spread, then charges for claiming spread at all.</p>
+  <div class="cols" style="grid-template-columns:1.3fr 1fr;gap:2vw;align-items:center">
+    <div style="min-width:0">
+  <div class="card small" style="line-height:1.65">
+    <b>1</b> · the bell: &ensp;p(y | μ, σ) ∝ exp(−(y − μ)² ⁄ 2σ²) ⁄ σ<br>
+    <b>2</b> · surprise −log p: &ensp;<span class="accent"><b>L = (y − μ)² ⁄ 2σ² + log σ</b></span> + const<br>
+    <b>3</b> · miss e = |y − μ|: &ensp;dL ⁄ dσ = −e² ⁄ σ³ + 1 ⁄ σ = 0 ⇒ <b>σ* = e</b><br>
+    <b>4</b> · σ fixed ⇒ L ∝ (y − μ)²: &ensp;the point head, as a special case
+  </div>
+  <table class="small" style="width:100%;border-collapse:collapse;margin:.2vh 0 0"><tr><th style="padding:.3vh .6vw;text-align:left">L for one day</th><th style="padding:.3vh .6vw;text-align:center">narrow</th><th style="padding:.3vh .6vw;text-align:center">medium</th><th style="padding:.3vh .6vw;text-align:center">wide</th></tr><tr><td style="padding:.3vh .6vw;text-align:left">miss e = 2</td><td style="padding:.3vh .6vw;text-align:center">σ = 1: 2.00</td><td style="padding:.3vh .6vw;text-align:center;font-weight:700;color:var(--accent)">σ = 2: 1.19</td><td style="padding:.3vh .6vw;text-align:center">σ = 4: 1.51</td></tr><tr><td style="padding:.3vh .6vw;text-align:left">miss e = 0.5</td><td style="padding:.3vh .6vw;text-align:center;font-weight:700;color:var(--accent)">σ = 0.5: −0.19</td><td style="padding:.3vh .6vw;text-align:center">σ = 2: 0.72</td><td style="padding:.3vh .6vw;text-align:center">σ = 4: 1.39</td></tr></table>
+    </div>
+    <div class="figure" style="min-width:0">
+        <svg viewBox="0 0 480 300" role="img" aria-label="Three curves against the claimed spread sigma for a miss of size 2. The miss term, e squared over two sigma squared, falls steeply as sigma grows; the confidence term, log sigma, rises slowly; their sum, the loss, dips to a minimum exactly at sigma equal to the miss, 2, marked with a dot." style="width:min(100%,520px);display:block;margin:0 auto">
+        <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M60 30 V235 H460"/></g>
+        <path d="M60 212.2 H460" stroke="var(--hairline)" stroke-width="1"/><text x="52" y="216.2" text-anchor="end" font-size="11.5" fill="var(--muted)">0</text>
+        <path d="M60 166.7 H460" stroke="var(--hairline)" stroke-width="1"/><text x="52" y="170.7" text-anchor="end" font-size="11.5" fill="var(--muted)">1</text>
+        <path d="M60 121.1 H460" stroke="var(--hairline)" stroke-width="1"/><text x="52" y="125.1" text-anchor="end" font-size="11.5" fill="var(--muted)">2</text>
+        <path d="M60 75.6 H460" stroke="var(--hairline)" stroke-width="1"/><text x="52" y="79.6" text-anchor="end" font-size="11.5" fill="var(--muted)">3</text>
+        <path d="M60 30.0 H460" stroke="var(--hairline)" stroke-width="1"/><text x="52" y="34.0" text-anchor="end" font-size="11.5" fill="var(--muted)">4</text>
+        <text x="112" y="251" text-anchor="middle" font-size="11.5" fill="var(--muted)">1</text>
+        <text x="199" y="251" text-anchor="middle" font-size="11.5" fill="var(--muted)">2</text>
+        <text x="286" y="251" text-anchor="middle" font-size="11.5" fill="var(--muted)">3</text>
+        <text x="373" y="251" text-anchor="middle" font-size="11.5" fill="var(--muted)">4</text>
+        <text x="460" y="251" text-anchor="middle" font-size="11.5" fill="var(--muted)">5</text>
+        <text x="260" y="269" text-anchor="middle" font-size="12.5" fill="var(--muted)">σ, the spread the head claims</text>
+        <text x="22" y="132" text-anchor="middle" font-size="12.5" fill="var(--muted)" transform="rotate(-90 22 132)">loss L</text>
+        <polyline fill="none" stroke="var(--blue, #2c6fb0)" stroke-width="2.2" stroke-dasharray="6 4" points="86.7,29.8 90.0,48.1 93.3,63.7 96.7,77.3 100.0,89.0 103.3,99.3 106.7,108.4 110.0,116.4 113.3,123.5 116.7,129.8 120.0,135.5 123.3,140.7 126.7,145.3 130.0,149.5 133.3,153.3 136.7,156.8 140.0,159.9 143.3,162.8 146.7,165.5 150.0,168.0 153.3,170.2 156.7,172.4 160.0,174.3 163.3,176.1 166.7,177.8 170.0,179.4 173.3,180.8 176.7,182.2 180.0,183.5 183.3,184.7 186.7,185.8 190.0,186.9 193.3,187.8 196.7,188.8 200.0,189.7 203.3,190.5 206.7,191.3 210.0,192.0 213.3,192.8 216.7,193.4 220.0,194.1 223.3,194.7 226.7,195.2 230.0,195.8 233.3,196.3 236.7,196.8 240.0,197.3 243.3,197.7 246.7,198.2 250.0,198.6 253.3,199.0 256.7,199.4 260.0,199.7 263.3,200.1 266.7,200.4 270.0,200.7 273.3,201.0 276.7,201.3 280.0,201.6 283.3,201.9 286.7,202.1 290.0,202.4 293.3,202.6 296.7,202.9 300.0,203.1 303.3,203.3 306.7,203.5 310.0,203.7 313.3,203.9 316.7,204.1 320.0,204.3 323.3,204.5 326.7,204.6 330.0,204.8 333.3,205.0 336.7,205.1 340.0,205.3 343.3,205.4 346.7,205.6 350.0,205.7 353.3,205.8 356.7,206.0 360.0,206.1 363.3,206.2 366.7,206.3 370.0,206.4 373.3,206.5 376.7,206.6 380.0,206.7 383.3,206.9 386.7,206.9 390.0,207.0 393.3,207.1 396.7,207.2 400.0,207.3 403.3,207.4 406.7,207.5 410.0,207.6 413.3,207.6 416.7,207.7 420.0,207.8 423.3,207.9 426.7,207.9 430.0,208.0 433.3,208.1 436.7,208.2 440.0,208.2 443.3,208.3 446.7,208.3 450.0,208.4 453.3,208.5 456.7,208.5 460.0,208.6"/>
+        <polyline fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-dasharray="6 4" points="60.0,254.0 63.3,249.8 66.7,246.0 70.0,242.5 73.3,239.2 76.7,236.1 80.0,233.3 83.3,230.6 86.7,228.0 90.0,225.6 93.3,223.3 96.7,221.2 100.0,219.1 103.3,217.1 106.7,215.2 110.0,213.4 113.3,211.6 116.7,209.9 120.0,208.3 123.3,206.7 126.7,205.2 130.0,203.7 133.3,202.3 136.7,200.9 140.0,199.6 143.3,198.3 146.7,197.0 150.0,195.8 153.3,194.6 156.7,193.4 160.0,192.3 163.3,191.1 166.7,190.1 170.0,189.0 173.3,188.0 176.7,186.9 180.0,186.0 183.3,185.0 186.7,184.0 190.0,183.1 193.3,182.2 196.7,181.3 200.0,180.4 203.3,179.6 206.7,178.7 210.0,177.9 213.3,177.1 216.7,176.3 220.0,175.5 223.3,174.7 226.7,173.9 230.0,173.2 233.3,172.5 236.7,171.7 240.0,171.0 243.3,170.3 246.7,169.6 250.0,169.0 253.3,168.3 256.7,167.6 260.0,167.0 263.3,166.3 266.7,165.7 270.0,165.1 273.3,164.5 276.7,163.8 280.0,163.2 283.3,162.7 286.7,162.1 290.0,161.5 293.3,160.9 296.7,160.4 300.0,159.8 303.3,159.3 306.7,158.7 310.0,158.2 313.3,157.6 316.7,157.1 320.0,156.6 323.3,156.1 326.7,155.6 330.0,155.1 333.3,154.6 336.7,154.1 340.0,153.6 343.3,153.1 346.7,152.7 350.0,152.2 353.3,151.7 356.7,151.3 360.0,150.8 363.3,150.4 366.7,149.9 370.0,149.5 373.3,149.0 376.7,148.6 380.0,148.2 383.3,147.7 386.7,147.3 390.0,146.9 393.3,146.5 396.7,146.1 400.0,145.7 403.3,145.3 406.7,144.9 410.0,144.5 413.3,144.1 416.7,143.7 420.0,143.3 423.3,142.9 426.7,142.5 430.0,142.2 433.3,141.8 436.7,141.4 440.0,141.0 443.3,140.7 446.7,140.3 450.0,140.0 453.3,139.6 456.7,139.3 460.0,138.9"/>
+        <polyline fill="none" stroke="var(--accent)" stroke-width="3.0" points="83.3,26.6 86.7,45.6 90.0,61.5 93.3,74.9 96.7,86.2 100.0,95.9 103.3,104.2 106.7,111.4 110.0,117.5 113.3,122.9 116.7,127.5 120.0,131.6 123.3,135.2 126.7,138.3 130.0,141.0 133.3,143.4 136.7,145.5 140.0,147.3 143.3,148.9 146.7,150.3 150.0,151.5 153.3,152.6 156.7,153.5 160.0,154.3 163.3,155.0 166.7,155.6 170.0,156.1 173.3,156.6 176.7,156.9 180.0,157.2 183.3,157.4 186.7,157.6 190.0,157.7 193.3,157.8 196.7,157.9 200.0,157.9 203.3,157.8 206.7,157.8 210.0,157.7 213.3,157.6 216.7,157.5 220.0,157.3 223.3,157.2 226.7,157.0 230.0,156.8 233.3,156.6 236.7,156.3 240.0,156.1 243.3,155.8 246.7,155.6 250.0,155.3 253.3,155.0 256.7,154.8 260.0,154.5 263.3,154.2 266.7,153.9 270.0,153.6 273.3,153.3 276.7,153.0 280.0,152.6 283.3,152.3 286.7,152.0 290.0,151.7 293.3,151.3 296.7,151.0 300.0,150.7 303.3,150.4 306.7,150.0 310.0,149.7 313.3,149.3 316.7,149.0 320.0,148.7 323.3,148.3 326.7,148.0 330.0,147.7 333.3,147.3 336.7,147.0 340.0,146.7 343.3,146.3 346.7,146.0 350.0,145.7 353.3,145.3 356.7,145.0 360.0,144.7 363.3,144.3 366.7,144.0 370.0,143.7 373.3,143.3 376.7,143.0 380.0,142.7 383.3,142.4 386.7,142.0 390.0,141.7 393.3,141.4 396.7,141.1 400.0,140.8 403.3,140.4 406.7,140.1 410.0,139.8 413.3,139.5 416.7,139.2 420.0,138.9 423.3,138.6 426.7,138.3 430.0,138.0 433.3,137.7 436.7,137.3 440.0,137.0 443.3,136.7 446.7,136.4 450.0,136.1 453.3,135.8 456.7,135.6 460.0,135.3"/>
+        <circle cx="199.1" cy="157.9" r="6" fill="var(--accent)"/>
+        <path d="M199.1 165.9 V235" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="207" y="148" font-size="13" font-weight="700" fill="var(--accent)">minimum at σ = e = 2</text>
+        <text x="269" y="227" font-size="12.5" font-weight="700" fill="var(--blue, #2c6fb0)">e² ⁄ 2σ²: the miss in units of σ</text>
+        <text x="277" y="182" font-size="12.5" font-weight="700" fill="var(--muted)">log σ: the price of spread</text>
+        <text x="460" y="123" text-anchor="end" font-size="12.5" font-weight="700" fill="var(--accent)">L = the sum</text>
+        <text x="260" y="18" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">one day, one miss of size e = 2: what the head should claim for σ</text>
+        </svg>
+    </div>
+  </div>
+  <ul class="small">
+    <li>Two charges pull against each other: a miss costs (e ⁄ σ)² ⁄ 2 — dear when you claimed to be sure — and any spread costs log σ. They balance at <span class="accent"><b>σ = the size of your own misses</b></span>, so storm days learn a wide bell and quiet days a narrow one.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>collapse</b> — where μ fits the training data exactly, σ → 0 sends L → −∞: keep σ positive with a softplus and a floor. <b>skew</b> — a bell is symmetric, flow errors are not: log the flow, or use quantiles (next slide).</span>
+  </div>
+  <div class="foot"><span>Nix &amp; Weigend 1994 (a network that outputs its own variance) · Klotz et al. 2022 · derivations: Appendix A9</span></div>
+  <aside class="notes">1.5 min. Line 1 is what the head claims: a bell centred on μ with spread σ. Line 2 is how surprised the model is by what actually happened — minus the log of the density it gave to the truth — and that surprise is the loss. Then read the two terms in words: the first is the miss measured in units of the spread you claimed, so a miss of 2 with σ = 1 costs 2 and the same miss with σ = 2 costs 0.5; the second is log σ, the price of claiming spread, so you cannot make the first term vanish for free. Line 3: for a fixed miss the balance is σ equal to the miss, and over many days that means σ² learns the mean squared error for that kind of day — storm days wide, quiet days narrow, without anyone labelling uncertainty. Point at the figure: blue falls, grey rises, orange dips at σ = 2. Line 4 is the reassurance: with σ frozen you are back to MSE, so μ is exactly the forecast you had; σ is the new information. The pitfall for the lab: an unconstrained σ collapses to zero wherever μ fits the training data and blows up the test loss — softplus plus a floor. Skew: streamflow errors are not bell-shaped, so the lab logs the flow or uses the quantile head on the next slide.</aside>
+</section>
+<!-- 34 -->
 <section class="slide xl">
   <p class="kicker">Part 4 · The pinball loss</p>
   <h2>The pinball loss — and a band you can check</h2>
@@ -1266,10 +1318,10 @@ for k in range(1, K+1):  # K = 3 in lab
     <span><b>CRPS</b> “continuous ranked probability score” — twice the pinball loss integrated over τ; Week 11’s score.</span>
   </div>
   <div class="foot"><span>Koenker &amp; Bassett 1978 · Gneiting &amp; Raftery 2007 · computed for this lecture on USGS 01022500, fitted 1999–2008, scored 1989–1999</span></div>
-  <aside class="notes">3 min. Explain the asymmetry with the τ = 0.9 arm: being below the truth costs nine times more than being above it, so the optimal q sits where only 10% of outcomes exceed it. Then the measured band: 91.0% coverage for a nominal 90%, and a width that grows sixfold on high-flow days — nobody told the model that; the loss discovered it. Make coverage a rule: every probabilistic claim in Note 05 carries its measured coverage. The CRPS line is a foreshadow only; the identity "CRPS = twice the pinball loss integrated over τ" is in Appendix A9, and Week 11 builds ensemble verification on it — ECMWF's machine-learning ensemble is trained on a CRPS loss. Time check: ~0:50 — HARD CHECK before Part 5.</aside>
+  <aside class="notes">2.6 min. Explain the asymmetry with the τ = 0.9 arm: being below the truth costs nine times more than being above it, so the optimal q sits where only 10% of outcomes exceed it. Then the measured band: 91.0% coverage for a nominal 90%, and a width that grows sixfold on high-flow days — nobody told the model that; the loss discovered it. Make coverage a rule: every probabilistic claim in Note 05 carries its measured coverage. The CRPS line is a foreshadow only; the identity "CRPS = twice the pinball loss integrated over τ" is in Appendix A9, and Week 11 builds ensemble verification on it — ECMWF's machine-learning ensemble is trained on a CRPS loss. Time check: ~0:50 — HARD CHECK before Part 5.</aside>
 </section>
 
-<!-- 34 -->
+<!-- 35 -->
 <section class="slide xl">
   <p class="kicker">Part 4 · Watch at home</p>
   <h2>What an ensemble buys back — and why DeepMind went probabilistic</h2>
@@ -1310,7 +1362,7 @@ for k in range(1, K+1):  # K = 3 in lab
   <aside class="notes">Twenty seconds, no playback. The Met Office clip is four minutes and is the most economical way to get the ensemble intuition Week 11 assumes; the Klotz talk is for students who want to put a mixture head on the lab LSTM; the DeepMind conversation is the story of Part 3 turning into Part 4 at planet scale — GraphCast was deterministic, GenCast is an ensemble, and Battaglia says why. None of them is assigned.</aside>
 </section>
 
-<!-- 35 -->
+<!-- 36 -->
 <section class="slide xl">
   <p class="kicker">Part 5 · The contract</p>
   <h2>Write the forecast protocol down before the model runs</h2>
@@ -1340,7 +1392,7 @@ for k in range(1, K+1):  # K = 3 in lab
   <aside class="notes">2 min. Deliver it as a contract, the same shape as last week's five sentences, because it is graded the same way. The killer sentence is number 2: almost every "streamflow forecast" skill in a student report is a hindcast with observed rain, and it must say so — our 0.35 at 15 days is exactly such a number. Number 3 is the lesson of Part 1: a model that does not beat persistence at every lead has not earned its parameters. End of the live budget: ~0:52. Read the clock here: ≤ 0:52 → run the FLEX board exercise; past it → hand the board to the journal-club leader and go to break.</aside>
 </section>
 
-<!-- 36 -->
+<!-- 37 -->
 <section class="slide xl">
   <p class="kicker">Part 5 · FLEX ~5 min · teach or skip</p>
   <h2>Board exercise: five ways to make a forecast look better than it is</h2>
@@ -1371,7 +1423,7 @@ for k in range(1, K+1):  # K = 3 in lab
   <aside class="notes">5 min, FLEX — teach or skip per the clock rule on the previous slide. If skipped, the fallback is MANDATORY: say out loud "leader, the five-ways board is your journal-club opener." Target list, do not reveal upfront: (1) report the teacher-forced one-step score as "the forecast" — 0.90 against 0.35; (2) feed observed future rain and call it a forecast; (3) compare against the mean-flow benchmark (NSE 0) instead of persistence (0.48 median, 0.81 on our river); (4) report KGE without its benchmark — persistence already scores 0.74; (5) restart every run from the observed flow each day and report the average over lead times, which is dominated by day 1. Subtler ones if the room is quick: averaging NSE instead of taking the median (or dropping basins below zero), normalizing with statistics from all years, and choosing the lead time where the model looks best. Close by naming the pattern: none is fraud if it is disclosed before the result; all are a missing sentence.</aside>
 </section>
 
-<!-- 37 -->
+<!-- 38 -->
 <section class="slide xl">
   <p class="kicker">Journal club · 30 min · after break · 0 lecture minutes</p>
   <h2>Kratzert et al. 2019 — discussion questions</h2>
@@ -1385,7 +1437,7 @@ for k in range(1, K+1):  # K = 3 in lab
   <aside class="notes">Journal club: 30 min in groups of 3–4, drawn leader moderating, presenter reporting back; harvest in the last 5 min. DQ1: good answers say the regional training over 531 basins plays the role of pretraining (supervised, not self-supervised — a distinction Week 7 sharpens) and the static attributes are conditioning; better ones notice the EA-LSTM's input-gate vector is an embedding, and that per-basin fine-tuning is exactly what the paper argued you no longer need. DQ2: the board derivation is the crib — the one-step score reports σ² and hides a — and the three remedies map onto the recursion: multi-step loss and curriculum shape a, noise injection shows the model inputs off the data; Appendix A7 has the family. DQ3: the honest answer is "zero-shot with respect to the target basin, conditioned on its attributes" — which is only possible because the attributes are available everywhere; the optional Nature paper is the operational test. Close with a one-line bridge to lab.</aside>
 </section>
 
-<!-- 38 -->
+<!-- 39 -->
 <section class="slide xl">
   <p class="kicker">Lab briefing · 3 min · after journal club</p>
   <h2>Today’s lab: one LSTM, two training regimes, one curve each</h2>
@@ -1423,7 +1475,7 @@ for k in range(1, K+1):  # K = 3 in lab
   <aside class="notes">3 min. Set the verification contract explicitly — three checks: (1) before training, reproduce persistence for your basins at leads 1–15; (2) after training, look at hydrographs, not only the curve — the failure panel is where the learning is; (3) confirm that the free-running rollout never reads an observed flow after the issue day — the commonest agent-scaffold bug is a data loader that quietly keeps feeding the observed lag. Two more to warn about in one breath: normalization statistics computed over all years, and NSE pooled across basins instead of computed per basin. Dismiss to lab. (Slides after this one are the self-study appendix — tell them it exists, then stop here.)</aside>
 </section>
 
-<!-- 39 -->
+<!-- 40 -->
 <section class="slide section">
   <p class="kicker">Appendix · self-study</p>
   <h2>The derivations and the reference cards</h2>
@@ -1431,7 +1483,7 @@ for k in range(1, K+1):  # K = 3 in lab
   <aside class="notes">Not taught in class. These eleven cards hold everything that came off the live path: backpropagation through time in full, the LSTM, GRU and EA-LSTM equations with parameter counts, the NSE and KGE algebra with the benchmark identities, the CAMELS card with our baseline table, the error recursion for a vector state, the rollout-training family in code, the weather models' exact schedules, the quantile, likelihood and CRPS derivations, the ERA5 teaser card, and the assigned video. Say the appendix exists, say what is in it, and stop.</aside>
 </section>
 
-<!-- 40 -->
+<!-- 41 -->
 <section class="slide">
   <p class="kicker">Appendix A1 · Backpropagation through time</p>
   <h2>Why the product vanishes, in full</h2>
@@ -1450,7 +1502,7 @@ for k in range(1, K+1):  # K = 3 in lab
   <aside class="notes">Not taught in class. This is the derivation behind the 0.9¹⁵⁰ line of slide 6. Students preparing for the Book Check should be able to reproduce the step Jacobian and the norm bound from Goodfellow §10.7 without notes.</aside>
 </section>
 
-<!-- 41 -->
+<!-- 42 -->
 <section class="slide">
   <p class="kicker">Appendix A2 · LSTM and GRU</p>
   <h2>The full equations, and what they cost</h2>
@@ -1469,7 +1521,7 @@ for k in range(1, K+1):  # K = 3 in lab
   <aside class="notes">Not taught in class. The parameter count is worth doing once by hand for the lab model — it is small enough that the LSTM is never the memory problem; the activations of a 270-day window across a batch are.</aside>
 </section>
 
-<!-- 42 -->
+<!-- 43 -->
 <section class="slide">
   <p class="kicker">Appendix A3 · This week’s paper</p>
   <h2>The EA-LSTM and the NSE* loss, as the paper writes them</h2>
@@ -1489,7 +1541,7 @@ for k in range(1, K+1):  # K = 3 in lab
   <aside class="notes">Not taught in class; the crib for the paper and for the two quiz questions. Note the honest detail in the results line: the plain LSTM with static inputs is slightly better than the EA-LSTM — the EA-LSTM's point is interpretability (the embedding), not accuracy. Every LSTM-type model was trained with 8 random seeds and the 8 predictions averaged (§2.6) — the ensemble numbers are those averages.</aside>
 </section>
 
-<!-- 43 -->
+<!-- 44 -->
 <section class="slide">
   <p class="kicker">Appendix A4 · The metrics, derived</p>
   <h2>NSE, KGE and their benchmarks, in full</h2>
@@ -1508,7 +1560,7 @@ for k in range(1, K+1):  # K = 3 in lab
   <aside class="notes">Not taught in class. The persistence identity is the most useful line for the lab: once you know a basin's lag-1 autocorrelation you know its persistence NSE and KGE without running anything, and the two numbers on slide 9 stop looking like a paradox.</aside>
 </section>
 
-<!-- 44 -->
+<!-- 45 -->
 <section class="slide">
   <p class="kicker">Appendix A5 · Lab reference</p>
   <h2>CAMELS, and the do-nothing baselines you have to beat</h2>
@@ -1531,7 +1583,7 @@ for k in range(1, K+1):  # K = 3 in lab
   <aside class="notes">Not taught in class. Keep this card open in a second tab during lab: your basins' persistence numbers belong beside this table, and your model's curve has to clear the persistence row at every lead. The 90th-percentile column is the snowmelt and groundwater rivers — for them even 7-day persistence is hard to beat, which is worth knowing before you conclude your model is bad.</aside>
 </section>
 
-<!-- 45 -->
+<!-- 46 -->
 <section class="slide">
   <p class="kicker">Appendix A6 · The error recursion, in full</p>
   <h2>A vector state, a Jacobian, and chaos</h2>
@@ -1550,7 +1602,7 @@ for k in range(1, K+1):  # K = 3 in lab
   <aside class="notes">Not taught in class. The Kalman-filter line is the bridge back to Week 3: the forecast step of data assimilation is exactly this covariance recursion, which is why operational centres think about forecast error the way this card does.</aside>
 </section>
 
-<!-- 46 -->
+<!-- 47 -->
 <section class="slide">
   <p class="kicker">Appendix A7 · Rollout training</p>
   <h2>The rollout loss and its cheaper relatives, in code</h2>
@@ -1581,7 +1633,7 @@ loss = mse(model(y1, x[t + 2]), y[t + 2])</code></pre>
   <aside class="notes">Not taught in class; the crib for discussion question 2's "noise injection". The unifying sentence: every one of these shows the model, during training, inputs that look like its own mistakes — they differ only in how faithfully and at what cost.</aside>
 </section>
 
-<!-- 47 -->
+<!-- 48 -->
 <section class="slide">
   <p class="kicker">Appendix A8 · The weather models</p>
   <h2>How four weather models handle their own rollout</h2>
@@ -1596,7 +1648,7 @@ loss = mse(model(y1, x[t + 2]), y[t + 2])</code></pre>
   <aside class="notes">Not taught in class. Read it as four placements on the recursion of slide 16: GraphCast and FourCastNet shape a by training on the rollout; Pangu and FuXi reduce k or give each lead-time range its own model. None of them removes the blur — that needs Part 4's move to distributions.</aside>
 </section>
 
-<!-- 48 -->
+<!-- 49 -->
 <section class="slide">
   <p class="kicker">Appendix A9 · Probabilistic losses</p>
   <h2>Quantile, likelihood and CRPS, derived</h2>
@@ -1615,7 +1667,7 @@ loss = mse(model(y1, x[t + 2]), y[t + 2])</code></pre>
   <aside class="notes">Not taught in class. The pinball derivation is two lines and worth doing once: it is why a quantile head needs no distributional assumption at all. The CRPS identity with the pinball loss is the bridge to Week 11 — a set of quantile heads was already estimating the CRPS.</aside>
 </section>
 
-<!-- 49 -->
+<!-- 50 -->
 <section class="slide">
   <p class="kicker">Appendix A10 · Lab reference</p>
   <h2>The ERA5 next-step teaser, and the numbers to beat</h2>
@@ -1637,7 +1689,7 @@ loss = mse(model(y1, x[t + 2]), y[t + 2])</code></pre>
   <aside class="notes">Not taught in class. The table is for when students roll the teaser out to 3 and 5 days — at 6 hours persistence is far better than these numbers. The honest expectation to set: a 20-minute model will beat persistence at 6 hours and lose most of that edge by day 3, which is Part 2 again on a planet-sized grid.</aside>
 </section>
 
-<!-- 50 -->
+<!-- 51 -->
 <section class="slide">
   <p class="kicker">Appendix A11 · Watch at home</p>
   <h2>This week’s assigned video — the recurrent network, from the source course</h2>
@@ -1665,7 +1717,7 @@ loss = mse(model(y1, x[t + 2]), y[t + 2])</code></pre>
   <aside class="notes">Not taught in class. It is the assigned video and it pairs with Goodfellow chapter 10 — the video for intuition and the famous interpretable-cell figures, the chapter for the derivations. Three quiz questions next week come from it. It opens in a new tab because the Stanford channel disables embedded playback.</aside>
 </section>
 
-<!-- 51 -->
+<!-- 52 -->
 <section class="slide">
   <p class="kicker">Appendix A12 · More to watch</p>
   <h2>The video shelf — verified, embeddable, optional</h2>
