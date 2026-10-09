@@ -607,14 +607,14 @@
      "topic_ko": "제1원리에서 출발하는 attention: QKV, multi-head, masking, 복잡도 · pre-norm vs post-norm · residual stream 직관"
     },
     {
-     "min": 15,
-     "topic": "Positional encodings as the geoscience battleground: sincos, learned, RoPE (one slide); then the ones that matter here — SatMAE's temporal+spectral encodings, Prithvi-EO-2.0's lat/lon+date embeddings, Scale-MAE's GSD encoding, ClimaX's variable tokenization.",
-     "topic_ko": "지구과학의 격전지가 된 positional encoding: sincos, learned, RoPE(한 슬라이드) · 그리고 여기서 중요한 것들 — SatMAE의 temporal+spectral encoding, Prithvi-EO-2.0의 lat/lon+date embedding, Scale-MAE의 GSD encoding, ClimaX의 variable tokenization"
-    },
-    {
      "min": 10,
      "topic": "ViT anatomy: patchify as tokenization; patch size vs sequence length vs resolution trade-offs (why weather models at 0.25° need tricks).",
      "topic_ko": "ViT 해부: tokenization으로서의 patchify · patch size vs sequence length vs 해상도 trade-off(0.25° 기상 모델에 트릭이 필요한 이유)"
+    },
+    {
+     "min": 15,
+     "topic": "Positional encodings as the geoscience battleground: sincos, learned, RoPE (one slide); then the ones that matter here — SatMAE's temporal+spectral encodings, Prithvi-EO-2.0's lat/lon+date embeddings, Scale-MAE's GSD encoding, ClimaX's variable tokenization.",
+     "topic_ko": "지구과학의 격전지가 된 positional encoding: sincos, learned, RoPE(한 슬라이드) · 그리고 여기서 중요한 것들 — SatMAE의 temporal+spectral encoding, Prithvi-EO-2.0의 lat/lon+date embedding, Scale-MAE의 GSD encoding, ClimaX의 variable tokenization"
     },
     {
      "min": 10,
@@ -638,8 +638,8 @@
      "pytest",
      "W&B"
     ],
-    "deliverable": "Note 06 + mini_vit.py with passing test suite committed; accuracy vs the W1 CNN. This file is the backbone of the W7 MAE and, for many students, the capstone.",
-    "deliverable_ko": "Note 06 + 테스트 스위트 통과 상태로 commit된 mini_vit.py · W1 CNN 대비 정확도 · 이 파일이 W7 MAE의 backbone이 되고, 많은 학생에게는 capstone의 backbone",
+    "deliverable": "Note 06 + mini_vit.py with passing test suite committed; accuracy vs a CNN of similar size trained on the same split. This file is the backbone of the W7 MAE and, for many students, the capstone.",
+    "deliverable_ko": "Note 06 + 테스트 스위트 통과 상태로 commit된 mini_vit.py · 같은 split에서 학습한 비슷한 크기의 CNN 대비 정확도 · 이 파일이 W7 MAE의 backbone이 되고, 많은 학생에게는 capstone의 backbone",
     "homework": null
    },
    "reading": {
@@ -678,7 +678,8 @@
     "positional/metadata encodings",
     "patchify/tokenization",
     "test-driven agent verification"
-   ]
+   ],
+   "slides": true
   },
   {
    "n": 7,

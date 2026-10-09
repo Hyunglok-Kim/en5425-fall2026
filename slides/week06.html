@@ -1,0 +1,1374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Week 6 · Attention and the Transformer, Built From Scratch</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="deck.css">
+<script src="deck.js" defer></script>
+<script src="ink.js" defer></script>
+<script src="poll.js" defer></script>
+</head>
+<body>
+
+<!-- 1 ─ Title -->
+
+<!-- 1 -->
+<section class="slide title xl" style="background:linear-gradient(rgba(10,12,18,.40),rgba(10,12,18,.78)),url('img/w6-title-eurosat.jpg') center/cover no-repeat">
+  <p class="kicker" style="color:#e8a07a">EN5425 / EV4240 · Week 6 · Fall 2026</p>
+  <h1 style="color:#f4efe5;text-shadow:0 2px 24px rgba(0,0,0,.6)">Attention and the Transformer, Built From Scratch</h1>
+  <p class="big" style="color:#e8e2d8;text-shadow:0 1px 16px rgba(0,0,0,.6)">Forty Sentinel-2 chips, thirteen bands each, from the dataset you train on today. Every model this course meets from here on — Prithvi, ClimaX, Pangu, Aurora — is made of one operation. Today you write it, test it, and read the choices that make it work on the Earth.</p>
+  <div class="foot" style="color:#cfc8bc"><span>Deep Learning Applications in Environmental Big Data · Prof. Hyunglok Kim · GIST</span><span>Image: four EuroSAT-MS chips per class, true colour from bands 4-3-2, read for this lecture straight out of the 2 GB Zenodo archive; the orange grid is one 4 × 4 token window of a Swin layer. Helber et al. 2019, CC BY 4.0.</span></div>
+  <aside class="notes">Open: five weeks of models that were given their structure — convolutions that look at neighbours, recurrences that look at yesterday. Today the model decides what to look at, with weights you can read off. Say what the picture is: forty real chips from the lab's dataset, ten classes, and one Swin window drawn over four of them. Timing: 54 min without the FLEX block (5-min quiz + 49 min core), 58 with it — run the FLEX only if the clock at slide 36 allows. Cut order if short: slide 27 (Prithvi), slide 19 (the ViT paper), the second table on slide 7. The full attention shapes, the four tests in code with the torch.nn.MultiheadAttention weight mapping, the positional-encoding algebra, the EO encodings card, the Swin card, the three weather backbones, the ViT card, mixed precision and FlashAttention, and the EuroSAT-MS card with the band-order trap all live in the APPENDIX after the lab slide — point students there. In class: the mechanism on real chips, one by-hand table, numbers we measured ourselves, and the four tests they will write before the agent writes code. Three Watch-at-home slides are pointers, not playback — twenty seconds each.</aside>
+</section>
+
+<!-- 1b ─ Reading quiz -->
+
+<!-- 2 -->
+<section class="slide xl">
+  <p class="kicker">0:00 · Reading + video quiz</p>
+  <h2>Quiz first — 5 minutes, closed book</h2>
+  <ul>
+    <li><span class="accent"><b>3 questions on last week’s assigned video</b></span> — <i>Stanford CS231N Lecture 7: Recurrent Neural Networks</i> (Stanford Online, 72 min).</li>
+    <li><b>2 questions on this week’s paper</b> — Liu et al. 2021, <i>Swin Transformer</i>.</li>
+    <li>No AI, no notes. Swap with your neighbor to grade. Pass = 3 of 5 — the video alone can carry you; <span class="accent">the paper alone cannot</span>.</li>
+    <li>Best 8 of 10 count, 0.75% each; an optional handwritten book summary forgives one wrong answer.</li>
+    <li class="muted">Next Monday, 19 October: no lecture — the 60-min closed-book Book Check (Goodfellow Ch. 5, 6, 9, 10 + d2l Ch. 11, this week’s chapter; counts as two quiz slots). Week 7 is 26 October.</li>
+  </ul>
+  <aside class="notes">Distribute at 0:00 sharp, collect at 0:05. Say the composition out loud before handing it out: three of the five are on the Stanford RNN lecture assigned last week, two on the Swin paper — the same norm as every week. The calendar line matters: next Monday is the Book Check, not a lecture, and it includes the attention chapter of d2l — so today's reading is examined twice, once in the Week 7 quiz on the 3Blue1Brown video and once in the Book Check. Note 06 and the video summary are due Sunday 18 October, 13:00. The next time we meet for a lecture is 26 October.</aside>
+</section>
+
+<!-- 3 -->
+<section class="slide xl">
+  <p class="kicker">Week 6 · 55 min</p>
+  <h2>Today in five blocks — and one chain of cause and effect</h2>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .8vh">
+    <svg viewBox="0 0 900 118" role="img" aria-label="Seven boxes joined left to right by arrows: a token must look at the others; attention is a weighted average whose weights come from content; every token sees every token, N squared; so cut the image into few tokens, patches; but position is lost, so put it back in the Earth's units; and attend inside windows; then make it fit, bf16 and FlashAttention. Brackets under the boxes mark the five lecture parts." style="width:min(98%,1150px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="4" y="22" width="112" height="50" rx="8" stroke="var(--accent)" stroke-width="1.8"/><rect x="134" y="22" width="112" height="50" rx="8" stroke="var(--accent)" stroke-width="1.8"/>
+        <rect x="264" y="22" width="112" height="50" rx="8"/><rect x="394" y="22" width="112" height="50" rx="8"/>
+        <rect x="524" y="22" width="112" height="50" rx="8"/><rect x="654" y="22" width="112" height="50" rx="8"/><rect x="784" y="22" width="112" height="50" rx="8"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M116 47 H134 M246 47 H264 M376 47 H394 M506 47 H524 M636 47 H654 M766 47 H784"/></g>
+      <g fill="currentColor" stroke="none"><path d="M128 43 L134 47 L128 51 Z"/><path d="M258 43 L264 47 L258 51 Z"/><path d="M388 43 L394 47 L388 51 Z"/><path d="M518 43 L524 47 L518 51 Z"/><path d="M648 43 L654 47 L648 51 Z"/><path d="M778 43 L784 47 L778 51 Z"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle">
+        <text x="60" y="43" fill="var(--accent)" font-weight="700">a token must</text><text x="60" y="57" fill="var(--accent)" font-weight="700">look at others</text>
+        <text x="190" y="43" fill="var(--accent)" font-weight="700">average, weights</text><text x="190" y="57" fill="var(--accent)" font-weight="700">from content</text>
+        <text x="320" y="43">everyone sees</text><text x="320" y="57">everyone: N²</text>
+        <text x="450" y="43">so: few tokens</text><text x="450" y="57">(patches)</text>
+        <text x="580" y="43">position is lost:</text><text x="580" y="57">put it back</text>
+        <text x="710" y="43">attend inside</text><text x="710" y="57">windows</text>
+        <text x="840" y="43">then make it fit:</text><text x="840" y="57">bf16, Flash</text>
+      </g>
+      <g fill="none" stroke="var(--muted)" stroke-width="1"><path d="M4 84 V90 H376 V84 M394 84 V90 H506 V84 M524 84 V90 H636 V84 M654 84 V90 H766 V84 M784 84 V90 H896 V84"/></g>
+      <g font-size="11" fill="var(--muted)" text-anchor="middle">
+        <text x="190" y="106">Part 1 · attention (17 min · the headline)</text><text x="450" y="106">Part 2 · tokens (8)</text><text x="580" y="106">Part 3 · position (11)</text><text x="710" y="106">Part 4 · windows (8)</text><text x="840" y="106">Part 5 · fit (3)</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li><b>1 · Attention</b> — a weighted average on a real chip, by hand, then Q·K·V, heads, masks, cost, the block — and the four tests. <b>2 · Tokens</b> — patchify, patch size, the 0.25° problem, the ViT paper.</li>
+    <li><b>3 · Position</b> — sin-cos, learned, RoPE; then SatMAE, Scale-MAE, ClimaX, Prithvi. <b>4 · Windows</b> — Swin, shifted windows, the three weather backbones, this week’s paper. <b>5 · Fit</b> — bf16 and FlashAttention. Then the contract (+ 4 min FLEX).</li>
+    <li class="muted"><b>Journal club</b> (30 · after break) — the three Swin questions. Lab briefing after.</li>
+  </ul>
+  <div class="foot"><span>Skills: attention from scratch · test-driven implementation with an agent · tokenization and positional encoding choices · windowed attention · mixed precision</span><span>Every derivation and reference card is in the Appendix after the lab slide</span></div>
+  <aside class="notes">One minute. Read the chain left to right, once, out loud — it is the whole lecture: a token must look at the others; attention is a weighted average whose weights the content decides; that lets everyone see everyone, which costs N²; so we cut the image into few tokens and attend inside windows; but a weighted average has no idea where anything is, so position goes back in — and on the Earth, position means band, date, latitude and metres per pixel; then two lines make it fit in a lab hour. The through-line to say once: every concept slide in Part 1 ends in a test — the lab's four tests — and every number on today's slides that is not from a paper was computed for this lecture on the lab's own chips.</aside>
+</section>
+
+<!-- 4 -->
+<section class="slide section xl">
+  <p class="kicker">Part 1 · 17 min · the headline</p>
+  <h2>Attention: a Weighted Average You Can Read</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Attention running on a real chip with no learned weights; the same thing by hand with four tokens; then what Q, K, V, heads and masks add; what it costs; the block it lives in. <b>By the end:</b> write attention in twelve lines and name the four tests that prove it.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>Week 5’s gradient had to survive 150 multiplications. Attention connects any two tokens in one hop — that is why it replaced recurrence, and why every model from here on is built from it.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Today’s lab (<code>mini_vit.py</code>) · Week 7’s masked autoencoder, built on it · Prithvi, ClimaX, Pangu, Aurora · the language model that writes your code.</p></div>
+  </div>
+  <aside class="notes">17 minutes. Read the three cards in thirty seconds. Goal: not "what is a Transformer" — the assigned 3Blue1Brown video does that beautifully in 26 minutes. The goal is that they can write the operation and know what each piece is for: the average, the weights, the three projections, the heads, the mask, the cost, the residual block — and that each piece is a test they will write today before the agent writes code. Concrete first: two slides on a real chip and a four-token table before any symbol appears.</aside>
+</section>
+
+<!-- 5 -->
+<section class="slide xl">
+  <p class="kicker">Part 1 · Why attention</p>
+  <h2>Last week’s gradient crossed 150 gates; attention gets there in one hop</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Week 5’s gradient survived 150 multiplications; attention’s path from April to December is one hop.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 200" role="img" aria-label="Top: a chain of recurrent cells from December to April, each step multiplying the gradient by a gate factor f, one hundred and fifty times. Bottom: the same tokens in a row, with a single arrow drawn directly from April back to December labelled one weight, read directly." style="width:min(96%,1100px)">
+      <text x="10" y="18" font-size="13" fill="currentColor" font-weight="700">recurrence (Week 5): the signal is handed along, one step at a time</text>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="70" y="32" width="54" height="28" rx="6"/><rect x="160" y="32" width="54" height="28" rx="6"/><rect x="250" y="32" width="54" height="28" rx="6"/><rect x="430" y="32" width="54" height="28" rx="6"/><rect x="520" y="32" width="54" height="28" rx="6"/><rect x="610" y="32" width="54" height="28" rx="6"/>
+      </g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="97" y="51">Dec 1</text><text x="187" y="51">Dec 2</text><text x="277" y="51">Dec 3</text><text x="457" y="51">Apr 28</text><text x="547" y="51">Apr 29</text><text x="637" y="51">Apr 30</text></g>
+      <g fill="none" stroke="var(--accent)" stroke-width="1.6"><path d="M124 46 H160 M214 46 H250 M304 46 H340 M394 46 H430 M484 46 H520 M574 46 H610"/></g>
+      <g fill="var(--accent)" stroke="none"><path d="M154 42 L160 46 L154 50 Z"/><path d="M244 42 L250 46 L244 50 Z"/><path d="M424 42 L430 46 L424 50 Z"/><path d="M514 42 L520 46 L514 50 Z"/><path d="M604 42 L610 46 L604 50 Z"/></g>
+      <text x="367" y="50" text-anchor="middle" font-size="13" fill="var(--muted)">· · ·</text>
+      <g font-size="11.5" fill="var(--accent)" text-anchor="middle"><text x="142" y="78">× f</text><text x="232" y="78">× f</text><text x="412" y="78">× f</text><text x="502" y="78">× f</text><text x="592" y="78">× f</text></g>
+      <text x="700" y="51" font-size="12.5" fill="currentColor">150 factors: f<tspan font-size="9.5" dy="-5">150</tspan><tspan dy="5"> — 0.9</tspan><tspan font-size="9.5" dy="-5">150</tspan><tspan dy="5"> ≈ 10</tspan><tspan font-size="9.5" dy="-5">−7</tspan></text>
+      <text x="10" y="106" font-size="13" fill="var(--accent)" font-weight="700">attention (today): every token can read every other token directly</text>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="70" y="150" width="54" height="28" rx="6"/><rect x="160" y="150" width="54" height="28" rx="6"/><rect x="250" y="150" width="54" height="28" rx="6"/><rect x="430" y="150" width="54" height="28" rx="6"/><rect x="520" y="150" width="54" height="28" rx="6"/><rect x="610" y="150" width="54" height="28" rx="6" stroke="var(--accent)" stroke-width="2"/>
+      </g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="97" y="169">Dec 1</text><text x="187" y="169">Dec 2</text><text x="277" y="169">Dec 3</text><text x="457" y="169">Apr 28</text><text x="547" y="169">Apr 29</text><text x="637" y="169" fill="var(--accent)" font-weight="700">Apr 30</text></g>
+      <text x="367" y="168" text-anchor="middle" font-size="13" fill="var(--muted)">· · ·</text>
+      <path d="M625 150 C 560 118, 170 118, 103 148" fill="none" stroke="var(--accent)" stroke-width="2.4"/>
+      <path d="M98 140 L103 149 L110 142 Z" fill="var(--accent)"/>
+      <path d="M625 150 C 600 132, 490 132, 462 148 M625 150 C 612 140, 564 140, 552 148" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="364" y="146" text-anchor="middle" font-size="12" fill="var(--accent)" font-weight="700">one weight, read directly — path length 1</text>
+      <text x="700" y="169" font-size="12.5" fill="currentColor">any token to any token</text>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Along the recurrence the gradient is a <b>product</b> of 150 factors; along attention it is <b>one weight</b>. <span class="accent">The price: every token must score every other token — Part 1 ends with what that costs.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>token</b> — one vector in the sequence: a day of the river, a word, or (today) a patch of an image. <b>in the figure</b> — the dashed arrows are the same token reading other days; attention reads them all at once.</span>
+  </div>
+  <div class="foot"><span>Callback: Week 5 slides 6–7 (the product, and the LSTM’s gated lane) · Vaswani et al. 2017, <i>Attention Is All You Need</i>, §4: “path length between any two positions”</span></div>
+  <aside class="notes">1 min. Point at the top row and say the Week 5 number: 0.9 to the 150th is ten to the minus seven — December cannot reach April through a plain recurrence, and the LSTM's answer was a lane with a gate the network controls. Then the bottom row: attention does not hand the signal along at all; April reads December directly, with a weight. Vaswani's own argument for the architecture was exactly this — the maximum path length between two positions drops from N to 1. Then say the price out loud so they expect slide 11: to read everything directly, every token must score every other token.</aside>
+</section>
+
+<!-- 6 -->
+<section class="slide xl">
+  <p class="kicker">Part 1 · The mechanism, on a real chip</p>
+  <h2>Attention with no learned weights at all</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Attention is a weighted average of the other tokens; the weights come from similarity — no learning yet.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w6-attention-chip.png" data-zoom alt="Left: a EuroSAT River chip with an 8 by 8 grid; a water patch is outlined in orange and the greenest patch in blue. Middle: the attention weights of the water patch over all 64 patches, spread along the river. Right: the attention weights of the greenest patch, concentrated on a few vegetation patches." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Each patch is a token: its mean 13-band spectrum. Weights = softmax(q·k/√d) over the 64 patches. <span class="accent">The water patch spreads its weight along the river (max 0.08); the greenest patch concentrates (0.21, top-3 = 49%).</span></li>
+    <li>Output for a token = <b>Σ<sub>j</sub> w<sub>ij</sub> v<sub>j</sub></b>: the spectrum of the places it attended to. Learning adds only the three maps that decide <i>what counts as similar</i>.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>softmax</b> — turns N scores into N positive weights that sum to 1: w<sub>j</sub> = e<sup>s<sub>j</sub></sup> / Σ e<sup>s<sub>k</sub></sup>. <b>q, k, v</b> — here all three are the token itself (z-scored per band).</span>
+  </div>
+  <div class="foot"><span>EuroSAT-MS River_2, 8 px patches, d = 13 · computed for this lecture (tools/week06_figs) · uniform weight would be 1/64 = 0.016</span></div>
+  <aside class="notes">2.5 min. This is the slide to spend on. Say the recipe while pointing: take the water patch; dot it with every other patch; softmax the 64 numbers; the picture in the middle IS those 64 numbers. Water attends to water — the river lights up — and the forest patch attends to forest. Nothing was trained; the weights fall out of similarity. Then the output: the water token becomes the weighted average of what it attended to. The sentence to leave on the board: attention is a weighted average, and learning only changes what counts as similar. Next slide does the same with four tokens and two numbers each so they can check the arithmetic.</aside>
+</section>
+
+<!-- 7 -->
+<section class="slide xl">
+  <p class="kicker">Part 1 · By hand</p>
+  <h2>Four tokens, two numbers each: attention by hand</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Four tokens, two numbers each — the whole mechanism on one board; the projections set how sharp it is.</p>
+  <div class="cols" style="grid-template-columns:1fr 1.3fr;gap:2vw;flex:0 0 auto;align-items:start">
+    <div style="min-width:0">
+      <table style="border-collapse:collapse;width:100%">
+        <tr style="color:var(--ink-2)"><th style="text-align:left;padding:.3vh .4vw">token x<sub>i</sub></th><th style="padding:.3vh .4vw">NDVI</th><th style="padding:.3vh .4vw">NDWI</th></tr>
+        <tr><td style="padding:.3vh .4vw"><b style="color:var(--accent)">water</b> (SeaLake_1)</td><td style="text-align:center">−0.29</td><td style="text-align:center">0.53</td></tr>
+        <tr><td style="padding:.3vh .4vw"><b style="color:#2e7d32">forest</b> (Forest_1)</td><td style="text-align:center">0.73</td><td style="text-align:center">−0.60</td></tr>
+        <tr><td style="padding:.3vh .4vw"><b>crop</b> (AnnualCrop_1)</td><td style="text-align:center">0.20</td><td style="text-align:center">−0.25</td></tr>
+        <tr><td style="padding:.3vh .4vw"><b>built</b> (Industrial_1)</td><td style="text-align:center">0.31</td><td style="text-align:center">−0.31</td></tr>
+      </table>
+      <p class="small" style="margin:.8vh 0 0">s<sub>ij</sub> = q<sub>i</sub>·k<sub>j</sub> / √2 &nbsp;·&nbsp; w<sub>i</sub> = softmax(s<sub>i</sub>) &nbsp;·&nbsp; out<sub>i</sub> = Σ<sub>j</sub> w<sub>ij</sub> v<sub>j</sub></p>
+    </div>
+    <div style="min-width:0">
+      <table style="border-collapse:collapse;width:100%">
+        <tr style="color:var(--ink-2)"><th style="text-align:left;padding:.3vh .4vw">weights w<sub>ij</sub> with q = k = 3·x</th><th>water</th><th>forest</th><th>crop</th><th>built</th><th style="padding-left:.8vw">out (NDVI, NDWI)</th></tr>
+        <tr><td style="padding:.3vh .4vw;color:var(--accent)"><b>water</b> looks at …</td><td style="text-align:center;color:var(--accent)"><b>0.95</b></td><td style="text-align:center">0.00</td><td style="text-align:center">0.03</td><td style="text-align:center">0.02</td><td style="text-align:center;padding-left:.8vw">(−0.27, 0.49)</td></tr>
+        <tr><td style="padding:.3vh .4vw;color:#2e7d32"><b>forest</b> looks at …</td><td style="text-align:center">0.00</td><td style="text-align:center;color:#2e7d32"><b>0.93</b></td><td style="text-align:center">0.02</td><td style="text-align:center">0.04</td><td style="text-align:center;padding-left:.8vw">(0.70, −0.58)</td></tr>
+        <tr><td style="padding:.3vh .4vw"><b>crop</b> looks at …</td><td style="text-align:center">0.03</td><td style="text-align:center;color:#2e7d32"><b>0.59</b></td><td style="text-align:center">0.17</td><td style="text-align:center">0.22</td><td style="text-align:center;padding-left:.8vw">(0.52, −0.45)</td></tr>
+        <tr><td style="padding:.3vh .4vw"><b>built</b> looks at …</td><td style="text-align:center">0.01</td><td style="text-align:center;color:#2e7d32"><b>0.70</b></td><td style="text-align:center">0.12</td><td style="text-align:center">0.17</td><td style="text-align:center;padding-left:.8vw">(0.58, −0.50)</td></tr>
+      </table>
+    </div>
+  </div>
+  <ul class="small">
+    <li>Water keeps 95% on itself; crop and built lean on forest because their NDVI points the same way. <span class="accent">Rows sum to 1: every output is a mix of the inputs — nothing is invented.</span> With q = k = x the rows are 0.35 / 0.19 / 0.24 / 0.23, flat: <b>scaling by 3 scales every score by 9</b>.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>NDVI</b> — (NIR − red)/(NIR + red), greenness; <b>NDWI</b> — (green − NIR)/(green + NIR), wetness; from the chips’ mean bands B8, B4, B3. Numbers: tools/week06_figs/out/byhand.json.</span>
+  </div>
+  <aside class="notes">2 min, board. Do the water row by hand: water·water = (0.29² + 0.53²) × 9 / √2 = 2.32, water·forest = −3.38; exponentiate, normalize — 0.95 on itself. Then point at the crop row: crop has only two numbers, and in those two numbers it is more like forest than like anything else, so it borrows from forest. Two lessons to say: every row sums to one, so the output is always a mixture of the inputs — nothing is invented; and the sharpness is not a property of the data but of the projection — multiply the features by 3 and the scores by 9 and a flat average becomes a lookup. That is what W_Q and W_K are for, next slide. FLEX cut: skip the grey line.</aside>
+</section>
+
+<!-- 8 -->
+<section class="slide xl">
+  <p class="kicker">Part 1 · Query, key, value</p>
+  <h2>Three linear maps: a question, a label, and a payload</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Three linear maps turn one vector into a question, a label and a payload; √d keeps the softmax trainable.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 196" role="img" aria-label="Left: one token vector x enters three small boxes W Q, W K and W V and leaves as q, k and v. Middle: the query is dotted with every key, divided by the square root of d, and passed through a softmax to give weights. Right: the weights multiply the values and are summed into the output. The same three boxes are applied to every token." style="width:min(96%,1100px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2"><rect x="10" y="78" width="60" height="34" rx="7"/></g>
+      <text x="40" y="100" text-anchor="middle" font-size="14" fill="currentColor" font-weight="700">x<tspan font-size="10" dy="3">i</tspan></text>
+      <g fill="var(--wash)" stroke="var(--accent)" stroke-width="1.6"><rect x="120" y="22" width="64" height="32" rx="6"/><rect x="120" y="78" width="64" height="32" rx="6"/><rect x="120" y="134" width="64" height="32" rx="6"/></g>
+      <g font-size="13" fill="currentColor" text-anchor="middle"><text x="152" y="43">W<tspan font-size="10" dy="3">Q</tspan></text><text x="152" y="99">W<tspan font-size="10" dy="3">K</tspan></text><text x="152" y="155">W<tspan font-size="10" dy="3">V</tspan></text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M70 95 H95 V38 H120 M95 95 H120 M95 95 V150 H120"/></g>
+      <g font-size="13" fill="var(--accent)" font-weight="700"><text x="196" y="43">q<tspan font-size="10" dy="3">i</tspan></text><text x="196" y="99">k<tspan font-size="10" dy="3">i</tspan></text><text x="196" y="155">v<tspan font-size="10" dy="3">i</tspan></text></g>
+      <g font-size="11.5" fill="var(--muted)"><text x="222" y="58">what I am looking for</text><text x="222" y="114">what I offer to be found by</text><text x="222" y="170">what I hand over if chosen</text></g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2"><rect x="420" y="60" width="150" height="70" rx="9"/></g>
+      <text x="495" y="84" text-anchor="middle" font-size="13" fill="currentColor">s<tspan font-size="10" dy="3">ij</tspan><tspan dy="-3"> = q</tspan><tspan font-size="10" dy="3">i</tspan><tspan dy="-3">·k</tspan><tspan font-size="10" dy="3">j</tspan><tspan dy="-3"> / √d</tspan></text>
+      <text x="495" y="108" text-anchor="middle" font-size="13" fill="currentColor">w<tspan font-size="10" dy="3">ij</tspan><tspan dy="-3"> = softmax</tspan><tspan font-size="10" dy="3">j</tspan><tspan dy="-3">(s</tspan><tspan font-size="10" dy="3">ij</tspan><tspan dy="-3">)</tspan></text>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M212 38 H350 V95 H420 M212 99 H420"/></g>
+      <text x="380" y="144" font-size="11.5" fill="var(--muted)">… against every k<tspan font-size="9" dy="2">j</tspan><tspan dy="-2">, j = 1 … N</tspan></text>
+      <g fill="var(--wash)" stroke="var(--accent)" stroke-width="1.6"><rect x="640" y="60" width="150" height="70" rx="9"/></g>
+      <text x="715" y="90" text-anchor="middle" font-size="13.5" fill="var(--accent)" font-weight="700">out<tspan font-size="10" dy="3">i</tspan><tspan dy="-3"> = Σ</tspan><tspan font-size="10" dy="3">j</tspan><tspan dy="-3"> w</tspan><tspan font-size="10" dy="3">ij</tspan><tspan dy="-3"> v</tspan><tspan font-size="10" dy="3">j</tspan></text>
+      <text x="715" y="112" text-anchor="middle" font-size="11.5" fill="var(--muted)">a mixture of the values</text>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M570 95 H640 M212 155 H610 V110 H640"/></g>
+      <g fill="currentColor" stroke="none"><path d="M634 91 L640 95 L634 99 Z"/><path d="M414 91 L420 95 L414 99 Z"/></g>
+      <text x="450" y="193" text-anchor="middle" font-size="12.5" fill="currentColor">the same W<tspan font-size="9.5" dy="3">Q</tspan><tspan dy="-3">, W</tspan><tspan font-size="9.5" dy="3">K</tspan><tspan dy="-3">, W</tspan><tspan font-size="9.5" dy="3">V</tspan><tspan dy="-3"> for every token — 3 × d × d numbers, whatever N is</tspan></text>
+      <text x="820" y="193" text-anchor="middle" font-size="12.5" fill="var(--accent)" font-weight="700">√d: q·k has variance d</text>
+    </svg>
+  </div>
+  <p class="big" style="font-family:var(--serif);margin:.2vh 0;max-width:none">Attention(Q, K, V) = softmax(QK<sup>⊤</sup>/√d) V &nbsp;&nbsp;·&nbsp;&nbsp; Q = XW<sub>Q</sub>, K = XW<sub>K</sub>, V = XW<sub>V</sub></p>
+  <ul class="small">
+    <li>With unit-variance entries a dot product of d terms has variance d; divide by √d or the softmax saturates and its gradient dies. <span class="accent">Test 1 (shapes): X is N × d in, N × d out, for any N.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>Q, K, V</b> — the N × d matrices of all queries, keys, values. <b>softmax</b> row-wise: each query’s weights sum to 1. <b>d</b> — the width; in the original paper 512, per head 64.</span>
+  </div>
+  <div class="foot"><span>Vaswani et al. 2017, §3.2.1 (eq. 1 and footnote 4 on √d) · the chip and the table were this equation with W = I and W = 3I</span></div>
+  <aside class="notes">2 min. Name the three maps in plain words and point back at the table: on the last slide W_Q = W_K = 3I was the "projection" that sharpened the average; a learned W_Q and W_K can also rotate — make crop look for water if that is what the loss wants. The √d: footnote 4 of the paper — a dot product of d unit-variance numbers has variance d, so without the division the scores of a 64-wide head are ±8 and the softmax is a one-hot with no gradient. Then the first test: shapes. It sounds trivial; it is the test that catches the agent transposing K, or forgetting that the batch is on dim 0.</aside>
+</section>
+
+<!-- 9 -->
+<section class="slide xl">
+  <p class="kicker">Part 1 · Multi-head</p>
+  <h2>Heads: the same cost, split into h questions</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Heads are the same cost split h ways: h different questions asked of the same tokens at once.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 176" role="img" aria-label="A d equals 64 token vector is split into four segments of 16. Each segment goes through its own attention with its own Q K V maps, producing four 16-wide outputs, which are concatenated back to 64 and multiplied by an output map W O." style="width:min(94%,1050px)">
+      <g stroke="currentColor" stroke-width="1.2"><rect x="20" y="70" width="40" height="30" fill="var(--accent)" opacity=".85"/><rect x="60" y="70" width="40" height="30" fill="#2c6fb0" opacity=".85"/><rect x="100" y="70" width="40" height="30" fill="#5a9a3b" opacity=".85"/><rect x="140" y="70" width="40" height="30" fill="#8a877d" opacity=".85"/></g>
+      <text x="100" y="60" text-anchor="middle" font-size="12.5" fill="currentColor">x: d = 64 → 4 heads × 16</text>
+      <text x="100" y="172" text-anchor="middle" font-size="11.5" fill="var(--muted)">(the split is of the projected q, k, v)</text>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="300" y="14" width="190" height="30" rx="6" stroke="var(--accent)"/><rect x="300" y="56" width="190" height="30" rx="6" stroke="#2c6fb0"/><rect x="300" y="98" width="190" height="30" rx="6" stroke="#5a9a3b"/><rect x="300" y="140" width="190" height="30" rx="6" stroke="#8a877d"/>
+      </g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle">
+        <text x="395" y="34">head 1 · softmax(q<tspan font-size="9.5" dy="3">1</tspan><tspan dy="-3">k</tspan><tspan font-size="9.5" dy="3">1</tspan><tspan dy="-3">ᵀ/√16) v</tspan><tspan font-size="9.5" dy="3">1</tspan></text>
+        <text x="395" y="76">head 2 · own W<tspan font-size="9.5" dy="3">Q</tspan><tspan dy="-3">, W</tspan><tspan font-size="9.5" dy="3">K</tspan><tspan dy="-3">, W</tspan><tspan font-size="9.5" dy="3">V</tspan></text>
+        <text x="395" y="118">head 3 · “is it water?”</text><text x="395" y="160">head 4 · “is it next to a road?”</text>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M40 70 V29 H300 M80 70 V71 H300 M120 100 V113 H300 M160 100 V155 H300"/><path d="M490 29 H560 V84 M490 71 H560 M490 113 H560 M490 155 H560 V86"/></g>
+      <g stroke="currentColor" stroke-width="1.2"><rect x="580" y="70" width="40" height="30" fill="var(--accent)" opacity=".85"/><rect x="620" y="70" width="40" height="30" fill="#2c6fb0" opacity=".85"/><rect x="660" y="70" width="40" height="30" fill="#5a9a3b" opacity=".85"/><rect x="700" y="70" width="40" height="30" fill="#8a877d" opacity=".85"/></g>
+      <path d="M560 85 H580" stroke="currentColor" stroke-width="1.1"/>
+      <text x="660" y="60" text-anchor="middle" font-size="12.5" fill="currentColor">concat → 64</text>
+      <g fill="var(--wash)" stroke="var(--accent)" stroke-width="1.6"><rect x="770" y="70" width="60" height="30" rx="6"/></g>
+      <text x="800" y="90" text-anchor="middle" font-size="13" fill="currentColor">W<tspan font-size="10" dy="3">O</tspan></text>
+      <path d="M740 85 H770 M830 85 H870" stroke="currentColor" stroke-width="1.2"/><path d="M864 81 L870 85 L864 89 Z" fill="currentColor"/>
+      <text x="800" y="118" text-anchor="middle" font-size="11.5" fill="var(--muted)">mixes the heads</text>
+      <text x="700" y="172" text-anchor="middle" font-size="12.5" fill="currentColor">parameters: 4d² (Q, K, V, O) — same as one head of width d</text>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>One head of width 64 or four of width 16: same parameters, same FLOPs, four weight maps instead of one. <span class="accent">Test 4 (equivalence): with copied weights, your module matches <code>torch.nn.MultiheadAttention</code> to 10<sup>−5</sup>.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>h</b> — number of heads; <b>d<sub>head</sub></b> = d / h (64 in the 2017 paper: 512 / 8). <b>W<sub>O</sub></b> — the output projection that recombines the heads.</span>
+  </div>
+  <div class="foot"><span>Vaswani et al. 2017, §3.2.2 · the weight packing of torch’s module (one 3d × d <code>in_proj_weight</code>) is the usual reason the equivalence test fails: Appendix A2</span></div>
+  <aside class="notes">1.5 min. The one idea: heads are free. Splitting a 64-wide attention into four 16-wide ones costs the same parameters and the same FLOPs, and buys four different similarity maps at once — one head can ask "is it water" while another asks "is it next to a road". The equivalence test is the lab's fourth test and the one most worth writing: torch's module packs W_Q, W_K, W_V into one 3d × d matrix, so copying weights across is where students (and agents) go wrong — Appendix A2 has the mapping. Do not go into head interpretability; say the 3Blue1Brown video shows a head and move on.</aside>
+</section>
+
+<!-- 10 -->
+<section class="slide xl">
+  <p class="kicker">Part 1 · Masks</p>
+  <h2>A mask is −∞ added to a score</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">A mask adds −∞ to a score before softmax — one line hides the future, the padding or the far away.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0">
+    <svg viewBox="0 0 900 190" role="img" aria-label="Three six-by-six grids of attention scores, rows are queries and columns keys. Causal: only the lower triangle is allowed, the future is masked. Padding: the last two key columns are masked. Window: only three-by-three blocks on the diagonal are allowed, the far away is masked. Under them, the single line of code that applies any of them." style="width:min(94%,1050px)">
+      <g font-size="13" fill="currentColor" font-weight="700" text-anchor="middle"><text x="130" y="16">causal — no peeking at the future</text><text x="450" y="16">padding — ignore the empty slots</text><text x="770" y="16">window — only the neighbours (Part 4)</text></g>
+      <g stroke="var(--hairline)" stroke-width="1">
+        <g fill="var(--accent)" opacity=".8">
+          <rect x="70" y="28" width="20" height="20"/><rect x="70" y="48" width="20" height="20"/><rect x="90" y="48" width="20" height="20"/><rect x="70" y="68" width="20" height="20"/><rect x="90" y="68" width="20" height="20"/><rect x="110" y="68" width="20" height="20"/><rect x="70" y="88" width="20" height="20"/><rect x="90" y="88" width="20" height="20"/><rect x="110" y="88" width="20" height="20"/><rect x="130" y="88" width="20" height="20"/><rect x="70" y="108" width="20" height="20"/><rect x="90" y="108" width="20" height="20"/><rect x="110" y="108" width="20" height="20"/><rect x="130" y="108" width="20" height="20"/><rect x="150" y="108" width="20" height="20"/><rect x="70" y="128" width="20" height="20"/><rect x="90" y="128" width="20" height="20"/><rect x="110" y="128" width="20" height="20"/><rect x="130" y="128" width="20" height="20"/><rect x="150" y="128" width="20" height="20"/><rect x="170" y="128" width="20" height="20"/>
+        </g>
+        <g fill="var(--wash)"><rect x="90" y="28" width="100" height="20"/><rect x="110" y="48" width="80" height="20"/><rect x="130" y="68" width="60" height="20"/><rect x="150" y="88" width="40" height="20"/><rect x="170" y="108" width="20" height="20"/></g>
+        <g fill="var(--accent)" opacity=".8"><rect x="390" y="28" width="80" height="120"/></g>
+        <g fill="var(--wash)"><rect x="470" y="28" width="40" height="120"/></g>
+        <g fill="var(--accent)" opacity=".8"><rect x="710" y="28" width="60" height="60"/><rect x="770" y="88" width="60" height="60"/></g>
+        <g fill="var(--wash)"><rect x="770" y="28" width="60" height="60"/><rect x="710" y="88" width="60" height="60"/></g>
+      </g>
+      <g fill="none" stroke="var(--hairline)" stroke-width="1"><path d="M70 28 H190 V148 H70 Z M70 48 H190 M70 68 H190 M70 88 H190 M70 108 H190 M70 128 H190 M90 28 V148 M110 28 V148 M130 28 V148 M150 28 V148 M170 28 V148"/><path d="M390 28 H510 V148 H390 Z M390 48 H510 M390 68 H510 M390 88 H510 M390 108 H510 M390 128 H510 M410 28 V148 M430 28 V148 M450 28 V148 M470 28 V148 M490 28 V148"/><path d="M710 28 H830 V148 H710 Z M710 48 H830 M710 68 H830 M710 88 H830 M710 108 H830 M710 128 H830 M730 28 V148 M750 28 V148 M770 28 V148 M790 28 V148 M810 28 V148"/></g>
+      <g font-size="11.5" fill="var(--muted)" text-anchor="middle"><text x="130" y="164">keys: t = 1 … 6 → · rows: queries</text><text x="450" y="164">last two keys are padding</text><text x="770" y="164">two windows of 3</text></g>
+      <g font-size="11.5" fill="var(--muted)"><text x="22" y="40">t=1</text><text x="22" y="140">t=6</text></g>
+      <text x="450" y="185" text-anchor="middle" font-size="13" fill="currentColor" font-family="var(--mono)">scores = scores.masked_fill(mask == 0, float("-inf"))   # orange = allowed, grey = −∞ → weight exactly 0</text>
+    </svg>
+  </div>
+  <div class="quickpoll" data-pid="w06-s10-w0" data-answer="no" data-quiet="1">
+    <div class="qp-row">
+      <span class="qp-q"><b>QUICK Q</b>&ensp;Today’s ViT classifies one chip. Does it need the causal mask at all? <span class="muted">(the lab still makes you write a causal-mask test)</span></span>
+      <span class="qp-ui"></span>
+    </div>
+    <div class="qp-explain" hidden>
+      <p><b>NO — a chip has no future.</b> Every patch may look at every patch; the mask is all ones. The test exists because the same <code>Attention</code> class will run on time series next (Presto-style pixel series, the Week 11 weather emulator), and a mask bug is silent: the model trains, scores well, and has been reading the answer.</p>
+      <p class="muted">Test 2: change the inputs after step t; the output at t must not move.</p>
+    </div>
+  </div>
+  <div class="gloss">
+    <span><b>causal</b> — key j allowed only if j ≤ i. <b>padding</b> — sequences of unequal length filled with empty tokens that must get weight 0. <b>e<sup>−∞</sup> = 0</b> — why −∞ and not a small number.</span>
+  </div>
+  <aside class="notes">1.5 min including the poll. One line of code, three uses: say them while pointing at the grids. Then run the QUICK Q — most rooms split. The answer is no, and the reason the test is still required is the real lesson: a mask bug does not crash, it leaks the future, and the model looks better than it is — the Week 5 contract again, in code. Describe test 2 in one sentence: feed two sequences that agree up to step t and differ after; the outputs up to t must be identical. The window grid on the right is Part 4 — plant it now.</aside>
+</section>
+
+<!-- 11 -->
+<section class="slide xl">
+  <p class="kicker">Part 1 · The price</p>
+  <h2>Every token scores every other token: N²</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Every token scoring every other costs N²: measured here, ×16 tokens cost the MLP ×16 and attention ×256.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w6-attention-cost.png" data-zoom alt="Left: time per layer against sequence length on log axes, measured on this machine's CPU with numpy: attention rises as N squared from 0.04 milliseconds at 64 tokens to 1.6 seconds at 16,384, the MLP rises linearly; vertical marks show EuroSAT with patch 8, ViT-B/16, ClimaX and a 0.25 degree globe with patch 4. Right: memory of the N by N score matrix in bf16 against N, crossing the T4's 16 gigabytes near 90,000 tokens; at 65,160 tokens it is 8.5 gigabytes for one head of one layer." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Scores are an N × N matrix: 64 tokens → 0.04 ms; 16,384 → 1.6 s on this CPU. <span class="accent">The lab’s 64 tokens are free; one 0.25° level of the globe (65,160 tokens) needs 8.5 GB of scores per head, per layer.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>N</b> — tokens per sequence; <b>d</b> — width. Attention ∝ N²d, the MLP ∝ Nd²: the crossover is at N ≈ d. <b>in the figure</b> — dashed lines are the N² and N trends extended, not measured.</span>
+  </div>
+  <div class="foot"><span>Measured for this lecture: numpy float32, d = 64, one head, Apple M2 Ultra CPU (tools/week06_figs/measure_attention.py) · Part 2 and Part 4 are the two escapes</span></div>
+  <aside class="notes">2 min. Two numbers to say: 64 tokens, 0.04 ms — the lab's chip is free; 16,384 tokens, 1.6 seconds for one layer on this CPU — and a 0.25-degree level of the globe is four times that again. Point at the right panel: the score matrix alone for one head of one layer is 8.5 GB in bf16 — the T4 you get on Colab has 16 — and Pangu has 16 layers with 6 to 12 heads. So the rest of today is two answers to this slide: Part 2 — make fewer tokens; Part 4 — do not let every token see every token. Part 5 is the third, smaller answer: never write the matrix to memory at all.</aside>
+</section>
+
+<!-- 12 -->
+<section class="slide xl">
+  <p class="kicker">Part 1 · The block</p>
+  <h2>The residual stream: Week 5’s lane, without the gates</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">A block is attention and an MLP that read from and add to a running sum — Week 5’s lane, without gates.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 220" role="img" aria-label="A thick orange horizontal lane, the residual stream, runs from the input tokens on the left to the output on the right. Two branches hang below it: first a layer norm then multi-head attention, second a layer norm then an MLP; each branch reads from the lane and adds its result back at a plus sign. A grey annotation shows where the 2017 post-norm placed the layer norm instead: on the lane itself, after each addition." style="width:min(92%,1050px)">
+      <path d="M20 60 H870" stroke="var(--accent)" stroke-width="3.5" fill="none"/><path d="M862 55 L871 60 L862 65 Z" fill="var(--accent)"/>
+      <text x="28" y="48" font-size="13" fill="var(--accent)" font-weight="700">x — the residual stream (N × d)</text>
+      <text x="866" y="48" text-anchor="end" font-size="13" fill="var(--accent)" font-weight="700">x + attn + mlp</text>
+      <g fill="var(--page)" stroke="var(--accent)" stroke-width="1.8"><circle cx="400" cy="60" r="12"/><circle cx="760" cy="60" r="12"/></g>
+      <g font-size="15" fill="var(--accent)" font-weight="700" text-anchor="middle"><text x="400" y="65">+</text><text x="760" y="65">+</text></g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2"><rect x="150" y="118" width="60" height="30" rx="6"/><rect x="250" y="108" width="110" height="50" rx="8" stroke="var(--accent)" stroke-width="1.6"/><rect x="520" y="118" width="60" height="30" rx="6"/><rect x="620" y="108" width="100" height="50" rx="8"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="180" y="137">LN</text><text x="305" y="128">multi-head</text><text x="305" y="144">attention</text><text x="550" y="137">LN</text><text x="670" y="128">MLP</text><text x="670" y="144">d → 4d → d</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M120 60 V133 H150 M210 133 H250 M360 133 H400 V72 M490 60 V133 H520 M580 133 H620 M720 133 H760 V72"/></g>
+      <g fill="currentColor" stroke="none"><path d="M396 78 L400 72 L404 78 Z"/><path d="M756 78 L760 72 L764 78 Z"/></g>
+      <g font-size="11.5" fill="var(--muted)"><text x="124" y="100">read</text><text x="372" y="100">write (add)</text><text x="494" y="100">read</text><text x="732" y="100">write (add)</text></g>
+      <text x="305" y="178" text-anchor="middle" font-size="12" fill="currentColor">moves information <tspan font-weight="700">between</tspan> tokens</text>
+      <text x="670" y="178" text-anchor="middle" font-size="12" fill="currentColor">transforms each token <tspan font-weight="700">on its own</tspan></text>
+      <g font-size="11.5" fill="var(--muted)" text-anchor="middle"><text x="450" y="198">pre-norm (drawn): LN inside each branch — gradients well-behaved at init, no warm-up needed (Xiong et al. 2020)</text><text x="450" y="214">post-norm (2017): LN on the lane after each + — needs learning-rate warm-up</text></g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Along the lane the derivative is <b>1 + (branch)</b> — the identity path the LSTM had to buy with a gate comes free. <span class="accent">Test 3 (gradient flow): after one backward pass, the first block’s weights have a non-zero gradient.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>LN</b> “layer norm” — standardize each token’s d numbers (then scale, shift). <b>residual stream</b> — the running sum every layer reads from and writes to (Elhage et al. 2021). <b>MLP</b> — two linear layers with a nonlinearity, per token.</span>
+  </div>
+  <div class="foot"><span>Vaswani et al. 2017 §3.1 (post-norm) · Xiong et al. 2020, <i>On Layer Normalization in the Transformer Architecture</i>, ICML · ViT, GPT-2 and today’s lab use pre-norm</span></div>
+  <aside class="notes">2 min. Draw the lane on the board exactly as you drew the LSTM's orange lane two weeks ago, then the two branches hanging from it. Say the Elhage framing: attention moves information between tokens, the MLP transforms each token in place, and both only read from the stream and add to it — the stream itself is never multiplied by a weight. That is why the gradient reaches block 1: the derivative along the lane is 1 plus something, which is what the LSTM needed a forget gate to approximate. Pre- vs post-norm in one sentence: the 2017 paper normalized the lane after each addition and needed learning-rate warm-up; putting the norm inside the branch makes the gradients well-behaved at initialization — Xiong 2020 — and everything since ViT does it that way. Test 3 is a two-line test and it catches a detached tensor or a missing residual.</aside>
+</section>
+
+<!-- 13 -->
+<section class="slide xl">
+  <p class="kicker">Part 1 · The four tests</p>
+  <h2>Each slide you just saw is a test you write before the agent writes code</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Write these before the agent writes code: it makes them pass, you make them hard to pass by accident.</p>
+  <table style="border-collapse:collapse;width:100%;margin:0 0 1vh">
+    <tr style="color:var(--ink-2)"><th style="text-align:left;padding:.4vh .5vw">test</th><th style="text-align:left;padding:.4vh .5vw">what it asserts</th><th style="text-align:left;padding:.4vh .5vw">what it catches</th><th style="text-align:left;padding:.4vh .5vw">from</th></tr>
+    <tr><td style="padding:.4vh .5vw"><b>1 · shapes</b></td><td style="padding:.4vh .5vw">(B, N, d) in → (B, N, d) out, for N = 1, 64, 65; heads concat back to d</td><td style="padding:.4vh .5vw">a transposed K, batch on the wrong dim, d not divisible by h</td><td style="padding:.4vh .5vw">slide 8</td></tr>
+    <tr><td style="padding:.4vh .5vw"><b>2 · causal mask</b></td><td style="padding:.4vh .5vw">change inputs after step t → outputs ≤ t do not change (to 10<sup>−6</sup>)</td><td style="padding:.4vh .5vw">a mask on the wrong triangle; a mask applied after the softmax</td><td style="padding:.4vh .5vw">slide 10</td></tr>
+    <tr><td style="padding:.4vh .5vw"><b>3 · gradient flow</b></td><td style="padding:.4vh .5vw">one backward pass → first block’s W<sub>Q</sub> has grad ≠ 0; loss drops over 20 steps</td><td style="padding:.4vh .5vw">a detached tensor, a missing residual, a frozen patch embedding</td><td style="padding:.4vh .5vw">slide 12</td></tr>
+    <tr><td style="padding:.4vh .5vw"><b>4 · equivalence</b></td><td style="padding:.4vh .5vw">copied weights → matches <code>nn.MultiheadAttention</code> to 10<sup>−5</sup></td><td style="padding:.4vh .5vw">a missing √d, softmax over the wrong axis, heads split before projection</td><td style="padding:.4vh .5vw">slide 9</td></tr>
+  </table>
+  <ul class="small">
+    <li>Then break it on purpose: flip the mask’s triangle and <b>watch test 2 fail</b>. <span class="accent">A test that cannot fail has verified nothing — that is the lab’s first deliverable, before any training.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>B, N, d</b> — batch, tokens, width. <b>pytest</b> — the test runner; the agent is told the test file, not the answers.</span>
+  </div>
+  <div class="foot"><span>The four tests in code, with the <code>in_proj_weight</code> mapping for test 4: Appendix A2 · lab briefing after the journal club</span></div>
+  <aside class="notes">1.5 min. Read the table down the first column only — the rest is reference. The point is the order of events: the tests exist before the implementation, so the agent is solving a specification, not guessing what you meant; and the lab's first deliverable is the tests failing on a deliberately broken model, because a test that cannot fail has verified nothing. Say which one students skip and regret: test 4, because it needs the weight mapping — Appendix A2 has it. Transition to the watch slide, twenty seconds, then Part 2.</aside>
+</section>
+
+<!-- 14 -->
+<section class="slide xl">
+  <p class="kicker">Part 1 · Watch at home</p>
+  <h2>The mechanism animated, the Transformer explained, and GPT written live</h2>
+  <div style="display:flex;gap:1.2vw;margin-top:1.4vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=wjZofJX0v4M" class="yt" data-id="wjZofJX0v4M" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w6-3b1b-transformers.jpg" alt="3Blue1Brown video on Transformers, the technology behind large language models" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">3Blue1Brown · <i>Transformers, the tech behind LLMs</i> (Ch. 5) · 27 min — <span class="accent">click to play here</span> · the chapter before the assigned one: embeddings to unembedding.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=zxQyTK8quyY" class="yt" data-id="zxQyTK8quyY" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w6-statquest-transformer.jpg" alt="StatQuest video explaining Transformer neural networks step by step" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">StatQuest · <i>Transformer Neural Networks, Clearly Explained</i> · 36 min — Q, K, V with numbers, if slide 7 went by too fast.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=kCc8FmEb1nY" class="yt" data-id="kCc8FmEb1nY" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w6-karpathy-gpt.jpg" alt="Andrej Karpathy's lecture building GPT from scratch in code" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Andrej Karpathy · <i>Let’s build GPT: from scratch, in code</i> · 116 min — the lab’s attention class, typed live; watch 0:00–1:10 for self-attention.</p>
+    </a>
+  </div>
+  <p class="small" style="margin:1.2vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Part 2.</b> Everything so far worked on “tokens”. For a 13-band chip, a token is a patch — and how big you cut the patch sets N, and N² sets the bill.</p>
+  <div class="gloss">
+    <span><b>assigned video</b> — 3Blue1Brown Ch. 6, <i>Attention in transformers, step-by-step</i> (26 min), quizzed in Week 7; it is in the Appendix and embeddable.</span>
+  </div>
+  <div class="foot"><span>Optional, not assigned — the assigned video is 3Blue1Brown Chapter 6 (Appendix A10); its summary is due with Note 06, Sunday 18 October</span></div>
+  <aside class="notes">Twenty seconds, no playback. Say what each is for: Chapter 5 if the word "embedding" is still fuzzy; StatQuest if the arithmetic on slide 7 needs a second pass; Karpathy if they want to see the exact class the lab asks for typed from nothing — the first seventy minutes are enough. Keep the Note 06 requirement unambiguous: the assigned video is Chapter 6, not Chapter 5.</aside>
+</section>
+
+<!-- 15 -->
+<section class="slide section xl">
+  <p class="kicker">Part 2 · 8 min</p>
+  <h2>Tokens: Patchify, Patch Size, and the 0.25° Problem</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>A real chip cut into 64 tokens; the patch-size dial and what it does to N²; one level of the globe at 0.25°, and the three ways weather models escape it; what the ViT paper actually found. <b>By the end:</b> compute N and the score-matrix memory for any grid you are handed.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>N² is the bill from slide 11, and tokenization is where you pay it or avoid it. Every Earth model’s first design decision is how big a token is.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>ViT-B/16: 196 tokens · the lab: 64 tokens × 3 band groups · ClimaX: 512 · Pangu: 8 × 181 × 360 · Week 7’s masked autoencoder masks 75% of exactly these tokens.</p></div>
+  </div>
+  <aside class="notes">8 minutes. Read the cards in twenty seconds. The part has one idea — a token is a patch and the patch size sets N — and one consequence they must be able to compute: the memory of the score matrix for a grid they are handed. The 0.25-degree slide is the hinge of the whole second half: Part 3 (position) and Part 4 (windows) are both answers to it.</aside>
+</section>
+
+<!-- 16 -->
+<section class="slide xl">
+  <p class="kicker">Part 2 · Patchify</p>
+  <h2>An image becomes a sentence of 64 words</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Patchify is tokenization: cut the chip into patches, flatten, project — 64 words of 832 numbers each.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w6-patchify.png" data-zoom alt="Left: a EuroSAT Highway chip with an 8 by 8 grid, each patch numbered 0 to 63. Top right: the 64 patches laid out in raster order as a one-dimensional strip. Bottom right: the token matrix, 64 rows by 832 columns, with the 13 band segments labelled." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Token = one patch flattened (13 × 8 × 8 = 832) × a linear map (832 → d). The ViT paper: 224 px / 16 = 196 tokens. <span class="accent">The lab: 64 px / 8 = 64 tokens — then one patch embedding per <i>band group</i>, so 3 × 64 tokens that know which bands they came from (Part 3).</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>patchify</b> — reshape (13, 64, 64) → (64, 832); in code one <code>Conv2d(13, d, kernel=8, stride=8)</code> does the cut and the projection at once. <b>raster order</b> — row by row, like reading.</span>
+  </div>
+  <div class="foot"><span>EuroSAT-MS Highway_1 · Dosovitskiy et al. 2020, §3.1 · the band order in the file (B8A last) is a trap: Appendix A9</span></div>
+  <aside class="notes">2 min. Say it as an analogy and then as code: a tokenizer cuts a sentence into words and looks each up in a table; patchify cuts the chip into 8-pixel squares and multiplies each by one matrix — and the two together are a single strided convolution, which is how every implementation writes it. Point at the strip: raster order is arbitrary, and the model will not know it is an image until Part 3 puts the position back. Plant the lab's twist now — one patch embedding per band group — and say why it will make sense after SatMAE.</aside>
+</section>
+
+<!-- 17 -->
+<section class="slide xl">
+  <p class="kicker">Part 2 · The dial</p>
+  <h2>Patch size sets the sequence length — and the bill</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Halve the patch and attention costs 16× more; double it and the road dissolves inside its token.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w6-patchsize.png" data-zoom alt="The same Highway chip tokenized three ways: patch 4 pixels giving 256 tokens, patch 8 giving 64, patch 16 giving 16. The orange token containing the same road pixel grows from a sliver of road to a square that mixes road, field and trees. Under each: N squared and the numbers per token." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>N = (H/p)², so the score matrix grows as p<sup>−4</sup>: patch 4 costs 16× patch 8. <span class="accent">But at patch 16 the road is one-fifth of its token’s 3,328 numbers — the linear map must find it in the mix.</span> Resolution of the <i>input</i> is what sets p, not taste.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>p</b> — patch side in pixels; <b>H</b> — image side. <b>GSD</b> “ground sample distance” — metres per pixel (10 m here), so patch 8 = 80 m. <b>in the figure</b> — the orange square is the same road pixel’s token each time.</span>
+  </div>
+  <div class="foot"><span>EuroSAT-MS Highway_1 · ViT-B/16 vs ViT-B/32 is this dial (Dosovitskiy 2020, Table 5) · Aurora moves p from 4 to 10 when it fine-tunes at 0.1° — the same dial, for the same reason</span></div>
+  <aside class="notes">2 min. Point at the three orange squares: same pixel, three tokens. Left: the token is almost purely road, and there are 256 of them — 65,536 scores per head. Right: the token is a 160-metre square that is one-fifth road, and the linear map has to find the road inside 3,328 numbers; there are 16 of them. The lesson: patch size is set by what the input resolves and what the task needs, and the N² bill follows. Then the one-line callback that sets up the next slide: Aurora changes its patch from 4 to 10 when it moves from 0.25 to 0.1 degrees — exactly to hold N.</aside>
+</section>
+
+<!-- 18 -->
+<section class="slide xl">
+  <p class="kicker">Part 2 · The 0.25° problem</p>
+  <h2>One level of the globe is 65,160 tokens — and three ways out</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">At 0.25° one level of the globe is 65,160 tokens after patching; its attention matrix is 8.5 GB per head.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 214" role="img" aria-label="Left column, three boxes top to bottom: one pressure level at 0.25 degrees is 721 by 1,440, about one million grid points; patch 4 by 4 gives 181 by 360, 65,160 tokens, times 8 levels in Pangu; the score matrix is 65,160 squared times 2 bytes, 8.5 gigabytes per head per layer. Right column, three doors fed by the last box: attend inside windows, used by Pangu, FuXi and Aurora; coarsen the grid to 5.625 degrees, 512 tokens, used by ClimaX; compress into a latent, as Aurora's Perceiver does." style="width:min(96%,1100px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="10" y="14" width="400" height="48" rx="8"/><rect x="10" y="80" width="400" height="48" rx="8"/><rect x="10" y="146" width="400" height="54" rx="8" stroke="var(--accent)" stroke-width="1.8"/>
+      </g>
+      <g font-size="13" fill="currentColor" text-anchor="middle">
+        <text x="210" y="34">one pressure level at 0.25°: 721 × 1,440 =</text><text x="210" y="52" font-weight="700">1,038,240 grid points</text>
+        <text x="210" y="100">patch 4 × 4 → 181 × 360 = <tspan font-weight="700">65,160 tokens</tspan></text><text x="210" y="118" fill="var(--muted)" font-size="11.5">Pangu: × 8 (7 upper-air + 1 surface) = 521,280 tokens, C = 192</text>
+        <text x="210" y="168" fill="var(--accent)" font-weight="700">scores: 65,160² × 2 bytes = 8.5 GB</text><text x="210" y="188" fill="var(--accent)">per head, per layer — a T4 has 16 GB in total</text>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M210 62 V80 M210 128 V146"/></g>
+      <g fill="currentColor" stroke="none"><path d="M206 74 L210 80 L214 74 Z"/><path d="M206 140 L210 146 L214 140 Z"/></g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="500" y="14" width="390" height="54" rx="8" stroke="var(--accent)" stroke-width="1.8"/><rect x="500" y="80" width="390" height="54" rx="8"/><rect x="500" y="146" width="390" height="54" rx="8"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M410 173 H455 V41 H500 M455 107 H500 M455 173 H500"/></g>
+      <g fill="currentColor" stroke="none"><path d="M494 37 L500 41 L494 45 Z"/><path d="M494 103 L500 107 L494 111 Z"/><path d="M494 169 L500 173 L494 177 Z"/></g>
+      <g font-size="13" fill="currentColor">
+        <text x="512" y="34" font-weight="700" fill="var(--accent)">1 · attend inside windows</text><text x="512" y="52">2 × 6 × 12 tokens per window: Pangu, FuXi, Aurora — Part 4</text>
+        <text x="512" y="100" font-weight="700">2 · coarsen the grid</text><text x="512" y="118">5.625°: 32 × 64, patch 2 → 512 tokens: ClimaX</text>
+        <text x="512" y="166" font-weight="700">3 · compress into a latent</text><text x="512" y="184">13 levels → 3 (Aurora’s Perceiver) · a mesh (GraphCast)</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Every machine-learning weather model is an answer to this slide. <span class="accent">The honest version of “global attention” at 0.25° does not exist; what exists is windows, coarser grids and latents.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>0.25°</b> — ERA5’s grid, ≈ 28 km at the equator. <b>Perceiver</b> — a small set of learned latent tokens that cross-attend to the big input (Aurora: 13 pressure levels → 3 latent levels). <b>mesh</b> — GraphCast’s coarser icosahedral graph (not attention).</span>
+  </div>
+  <div class="foot"><span>Bi et al. 2023 (Pangu-Weather), Nature 619 · Nguyen et al. 2023 (ClimaX), ICML · Bodnar et al. 2025 (Aurora), Nature 641 · numbers: Appendix A6</span></div>
+  <aside class="notes">2 min. Walk the left column slowly — it is the computation they must be able to redo for any grid: points, divide by the patch area, square, times two bytes. Land the 8.5 GB per head per layer against the T4's 16. Then the three doors, one sentence each: Pangu, FuXi and Aurora attend inside 2 × 6 × 12 windows — Part 4; ClimaX works at 5.625 degrees where the whole level is 512 tokens — the grid of Lab 05's ERA5 teaser; Aurora also squeezes 13 levels into 3 latent ones before the backbone sees them. Say the honest sentence: there is no global attention at 0.25 degrees in any operational model; the question is always which escape.</aside>
+</section>
+
+<!-- 19 -->
+<section class="slide xl">
+  <p class="kicker">Part 2 · The ViT paper</p>
+  <h2>ViT’s recipe is almost nothing — plus a lot of data</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">ViT’s recipe is almost nothing: patches, a learned position table, a class token — and a lot of data.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .5vh">
+    <svg viewBox="0 0 900 128" role="img" aria-label="Pipeline left to right: a chip is patchified and linearly projected; a learned position table is added; a class token is prepended; L transformer blocks; a layer norm and MLP head read the class token; ten classes." style="width:min(98%,1150px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="4" y="30" width="118" height="60" rx="8"/><rect x="146" y="30" width="138" height="60" rx="8"/><rect x="308" y="30" width="128" height="60" rx="8" stroke="var(--accent)" stroke-width="1.8"/><rect x="460" y="30" width="110" height="60" rx="8"/><rect x="594" y="30" width="128" height="60" rx="8"/><rect x="746" y="30" width="150" height="60" rx="8"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M122 60 H146 M284 60 H308 M436 60 H460 M570 60 H594 M722 60 H746"/></g>
+      <g fill="currentColor" stroke="none"><path d="M140 56 L146 60 L140 64 Z"/><path d="M302 56 L308 60 L302 64 Z"/><path d="M454 56 L460 60 L454 64 Z"/><path d="M588 56 L594 60 L588 64 Z"/><path d="M740 56 L746 60 L740 64 Z"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle">
+        <text x="63" y="56">13 × 64 × 64</text><text x="63" y="72">→ 64 patches</text>
+        <text x="215" y="56">linear 832 → d</text><text x="215" y="72">(one per band group)</text>
+        <text x="372" y="56" fill="var(--accent)" font-weight="700">+ position table</text><text x="372" y="72" fill="var(--accent)">learned, N × d</text>
+        <text x="515" y="56">prepend [cls]</text><text x="515" y="72">N + 1 tokens</text>
+        <text x="658" y="56">L × block</text><text x="658" y="72">(slide 12)</text>
+        <text x="821" y="56">LN → MLP on [cls]</text><text x="821" y="72">→ 10 classes</text>
+      </g>
+      <g font-size="11.5" fill="var(--muted)" text-anchor="middle"><text x="63" y="112">EuroSAT-MS</text><text x="215" y="112">ViT-B: d = 768</text><text x="372" y="112">2-D tables: no gain</text><text x="515" y="112">no patch behind it</text><text x="658" y="112">ViT-B: 12</text><text x="821" y="112">the lab: ~1 M params</text></g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li><b>Learned 1-D positions</b>: a table of N vectors; 2-D-aware versions gave nothing (Table 8). <b>Data</b>: ViT-B/16 loses to ResNets on ImageNet alone and wins only from JFT-300M up (ViT-H/14: 88.55%). <span class="accent">Week 1’s question — what inductive bias was traded away — is answered by this slide: locality, and 300 M images bought it back. Week 7 buys it with pretraining instead.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>[cls]</b> — an extra learned token whose output is read as the image summary (from BERT); mean-pooling the patch tokens works as well. <b>JFT-300M</b> — Google’s private 303 M-image set.</span>
+  </div>
+  <div class="foot"><span>Dosovitskiy et al. 2020, <i>An Image is Worth 16×16 Words</i>, ICLR 2021 — §3.1, §4.3 (Fig. 3), App. D.4 (Table 8) · card: Appendix A7</span></div>
+  <aside class="notes">1.5 min (cuttable). The pipeline is the lab's file, box by box — say that. Two findings worth remembering from the paper: positions are a learned table and nothing cleverer helped, which is why Part 3 is about Earth-specific information and not about fancier indexing; and ViT needs data — it loses to a ResNet on ImageNet and only wins from 300 million images up. Tie to Week 1's discussion question: the convolution's locality was the inductive bias traded away, and data bought it back; next week self-supervised pretraining buys it back cheaper, on exactly this file.</aside>
+</section>
+
+<!-- 20 -->
+<section class="slide section xl">
+  <p class="kicker">Part 3 · 11 min · the geoscience battleground</p>
+  <h2>Position: Where, When, Which Band, How Many Metres</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Proof on a chip that attention cannot see where; the three generic fixes (sin-cos, learned, RoPE); then four Earth models that encode band group, metres per pixel, variable identity, and latitude and date. <b>By the end:</b> say which “where” your data needs and how each model wrote it down.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>A text token has one position. A Sentinel-2 token has a pixel position, a wavelength, a date, a latitude and a ground sample distance — and a model that is told none of them learns them from scratch, or not at all.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>SatMAE and the lab’s band groups · Scale-MAE · ClimaX · Prithvi-EO-2.0 · DOFA (discussion question 2) · Presto (question 3) · Week 10’s foundation-model comparison on this very dataset.</p></div>
+  </div>
+  <aside class="notes">11 minutes. Read the cards in twenty seconds. The frame for the part: in language a token has one coordinate; on the Earth it has five, and each model on the slides that follow chose which ones to tell the network and how. The first slide is a proof, not a claim — the shuffle picture — because students believe "attention sees the image" until they see the output not change.</aside>
+</section>
+
+<!-- 21 -->
+<section class="slide xl">
+  <p class="kicker">Part 3 · Attention is a set operation</p>
+  <h2>Shuffle the patches and nothing in the output notices</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Attention is a set operation: shuffle the patches and the outputs just shuffle — the model cannot see where.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w6-shuffle.png" data-zoom alt="Four panels: the River chip; the same chip with its 64 patches randomly shuffled; the attention output of the original rendered as a mosaic; the attention output of the shuffled chip put back into place — identical to the third panel, maximum difference 2 times 10 to the minus 16." title="Click to enlarge" style="display:block;margin:0 auto;height:30vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Scores depend on <i>what</i> a token is, never on <i>where</i> it sits: permute the inputs and the outputs permute identically (max difference 2 × 10<sup>−16</sup>). <span class="accent">A road is a line only if the tokens know their coordinates — so the coordinates go in as numbers added to the token.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>permutation-equivariant</b> — the formal name: f(Px) = P f(x). <b>positional encoding</b> — any vector added to (or concatenated with) a token to break this. Convolutions never had the problem: the kernel is the position.</span>
+  </div>
+  <div class="foot"><span>EuroSAT-MS River_2, the slide-6 attention · computed for this lecture · next: three ways to write the coordinates</span></div>
+  <aside class="notes">1.2 min. Let the fourth panel make the point: the output of the shuffled chip, put back in place, is the output of the original to machine precision. The model has not seen the image — it has seen a bag of 64 spectra. Then the sentence that sets up every remaining slide of the part: position has to be added as numbers, and on the Earth, position is more than an index.</aside>
+</section>
+
+<!-- 22 -->
+<section class="slide xl">
+  <p class="kicker">Part 3 · Three generic answers</p>
+  <h2>Sin-cos, a learned table, or a rotation</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Three ways to say ‘where’: a fixed wave code, a learned table, or a rotation that reads distance.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w6-sincos.png" data-zoom alt="Left: the sinusoidal positional encoding as a 64 by 64 heat map, positions down, dimensions across; fast waves on the left, slow on the right. Right: the dot product between the encodings of every pair of positions — bright on the diagonal, falling off with distance in bands that depend only on the offset." title="Click to enlarge" style="display:block;margin:0 auto;height:33vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li><b>Sin-cos</b> (2017): PE(pos, 2i) = sin(pos / 10000<sup>2i/d</sup>), cos for odd dims — fixed, extends to any N, and PE<sub>i</sub>·PE<sub>j</sub> depends only on i − j. <b>Learned table</b> (ViT, GPT-2): N vectors, trained; “nearly identical results” in 2017.</li>
+    <li><b>RoPE</b> (2021): rotate each (q, k) pair by an angle m·θ — then q<sub>m</sub>·k<sub>n</sub> depends only on m − n: <span class="accent">relative distance read straight off the score</span>; the LLM default.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>pos</b> — the token index; <b>i</b> — dimension pair; 32 wavelengths from 2π to 20,000π tokens. <b>RoPE</b> “rotary position embedding”: the rotation is applied to q and k, not added to x.</span>
+  </div>
+  <div class="foot"><span>Vaswani et al. 2017 §3.5 · Dosovitskiy 2020 App. D.4 · Su et al. 2021, <i>RoFormer</i> · algebra of the dot product and the rotation: Appendix A3</span></div>
+  <aside class="notes">2 min. Left panel: each row is a token's code — a clock with 32 hands turning at 32 speeds; the fast hands distinguish neighbours, the slow hands distinguish far apart. Right panel is the property that matters: the dot product of two codes depends only on how far apart they are, so attention can learn "look two tokens back" as a fixed pattern. Learned tables are what ViT uses and the 2017 paper found them equivalent. RoPE in one sentence: instead of adding a code to x, rotate q and k by an angle proportional to position; the angle difference survives the dot product, so the score sees m minus n directly — which is why LLaMA and nearly every LLM use it. Do not derive; Appendix A3.</aside>
+</section>
+
+<!-- 23 -->
+<section class="slide xl">
+  <p class="kicker">Part 3 · The battleground</p>
+  <h2>On the Earth, a token’s position is five numbers, not one</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">On the Earth, ‘where’ also means which band, which date, which latitude, how many metres per pixel.</p>
+  <table style="border-collapse:collapse;width:100%;margin:0 0 .8vh">
+    <tr style="color:var(--ink-2)"><th style="text-align:left;padding:.35vh .5vw">model</th><th style="text-align:left;padding:.35vh .5vw">a token is …</th><th style="text-align:left;padding:.35vh .5vw">and is told …</th><th style="text-align:left;padding:.35vh .5vw">in units of</th></tr>
+    <tr><td style="padding:.35vh .5vw"><b>ViT</b> 2020</td><td style="padding:.35vh .5vw">a 16-px patch of an RGB image</td><td style="padding:.35vh .5vw">its index, from a learned table</td><td style="padding:.35vh .5vw">patches</td></tr>
+    <tr><td style="padding:.35vh .5vw"><b>SatMAE</b> 2022</td><td style="padding:.35vh .5vw">a patch of <i>one band group</i> at one date</td><td style="padding:.35vh .5vw">x, y + band group + year, month, hour</td><td style="padding:.35vh .5vw">wavelength groups, calendar</td></tr>
+    <tr><td style="padding:.35vh .5vw"><b>Scale-MAE</b> 2023</td><td style="padding:.35vh .5vw">a patch at a known GSD</td><td style="padding:.35vh .5vw">sin-cos of position × g/G</td><td style="padding:.35vh .5vw"><span class="accent">metres</span></td></tr>
+    <tr><td style="padding:.35vh .5vw"><b>ClimaX</b> 2023</td><td style="padding:.35vh .5vw">a patch of <i>one variable</i></td><td style="padding:.35vh .5vw">which variable (own embedding) + hours ahead</td><td style="padding:.35vh .5vw">variables, lead time</td></tr>
+    <tr><td style="padding:.35vh .5vw"><b>Prithvi-EO-2.0</b> 2024</td><td style="padding:.35vh .5vw">a 16-px patch of 6 HLS bands at one date</td><td style="padding:.35vh .5vw">x, y, t + sin-cos(lat, lon) + sin-cos(year, day)</td><td style="padding:.35vh .5vw">degrees, calendar</td></tr>
+    <tr><td style="padding:.35vh .5vw"><b>DOFA</b> 2024 · <b>Presto</b> 2023</td><td style="padding:.35vh .5vw">a patch of one band · a channel group at one month</td><td style="padding:.35vh .5vw">its wavelength (generates the patch weights) · channel + month</td><td style="padding:.35vh .5vw">nanometres · months</td></tr>
+  </table>
+  <ul class="small">
+    <li>Same backbone every time; the design is <i>what the token is told</i>. <span class="accent">Four get a slide: band group, metres, variable, place and date.</span> DOFA and Presto are your discussion questions.</li>
+  </ul>
+  <div class="foot"><span>Cong 2022 · Reed 2023 · Nguyen 2023 · Szwarcman 2024 · Xiong 2024 · Tseng 2023 — every encoding written out: Appendix A4</span></div>
+  <aside class="notes">1.5 min. Read the third column only, top to bottom; the table is the map of the next four slides. The thesis to say once: the backbone is the same in every row — the block from slide 12 — and the research is in what the token is told. Point at the two rows that have no slide: DOFA, which generates the patch-embedding weights from the band's wavelength, is discussion question 2; Presto, 400 thousand parameters on pixel time series, is question 3.</aside>
+</section>
+
+<!-- 24 -->
+<section class="slide xl">
+  <p class="kicker">Part 3 · Which band · SatMAE</p>
+  <h2>A band is a position on the wavelength axis</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">SatMAE embeds each band group separately and tags every token with its group — the lab does the same.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w6-band-spectra.png" data-zoom alt="Mean reflectance of eight EuroSAT classes across the 13 Sentinel-2 bands plotted against central wavelength from 443 to 2190 nanometres; the three 60-metre atmospheric bands are shaded. Vegetation classes jump at the red edge near 700 nanometres; water stays near zero beyond it." title="Click to enlarge" style="display:block;margin:0 auto;height:33vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li><b>SatMAE</b>: three groups — {B2 B3 B4 B8}, {B5 B6 B7 B8A}, {B11 B12}; B1, B9, B10 dropped; one patch embedding per group, a <i>group encoding</i> concatenated to x, y; 3 × 144 tokens per 96-px image; groups masked independently. <span class="accent">The lab: the same three groups on 64-px chips → 3 × 64 tokens.</span></li>
+    <li><b>DOFA</b>’s answer (question 2): a band is its wavelength in nm — feed λ through a small network that <i>generates</i> the patch-embedding weights, and one model reads Sentinel-1, Sentinel-2, NAIP, EnMAP.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>red edge</b> — the jump in vegetation reflectance between B4 (665 nm) and B8 (842 nm) that B5–B7 straddle. <b>group encoding</b> — a sin-cos code of the group index, like a position.</span>
+  </div>
+  <div class="foot"><span>Cong et al. 2022, <i>SatMAE</i>, NeurIPS, §3.3 and App. A.3 · Xiong et al. 2024, <i>DOFA</i> · spectra: 4 chips per class, EuroSAT-MS, computed for this lecture</span></div>
+  <aside class="notes">1.5 min. Point at the red edge first — that is why multispectral matters and why the bands are not interchangeable channels: vegetation jumps between 665 and 842 nanometres and water does not. SatMAE's move: treat the band groups like time steps — separate tokens, separate patch embeddings, a group code added like a position, and mask groups independently so the model must predict SWIR from visible. Say the lab's instruction in one breath: the same three groups, 64-pixel chips, 192 tokens. Then the discussion-question hook: DOFA says the group index is a crude code for what is really a wavelength, and generates the embedding weights from the wavelength itself.</aside>
+</section>
+
+<!-- 25 -->
+<section class="slide xl">
+  <p class="kicker">Part 3 · How many metres · Scale-MAE</p>
+  <h2>Count the wave in metres, not in patches</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Scale-MAE scales the position by g/G, so a wave is the same length in metres at 10 m and at 30 m.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w6-gsd-encoding.png" data-zoom alt="Two panels of one sinusoidal positional-encoding component plotted against ground distance in metres. Left, standard sin-cos: the 10-metre image's wave has a period of about 2,400 metres while the 30-metre image's wave is three times longer — same field, different code. Right, Scale-MAE's GSD encoding: the two waves coincide — same field, same code." title="Click to enlarge" style="display:block;margin:0 auto;height:30vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>PE<sub>gsd</sub>(pos, 2i) = sin( (g/G) · pos / 10000<sup>2i/D</sup> ): the image’s GSD g over a reference G scales the <i>position</i>. A patch 480 m from the corner gets the same code whether it is patch 3 at 10 m or patch 1 at 30 m. <span class="accent">+5.6% average over SatMAE across GSDs on 8 datasets (kNN).</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>g, G</b> — this image’s and the reference ground sample distance. <b>in the figure</b> — one of the D/2 wave components; the slow ones barely change, the fast ones change a lot.</span>
+  </div>
+  <div class="foot"><span>Reed et al. 2023, <i>Scale-MAE</i>, ICCV, eqs. 3–4 and Table 1 (also a Laplacian-pyramid decoder that reconstructs at two resolutions) · computed for this lecture</span></div>
+  <aside class="notes">1.5 min. Left panel: the same field, imaged at 10 and at 30 metres, gets two different codes because sin-cos counts patches. Right panel: multiply the position by the GSD ratio and the two curves fall on top of each other — the code now counts metres. One formula on the board, pointing at the g over G inside the sine. The number: 5.6 percent average improvement over SatMAE when tested across resolutions. Connect to the previous slide: SatMAE wrote the band into the code; Scale-MAE wrote the metres; next, ClimaX writes the variable.</aside>
+</section>
+
+<!-- 26 -->
+<section class="slide xl">
+  <p class="kicker">Part 3 · Which variable · ClimaX</p>
+  <h2>Each weather variable is its own image, until a query merges them</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">ClimaX tokenizes each variable separately; a learned query then merges one location’s V tokens into one.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 206" role="img" aria-label="Left: a stack of four weather variable maps, temperature, geopotential, wind and humidity, each patchified with its own embedding into tokens drawn in its own colour. Middle: at one grid location the four coloured tokens are stacked and a single learned query cross-attends over them to produce one token. Right: a lead-time embedding is added and the tokens enter a ViT. Numbers: 5.625 degrees, 32 by 64, patch 2 gives 512 locations; 48 variables give 24,576 tokens before aggregation and 512 after." style="width:min(96%,1100px)">
+      <g stroke="currentColor" stroke-width="1.1">
+        <rect x="40" y="60" width="110" height="66" fill="#8a877d" opacity=".55"/><rect x="30" y="48" width="110" height="66" fill="#5a9a3b" opacity=".65"/><rect x="20" y="36" width="110" height="66" fill="#2c6fb0" opacity=".7"/><rect x="10" y="24" width="110" height="66" fill="var(--accent)" opacity=".8"/>
+      </g>
+      <g font-size="12" fill="#fff" font-weight="700"><text x="18" y="40">T2m</text></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="80" y="150">V = 48 variables, each</text><text x="80" y="166">patchified on its own:</text><text x="80" y="182" font-weight="700">own patch embedding</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M150 93 H200"/></g><path d="M194 89 L200 93 L194 97 Z" fill="currentColor"/>
+      <g stroke="currentColor" stroke-width="1"><rect x="230" y="22" width="48" height="22" fill="var(--accent)" opacity=".8"/><rect x="230" y="48" width="48" height="22" fill="#2c6fb0" opacity=".7"/><rect x="230" y="74" width="48" height="22" fill="#5a9a3b" opacity=".65"/><rect x="230" y="100" width="48" height="22" fill="#8a877d" opacity=".55"/></g>
+      <text x="254" y="140" text-anchor="middle" font-size="12" fill="var(--muted)">⋮ V tokens</text>
+      <text x="254" y="160" text-anchor="middle" font-size="12.5" fill="currentColor">at ONE location</text>
+      <g fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8"><rect x="330" y="46" width="170" height="60" rx="9"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="415" y="68">cross-attention:</text><text x="415" y="86" fill="var(--accent)" font-weight="700">one learned query</text></g>
+      <text x="415" y="130" text-anchor="middle" font-size="12" fill="var(--muted)">asks the V tokens “what matters here?”</text>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M278 33 H310 V76 H330 M278 59 H310 M278 85 H310 M278 111 H310 V76"/><path d="M500 76 H540"/></g><path d="M534 72 L540 76 L534 80 Z" fill="currentColor"/>
+      <g stroke="currentColor" stroke-width="1.2"><rect x="546" y="65" width="48" height="22" fill="var(--wash)"/></g>
+      <text x="570" y="80" text-anchor="middle" font-size="12" fill="currentColor">1 token</text>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2"><rect x="620" y="22" width="130" height="40" rx="7"/><rect x="620" y="86" width="130" height="40" rx="7"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="685" y="39">+ lead-time code</text><text x="685" y="54" fill="var(--muted)" font-size="11.5">Δt → MLP → d</text><text x="685" y="103">+ position (sin-cos)</text><text x="685" y="118" fill="var(--muted)" font-size="11.5">of the grid cell</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M594 76 H608 V42 H620 M608 106 H620 M750 42 H770 V76 H800 M750 106 H770"/></g><path d="M794 72 L800 76 L794 80 Z" fill="currentColor"/>
+      <g fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8"><rect x="806" y="50" width="86" height="52" rx="8"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="849" y="72">ViT</text><text x="849" y="88" font-size="11.5" fill="var(--muted)">8 × 1024</text></g>
+      <text x="520" y="192" text-anchor="middle" font-size="12.5" fill="currentColor">5.625°: 32 × 64 grid, patch 2 → <tspan font-weight="700">512 locations</tspan> · 48 variables → 24,576 tokens before the query, <tspan font-weight="700" fill="var(--accent)">512 after</tspan></text>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Why not stack the 48 variables as channels? Because the set of variables changes between datasets (CMIP6 pretraining, ERA5 fine-tuning) — <span class="accent">a token per variable makes a missing variable a missing token, not a broken input layer.</span> Aurora does the same with per-variable patch embeddings summed per level.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>cross-attention</b> — the query comes from one place (here a learned vector), the keys and values from another (the V tokens). <b>lead time</b> — hours ahead; one model serves every lead by being told it.</span>
+  </div>
+  <div class="foot"><span>Nguyen et al. 2023, <i>ClimaX</i>, ICML, §3.1 (variable tokenization and aggregation) · 1.40625°: 128 × 256, patch 4 → 2,048 locations · Lab 05’s ERA5 teaser ran on this 5.625° grid</span></div>
+  <aside class="notes">1.5 min. Walk it left to right: each variable is its own little image with its own patch embedding; at each grid cell you now have 48 tokens; one learned query asks those 48 "what matters here" and the cross-attention collapses them to one. The design reason is the bullet: pretraining data and fine-tuning data have different variable sets, and a token per variable makes that a missing token rather than a broken first layer. Tie back to the lab's band groups — the same idea, three groups instead of 48 variables — and forward to Aurora, which sums per-variable embeddings instead of cross-attending.</aside>
+</section>
+
+<!-- 27 -->
+<section class="slide xl">
+  <p class="kicker">Part 3 · Where and when · Prithvi-EO-2.0</p>
+  <h2>Latitude, longitude and the day of the year, as sin-cos — dropped 10% of the time</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Prithvi-EO-2.0 adds where and when as sin–cos codes of lat/lon and date — and drops them 10% of the time.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 164" role="img" aria-label="A token from a 3-D patch of six HLS bands, 16 by 16 pixels, one time step, enters from the left. Three things are added to it: the sin-cos position of the patch in time, height and width; a time code, sin-cos of the year and the day of year, weighted by a learned scalar; and a location code, sin-cos of latitude and longitude, weighted by another learned scalar. A note says each code is dropped with probability 0.1 during pretraining. The sum enters a ViT-L of 300 million or ViT-H of 600 million parameters." style="width:min(96%,1100px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2"><rect x="8" y="52" width="180" height="60" rx="8"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="98" y="72">3-D patch token</text><text x="98" y="88" font-size="11.5" fill="var(--muted)">6 HLS bands · 16 × 16 · t = 1</text><text x="98" y="103" font-size="11.5" fill="var(--muted)">(samples: 4 dates, 224 px)</text></g>
+      <g fill="var(--page)" stroke="var(--accent)" stroke-width="1.8"><circle cx="525" cy="82" r="14"/></g>
+      <text x="525" y="87" text-anchor="middle" font-size="16" fill="var(--accent)" font-weight="700">+</text>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M188 82 H511"/></g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2"><rect x="200" y="6" width="150" height="36" rx="7"/><rect x="370" y="6" width="310" height="36" rx="7" stroke="var(--accent)" stroke-width="1.6"/><rect x="370" y="122" width="310" height="36" rx="7" stroke="var(--accent)" stroke-width="1.6"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle">
+        <text x="275" y="22">position: sin-cos of</text><text x="275" y="36" font-size="11.5" fill="var(--muted)">(t, row, column)</text>
+        <text x="525" y="22" font-size="12">λ<tspan font-size="9.5" dy="3">t</tspan><tspan dy="-3"> · [sin-cos(year) ‖ sin-cos(day of year)]</tspan></text><text x="525" y="36" font-size="11.5" fill="var(--muted)">when — λ<tspan font-size="9" dy="2">t</tspan><tspan dy="-2"> is one learned weight</tspan></text>
+        <text x="525" y="138" font-size="12">λ<tspan font-size="9.5" dy="3">l</tspan><tspan dy="-3"> · [sin-cos(lat) ‖ sin-cos(lon)]</tspan></text><text x="525" y="152" font-size="11.5" fill="var(--muted)">where — λ<tspan font-size="9" dy="2">l</tspan><tspan dy="-2"> is another learned weight</tspan></text>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M275 42 V82 M525 42 V68 M525 122 V96"/></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M539 82 H700"/></g><path d="M694 78 L700 82 L694 86 Z" fill="currentColor"/>
+      <g fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8"><rect x="706" y="54" width="186" height="56" rx="8"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="799" y="76">ViT-L 300 M · ViT-H 600 M</text><text x="799" y="94" font-size="11.5" fill="var(--muted)">MAE pretraining (Week 7)</text></g>
+      <text x="358" y="118" text-anchor="end" font-size="12.5" fill="var(--accent)" font-weight="700">each code dropped with p = 0.1 in pretraining</text>
+      <text x="358" y="134" text-anchor="end" font-size="11.5" fill="var(--muted)">so the model also works on a chip with no metadata</text>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Where and when are not pixels: a May chip at 35° N and a May chip at 35° S are different seasons. <span class="accent">Two learned scalars λ decide how loud the metadata is; the 10% drop keeps the model usable on bare chips.</span> Trained on 4.2 M HLS time series; best combined score on GEO-Bench’s 12 datasets.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>HLS</b> — Harmonized Landsat–Sentinel, 30 m, the six bands Blue, Green, Red, NIR, SWIR1, SWIR2. <b>GEO-Bench</b> — a 12-task EO benchmark; Week 10 runs part of it.</span>
+  </div>
+  <div class="foot"><span>Szwarcman et al. 2024, <i>Prithvi-EO-2.0</i>, §III (temporal and location embeddings, eq. 1) · the “TL” checkpoints are the ones with these codes</span></div>
+  <aside class="notes">1.2 min (cuttable). One sentence per box: the token is a 3-D patch of six bands; the ordinary position code says where in the sample; two more codes say when (year, day of year) and where on the planet (latitude, longitude), each a sin-cos vector times a learned loudness; and each is dropped ten percent of the time so the model does not fall apart on a chip with no metadata. Say why it matters for the lab's data: EuroSAT chips carry no date and no location in the file — so this is a model you could not fully use on them, which is a real limitation, not a detail.</aside>
+</section>
+
+<!-- 28 -->
+<section class="slide xl">
+  <p class="kicker">Part 3 · Watch at home</p>
+  <h2>The ViT paper read aloud, positions demystified, and RoPE in ten minutes</h2>
+  <div style="display:flex;gap:1.2vw;margin-top:1.4vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=TrdevFK_am4" class="yt" data-id="TrdevFK_am4" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w6-vit-kilcher.jpg" alt="Yannic Kilcher explaining the Vision Transformer paper" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Yannic Kilcher · <i>An Image is Worth 16×16 Words</i> (paper explained) · 30 min — <span class="accent">click to play here</span> · slide 19, with the figures.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=1biZfFLPRSY" class="yt" data-id="1biZfFLPRSY" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w6-posenc-coffee.jpg" alt="AI Coffee Break video on positional embeddings in transformers" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">AI Coffee Break with Letitia · <i>Positional embeddings in transformers EXPLAINED</i> · 10 min — why sin-cos, with the clock picture.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=o29P0Kpobz0" class="yt" data-id="o29P0Kpobz0" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w6-rope-efficientnlp.jpg" alt="Efficient NLP video deriving rotary positional embeddings" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Efficient NLP · <i>Rotary Positional Embeddings: Combining Absolute and Relative</i> · 11 min — the rotation, derived.</p>
+    </a>
+  </div>
+  <p class="small" style="margin:1.2vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Part 4.</b> Position solved “where”; the 0.25° bill from slide 18 is still unpaid. Swin pays it by letting a token see only its window — and shifting the window so the walls move.</p>
+  <div class="gloss">
+    <span><b>author talks</b> — Presto (Tseng), DOFA (Xiong) and the Prithvi workshop are on the Appendix shelf (A11), for the discussion questions.</span>
+  </div>
+  <div class="foot"><span>Optional, not assigned · ids verified embeddable on 9 October 2026</span></div>
+  <aside class="notes">Twenty seconds. The Kilcher video is the paper slide with its figures; the Coffee Break one is the clock picture for slide 22; the RoPE one is the derivation we skipped. Then the bridge sentence and straight into Part 4.</aside>
+</section>
+
+<!-- 29 -->
+<section class="slide section xl">
+  <p class="kicker">Part 4 · 8 min · this week’s paper</p>
+  <h2>Windows: Swin, the Shift, and the Three Weather Backbones</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Attention confined to M × M windows and what that does to the N² term; the shift that lets windows talk; the 3-D window over (level, lat, lon) that Pangu, FuXi and Aurora share; the paper in one slide. <b>By the end:</b> explain why shifting recovers cross-window flow — question 1 of the journal club.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>It is the escape from slide 18 that every 0.25° weather model took: a window of 2 × 6 × 12 tokens costs 9 MB of scores per head where the globe cost 8.5 GB.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Pangu-Weather (Nature 2023) · FuXi (2023) · Aurora (Nature 2025) · Swin itself in detection and segmentation backbones · Week 11’s rollout lab runs a windowed emulator.</p></div>
+  </div>
+  <aside class="notes">8 minutes. Read the cards in twenty seconds. The part exists to make the journal-club paper teachable: windows (why), the shift (how information crosses walls), and then the move that is not in the paper — the third dimension for pressure levels and the globe's wrap-around, which is discussion question 1.</aside>
+</section>
+
+<!-- 30 -->
+<section class="slide xl">
+  <p class="kicker">Part 4 · Windows</p>
+  <h2>Let a token see only its window: N² becomes N · M²</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Swin attends inside M × M windows: the N² term becomes N · M², linear in the image.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 222" role="img" aria-label="Left: an 8 by 8 grid of tokens divided into four 4 by 4 windows; one orange token attends only to the 16 tokens of its own window, shaded. Right: the two complexity formulas from the paper, the global one with an h w squared term and the windowed one with an M squared h w term, and the numbers for a 56 by 56 token map with M equals 7 and for one level of the globe with a 6 by 12 window." style="width:min(96%,1100px)">
+      <g stroke="var(--hairline)" stroke-width="1" fill="var(--wash)">
+        <rect x="20" y="20" width="176" height="176"/>
+      </g>
+      <rect x="108" y="108" width="88" height="88" fill="var(--accent)" opacity=".25"/>
+      <g fill="none" stroke="var(--hairline)" stroke-width="1">
+        <path d="M42 20 V196 M64 20 V196 M86 20 V196 M130 20 V196 M152 20 V196 M174 20 V196 M20 42 H196 M20 64 H196 M20 86 H196 M20 130 H196 M20 152 H196 M20 174 H196"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="2"><path d="M108 20 V196 M20 108 H196"/><rect x="20" y="20" width="176" height="176"/></g>
+      <rect x="152" y="152" width="22" height="22" fill="var(--accent)"/>
+      <text x="108" y="214" text-anchor="middle" font-size="12.5" fill="currentColor">8 × 8 tokens, M = 4</text>
+      <text x="230" y="60" font-size="12.5" fill="currentColor">the orange token scores</text><text x="230" y="76" font-size="12.5" fill="currentColor"><tspan fill="var(--accent)" font-weight="700">16 keys</tspan>, not 64 — and never</text><text x="230" y="92" font-size="12.5" fill="currentColor">one across the thick line</text>
+      <g font-size="13.5" fill="currentColor">
+        <text x="420" y="34" font-weight="700">global (ViT):  Ω(MSA) = 4hwC² + <tspan fill="var(--accent)">2(hw)²C</tspan></text>
+        <text x="420" y="60" font-weight="700">windowed (Swin):  Ω(W-MSA) = 4hwC² + <tspan fill="var(--accent)">2M²·hwC</tspan></text>
+      </g>
+      <g font-size="12" fill="var(--muted)"><text x="420" y="80">hw tokens, C width, M window side · 1st term projections, 2nd scores</text></g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2"><rect x="420" y="98" width="470" height="56" rx="8"/><rect x="420" y="162" width="470" height="56" rx="8" stroke="var(--accent)" stroke-width="1.8"/></g>
+      <g font-size="12.5" fill="currentColor">
+        <text x="432" y="118" font-weight="700">Swin stage 1 on 224 px: 56 × 56 = 3,136 tokens, M = 7</text><text x="432" y="136">64 windows of 49 · the score term shrinks 3,136 / 49 = <tspan font-weight="700">64×</tspan></text>
+        <text x="432" y="182" font-weight="700" fill="var(--accent)">one 0.25° level (slide 18): 65,160 tokens, window 6 × 12 = 72</text><text x="432" y="200">scores 65,160 × 72 × 2 B = <tspan font-weight="700" fill="var(--accent)">9.4 MB</tspan> per head — not 8.5 GB</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>The projections (4hwC²) are untouched; only the scores change, from every pair to pairs inside a window. <span class="accent">The price is the thick line: nothing crosses it — until the next slide moves it.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>W-MSA</b> “window multi-head self-attention”. <b>M</b> — window side in tokens (7 in Swin; 6 lat × 12 lon in the weather models). <b>in the figure</b> — same block as slide 12; only the mask (slide 10, right grid) differs.</span>
+  </div>
+  <div class="foot"><span>Liu et al. 2021, <i>Swin Transformer</i>, ICCV, eqs. 1–2 · the window is literally the block-diagonal mask of slide 10 — plus a reshape so the zeros are never computed</span></div>
+  <aside class="notes">2 min. Say it with the grid: the orange token scores 16 keys instead of 64 and the thick lines are walls. Then the two formulas: the first term is the three projections and the output map and does not change; the second is the scores, and it goes from hw squared to M squared times hw — linear in the image. Then the globe: 9 megabytes per head instead of 8.5 gigabytes. End on the price so the next slide has a job: nothing crosses the walls.</aside>
+</section>
+
+<!-- 31 -->
+<section class="slide xl">
+  <p class="kicker">Part 4 · The shift</p>
+  <h2>Move the walls every other layer and the walls disappear</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Shift the windows by half a window in the next layer and any token can reach any other in a few layers.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 226" role="img" aria-label="Left: layer l, an 8 by 8 token grid with four windows; an orange token near a wall and a blue token just across it cannot see each other. Middle: layer l plus 1, the same grid with the windows shifted by two tokens in both directions, so the boundary now runs elsewhere and the orange and blue tokens share a window; nine windows of unequal size result. Right: the cyclic shift trick, rolling the grid so the partial windows pack into four full ones, with a mask so rolled-in tokens do not attend across." style="width:min(96%,1100px)">
+      <g fill="var(--wash)" stroke="var(--hairline)" stroke-width="1"><rect x="14" y="26" width="176" height="176"/></g>
+      <g fill="none" stroke="var(--hairline)" stroke-width="1"><path d="M36 26 V202 M58 26 V202 M80 26 V202 M124 26 V202 M146 26 V202 M168 26 V202 M14 48 H190 M14 70 H190 M14 92 H190 M14 136 H190 M14 158 H190 M14 180 H190"/></g>
+      <g fill="none" stroke="currentColor" stroke-width="2"><path d="M102 26 V202 M14 114 H190"/><rect x="14" y="26" width="176" height="176"/></g>
+      <rect x="80" y="92" width="22" height="22" fill="var(--accent)"/><rect x="102" y="92" width="22" height="22" fill="#2c6fb0"/>
+      <text x="102" y="16" text-anchor="middle" font-size="13" fill="currentColor" font-weight="700">layer l: windows</text>
+      <text x="102" y="220" text-anchor="middle" font-size="12" fill="var(--muted)">neighbours, separated by a wall</text>
+      <g fill="var(--wash)" stroke="var(--hairline)" stroke-width="1"><rect x="330" y="26" width="176" height="176"/></g>
+      <g fill="none" stroke="var(--hairline)" stroke-width="1"><path d="M352 26 V202 M396 26 V202 M418 26 V202 M440 26 V202 M484 26 V202 M330 48 H506 M330 92 H506 M330 114 H506 M330 136 H506 M330 180 H506"/></g>
+      <rect x="374" y="70" width="88" height="88" fill="var(--accent)" opacity=".18"/>
+      <g fill="none" stroke="currentColor" stroke-width="2"><path d="M374 26 V202 M462 26 V202 M330 70 H506 M330 158 H506"/><rect x="330" y="26" width="176" height="176"/></g>
+      <rect x="396" y="92" width="22" height="22" fill="var(--accent)"/><rect x="418" y="92" width="22" height="22" fill="#2c6fb0"/>
+      <text x="418" y="16" text-anchor="middle" font-size="13" fill="currentColor" font-weight="700">layer l + 1: shifted by (M/2, M/2)</text>
+      <text x="418" y="220" text-anchor="middle" font-size="12" fill="var(--muted)">now in one window; 9 windows, some partial</text>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M196 114 H324"/></g><path d="M318 110 L324 114 L318 118 Z" fill="currentColor"/>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2"><rect x="560" y="30" width="330" height="170" rx="9"/></g>
+      <g font-size="12.5" fill="currentColor">
+        <text x="574" y="52" font-weight="700">the cyclic-shift trick (§3.2)</text>
+        <text x="574" y="70">roll the grid by (M/2, M/2): the 9 partial</text><text x="574" y="86">windows pack into 4 full ones — no padding;</text>
+        <text x="574" y="102">a mask (slide 10) blocks attention across</text><text x="574" y="118">the seam; roll back afterwards.</text>
+        <text x="574" y="142" fill="var(--accent)" font-weight="700">Swin-T top-1: 80.2 → 81.3 with the shift</text>
+        <text x="574" y="158">COCO box 47.7 → 50.5 · ADE20K 43.3 → 46.1</text>
+        <text x="574" y="178" fill="var(--muted)" font-size="12">cyclic 755 vs padded 670 img/s (V100)</text><text x="574" y="194" fill="var(--muted)" font-size="12">relative bias: 80.1 → 81.3 vs no position</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Alternate W-MSA and shifted W-MSA: two layers connect a token to a 3M/2 neighbourhood, and the reach grows with depth like a CNN’s receptive field. <span class="accent">Question 1: what plays the role of the shift on a globe, where longitude wraps and latitude ends?</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>SW-MSA</b> — the shifted version. <b>relative-position bias</b> — B[i−j] added to the scores, one learned table of (2M−1)² values per head: position for free, inside the window. <b>seam</b> — where rolled tokens meet.</span>
+  </div>
+  <div class="foot"><span>Liu et al. 2021, §3.2 (eq. 4, Fig. 4), Table 4 (ablation), Table 5 (throughput) · the shift is the whole difference between Swin and “a ViT with a block mask”</span></div>
+  <aside class="notes">2 min. Left grid: orange and blue are neighbours separated by a wall. Middle grid: next layer, the walls move half a window — the same two tokens are now in one window. Say the receptive-field analogy aloud because it is the answer to question 1: alternating layers grow the reach exactly as stacked 3 × 3 convolutions do. The right card is the engineering: rolling the grid packs the partial windows into full ones and a mask stops cheating across the seam; the ablation numbers are what the paper's Table 4 says the shift is worth — plus one point from the relative bias. Plant question 1: on a globe, longitude wraps, so the roll is physical; latitude ends at the poles, so there the walls are real.</aside>
+</section>
+
+<!-- 32 -->
+<section class="slide xl">
+  <p class="kicker">Part 4 · The weather backbones</p>
+  <h2>Pangu, FuXi, Aurora: one 3-D Swin over (level, latitude, longitude)</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Pangu, FuXi and Aurora share one backbone: 3-D Swin over (level, lat, lon) tokens, windows of 2 × 6 × 12.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 226" role="img" aria-label="Left: an isometric block of tokens, 8 levels deep, 181 tall in latitude and 360 wide in longitude, with a small orange window of 2 by 6 by 12 tokens drawn inside it; an arrow around the longitude axis marks that it wraps and a bar at the top marks that latitude ends at the pole. Right: three rows, one per model, with their key numbers." style="width:min(96%,1100px)">
+      <g stroke="currentColor" stroke-width="1.2" fill="var(--wash)">
+        <path d="M30 70 L250 70 L250 190 L30 190 Z"/><path d="M30 70 L70 40 L290 40 L250 70 Z"/><path d="M250 70 L290 40 L290 160 L250 190 Z"/>
+      </g>
+      <g stroke="var(--accent)" stroke-width="1.6" fill="var(--accent)" fill-opacity=".35">
+        <path d="M120 120 L168 120 L168 150 L120 150 Z"/><path d="M120 120 L130 112 L178 112 L168 120 Z"/><path d="M168 120 L178 112 L178 142 L168 150 Z"/>
+      </g>
+      <g font-size="12" fill="currentColor"><text x="140" y="218" text-anchor="middle">longitude: 360 tokens — wraps around</text><text x="18" y="130" transform="rotate(-90 18 130)" text-anchor="middle">181 lat tokens · ends at the poles</text><text x="160" y="30" text-anchor="middle">8 levels (7 upper-air + surface)</text></g>
+      <text x="144" y="172" text-anchor="middle" font-size="11.5" fill="var(--accent)" font-weight="700">window 2 × 6 × 12 = 144 tokens</text>
+      <path d="M30 194 C 60 204, 220 204, 250 194" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3"/>
+      <g font-size="12.5" fill="currentColor">
+        <text x="360" y="54" font-weight="700">Pangu-Weather (2023) · four models (1, 3, 6, 24 h), ≈ 64 M params each</text>
+        <text x="360" y="72">patch 2 × 4 × 4 → 8 × 181 × 360 tokens, C = 192 · blocks 2-6-6-2, U-shaped</text>
+        <text x="360" y="88" fill="var(--muted)" font-size="12"><tspan fill="var(--accent)">Earth-specific bias</tspan> — absolute in (level, lat), relative in lon · MAE loss</text>
+        <text x="360" y="116" font-weight="700">FuXi (2023) · three models in cascade: 0–5, 5–10, 10–15 days</text>
+        <text x="360" y="134">cube embedding 2 × 4 × 4 (two time steps in) → 180 × 360 tokens, C = 1536</text>
+        <text x="360" y="150" fill="var(--muted)" font-size="12"><tspan fill="var(--accent)">48 Swin-V2 blocks</tspan> in a U-Transformer · latitude-weighted L1 loss</text>
+        <text x="360" y="178" font-weight="700">Aurora (2025) · 1.3 B params · the one you can download</text>
+        <text x="360" y="196">Perceiver in (13 levels → 3 latent) → <tspan fill="var(--accent)">3-D Swin U-Net, 48 layers</tspan></text>
+        <text x="360" y="212" fill="var(--muted)" font-size="12">same window, no bias: position, area, time as Fourier codes · patch 4 → 10 at 0.1°</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Question 1’s answer, planted: along longitude the roll of slide 31 <i>is</i> the geometry — the dateline is a seam that should not exist; along latitude the walls are real, so both Pangu and Aurora give latitude an <b>absolute</b> code (a bias table; a Fourier encoding of position and cell area). <span class="accent">Windows pay the N² bill; the third dimension lets a token see the levels above and below it.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>3-D window</b> — 2 levels × 6 lat tokens (6 × 4 × 0.25° = 6°) × 12 lon tokens (12°). <b>Swin-V2</b> — Swin with the norm after the branch and cosine attention, for stability at scale. <b>Perceiver</b> — slide 18, door 3.</span>
+  </div>
+  <div class="foot"><span>Bi et al. 2023, Nature 619:533, Methods · Chen et al. 2023, npj Clim Atmos Sci 6:190 · Bodnar et al. 2025, Nature 641:1180, App. B · details: Appendix A6</span></div>
+  <aside class="notes">2 min. Point at the block: tokens live in three dimensions, levels × latitude × longitude, and the window is 2 levels by 6 degrees by 12 degrees — 144 tokens. Then one line per model, reading the bold names: Pangu invented the 3-D window and an Earth-specific bias that knows which latitude it is at; FuXi stacked 48 Swin-V2 blocks and cascaded three models by lead time; Aurora kept the same window, squeezed 13 levels into 3 before the backbone, and is the one you can download. Then the geometry: the roll along longitude is not a trick on a globe, it is the truth — the dateline should be invisible; latitude is where the walls are real, and that is why both models give latitude an absolute code. That is the start of discussion question 1, not its end.</aside>
+</section>
+
+<!-- 33 -->
+<section class="slide xl">
+  <p class="kicker">Part 4 · This week’s paper · 1.5 min</p>
+  <h2>The paper in one slide — a ViT that behaves like a CNN</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Swin: four stages that halve the grid and double the width, 7 × 7 windows, shifted every other block.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 150" role="img" aria-label="Left: ViT drawn as twelve identical columns of 196 tokens, width constant. Right: Swin drawn as four stages, each a block of tokens that halves in side and doubles in width: 56 by 56 at C, 28 by 28 at 2C, 14 by 14 at 4C, 7 by 7 at 8C, with patch merging between stages and the block counts 2, 2, 6, 2 underneath." style="width:min(96%,1100px)">
+      <text x="20" y="18" font-size="13" fill="currentColor" font-weight="700">ViT-B/16: flat — 196 tokens, 12 blocks</text>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1"><rect x="20" y="30" width="12" height="90"/><rect x="36" y="30" width="12" height="90"/><rect x="52" y="30" width="12" height="90"/><rect x="68" y="30" width="12" height="90"/><rect x="84" y="30" width="12" height="90"/><rect x="100" y="30" width="12" height="90"/><rect x="116" y="30" width="12" height="90"/><rect x="132" y="30" width="12" height="90"/><rect x="148" y="30" width="12" height="90"/><rect x="164" y="30" width="12" height="90"/><rect x="180" y="30" width="12" height="90"/><rect x="196" y="30" width="12" height="90"/></g>
+      <text x="20" y="140" font-size="12" fill="var(--muted)">every token sees every token, one scale</text>
+      <text x="590" y="18" text-anchor="middle" font-size="13" fill="currentColor" font-weight="700">Swin-T: a pyramid — patch merging between stages</text>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="330" y="26" width="96" height="96" stroke="var(--accent)" stroke-width="1.8"/><rect x="470" y="50" width="72" height="72"/><rect x="586" y="74" width="48" height="48"/><rect x="678" y="98" width="24" height="24"/>
+      </g>
+      <g fill="none" stroke="var(--hairline)" stroke-width=".8"><path d="M354 26 V122 M378 26 V122 M402 26 V122 M330 50 H426 M330 74 H426 M330 98 H426"/></g>
+      <g font-size="11.5" fill="currentColor" text-anchor="middle">
+        <text x="378" y="136">56² · C = 96 · ×2</text><text x="506" y="136">28² · 2C · ×2</text><text x="610" y="136">14² · 4C · ×6</text><text x="700" y="136">7² · 8C · ×2</text>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M426 86 H470 M542 86 H586 M634 110 H678"/></g>
+      <g fill="currentColor" stroke="none"><path d="M464 82 L470 86 L464 90 Z"/><path d="M580 82 L586 86 L580 90 Z"/><path d="M672 106 L678 110 L672 114 Z"/></g>
+      <text x="740" y="40" font-size="12.5" fill="currentColor">M = 7 everywhere:</text><text x="740" y="56" font-size="12.5" fill="currentColor">64 → 16 → 4 → 1 windows</text>
+      <text x="740" y="80" font-size="12.5" fill="var(--accent)" font-weight="700">feature maps at 4 scales</text><text x="740" y="96" font-size="12" fill="currentColor">→ fit any CNN-era head</text><text x="740" y="112" font-size="12" fill="currentColor">(FPN, UPerNet)</text>
+    </svg>
+  </div>
+  <ul class="small">
+    <li><b>Numbers to know:</b> Swin-T ≈ 28 M params, 4.5 GFLOPs, 81.3% ImageNet-1K; Swin-L 87.3% (ImageNet-22K); COCO 58.7 box / 51.1 mask AP; ADE20K 53.5 mIoU — all state of the art in 2021. <span class="accent">The idea the weather models took was not the pyramid but the window and the shift.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>patch merging</b> — concatenate each 2 × 2 group of tokens (4C) and project to 2C: half the side, double the width, like pooling. <b>FPN / UPerNet</b> — multi-scale detection and segmentation heads built for CNN pyramids.</span>
+  </div>
+  <div class="foot"><span>Liu et al. 2021, <i>Swin Transformer: Hierarchical Vision Transformer using Shifted Windows</i>, ICCV (Marr Prize) · Table 1 (variants), Tables 2–3 (results), Table 4 (ablations) · card: Appendix A5</span></div>
+  <aside class="notes">1.2 min, closing Part 4 with the paper on the board. The story to tell: ViT is flat — one scale, every token sees every token — and could not be dropped into the detection and segmentation pipelines the field already had; Swin rebuilt the CNN pyramid out of windowed attention, so its four feature maps slot straight into FPN and UPerNet, and it won everything in 2021. Then the sentence that matters for this course: the weather models did not take the pyramid; they took the window and the shift and added a third dimension. Do not answer the discussion questions; the leader should open with Figure 2 or Figure 4.</aside>
+</section>
+
+<!-- 34 -->
+<section class="slide xl">
+  <p class="kicker">Part 4 · Watch at home</p>
+  <h2>Swin animated, Swin by its author, and Pangu by its author</h2>
+  <div style="display:flex;gap:1.2vw;margin-top:1.4vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=SndHALawoag" class="yt" data-id="SndHALawoag" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w6-swin-coffee.jpg" alt="AI Coffee Break animated explanation of the Swin Transformer paper" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">AI Coffee Break with Letitia · <i>Swin Transformer paper animated and explained</i> · 11 min — <span class="accent">click to play here</span> · the shift, moving.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=udY0GlYXXbE" class="yt" data-id="udY0GlYXXbE" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w6-swin-hanhu.jpg" alt="Han Hu's CVPR tutorial talk on the Swin Transformer" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Han Hu (Microsoft Research Asia) · <i>Swin Transformer and 5 reasons to use attention in vision</i> · 30 min — this week’s paper, by its author.</p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=k4-gu1nX0Y8" class="yt" data-id="k4-gu1nX0Y8" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w6-pangu-xie.jpg" alt="Lingxi Xie's talk on Pangu-Weather at ICBS 2024" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Lingxi Xie (ICBS 2024) · <i>Pangu-Weather</i> · 54 min — the 3-D Earth-specific transformer, by an author.</p>
+    </a>
+  </div>
+  <p class="small" style="margin:1.2vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Part 5.</b> You now have a model. Two lines decide whether it trains in the lab hour or in three: the number format, and whether the N × N matrix is ever written to memory.</p>
+  <div class="gloss">
+    <span><b>also on the shelf (A11)</b> — FuXi by Xiaohui Zhong, Aurora by Paris Perdikaris, ECMWF’s AI-forecasting seminars.</span>
+  </div>
+  <div class="foot"><span>Optional, not assigned · ids verified embeddable on 9 October 2026</span></div>
+  <aside class="notes">Twenty seconds. The Coffee Break one if the shift still feels abstract; Han Hu for the paper's reasoning before the journal club; Xie if the weather track is theirs. Bridge and go.</aside>
+</section>
+
+<!-- 35 -->
+<section class="slide xl">
+  <p class="kicker">Part 5 · 3 min · why the lab fits in an hour</p>
+  <h2>bf16 and FlashAttention: two lines, eight times faster</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Two lines make the lab fit: bf16 autocast (8× the T4’s rate) and SDPA, which never stores the N × N matrix.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 190" role="img" aria-label="Left: three bars showing the bit layouts of fp32 (1 sign, 8 exponent, 23 fraction), fp16 (1, 5, 10) and bf16 (1, 8, 7); bf16 keeps fp32's exponent. Right: FlashAttention tiling — blocks of Q and K and V stream through the GPU's small fast SRAM, a running maximum and sum keep the softmax exact, and the output accumulates; the large slow HBM never holds the N by N matrix." style="width:min(96%,1100px)">
+      <g font-size="13" fill="currentColor" font-weight="700"><text x="10" y="18">number format: where the bits go</text><text x="470" y="18">FlashAttention: never write the N × N matrix</text></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="end"><text x="60" y="48">fp32</text><text x="60" y="88">fp16</text><text x="60" y="128">bf16</text></g>
+      <g stroke="currentColor" stroke-width="1">
+        <rect x="70" y="34" width="10" height="20" fill="var(--muted)"/><rect x="80" y="34" width="80" height="20" fill="var(--accent)" opacity=".85"/><rect x="160" y="34" width="230" height="20" fill="#2c6fb0" opacity=".7"/>
+        <rect x="70" y="74" width="10" height="20" fill="var(--muted)"/><rect x="80" y="74" width="50" height="20" fill="var(--accent)" opacity=".85"/><rect x="130" y="74" width="100" height="20" fill="#2c6fb0" opacity=".7"/>
+        <rect x="70" y="114" width="10" height="20" fill="var(--muted)"/><rect x="80" y="114" width="80" height="20" fill="var(--accent)" opacity=".85"/><rect x="160" y="114" width="70" height="20" fill="#2c6fb0" opacity=".7"/>
+      </g>
+      <g font-size="11.5" fill="#fff" font-weight="700"><text x="96" y="48">8 exponent</text><text x="250" y="48">23 fraction</text><text x="86" y="88">5 exp</text><text x="150" y="88">10 fraction</text><text x="100" y="128">8 exp</text><text x="168" y="128">7 frac</text></g>
+      <g font-size="12" fill="currentColor"><text x="240" y="88">max 65,504 → needs loss scaling</text><text x="240" y="128">same range as fp32 → <tspan fill="var(--accent)" font-weight="700">no loss scaling</tspan></text></g>
+      <g font-size="12" fill="currentColor"><text x="10" y="160">T4 (Colab): 8.1 TFLOPS fp32 → <tspan font-weight="700">65</tspan> fp16 tensor (×8) · A100: 19.5 → 312</text><text x="10" y="178" font-family="var(--mono)" font-size="12">with torch.autocast("cuda", dtype=torch.bfloat16):</text></g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2"><rect x="470" y="30" width="110" height="110" rx="8"/><rect x="760" y="30" width="130" height="110" rx="8" stroke="var(--accent)" stroke-width="1.8"/></g>
+      <g font-size="12" fill="currentColor" text-anchor="middle"><text x="525" y="50">HBM (slow, big)</text><text x="525" y="68" fill="var(--muted)" font-size="11.5">Q, K, V, O</text><text x="525" y="86" fill="var(--muted)" font-size="11.5">N × d each</text><text x="525" y="122" fill="var(--accent)" font-weight="700">no N × N here</text></g>
+      <g font-size="12" fill="currentColor" text-anchor="middle"><text x="825" y="50">SRAM (fast, tiny)</text><text x="825" y="68" fill="var(--muted)" font-size="11.5">one block of Q ×</text><text x="825" y="84" fill="var(--muted)" font-size="11.5">one block of K, V</text><text x="825" y="104" font-size="11.5">running max &amp; sum</text><text x="825" y="120" font-size="11.5">→ exact softmax</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M580 70 H760 M760 110 H580"/></g>
+      <g fill="currentColor" stroke="none"><path d="M754 66 L760 70 L754 74 Z"/><path d="M586 106 L580 110 L586 114 Z"/></g>
+      <g font-size="11.5" fill="var(--muted)" text-anchor="middle"><text x="670" y="62">stream blocks in</text><text x="670" y="126">write O blocks out</text></g>
+      <text x="680" y="162" text-anchor="middle" font-size="12" fill="currentColor">memory O(N) · FA-2 ≈ 2× FA-1 · exact, not approximate</text>
+      <text x="680" y="180" text-anchor="middle" font-size="12" fill="currentColor" font-family="var(--mono)">F.scaled_dot_product_attention(q, k, v)  # Flash</text>
+    </svg>
+  </div>
+  <ul class="small">
+    <li><span class="accent">Test your own attention; train with SDPA</span> — test 4 is what licenses the swap. bf16 keeps fp32’s exponent, so no loss scaling; fp16 does not (values below 2<sup>−24</sup> vanish, Micikevicius et al. 2018).</li>
+  </ul>
+  <div class="gloss">
+    <span><b>autocast</b> — runs matmuls in 16-bit, keeps master weights in fp32. <b>SDPA</b> “scaled dot-product attention”, <code>torch.nn.functional</code>. <b>HBM / SRAM</b> — the GPU’s big slow memory and its small fast on-chip memory; attention is bound by moving data, not by arithmetic.</span>
+  </div>
+  <div class="foot"><span>Dao et al. 2022, <i>FlashAttention</i>; Dao 2023, <i>FlashAttention-2</i> · Micikevicius et al. 2018 · NVIDIA T4 and A100 datasheets · card: Appendix A8</span></div>
+  <aside class="notes">2.5 min. Left: the bit bars. bf16 is fp32 with the fraction cut off — same exponent, same range, so nothing underflows and there is no loss scaling to manage; fp16 has the range problem and needs it. The number: a T4 does eight times the arithmetic in 16-bit on its tensor cores. Right: FlashAttention is not an approximation; it streams blocks of Q, K and V through the fast on-chip memory, keeps a running max and sum so the softmax is exact, and never writes the N × N matrix — memory linear in N, and two to four times faster because attention is bound by data movement. In the lab: the from-scratch attention is for the tests; once test 4 passes they may train with SDPA, because the test proved it computes the same thing.</aside>
+</section>
+
+<!-- 36 -->
+<section class="slide xl">
+  <p class="kicker">Part 5 · The contract</p>
+  <h2>Write the tests and the tokenization down before the agent starts</h2>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 120" role="img" aria-label="A timeline of seven steps: write the four tests; the agent writes mini vit dot py; run the tests on a deliberately broken copy, they fail; fix and run, they pass; swap in SDPA and bf16; train the ViT and the CNN baseline on the same split; Note 06. An orange line marks the moment before which no model code exists." style="width:min(98%,1150px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="4" y="30" width="118" height="50" rx="8" stroke="var(--accent)" stroke-width="1.8"/><rect x="134" y="30" width="118" height="50" rx="8"/><rect x="264" y="30" width="118" height="50" rx="8"/><rect x="394" y="30" width="118" height="50" rx="8"/><rect x="524" y="30" width="118" height="50" rx="8"/><rect x="654" y="30" width="118" height="50" rx="8"/><rect x="784" y="30" width="112" height="50" rx="8" stroke="var(--accent)" stroke-width="1.8"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M122 55 H134 M252 55 H264 M382 55 H394 M512 55 H524 M642 55 H654 M772 55 H784"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle">
+        <text x="63" y="51" fill="var(--accent)" font-weight="700">1 · write the</text><text x="63" y="67" fill="var(--accent)" font-weight="700">four tests</text>
+        <text x="193" y="51">2 · the agent writes</text><text x="193" y="67">mini_vit.py</text>
+        <text x="323" y="51">3 · break a copy:</text><text x="323" y="67">tests must FAIL</text>
+        <text x="453" y="51">4 · fix: tests</text><text x="453" y="67">PASS, log kept</text>
+        <text x="583" y="51">5 · bf16 + SDPA</text><text x="583" y="67">(test 4 allows it)</text>
+        <text x="713" y="51">6 · train ViT and</text><text x="713" y="67">CNN, same split</text>
+        <text x="840" y="51" fill="var(--accent)" font-weight="700">7 · Note 06</text><text x="840" y="67" fill="var(--accent)" font-weight="700">five sentences</text>
+      </g>
+      <path d="M128 14 V96" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4"/>
+      <text x="128" y="110" text-anchor="middle" font-size="12" fill="var(--accent)">left of this line, no model code exists</text>
+    </svg>
+  </div>
+  <div class="card small">
+    <p style="margin:.1em 0"><b>Note 06 opens with five sentences, written before training:</b> (1) the <b>four tests</b> with their tolerances, committed before any model code; (2) the <b>tokenization</b> — patch size, band groups, N, which positional encoding; (3) the <b>model card</b> — d, heads, depth, parameter count, pre-norm; (4) the <b>baseline</b> — a CNN of similar size, same split, same epochs, same augmentation; (5) the <b>split and metric</b> — EuroSAT’s class-wise 80/20, overall and per-class accuracy, seed.</p>
+  </div>
+  <ul class="small">
+    <li><span class="accent">A test that cannot fail has verified nothing; a baseline on a different split has compared nothing.</span> The deliberate failure in step 3 is graded.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>same split</b> — the identical list of chips, not the same percentages. <b>in the figure</b> — step 5 is where the from-scratch attention stops being the thing you train and becomes the thing you trust.</span>
+  </div>
+  <div class="foot"><span>Same shape as Week 5’s five sentences, graded the same way · the four tests in code: Appendix A2 · EuroSAT-MS card and the band-order trap: Appendix A9</span></div>
+  <aside class="notes">2 min. Deliver it as a contract, the same shape as last week's. The killer sentence is number 1 with the timeline: the tests exist before any model code, and step 3 — breaking a copy and watching them fail — is a graded deliverable, because the commonest way an agent-written model "passes" is a test that asserts nothing. Number 4 is the Week 1 discussion question made concrete: a CNN may well win on 27 thousand chips, and the honest report says so. End of the live budget: ~0:53. Read the clock: ≤ 0:53 → run the FLEX board exercise; past it → hand the board to the journal-club leader and go to break.</aside>
+</section>
+
+<!-- 37 -->
+<section class="slide xl">
+  <p class="kicker">Part 5 · FLEX ~4 min · teach or skip</p>
+  <h2>Board exercise: size the attention for three datasets</h2>
+  <table style="border-collapse:collapse;width:100%;margin:0 0 1vh">
+    <tr style="color:var(--ink-2)"><th style="text-align:left;padding:.4vh .5vw">input</th><th style="text-align:left;padding:.4vh .5vw">tokenization</th><th style="text-align:left;padding:.4vh .5vw">N</th><th style="text-align:left;padding:.4vh .5vw">N × N scores, bf16, one head</th><th style="text-align:left;padding:.4vh .5vw">which escape? which “where”?</th></tr>
+    <tr><td style="padding:.4vh .5vw"><b>A</b> · an HLS chip, 224 px at 30 m, 6 bands, 4 dates</td><td style="padding:.4vh .5vw">patch 16, t = 1 (Prithvi)</td><td style="padding:.4vh .5vw">?</td><td style="padding:.4vh .5vw">?</td><td style="padding:.4vh .5vw">?</td></tr>
+    <tr><td style="padding:.4vh .5vw"><b>B</b> · one 0.25° level, 721 × 1,440</td><td style="padding:.4vh .5vw">patch 4</td><td style="padding:.4vh .5vw">?</td><td style="padding:.4vh .5vw">?</td><td style="padding:.4vh .5vw">?</td></tr>
+    <tr><td style="padding:.4vh .5vw"><b>C</b> · one pixel’s year: 12 months × 13 bands</td><td style="padding:.4vh .5vw">3 band groups per month (Presto)</td><td style="padding:.4vh .5vw">?</td><td style="padding:.4vh .5vw">?</td><td style="padding:.4vh .5vw">?</td></tr>
+  </table>
+  <ul class="small">
+    <li>Rules: N = points / patch area (× dates); scores = N² × 2 bytes. <span class="accent">Then say what the token must be told: pixels? metres? the date? the band? the latitude?</span></li>
+    <li class="muted">Answers in the speaker notes — fill the board from the room, not from the slide.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>HLS</b> — 30 m Landsat–Sentinel; <b>Presto</b> — pixel time series, question 3. <b>the point</b> — the same two formulas size every model in this course.</span>
+  </div>
+  <div class="foot"><span>Run only if the clock allows at slide 36 · the three rows are the three tracks of the capstone: EO chips, weather grids, pixel time series</span></div>
+  <aside class="notes">FLEX, ~4 min. Answers. A: (224/16)² = 196 tokens per date; with t = 1 and 4 dates, 784 tokens; scores 784² × 2 B = 1.2 MB — trivial; no escape needed; the token should be told row, column, date, and — if available — latitude, longitude and day of year (Prithvi). B: 181 × 360 = 65,160; 8.5 GB per head; windows (Pangu, Aurora) or coarsen (ClimaX) or latent (Aurora's Perceiver); the token needs level, latitude (absolute — the poles are real) and longitude (periodic). C: 12 months × 3 groups = 36 tokens; 36² × 2 B = 2.6 kB — attention is free and the model can be tiny (Presto: 402 K parameters); the token must be told the month and the band group, and ideally the location. The lesson across the rows: the same two formulas size every model in the course, and "position" is a different list in each track.</aside>
+</section>
+
+<!-- 38 -->
+<section class="slide xl">
+  <p class="kicker">Journal club · 30 min · after break · 0 lecture minutes</p>
+  <h2>Liu et al. 2021, Swin Transformer — discussion questions</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.4vw;align-items:stretch">
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q1 · the shift on a globe</b><br>Why does shifted windowing recover cross-window information flow — and what is the weather-model analog at the poles and the dateline?</p><p class="small muted" style="margin:1vh 0 0">start from slides 31–32</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q2 · 13 bands, one embedding?</b><br>For a 13-band image, argue for and against: one patch embedding for all bands vs band-group embeddings vs wavelength-conditioned embeddings (DOFA’s answer).</p><p class="small muted" style="margin:1vh 0 0">start from slides 16 and 24 — and from your own lab’s choice</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q3 · 400 K parameters</b><br>Presto has 400 K parameters and competes with giants on pixel time series — what does that say about scale vs inductive fit?</p><p class="small muted" style="margin:1vh 0 0">start from slide 23 and Tseng et al. 2023, Tables 5 and 13</p></div>
+  </div>
+  <p class="small muted" style="margin-top:1vh">Groups of 3–4, working from your published entrance tickets (Journal Club tab on the course site) · the drawn leader moderates, the presenter reports back, the questioner takes another group’s report · these three questions are the agenda.</p>
+  <div class="foot"><span>Leader opens with one reproduced figure (Fig. 2 or Fig. 4 of the paper) · roles revealed at 13:00 on the course site · optional: <a href="https://arxiv.org/abs/2304.14065">Tseng et al. 2023, Presto</a></span></div>
+  <aside class="notes">Journal club: 30 min in groups of 3–4, drawn leader moderating, presenter reporting back; harvest in the last 5 min. Q1: good answers say that alternating window partitions make the reach grow with depth like a CNN's receptive field (the cyclic shift is only the efficient implementation); better ones separate the two axes of a globe — longitude is periodic, so a roll across the dateline is physically exact and the seam mask should NOT be applied there, while latitude ends, so the poles need either padding or an absolute code — and name Pangu's Earth-specific bias (absolute in latitude, relative in longitude) and Aurora's Fourier position/area encodings as the two published answers. Q2: one embedding treats bands as interchangeable channels and cannot handle a sensor with different bands; group embeddings (SatMAE, the lab) buy per-group masking and a sensor-agnostic token but hard-code the grouping; wavelength conditioning (DOFA) makes the embedding a function of physics so a new sensor is a new argument, at the cost of a hypernetwork and the assumption that wavelength is what matters (it ignores bandwidth and SAR). Q3: Presto's 402 K parameters win where the inductive fit is right — one pixel, monthly tokens, band-group and month codes — and lose to Scale-MAE on 64-px EuroSAT images (kNN 0.921 vs 0.960, Table 13) where spatial context matters; the lesson is that scale buys generality but the token design buys fit, and the two are not the same axis. Close with a one-line bridge to lab.</aside>
+</section>
+
+<!-- 39 -->
+<section class="slide xl">
+  <p class="kicker">Lab briefing · 3 min · after journal club</p>
+  <h2>Lab: four tests, one file, one honest comparison</h2>
+  <div class="cols" style="grid-template-columns:1.2fr 1fr;gap:2.2vw;align-items:center;flex:0 0 auto">
+    <div style="min-width:0">
+  <div class="card small">
+    <p><b>Data.</b> EuroSAT-MS: 27,000 chips, 64 px, 13 bands, 10 classes. <span class="pill">class-wise 80/20 split</span> <span class="pill">band order: B8A last</span></p>
+    <p><b>File.</b> <code>mini_vit.py</code>: Attention → MultiHead → Block → patchify (one embedding per band group) → ViT; d ≈ 128, 4–6 blocks, 3 × 64 tokens, ≈ 1 M params. Tests first, agent second, a deliberate failure third; then bf16 + SDPA, ~10 epochs on a T4.</p>
+    <p><b>Note 06.</b> The five sentences; the test log with the failure; accuracy overall and per class vs a <b>CNN of similar size on the same split</b>; one attention map.</p>
+  </div>
+    </div>
+    <div class="figure" style="min-width:0">
+      <svg viewBox="0 0 420 250" role="img" aria-label="Sketch of the plot the lab hands in: validation accuracy against epoch for a CNN and the tiny ViT, both rising; the CNN leads early and the ViT closes the gap; a badge in the corner reads four tests passing, one deliberate failure logged." style="width:min(100%,460px)">
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M50 20 V200 H400"/></g>
+      <g font-size="13" fill="var(--muted)" text-anchor="end"><text x="44" y="26">1.0</text><text x="44" y="204">0.5</text></g>
+      <g font-size="13" fill="var(--muted)" text-anchor="middle"><text x="50" y="218">0</text><text x="400" y="218">10</text><text x="225" y="238">epoch</text></g>
+      <text x="22" y="110" text-anchor="middle" font-size="13" fill="var(--muted)" transform="rotate(-90 22 110)">val accuracy</text>
+      <path d="M50 190 C 90 70, 160 48, 400 40" fill="none" stroke="#8a877d" stroke-width="2.6"/>
+      <path d="M50 196 C 120 150, 220 70, 400 48" fill="none" stroke="var(--accent)" stroke-width="3"/>
+      <g font-size="13.5" font-weight="700"><text x="300" y="32" fill="#8a877d">CNN baseline</text><text x="270" y="96" fill="var(--accent)">tiny ViT (yours)</text></g>
+      <rect x="60" y="30" width="150" height="40" rx="7" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.2"/>
+      <text x="135" y="47" text-anchor="middle" font-size="12" fill="currentColor">4 tests passing</text><text x="135" y="62" text-anchor="middle" font-size="12" fill="var(--accent)">1 deliberate failure logged</text>
+      <text x="225" y="150" text-anchor="middle" font-size="13" fill="currentColor" font-weight="700">the gap is the honest result — report it</text>
+    </svg>
+    </div>
+  </div>
+  <ul class="small">
+    <li>Verify, do not trust: <span class="accent">open one chip with the band names and check that B8A ≈ B8</span> (file order is B01…B12, B8A) — a group embedding fed the wrong bands trains fine and means nothing.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>pytest</b> — <code>pytest -q test_mini_vit.py</code>; the agent gets the test file, not the answers. <b>in the figure</b> — the plot you hand in; a CNN may well win at 27 k chips — Week 7 is where this file earns its keep.</span>
+  </div>
+  <div class="foot"><span>Stuck in lab? → Appendix A1 (shapes) · A2 (the four tests + torch weight mapping) · A8 (bf16/SDPA) · A9 (EuroSAT-MS card)</span></div>
+  <aside class="notes">3 min. Set the verification contract explicitly — three checks: (1) before any model code, the four tests exist and fail on a stub; (2) after the agent's code passes, break one thing on purpose (flip the mask triangle, drop the residual) and keep the failing log — that is graded; (3) before training, open one chip with band names and confirm B8A correlates with B8, because the Zenodo files store B8A last and every agent assumes the ESA order. Two more to warn about in one breath: normalization statistics computed on the whole set instead of the training split, and comparing against a CNN trained for a different number of epochs. Say the expectation out loud: on 27 thousand chips the CNN may win; the report is graded on honesty, and next week the same file is pretrained. Dismiss to lab. (Slides after this one are the self-study appendix — tell them it exists, then stop here.)</aside>
+</section>
+
+<!-- 40 -->
+<section class="slide section">
+  <p class="kicker">Appendix · self-study</p>
+  <h2>The derivations and the reference cards</h2>
+  <p class="big muted">Reference material; not covered live.</p>
+  <aside class="notes">Not taught in class. These eleven cards hold everything that came off the live path: attention with every shape written out and a twelve-line reference implementation; the four tests in code with the torch weight mapping; the positional-encoding algebra (why the dot product sees the offset, and RoPE); the six Earth encodings written out; the Swin card; the three weather backbones with their exact token grids; the ViT card; mixed precision and FlashAttention; the EuroSAT-MS card with the band-order trap; the assigned video; the shelf. Say the appendix exists, say what is in it, and stop.</aside>
+</section>
+
+<!-- 41 -->
+<section class="slide">
+  <p class="kicker">Appendix A1 · Attention, every shape written out</p>
+  <h2>Twelve lines, and what each tensor is</h2>
+  <div class="cols" style="grid-template-columns:1.15fr 1fr;gap:2vw;align-items:start">
+    <pre style="margin:0;line-height:1.45">class Attention(nn.Module):
+    def __init__(self, d, h):
+        super().__init__(); self.h, self.dh = h, d // h
+        self.qkv = nn.Linear(d, 3 * d); self.out = nn.Linear(d, d)
+    def forward(self, x, mask=None):                 # x: (B, N, d)
+        B, N, d = x.shape
+        q, k, v = (self.qkv(x).view(B, N, 3, self.h, self.dh)
+                   .permute(2, 0, 3, 1, 4))          # each (B, h, N, dh)
+        s = q @ k.transpose(-2, -1) / self.dh ** 0.5  # (B, h, N, N)
+        if mask is not None:
+            s = s.masked_fill(mask == 0, float("-inf"))
+        w = s.softmax(-1)                             # rows sum to 1
+        return self.out((w @ v).transpose(1, 2).reshape(B, N, d))</pre>
+    <div class="small" style="min-width:0">
+      <ul style="margin:0">
+        <li><b>X</b> (B, N, d) → one linear map to (B, N, 3d): the first d columns are Q for all heads, then K, then V — the same packing as torch’s <code>in_proj_weight</code>.</li>
+        <li><b>view + permute</b> splits d into h × d<sub>h</sub> and moves heads next to the batch: every head is an independent attention over (N, d<sub>h</sub>).</li>
+        <li><b>s</b> (B, h, N, N): N² numbers per head — slide 11. <b>/√d<sub>h</sub></b>: per-head width, not d.</li>
+        <li><b>mask</b> broadcast (N, N) or (B, 1, N, N); applied <i>before</i> softmax; −∞ → exactly 0.</li>
+        <li><b>w @ v</b> (B, h, N, d<sub>h</sub>) → transpose heads back → (B, N, d) → W<sub>O</sub>.</li>
+        <li>Parameters: 4d² + 4d. FLOPs per layer ≈ 8Nd² (projections) + 4N²d (scores and mixing).</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Vaswani et al. 2017 §3.2 · Karpathy’s nanoGPT writes it the same way · a Block = x + attn(LN(x)); x + mlp(LN(x)) · the lab’s MultiHead is this class with h &gt; 1</span></div>
+  <aside class="notes">Not taught in class. This is the file the lab asks for, minus the ViT wrapper. The shape comments are the shape test; the mask line is the mask test; the packing comment is why the equivalence test can copy weights directly.</aside>
+</section>
+
+<!-- 42 -->
+<section class="slide">
+  <p class="kicker">Appendix A2 · The four tests in code</p>
+  <h2>test_mini_vit.py — written before mini_vit.py</h2>
+  <pre style="margin:0 0 1vh;line-height:1.4">def test_shapes():
+    for N in (1, 64, 65):
+        assert Attention(64, 4)(torch.randn(2, N, 64)).shape == (2, N, 64)
+
+def test_causal_mask():                       # the future must not leak
+    a, m = Attention(64, 4).eval(), torch.tril(torch.ones(16, 16))
+    x = torch.randn(1, 16, 64); y = x.clone(); y[:, 9:] += 1.0
+    assert torch.allclose(a(x, m)[:, :9], a(y, m)[:, :9], atol=1e-6)
+
+def test_gradient_flow():                     # the first block learns
+    vit = ViT(d=64, h=4, depth=4, patch=8, groups=3); x = torch.randn(2, 13, 64, 64)
+    vit(x).logsumexp(-1).mean().backward()
+    assert vit.blocks[0].attn.qkv.weight.grad.abs().sum() &gt; 0
+
+def test_equivalence():                       # the same thing as torch
+    ours, ref = Attention(64, 4), nn.MultiheadAttention(64, 4, batch_first=True)
+    ref.in_proj_weight.data.copy_(ours.qkv.weight); ref.in_proj_bias.data.copy_(ours.qkv.bias)
+    ref.out_proj.weight.data.copy_(ours.out.weight); ref.out_proj.bias.data.copy_(ours.out.bias)
+    x = torch.randn(2, 10, 64)
+    assert torch.allclose(ours(x), ref(x, x, x, need_weights=False)[0], atol=1e-5)</pre>
+  <ul class="small">
+    <li><b>The mapping that fails:</b> torch stores Q, K, V as one (3d × d) <code>in_proj_weight</code>, rows [W<sub>Q</sub>; W<sub>K</sub>; W<sub>V</sub>]; a module with three separate <code>nn.Linear</code>s must <code>torch.cat</code> their weights in that order. <code>batch_first=True</code> or the reference expects (N, B, d). Dropout off (<code>.eval()</code>). The deliberate failure for step 3: <code>torch.triu</code> in place of <code>tril</code> — test 2 must fail.</li>
+  </ul>
+  <div class="foot"><span>pytest -q test_mini_vit.py · the agent receives this file and the shape of the ViT class, nothing else · Week 7 adds a fifth test: the MAE’s mask ratio</span></div>
+  <aside class="notes">Not taught in class. Four tests, fifteen lines. The bullet is the one students lose an hour to: the weight packing of torch's module. The deliberate failure is a one-token edit — triu for tril — and it is the proof that test 2 asserts something.</aside>
+</section>
+
+<!-- 43 -->
+<section class="slide">
+  <p class="kicker">Appendix A3 · Positional encodings, derived</p>
+  <h2>Why the dot product sees the offset, and what RoPE rotates</h2>
+  <div class="card small" style="line-height:1.75">
+    <b>Sin-cos (2017).</b> ω<sub>k</sub> = 10000<sup>−2k/d</sup>, k = 0 … d/2 − 1; PE(pos) = [sin(ω<sub>0</sub>pos), cos(ω<sub>0</sub>pos), …, sin(ω<sub>d/2−1</sub>pos), cos(ω<sub>d/2−1</sub>pos)]<br>
+    PE(i)·PE(j) = Σ<sub>k</sub> [sin(ω<sub>k</sub>i) sin(ω<sub>k</sub>j) + cos(ω<sub>k</sub>i) cos(ω<sub>k</sub>j)] = <b>Σ<sub>k</sub> cos(ω<sub>k</sub>(i − j))</b> — a function of the offset only (slide 22, right panel); and PE(pos + Δ) = M<sub>Δ</sub> PE(pos) for a fixed rotation M<sub>Δ</sub>, so a linear map can express “Δ tokens back”.<br>
+    <b>Learned (ViT, GPT-2).</b> A table E ∈ ℝ<sup>N×d</sup>, trained; fixed N; ViT’s 2-D-aware variants gave nothing (Table 8).<br>
+    <b>RoPE (2021).</b> Pair the d coordinates; rotate pair k of q<sub>m</sub> by angle mθ<sub>k</sub>, θ<sub>k</sub> = 10000<sup>−2k/d</sup>: q<sub>m</sub> = R(mΘ) W<sub>Q</sub>x<sub>m</sub>, k<sub>n</sub> = R(nΘ) W<sub>K</sub>x<sub>n</sub>. Since R(a)<sup>⊤</sup>R(b) = R(b − a): <b>q<sub>m</sub>·k<sub>n</sub> = (W<sub>Q</sub>x<sub>m</sub>)<sup>⊤</sup> R((n − m)Θ) (W<sub>K</sub>x<sub>n</sub>)</b> — the score depends on m − n, nothing is added to x, and the values v are untouched. The weight on far tokens decays with |m − n| (RoFormer §3.4.3).<br>
+    <b>Relative bias (Swin).</b> s<sub>ij</sub> += B[i − j], a learned table of (2M − 1)² entries per head inside a window: position without any code on the token.
+  </div>
+  <ul class="small">
+    <li>Which to use: sin-cos or RoPE when N varies between train and test (a longer sequence, a bigger chip); a learned table when N is fixed and small (the lab); a relative bias when attention is windowed.</li>
+  </ul>
+  <div class="foot"><span>Vaswani et al. 2017 §3.5 · Su et al. 2021, <i>RoFormer</i>, §3.2–3.4 · Liu et al. 2021 eq. 4 · d2l.ai Ch. 11.6 (self-attention and positional encoding)</span></div>
+  <aside class="notes">Not taught in class. The one derivation worth reproducing for the Book Check is the first line: sin·sin + cos·cos = cos of the difference, summed over frequencies — that is the whole reason the right panel of slide 22 is banded.</aside>
+</section>
+
+<!-- 44 -->
+<section class="slide">
+  <p class="kicker">Appendix A4 · The Earth encodings, written out</p>
+  <h2>Six models, what a token is, and exactly what it is told</h2>
+  <table class="small" style="border-collapse:collapse;width:100%">
+    <tr style="color:var(--ink-2)"><th style="text-align:left;padding:.3vh .4vw">model</th><th style="text-align:left;padding:.3vh .4vw">token and encoding</th><th style="text-align:left;padding:.3vh .4vw">numbers</th></tr>
+    <tr><td style="padding:.3vh .4vw;vertical-align:top"><b>SatMAE</b> Cong 2022</td><td style="padding:.3vh .4vw">patch of one band group at one date; encoding = concat[x (320) ‖ y (320) ‖ sin-cos year, month, hour (3 × 128)] for temporal, concat[x, y (768) ‖ group (256)] for spectral; separate patch embedding per group; groups masked independently</td><td style="padding:.3vh .4vw">fMoW-Sentinel groups {B2 B3 B4 B8} {B5 B6 B7 B8A} {B11 B12}; patch 8 on 96 px → 3 × 144 tokens; mask 0.75; ViT-L</td></tr>
+    <tr><td style="padding:.3vh .4vw;vertical-align:top"><b>Scale-MAE</b> Reed 2023</td><td style="padding:.3vh .4vw">v<sub>gsd</sub>(pos, 2i) = sin((g/G)·pos / 10000<sup>2i/D</sup>), cos for odd — the GSD ratio scales the position inside the sinusoid; Laplacian-pyramid decoder reconstructs low frequencies at 224 (L2) and high frequencies at 448 (L1)</td><td style="padding:.3vh .4vw">G = reference GSD; FMoW-RGB, ViT-L, patch 16, mask 0.75; kNN across GSDs 12.5–100%: +5.6% vs SatMAE, +2.4% vs ConvMAE</td></tr>
+    <tr><td style="padding:.3vh .4vw;vertical-align:top"><b>ClimaX</b> Nguyen 2023</td><td style="padding:.3vh .4vw">patch of one variable with its own embedding → V × h × w tokens; variable aggregation = cross-attention with one learnable query per location → h × w; + lead-time MLP(Δt) + position</td><td style="padding:.3vh .4vw">5.625°: 32 × 64, patch 2 → 512; 1.40625°: 128 × 256, patch 4 → 2048; 48 CMIP6 variables; D = 1024, 8 layers, 16 heads</td></tr>
+    <tr><td style="padding:.3vh .4vw;vertical-align:top"><b>Prithvi-EO-2.0</b> Szwarcman 2024</td><td style="padding:.3vh .4vw">3-D patch (t = 1, 16 × 16, 6 HLS bands); 3-D sin-cos position; + λ<sub>t</sub>·[sin-cos(year) ‖ sin-cos(day-of-year)] + λ<sub>l</sub>·[sin-cos(lat) ‖ sin-cos(lon)], λ learned; each dropped with p = 0.1</td><td style="padding:.3vh .4vw">ViT-L 300 M, ViT-H 600 M (“TL” = with these codes); 4.2 M HLS samples of 4 dates; best combined on GEO-Bench’s 12 tasks</td></tr>
+    <tr><td style="padding:.3vh .4vw;vertical-align:top"><b>DOFA</b> Xiong 2024</td><td style="padding:.3vh .4vw">patch of one band; the patch-embedding kernel [D, C, P, P] is <i>generated</i>: λ (nm) → sin-cos → 2 FC → one transformer layer over weight/bias queries → FC; a mirrored dynamic decoder</td><td style="padding:.3vh .4vw">S1 (2 ch), S2 (9), Gaofen (4), NAIP (3), EnMAP (202); ViT-B / ViT-L; masked-image modeling + distillation</td></tr>
+    <tr><td style="padding:.3vh .4vw;vertical-align:top"><b>Presto</b> Tseng 2023</td><td style="padding:.3vh .4vw">one channel group at one month: e = h<sup>c</sup>(x) + [channel code ‖ sin-cos month index ‖ learned month]; static SRTM and location tokens; random / channel / timestep masking</td><td style="padding:.3vh .4vw">402 K params; 2 layers, d = 128, 8 heads; 12 monthly steps; EuroSAT kNN (64 px, MS) 0.921 vs Scale-MAE 0.960; wins at 16 px</td></tr>
+  </table>
+  <div class="foot"><span>arXiv 2207.08051 · 2212.14532 · 2301.10343 · 2412.02732 · 2403.15356 · 2304.14065 — numbers checked against the papers on 9 October 2026</span></div>
+  <aside class="notes">Not taught in class. The table is the answer key to slide 23 and the reference for discussion questions 2 and 3. Students on the EO track should be able to say, for any of the six, what a token is and what it is told, in one sentence each.</aside>
+</section>
+
+<!-- 45 -->
+<section class="slide">
+  <p class="kicker">Appendix A5 · This week’s paper</p>
+  <h2>Swin Transformer — the card</h2>
+  <div class="card small" style="line-height:1.7">
+    <b>Cost.</b> Ω(MSA) = 4hwC² + 2(hw)²C · Ω(W-MSA) = 4hwC² + 2M²hwC (eqs. 1–2), M = 7. <b>Shift.</b> Alternate W-MSA and SW-MSA; the shifted partition is displaced by (⌊M/2⌋, ⌊M/2⌋). <b>Cyclic shift.</b> Roll the map by the same amount, attend with a mask so rolled-in tokens ignore the seam, roll back — 755 vs 670 img/s with padding (Swin-T, V100).<br>
+    <b>Position.</b> s = QK<sup>⊤</sup>/√d + B, B taken from a learned B̂ ∈ ℝ<sup>(2M−1)×(2M−1)</sup> per head (eq. 4). <b>Patch merging.</b> Concatenate 2 × 2 neighbours (4C) → linear → 2C; four stages at 1/4, 1/8, 1/16, 1/32 of the image.<br>
+    <b>Variants.</b> Swin-T: C = 96, depths {2, 2, 6, 2}, ≈ 28 M, 4.5 GFLOPs · S: {2, 2, 18, 2} · B: C = 128 · L: C = 192 (197 M, 103.9 G at 384²).<br>
+    <b>Results (2021).</b> ImageNet-1K top-1: Swin-T 81.3 · Swin-L (ImageNet-22K, 384²) 87.3 · COCO test-dev 58.7 box / 51.1 mask AP · ADE20K val 53.5 mIoU.<br>
+    <b>Ablations (Swin-T, Table 4).</b> no shift → shift: top-1 80.2 → 81.3, COCO box 47.7 → 50.5, ADE20K 43.3 → 46.1 · position: none 80.1, absolute 80.5, relative bias 81.3, both 81.3 (worse on dense tasks).
+  </div>
+  <ul class="small">
+    <li>What to take: the window pays the N² bill; the shift restores flow; the bias puts position inside the window; the pyramid makes the model a drop-in backbone. What the weather models kept: the first three.</li>
+  </ul>
+  <div class="foot"><span>Liu, Lin, Cao, Hu, Wei, Zhang, Lin, Guo 2021, ICCV (Marr Prize) · arXiv 2103.14030 · code and weights: github.com/microsoft/Swin-Transformer</span></div>
+  <aside class="notes">Not taught in class. The card the journal-club leader should have open. Everything in it was checked against the paper's tables.</aside>
+</section>
+
+<!-- 46 -->
+<section class="slide">
+  <p class="kicker">Appendix A6 · The three weather backbones</p>
+  <h2>Pangu-Weather, FuXi, Aurora — token grids, windows, training</h2>
+  <table class="small" style="border-collapse:collapse;width:100%">
+    <tr style="color:var(--ink-2)"><th style="text-align:left;padding:.3vh .4vw"></th><th style="text-align:left;padding:.3vh .4vw">Pangu-Weather (Bi et al., Nature 2023)</th><th style="text-align:left;padding:.3vh .4vw">FuXi (Chen et al., npj 2023)</th><th style="text-align:left;padding:.3vh .4vw">Aurora (Bodnar et al., Nature 2025)</th></tr>
+    <tr><td style="padding:.3vh .4vw"><b>input</b></td><td style="padding:.3vh .4vw">0.25°, 1440 × 721; 13 levels × 5 upper-air + 4 surface + 3 constant masks</td><td style="padding:.3vh .4vw">0.25°; two time steps × 70 variables (5 × 13 levels + 5 surface)</td><td style="padding:.3vh .4vw">any set of surface + atmospheric variables; 0.25° pretraining (0.1° and 0.4° fine-tuned)</td></tr>
+    <tr><td style="padding:.3vh .4vw"><b>tokens</b></td><td style="padding:.3vh .4vw">patch 2 × 4 × 4 (upper) and 4 × 4 (surface) → 8 × 181 × 360, C = 192</td><td style="padding:.3vh .4vw">cube embedding 2 × 4 × 4 → 180 × 360, C = 1536</td><td style="padding:.3vh .4vw">per-variable patch embeddings (patch 4) summed per level, + level code, Fourier position / area / time; Perceiver: 13 levels → 3 latent</td></tr>
+    <tr><td style="padding:.3vh .4vw"><b>backbone</b></td><td style="padding:.3vh .4vw">3-D Swin (3DEST), 2-6-6-2 blocks, U-shaped with one downsample (8 × 91 × 180, 2C); window (2, 6, 12); Earth-specific bias — absolute in (level, lat), relative in lon</td><td style="padding:.3vh .4vw">U-Transformer: 48 Swin-V2 blocks (res-post-norm, cosine attention), down to 90 × 180 and back, skip</td><td style="padding:.3vh .4vw">3-D Swin U-Net, 48 layers, stages (6, 10, 8) / (8, 10, 6), 512 → 1024; window (2, 6, 12); no attention bias; 1.3 B params</td></tr>
+    <tr><td style="padding:.3vh .4vw"><b>time</b></td><td style="padding:.3vh .4vw">four models (1, 3, 6, 24 h), hierarchical temporal aggregation</td><td style="padding:.3vh .4vw">one 6-h step; three models in cascade for 0–5, 5–10, 10–15 days</td><td style="padding:.3vh .4vw">one model, lead-time conditioned; rollout fine-tuning</td></tr>
+    <tr><td style="padding:.3vh .4vw"><b>training</b></td><td style="padding:.3vh .4vw">MAE loss; 192 V100 × 16 days per model; ≈ 64 M params each</td><td style="padding:.3vh .4vw">lat-weighted L1; ≈ 30 h on 8 A100 pretraining, ≈ 2 days per cascade model; params not stated</td><td style="padding:.3vh .4vw">&gt; 1 M hours of data; 32 A100 × 2.5 weeks, bf16; fine-tuned to HRES 0.1°, CAMS pollution, waves, cyclone tracks</td></tr>
+  </table>
+  <div class="foot"><span>Nature 619:533 (doi 10.1038/s41586-023-06185-3) · npj Clim Atmos Sci 6:190 · Nature 641:1180 · the window in all three is 2 levels × 6 lat × 12 lon tokens = 2 × 6° × 12° at patch 4</span></div>
+  <aside class="notes">Not taught in class. Weather-track students: the row to memorize is "tokens" — it is slide 18 done three ways — and the row to argue about in the journal club is "backbone", where the Earth-specific bias and Aurora's encoder-side position codes are the two answers to question 1.</aside>
+</section>
+
+<!-- 47 -->
+<section class="slide">
+  <p class="kicker">Appendix A7 · The ViT paper</p>
+  <h2>Dosovitskiy et al. 2020 — the card</h2>
+  <div class="card small" style="line-height:1.7">
+    <b>Pipeline.</b> x ∈ ℝ<sup>H×W×C</sup> → N = HW/P² patches → linear E (P²C → D) → + E<sub>pos</sub> (learned, (N + 1) × D) → [class] token prepended → L pre-norm blocks → LN → MLP head on [class].<br>
+    <b>Variants (Table 1).</b> ViT-B: 12 layers, D = 768, MLP 3072, 12 heads, 86 M · ViT-L: 24 / 1024 / 4096 / 16 / 307 M · ViT-H: 32 / 1280 / 5120 / 16 / 632 M. “/16” = patch 16: 224² → 196 tokens; “/32” → 49.<br>
+    <b>Positions (App. D.4, Table 8; ViT-B/16, ImageNet 5-shot linear).</b> none 0.614 · 1-D learned 0.642 · 2-D learned 0.640 · relative 0.640 — “little to no difference”.<br>
+    <b>Data (§4.3, Fig. 3; Table 2).</b> Pretrained on ImageNet (1.3 M) ViT loses to BiT ResNets; on ImageNet-21k (14 M) it ties; on JFT-300M (303 M) it wins: ViT-H/14 88.55 ± 0.04, ViT-L/16 87.76 (JFT) vs 85.30 (21k); BiT-L 87.54; Noisy Student 88.4/88.5.<br>
+    <b>Why.</b> A convolution hard-codes locality and translation equivariance; a ViT must learn them — the inductive bias of Week 1’s discussion question, bought back with data here and with self-supervised pretraining in Week 7.
+  </div>
+  <div class="foot"><span>Dosovitskiy et al., <i>An Image is Worth 16×16 Words: Transformers for Image Recognition at Scale</i>, ICLR 2021 · arXiv 2010.11929</span></div>
+  <aside class="notes">Not taught in class. The two numbers to keep: 196 tokens, and the data threshold — ImageNet alone is not enough, which is the entire motivation for next week.</aside>
+</section>
+
+<!-- 48 -->
+<section class="slide">
+  <p class="kicker">Appendix A8 · Mixed precision and FlashAttention</p>
+  <h2>The numbers behind “two lines, eight times faster”</h2>
+  <div class="card small" style="line-height:1.7">
+    <b>Formats (sign / exponent / fraction).</b> fp32 1/8/23 · fp16 1/5/10 (max 65,504; values below 2<sup>−24</sup> flush to zero) · bf16 1/8/7 (fp32’s range, 3 significant digits). <b>Loss scaling</b> (Micikevicius et al. 2018): multiply the loss by S (8 … 32 K) so fp16 gradients stay above 2<sup>−24</sup>, unscale before the update; master weights in fp32. bf16 needs none of this.<br>
+    <b>Throughput.</b> T4: 8.1 TFLOPS fp32 · 65 fp16 tensor-core · 16 GB. A100: 19.5 fp32 · 156 TF32 · 312 bf16/fp16 dense (624 sparse) · 40/80 GB. <code>torch.autocast</code> runs matmuls and convolutions in 16-bit and keeps reductions and the optimizer in fp32.<br>
+    <b>FlashAttention (Dao et al. 2022).</b> Attention is memory-bound: standard code writes S = QK<sup>⊤</sup> (N × N) and P = softmax(S) to HBM. Flash tiles Q, K, V into SRAM-sized blocks, keeps a running row max and row sum (online softmax), accumulates O block by block, and recomputes P in the backward pass — extra memory O(N), HBM traffic Θ(N²d²/M) vs Θ(Nd + N²). Exact. BERT-large 15% faster end-to-end, GPT-2 3×, attention kernel up to 7.6×.<br>
+    <b>FlashAttention-2 (2023).</b> Fewer non-matmul FLOPs, parallel over sequence length, better warp partitioning: ≈ 2× FA-1, 50–73% of A100 peak, 225 TFLOPS/GPU end-to-end (72% MFU). <code>F.scaled_dot_product_attention</code> selects Flash, memory-efficient or math kernels automatically (PyTorch ≥ 2.2 ships FA-2).
+  </div>
+  <div class="foot"><span>arXiv 2205.14135 · 2307.08691 · 1710.03740 · NVIDIA T4 and A100 datasheets · in the lab: autocast(bfloat16) + SDPA after test 4 passes</span></div>
+  <aside class="notes">Not taught in class. The practical rule for the lab: bf16 if the GPU has it (A100, L4), fp16 with GradScaler on a T4; SDPA always, once the equivalence test licenses it.</aside>
+</section>
+
+<!-- 49 -->
+<section class="slide">
+  <p class="kicker">Appendix A9 · Lab reference</p>
+  <h2>EuroSAT-MS: the dataset card, and the band-order trap</h2>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr;gap:2vw;align-items:start">
+    <div class="card small" style="line-height:1.65;min-width:0">
+      <b>What.</b> 27,000 geo-referenced 64 × 64 chips, 13 Sentinel-2 L1C bands, 10 classes: AnnualCrop 3000 · Forest 3000 · HerbaceousVegetation 3000 · Highway 2500 · Industrial 2500 · Pasture 2000 · PermanentCrop 2500 · Residential 3000 · River 2500 · SeaLake 3000. Paper split: class-wise 80/20.<br>
+      <b>Where.</b> Zenodo 7711810, <code>EuroSAT_MS.zip</code> (2.07 GB), members <code>EuroSAT_MS/&lt;Class&gt;/&lt;Class&gt;_&lt;n&gt;.tif</code>; uint16 reflectance × 10<sup>4</sup>; 60 m and 20 m bands resampled to 10 m. The deck’s 40 chips were range-read from the zip without downloading it (tools/week06_figs/get_eurosat.py).<br>
+      <b>The trap.</b> File band order is <b>B01 B02 B03 B04 B05 B06 B07 B08 B09 B10 B11 B12 B8A</b> — B8A last, not after B08 as ESA lists it. Verified on the 40 chips: corr(B08, band 13) = 0.98, corr(B08, band 9) = 0.78. Band 10 (B10, cirrus) is ≈ 0 everywhere.<br>
+      <b>Paper numbers.</b> ResNet-50, ImageNet-pretrained, fully trained: RGB 98.57% · colour-infrared 98.30 · SWIR 97.05; no all-13-band result is reported. A ~1 M-parameter model from scratch in 10 epochs will score lower — report yours against your own CNN, not against 98.57.
+    </div>
+    <div class="small" style="min-width:0">
+      <table style="border-collapse:collapse;width:100%">
+        <tr style="color:var(--ink-2)"><th style="text-align:left;padding:.2vh .4vw">band</th><th style="padding:.2vh .4vw">nm</th><th style="padding:.2vh .4vw">m</th><th style="text-align:left;padding:.2vh .4vw">lab group</th></tr>
+        <tr><td style="padding:.2vh .4vw">B1 coastal</td><td style="text-align:center">443</td><td style="text-align:center">60</td><td style="padding:.2vh .4vw;color:var(--muted)">4 (or drop)</td></tr>
+        <tr><td style="padding:.2vh .4vw">B2 B3 B4 blue green red</td><td style="text-align:center">490 560 665</td><td style="text-align:center">10</td><td style="padding:.2vh .4vw">1</td></tr>
+        <tr><td style="padding:.2vh .4vw">B5 B6 B7 red edge</td><td style="text-align:center">705 740 783</td><td style="text-align:center">20</td><td style="padding:.2vh .4vw">2</td></tr>
+        <tr><td style="padding:.2vh .4vw">B8 NIR · B8A narrow NIR</td><td style="text-align:center">842 · 865</td><td style="text-align:center">10 · 20</td><td style="padding:.2vh .4vw">1 · 2</td></tr>
+        <tr><td style="padding:.2vh .4vw">B9 water vapour · B10 cirrus</td><td style="text-align:center">945 · 1375</td><td style="text-align:center">60</td><td style="padding:.2vh .4vw;color:var(--muted)">4 (or drop)</td></tr>
+        <tr><td style="padding:.2vh .4vw">B11 B12 SWIR</td><td style="text-align:center">1610 2190</td><td style="text-align:center">20</td><td style="padding:.2vh .4vw">3</td></tr>
+      </table>
+      <p style="margin:.8vh 0 0">Normalize per band with <b>training-split</b> mean and std; keep B10 or drop it, but say which. Per-class mean spectra of the deck’s chips: <code>tools/week06_figs/out/class_spectra.json</code>.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Helber et al. 2019, IEEE JSTARS (arXiv 1709.00029), Tables I, III–IV · ESA Sentinel-2 MSI band table · band order verified for this lecture on 9 October 2026</span></div>
+  <aside class="notes">Not taught in class. The band-order trap is the one thing on this card that will silently ruin a lab: the agent will write the group embedding assuming ESA's order, the model will train, and the "red edge" group will contain SWIR2. Make them check B8A against B8 on one chip before training.</aside>
+</section>
+
+<!-- 50 -->
+<section class="slide">
+  <p class="kicker">Appendix A10 · Watch at home · assigned</p>
+  <h2>This week’s assigned video — attention, step by step, animated</h2>
+  <div style="display:flex;gap:2vw;margin-top:1vh;align-items:flex-start">
+    <a href="https://www.youtube.com/watch?v=eMlx5fFNoYc" class="yt" data-id="eMlx5fFNoYc" style="flex:0 0 46%;max-width:46%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w6-3b1b-attention.jpg" alt="3Blue1Brown video: Attention in transformers, step-by-step, Deep Learning Chapter 6" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
+        </span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">3Blue1Brown · <i>Attention in transformers, step-by-step | Deep Learning Chapter 6</i> · 26 min — <span class="accent">click to play here</span>.</p>
+    </a>
+    <div class="small" style="min-width:0">
+      <p style="margin:0 0 .8vh"><b>Assigned.</b> Three of next quiz’s five questions (Week 7, 26 October) come from this video. Your summary is due with Note 06, Sunday 18 October, 13:00.</p>
+      <ul style="margin:0">
+        <li>What a query, a key and a value are, in the video’s own picture (a noun and its adjectives).</li>
+        <li>Why the attention pattern is divided by √d and passed through a softmax; what the mask does and why it is applied before the softmax.</li>
+        <li>What a head is, how many GPT-3 has, and why the value map is factored into two low-rank matrices.</li>
+        <li>One sentence on how slide 6’s chip picture is the same object as the video’s attention pattern.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Chapter 5 (<i>Transformers, the tech behind LLMs</i>) is the optional prequel on slide 14 · the assigned video is quizzed; the shelf is not</span></div>
+  <aside class="notes">Not taught in class. The summary prompt is the four bullets; the quiz will ask about the noun-and-adjectives picture, the √d and the mask, and the heads.</aside>
+</section>
+
+<!-- 51 -->
+<section class="slide">
+  <p class="kicker">Appendix A11 · More to watch</p>
+  <h2>The video shelf — verified, embeddable, optional</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr;gap:2.5vw;flex:0 0 auto">
+    <div style="min-width:0">
+      <h3 class="small" style="margin:.4vh 0">Parts 1–3 · attention, tokens, position</h3>
+      <ul class="small" style="margin:0">
+        <li><a href="https://www.youtube.com/watch?v=bCz4OMemCcA" target="_blank" rel="noopener">Umar Jamil, <i>Attention is all you need — model explanation, including math</i></a> · 58 min — the 2017 paper, every matrix.</li>
+        <li><a href="https://www.youtube.com/watch?v=iDulhoQ2pro" target="_blank" rel="noopener">Yannic Kilcher, <i>Attention Is All You Need</i></a> · 27 min · <a href="https://www.youtube.com/watch?v=RQowiOF_FvQ" target="_blank" rel="noopener">Stanford CS231N 2025, <i>Lecture 8: Attention and Transformers</i></a> · 67 min (opens on YouTube — embedding disabled).</li>
+        <li><a href="https://www.youtube.com/watch?v=DVoHvmww2lQ" target="_blank" rel="noopener">AI Coffee Break, <i>ViT explained</i></a> · 5 min · <a href="https://www.youtube.com/watch?v=j6kuz_NqkG0" target="_blank" rel="noopener">Aleksa Gordić, <i>ViT paper explained</i></a> · 25 min — the inductive-bias argument.</li>
+        <li><a href="https://www.youtube.com/watch?v=SMBkImDWOyQ" target="_blank" rel="noopener">Jia-Bin Huang, <i>How Rotary Position Embedding supercharges modern LLMs</i></a> · 14 min.</li>
+        <li><a href="https://www.youtube.com/watch?v=H2mHNaI3oNQ" target="_blank" rel="noopener">Gabriel Tseng, <i>Presto: lightweight pretrained transformers for remote-sensing time series</i></a> · 48 min — question 3, by its author.</li>
+        <li><a href="https://www.youtube.com/watch?v=rsM1mMp8rh4" target="_blank" rel="noopener">Zhitong Xiong, <i>Multimodal foundation models for Earth observation</i> (SSL4EO 2024)</a> · 34 min — DOFA, question 2.</li>
+        <li><a href="https://www.youtube.com/watch?v=CB3FKtmuPI8" target="_blank" rel="noopener">AI for Good, <i>Prithvi-EO-2.0 and TerraTorch workshop</i></a> · 115 min · <a href="https://www.youtube.com/watch?v=9KDcNz85wbA" target="_blank" rel="noopener">IEEE GRSS, <i>Foundation models for geoscience</i></a> · 59 min.</li>
+      </ul>
+    </div>
+    <div style="min-width:0">
+      <h3 class="small" style="margin:.4vh 0">Parts 4–5 · windows, weather, fit</h3>
+      <ul class="small" style="margin:0">
+        <li><a href="https://www.youtube.com/watch?v=WVyDdIBi26M" target="_blank" rel="noopener">Microsoft Developer, <i>Swin Transformer</i></a> · 11 min · <a href="https://www.youtube.com/watch?v=Ngikt-K1Ecc" target="_blank" rel="noopener">Hugging Face, <i>CV study group: Swin</i></a> · 46 min — code level.</li>
+        <li><a href="https://www.youtube.com/watch?v=Sy8sRTfPOyA" target="_blank" rel="noopener">Han Hu &amp; Li Dong, <i>Convergence between CV and NLP modeling</i> (ICCV 2021)</a> · 29 min.</li>
+        <li><a href="https://www.youtube.com/watch?v=LmjpE5Wusgk" target="_blank" rel="noopener">Xiaohui Zhong, <i>FuXi weather forecasting system</i> (ICBS 2025)</a> · 53 min — by a co-author.</li>
+        <li><a href="https://www.youtube.com/watch?v=OqHlCXcibrg" target="_blank" rel="noopener">Paris Perdikaris, <i>Aurora: a foundation model of the atmosphere</i></a> · 66 min · <a href="https://www.youtube.com/watch?v=Zi4u-JWpY5w" target="_blank" rel="noopener">Microsoft Research Forum, <i>Project Aurora</i></a> · 7 min.</li>
+        <li><a href="https://www.youtube.com/watch?v=Lok2btHzlWw" target="_blank" rel="noopener">Richard Turner at ECMWF, <i>Foundation models for the Earth system</i></a> · 42 min · <a href="https://www.youtube.com/watch?v=JUsFvifyZeM" target="_blank" rel="noopener">ECMWF, <i>The AI weather forecasting revolution</i></a> · 68 min.</li>
+        <li><a href="https://www.youtube.com/watch?v=gMOAud7hZg4" target="_blank" rel="noopener">Tri Dao, <i>FlashAttention</i> (Stanford MLSys #67)</a> · 59 min · <a href="https://www.youtube.com/watch?v=FThvfkXWqtE" target="_blank" rel="noopener">the shorter MedAI version</a> · 48 min.</li>
+        <li><a href="https://www.youtube.com/watch?v=i1fIBtdhjIg" target="_blank" rel="noopener">NVIDIA, <i>Mixed-precision training</i></a> · 6 min · <a href="https://www.youtube.com/watch?v=hHpC9Sywh4U" target="_blank" rel="noopener">ExplainingAI, <i>Mixed precision from scratch in PyTorch</i></a> · 32 min · <a href="https://www.youtube.com/watch?v=139UPjoq7Kw" target="_blank" rel="noopener">Horace He, <i>ML systems for a trillion trillion FLOPs</i></a> · 63 min.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Every id checked on 9 October 2026 for embeddability and length · none assigned · the assigned video is A10</span></div>
+  <aside class="notes">Not taught in class. A shelf, not a syllabus: EO-track students to Tseng, Xiong and the Prithvi workshop; weather-track students to Zhong, Perdikaris and Turner; anyone who wants the lab to run faster to Tri Dao.</aside>
+</section>
+
+</body>
+</html>
