@@ -9,6 +9,19 @@
 <script src="deck.js" defer></script>
 <script src="ink.js" defer></script>
 <script src="poll.js" defer></script>
+<style>
+/* compact video row (slide 3): small thumbnails; a playing video opens large over the slide,
+   and deck.js restores the thumbnail when the slide is left */
+.ytmini { display:flex; gap:1.4vw; margin-top:1.2vh; }
+.ytmini a.yt { flex:1; min-width:0; display:flex; gap:.8vw; align-items:center; text-decoration:none; color:inherit; }
+.ytmini .ytbox { position:relative; display:block; flex:0 0 9.5vw; }
+.ytmini .ytbox img { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:6px; display:block; }
+.ytmini .play { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.ytmini .play span { background:rgba(0,0,0,.62); color:#fff; border-radius:999px; padding:.6vh 1vh; font-size:1.7vh; line-height:1; }
+.ytmini .cap { font-size:clamp(12.5px,1.85vh,16px); line-height:1.35; color:var(--ink-2); min-width:0; }
+.ytmini .ytbox:has(iframe) { position:fixed; z-index:120; top:10vh; left:50%; transform:translateX(-50%);
+  width:min(80vw,140vh); flex:none; border-radius:10px; box-shadow:0 12px 48px rgba(0,0,0,.45); }
+</style>
 </head>
 <body>
 
@@ -77,8 +90,22 @@
     <tr style="border-top:1px solid var(--hairline)"><td style="padding:.45vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">4 · Windows</td><td style="padding:.45vh .6vw"><b>Swin</b> shifted-window Transformer — attention only inside small windows that shift every layer (this week’s paper) · <b>Pangu, FuXi, Aurora</b> AI weather-forecast models built on such windows</td></tr>
     <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.45vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">5 · Fit</td><td style="padding:.45vh .6vw"><b>fp16 / bf16</b> 16-bit numbers: half the memory, much faster on a GPU · <b>FlashAttention</b> attention computed without storing the N × N table · <b>contract</b> the five sentences Note 06 opens with · <b>FLEX</b> optional board exercise</td></tr>
   </table>
-  <div class="foot"><span>Journal club (30 min, after the break) — three questions on this week’s paper; lab briefing after · every derivation and reference card is in the Appendix</span></div>
-  <aside class="notes">1.5 min. Read the chain left to right, once, out loud — it is the whole lecture: each patch looks at all the others and takes a weighted average, with weights set by how well they match; that means N patches produce N × N scores, so we cut the image into fewer, bigger patches; attention by itself forgets where each patch was, so we add its position back — and on the Earth, position also means band, date and metres per pixel; to save cost further, each patch looks only at its neighbours, in windows that shift every layer; and two lines of code make the whole thing fit in a lab hour. Then the table: say each new word in one breath — they all come back on their own slides, so this is a preview, not a lecture. The words worth stressing: token (today, one image patch), query/key/value, positional encoding, and Swin (this week's paper). Every concept slide in Part 1 ends in one of the lab's four tests, and every number on today's slides that is not from a paper was computed for this lecture on the lab's own chips.</aside>
+  <div class="ytmini">
+    <a href="https://www.youtube.com/watch?v=eMlx5fFNoYc" class="yt" data-id="eMlx5fFNoYc">
+      <span class="ytbox"><img src="img/yt-w6-3b1b-attention.jpg" alt="3Blue1Brown video: attention in transformers, step by step"><span class="play"><span>&#9654;</span></span></span>
+      <span class="cap"><b>Part 1 words</b> — token, Q/K/V, head, mask · 3Blue1Brown, <i>Attention in transformers</i> · 26 min · <span class="accent">assigned</span></span>
+    </a>
+    <a href="https://www.youtube.com/watch?v=o29P0Kpobz0" class="yt" data-id="o29P0Kpobz0">
+      <span class="ytbox"><img src="img/yt-w6-rope-efficientnlp.jpg" alt="Efficient NLP video on rotary positional embeddings"><span class="play"><span>&#9654;</span></span></span>
+      <span class="cap"><b>Part 3 words</b> — sin-cos and RoPE · Efficient NLP, <i>Rotary Positional Embeddings</i> · 11 min</span>
+    </a>
+    <a href="https://www.youtube.com/watch?v=SndHALawoag" class="yt" data-id="SndHALawoag">
+      <span class="ytbox"><img src="img/yt-w6-swin-coffee.jpg" alt="AI Coffee Break animated explanation of the Swin Transformer"><span class="play"><span>&#9654;</span></span></span>
+      <span class="cap"><b>Part 4 words</b> — patches, windows, the shift · AI Coffee Break, <i>Swin Transformer, animated</i> · 11 min</span>
+    </a>
+  </div>
+  <div class="foot"><span>Click a video to play it large · journal club after the break · every derivation and reference card is in the Appendix</span></div>
+  <aside class="notes">1.5 min. Read the chain left to right, once, out loud — it is the whole lecture: each patch looks at all the others and takes a weighted average, with weights set by how well they match; that means N patches produce N × N scores, so we cut the image into fewer, bigger patches; attention by itself forgets where each patch was, so we add its position back — and on the Earth, position also means band, date and metres per pixel; to save cost further, each patch looks only at its neighbours, in windows that shift every layer; and two lines of code make the whole thing fit in a lab hour. Then the table: say each new word in one breath — they all come back on their own slides, so this is a preview, not a lecture. The three videos under the table explain the same words (Part 1: the assigned 3Blue1Brown chapter; Part 3: sin-cos and RoPE; Part 4: Swin) — point at them, do not play them in class; a click opens one large over the slide, and moving to the next slide closes it. The words worth stressing: token (today, one image patch), query/key/value, positional encoding, and Swin (this week's paper). Every concept slide in Part 1 ends in one of the lab's four tests, and every number on today's slides that is not from a paper was computed for this lecture on the lab's own chips.</aside>
 </section>
 
 <!-- 4 -->
