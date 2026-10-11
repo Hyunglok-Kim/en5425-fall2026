@@ -172,7 +172,7 @@
     <img src="img/fig-w6-attention-chip.png" data-zoom alt="Left: a EuroSAT River chip with an 8 by 8 grid; a water patch is outlined in orange and the greenest patch in blue. Middle: the attention weights of the water patch over all 64 patches, spread along the river. Right: the attention weights of the greenest patch, concentrated on a few vegetation patches." title="Click to enlarge" style="display:block;margin:0 auto;height:34vh;width:auto;max-width:100%">
   </div>
   <ul class="small">
-    <li>Each patch is a token (its mean 13-band spectrum). Dot one query patch with all 64, softmax: <b>the heat maps are those 64 weights</b>. <span class="accent">Water spreads along the river (max 0.08); the greenest patch concentrates (0.21, top-3 = 49%).</span></li>
+    <li>Token = the patch’s 13 band means — <b>a plain average here</b>; the real model keeps all 832 numbers and learns the map (slide 17). <span class="accent">Each heat map = one query’s 64 weights: water spreads along the river, the greenest patch concentrates.</span></li>
     <li>Each patch’s new vector = <b>Σ<sub>j</sub> w<sub>ij</sub> v<sub>j</sub></b>: what it borrowed from related patches; layers of this feed the classifier. <b>One chip = a 64 × 64 table of w</b>; each map is one row.</li>
   </ul>
   <div class="gloss">
@@ -515,7 +515,7 @@
     <img src="img/fig-w6-patchify.png" data-zoom alt="Left: a EuroSAT Highway chip with an 8 by 8 grid, each patch numbered 0 to 63. Top right: the 64 patches laid out in raster order as a one-dimensional strip. Bottom right: the token matrix, 64 rows by 832 columns, with the 13 band segments labelled." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
   </div>
   <ul class="small">
-    <li>Token = one patch flattened (13 × 8 × 8 = 832) × a linear map (832 → d). ViT: (224/16)² = 196 tokens; here (64/8)² = 64. <span class="accent">The lab embeds each band group instead: 3 × 64 tokens of 4·64, 4·64 and 2·64 numbers (Part 3).</span></li>
+    <li>Token = one patch flattened (13 × 8 × 8 = 832 — every pixel kept, not averaged) × a learned linear map (832 → d). ViT: (224/16)² = 196 tokens; here (64/8)² = 64. <span class="accent">The lab embeds each band group instead: 3 × 64 tokens of 4·64, 4·64 and 2·64 numbers (Part 3).</span></li>
   </ul>
   <div class="gloss">
     <span><b>patchify</b> — reshape (13, 64, 64) → (64, 832); in code one <code>Conv2d(13, d, kernel_size=8, stride=8)</code> does the cut and the projection at once. <b>raster order</b> — row by row, like reading.</span>
