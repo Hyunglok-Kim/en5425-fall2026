@@ -18,5 +18,9 @@
  "w05": {
   "quiz": true,
   "key": false
+ },
+ "w06": {
+  "quiz": false,
+  "key": false
  }
 }
