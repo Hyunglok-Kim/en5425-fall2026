@@ -253,7 +253,7 @@
   </ul>
   <div class="gloss">
     <span><b>Q, K, V</b> — the N × d matrices of all queries, keys, values. <b>softmax</b> row-wise: each query’s weights sum to 1. <b>d</b> — the width; in the original paper 512, per head 64.</span>
-    <span><b>W<sub>Q</sub>, W<sub>K</sub>, W<sub>V</sub></b> — learned by training (random at the start): nobody decides by hand what a patch looks for.</span>
+    <span><b>W<sub>Q</sub>, W<sub>K</sub>, W<sub>V</sub></b> — start random; the task’s loss (lab: is the chip’s class right?), backpropagated, sets them — not you.</span>
   </div>
   <div class="foot"><span>Vaswani et al. 2017, §3.2.1 (eq. 1 and footnote 4 on √d) · the chip and the table were this equation with W = I and W = 3I</span></div>
   <aside class="notes">2 min. Name the three maps in plain words and point back at the table: on the last slide W_Q = W_K = 3I was the "projection" that sharpened the average; a learned W_Q and W_K can also rotate — make crop look for water if that is what the loss wants. The √d: footnote 4 of the paper — a dot product of d unit-variance numbers has variance d, so without the division the scores of a 64-wide head are ±8 and the softmax is a one-hot with no gradient. Then the first test: shapes. It sounds trivial; it is the test that catches the agent transposing K, or forgetting that the batch is on dim 0.</aside>
@@ -290,10 +290,11 @@
     </svg>
   </div>
   <ul class="small">
-    <li>One head of width 64 or four of width 16: same parameters, same FLOPs, four weight maps instead of one. <span class="accent">Test 4 (equivalence): with copied weights, your module matches PyTorch’s built-in <code>torch.nn.MultiheadAttention</code> to 10<sup>−5</sup>.</span></li>
+    <li>One head of width 64 or four of width 16: same parameters, same FLOPs — but four 64 × 64 attention maps per layer instead of one. <span class="accent">Test 4 (equivalence): with copied weights, your module matches PyTorch’s built-in <code>torch.nn.MultiheadAttention</code> to 10<sup>−5</sup>.</span></li>
   </ul>
   <div class="gloss">
     <span><b>h</b> — number of heads; <b>d<sub>head</sub></b> = d / h (64 in the 2017 paper: 512 / 8). <b>W<sub>O</sub></b> — the output projection that recombines the heads. <b>FLOPs</b> — arithmetic operations, the compute bill.</span>
+    <span><b>attention map</b> — the 64 × 64 table of weights one head makes for one chip; like the many filters of a CNN layer.</span>
   </div>
   <div class="foot"><span>Vaswani et al. 2017, §3.2.2 · the weight packing of torch’s module (one 3d × d <code>in_proj_weight</code>) is the usual reason the equivalence test fails: Appendix A2</span></div>
   <aside class="notes">1.5 min. The one idea: heads are free. Splitting a 64-wide attention into four 16-wide ones costs the same parameters and the same FLOPs, and buys four different similarity maps at once — one head can ask "is it water" while another asks "is it next to a road". The equivalence test is the lab's fourth test and the one most worth writing: torch's module packs W_Q, W_K, W_V into one 3d × d matrix, so copying weights across is where students (and agents) go wrong — Appendix A2 has the mapping. Do not go into head interpretability; say the 3Blue1Brown video shows a head and move on.</aside>
