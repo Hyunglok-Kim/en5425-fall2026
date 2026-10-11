@@ -104,8 +104,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       ${questions.length && n >= 2 && n <= 12 && n !== 8 && !w.async ? `<h2>${t("Journal club (30 min)", "저널클럽 (30분)")}</h2>
       <div class="card">
         <p style="margin:0" class="small">${t(
-          "Bring your entrance ticket (submitted on the sign-in area of this site 24 h before class). Groups of 3&#8211;4, with leader, presenter and questioner drawn at random and revealed at 13:00 on class day; the class opens with a 5-minute closed-book reading quiz.",
-          "입장 티켓(수업 24시간 전까지 이 사이트 로그인에서 제출)을 가지고 3&#8211;4명씩 토론합니다. 리더·발표자·질문자는 랜덤 추첨으로 수업 당일 13:00에 공개되며, 수업 시작은 5분 closed-book 리딩 퀴즈입니다.")}</p>
+          "Bring your entrance ticket (submitted on the sign-in area of this site 24 h before class). " + (n <= 5 ? "Groups of 3&#8211;4" : "The whole class discusses as one team") + ", with leader, presenter and questioner drawn at random and revealed at 13:00 on class day; the class opens with a 5-minute closed-book reading quiz.",
+          "입장 티켓(수업 24시간 전까지 이 사이트 로그인에서 제출)을 가지고 " + (n <= 5 ? "3&#8211;4명씩" : "전원이 한 팀으로") + " 토론합니다. 리더·발표자·질문자는 랜덤 추첨으로 수업 당일 13:00에 공개되며, 수업 시작은 5분 closed-book 리딩 퀴즈입니다.")}</p>
         <p class="kv">${t("Discussion questions", "토론 질문")}</p>
         <ol style="margin-top:4px">${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>
         <p style="margin:10px 0 0"><a class="btn" href="journal.html?w=${n}">${t("Read this week's tickets &#8594;", "이번 주 티켓 보기 &#8594;")}</a></p>

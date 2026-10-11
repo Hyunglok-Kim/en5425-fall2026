@@ -17,7 +17,7 @@
  },
  "w05": {
   "quiz": true,
-  "key": false
+  "key": true
  },
  "w06": {
   "quiz": false,
