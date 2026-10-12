@@ -638,14 +638,14 @@
     </svg>
   </div>
   <ul class="small">
-    <li><b>Learned 1-D positions</b>: a table of N vectors; 2-D-aware versions gave nothing (Table 8). <b>Data</b>: ViT-B/16 never beats the best BiT ResNet; ViT-L/16 and H/14 overtake it only with JFT-300M (H/14: 88.55%). <span class="accent">Week 1’s question — what built-in assumption (inductive bias) was traded away — is answered by this slide: locality, and 300 M images bought it back. Week 7 buys it with pretraining instead.</span></li>
+    <li><b>Learned 1-D positions</b>: a table of N vectors; removing it costs ≈ 3 points, 2-D-aware versions add nothing (Table 8). <b>Data</b>: ViT-B/16 never beats the best BiT ResNet; ViT-L/16 and H/14 overtake it only with JFT-300M (H/14: 88.55%). <span class="accent">Week 1’s question — what built-in assumption (inductive bias) was traded away — is answered by this slide: locality, and 300 M images bought it back. Week 7 buys it with pretraining instead.</span></li>
   </ul>
   <div class="gloss">
     <span><b>[cls]</b> — an extra learned token read out as the image summary. <b>JFT-300M</b> — Google’s private 303 M-image set.</span>
-    <span><b>BiT</b> — “Big Transfer”, Google’s pretrained ResNet (a CNN). <b>B, L, H</b> — base, large, huge model sizes; <b>/16</b> — 16-px patches.</span>
+    <span><b>BiT</b> — “Big Transfer”, Google’s pretrained ResNet (a CNN: its filters know their neighbours, so no position table). <b>B, L, H</b> — base, large, huge model sizes; <b>/16</b> — 16-px patches.</span>
   </div>
   <div class="foot"><span>Dosovitskiy et al. 2020, <i>An Image is Worth 16×16 Words</i>, ICLR 2021 — §3.1, §4.3 (Fig. 3), App. D.4 (Table 8) · card: Appendix A7</span></div>
-  <aside class="notes">1.5 min (cuttable). The pipeline is the lab's file, box by box — say that. Two findings worth remembering from the paper: positions are a learned table and nothing cleverer helped, which is why Part 3 is about Earth-specific information and not about fancier indexing; and ViT needs data — it loses to a ResNet on ImageNet and only wins from 300 million images up. Tie to Week 1's discussion question: the convolution's locality was the inductive bias traded away, and data bought it back; next week self-supervised pretraining buys it back cheaper, on exactly this file.</aside>
+  <aside class="notes">1.5 min (cuttable). The pipeline is the lab's file, box by box — say that. Two findings worth remembering from the paper: positions are a learned table and nothing cleverer helped (but none at all costs about 3 points; BiT, a CNN, needs none because its filters know their neighbours), which is why Part 3 is about Earth-specific information and not about fancier indexing; and ViT needs data — it loses to a ResNet on ImageNet and only wins from 300 million images up. Tie to Week 1's discussion question: the convolution's locality was the inductive bias traded away, and data bought it back; next week self-supervised pretraining buys it back cheaper, on exactly this file.</aside>
 </section>
 
 <!-- 22 -->
