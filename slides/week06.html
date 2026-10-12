@@ -278,7 +278,7 @@
     <li>With unit-variance entries a dot product of d terms has variance d; divide by √d or the softmax saturates and its gradient dies. <span class="accent">Test 1 of the lab’s four (slide 15), shapes: X is N × d in, N × d out, for any N.</span></li>
   </ul>
   <div class="gloss">
-    <span><b>q·k</b> — dot product Σ q<sub>i</sub>k<sub>i</sub> = |q||k| cos θ: same direction → large, opposite → negative, at right angles → 0. <b>Q, K, V</b> — all queries, keys, values stacked, N × d; <b>d</b> — the width (512 in the 2017 paper).</span>
+    <span><b>q·k</b> — dot product Σ q<sub>i</sub>k<sub>i</sub> = |q||k| cos θ: same direction → large, opposite → negative, at right angles → 0 (Swin-V2, inside FuXi, scores with cos θ / τ instead). <b>Q, K, V</b> — all queries, keys, values stacked, N × d; <b>d</b> — the width.</span>
     <span><b>W<sub>Q</sub>, W<sub>K</sub>, W<sub>V</sub></b> — start random; the task’s loss (lab: is the chip’s class right?), backpropagated, sets them — not you.</span>
   </div>
   <div class="foot"><span>Vaswani et al. 2017, §3.2.1 (eq. 1 and footnote 4 on √d) · the chip and the table were this equation with W = I and W = 3I</span></div>
