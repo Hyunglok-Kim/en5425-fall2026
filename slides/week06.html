@@ -541,14 +541,16 @@
   <div class="figure" style="flex:0 0 auto;display:block;margin:0">
     <img src="img/fig-w6-patchify.png" data-zoom alt="Left: a EuroSAT Highway chip with an 8 by 8 grid, each patch numbered 0 to 63. Top right: the 64 patches laid out in raster order as a one-dimensional strip. Bottom right: the token matrix, 64 rows by 832 columns, with the 13 band segments labelled." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
   </div>
+  <p class="small" style="margin:.8vh 0 0;padding:.5vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0">① patch: 8 × 8 px × 13 bands = <b>832 numbers</b> → ② × W<sub>embed</sub> (832 × 128) → ③ token x: <b>128 numbers</b>, + position<br>→ ④ q, k, v = x W<sub>Q</sub>, x W<sub>K</sub>, x W<sub>V</sub> (slide 9)</p>
   <ul class="small">
-    <li>Token = one patch flattened (13 × 8 × 8 = 832 — every pixel kept, not averaged) × a learned linear map (832 → d). ViT: (224/16)² = 196 tokens; here (64/8)² = 64. <span class="accent">The lab embeds each band group instead: 3 × 64 tokens of 4·64, 4·64 and 2·64 numbers (Part 3).</span></li>
+    <li>Every pixel kept. <b>d is the model’s width, not the patch’s:</b> 4 × 4 px × 2 bands = 32 → 128 expands, 832 → 128 compresses; attention fills the room with context.</li>
+    <li>ViT: (224/16)² = 196 tokens; here (64/8)² = 64. <span class="accent">The lab: one embedding per band group → 3 × 64 tokens (Part 3).</span></li>
   </ul>
   <div class="gloss">
-    <span><b>patchify</b> — reshape (13, 64, 64) → (64, 832); in code one <code>Conv2d(13, d, kernel_size=8, stride=8)</code> does the cut and the projection at once. <b>raster order</b> — row by row, like reading.</span>
+    <span><b>patchify</b> — in code one <code>Conv2d(13, d, kernel_size=8, stride=8)</code> cuts and projects at once. <b>raster order</b> — row by row.</span>
   </div>
   <div class="foot"><span>EuroSAT-MS Highway_1 · Dosovitskiy et al. 2020, §3.1 · the band order in the file (B8A last) is a trap: Appendix A9</span></div>
-  <aside class="notes">2 min. Say it as an analogy and then as code: a tokenizer cuts a sentence into words and looks each up in a table; patchify cuts the chip into 8-pixel squares and multiplies each by one matrix — and the two together are a single strided convolution, which is how every implementation writes it. Point at the strip: raster order is arbitrary, and the model will not know it is an image until Part 3 puts the position back. Plant the lab's twist now — one patch embedding per band group — and say why it will make sense after SatMAE.</aside>
+  <aside class="notes">2 min. Say it as an analogy and then as code: a tokenizer cuts a sentence into words and looks each up in a table; patchify cuts the chip into 8-pixel squares and multiplies each by one matrix — and the two together are a single strided convolution, which is how every implementation writes it. Point at the strip: raster order is arbitrary, and the model will not know it is an image until Part 3 puts the position back. Then walk the boxed chain left to right — 832 numbers, one learned matrix, 128 numbers, + position, then q, k, v — and stress that 128 is the model's width: a smaller patch is expanded to it, a bigger one compressed, nothing is averaged. Plant the lab's twist now — one patch embedding per band group — and say why it will make sense after SatMAE.</aside>
 </section>
 
 <!-- 19 -->
