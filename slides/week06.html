@@ -373,7 +373,7 @@
 <section class="slide xl">
   <p class="kicker">Part 1 · The price</p>
   <h2>Every token scores every other token: N²</h2>
-  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Every token scores every other: ×16 tokens is ×16 FLOPs for the MLP, ×256 for attention — 0.04 ms → 1.6 s here.</p>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Every token scores every other: 16× the tokens costs the MLP 16× but attention 256× (in FLOPs).</p>
   <div class="figure" style="flex:0 0 auto;display:block;margin:0">
     <img src="img/fig-w6-attention-cost.png" data-zoom alt="Left: time per layer against sequence length on log axes, measured on this machine's CPU with numpy: attention rises as N squared from 0.04 milliseconds at 64 tokens to 1.6 seconds at 16,384, the MLP rises linearly; vertical marks show EuroSAT with patch 8, ViT-B/16, ClimaX and a 0.25 degree globe with patch 4. Right: memory of the N by N score matrix in bf16 against N, crossing the T4's 16 gigabytes near 90,000 tokens; at 65,160 tokens it is 8.5 gigabytes for one head of one layer." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
   </div>
