@@ -602,7 +602,7 @@
    "date": "2026-10-12",
    "concept": [
     {
-     "min": 18,
+     "min": 19,
      "topic": "Attention from first principles: QKV, multi-head, masking, complexity; pre-norm vs post-norm; residual stream intuition.",
      "topic_ko": "제1원리에서 출발하는 attention: QKV, multi-head, masking, 복잡도 · pre-norm vs post-norm · residual stream 직관"
     },

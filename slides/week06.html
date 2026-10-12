@@ -34,7 +34,7 @@
   <h1 style="color:#f4efe5;text-shadow:0 2px 24px rgba(0,0,0,.6)">Attention and the Transformer, Built From Scratch</h1>
   <p class="big" style="color:#e8e2d8;text-shadow:0 1px 16px rgba(0,0,0,.6)">Forty Sentinel-2 chips, thirteen bands each, from the dataset you train on today. Every Earth-observation and weather model this course meets from here on — Prithvi, ClimaX, Pangu, Aurora — is built from one operation, attention. Today you write it, test it, and see the choices that make it work on the Earth.</p>
   <div class="foot" style="color:#cfc8bc"><span>Deep Learning Applications in Environmental Big Data · Prof. Hyunglok Kim · GIST</span><span>Image: four EuroSAT-MS chips per class, true colour from bands 4-3-2, read for this lecture straight out of the 2 GB Zenodo archive; the orange grid: image patches grouped into windows, as this week’s paper does (Part 4). Helber et al. 2019, MIT licence.</span></div>
-  <aside class="notes">Open: five weeks of models that were given their structure — convolutions that look at neighbours, recurrences that look at yesterday. Today the model decides what to look at, with weights you can read off. Say what the picture is: forty real chips from the lab's dataset, ten classes, and one Swin window drawn over four of them. Timing: 56 min without the FLEX block (5-min quiz + 51 min core, of which the seven video slides are 2; 55 if slide 8 is skipped), 60 with it — run the FLEX only if the clock at slide 41 allows. Cut order if short: slide 8 (the full 4 × 4 table — slide 7 already did the arithmetic), then the three extra video slides 21, 31 and 38 (their videos stay on the shelf, A11), then slide 20 (the ViT paper — A7 holds it), then the FLEX. The full attention shapes, the four tests in code with the torch.nn.MultiheadAttention weight mapping, the positional-encoding algebra, the EO encodings card, the Swin card, the three weather backbones, the ViT card, mixed precision and FlashAttention, and the EuroSAT-MS card with the band-order trap all live in the APPENDIX after the lab slide — point students there. In class: the mechanism on real chips, one by-hand table, numbers we measured ourselves, and the four tests they will write before the agent writes code. Seven Watch-at-home slides are pointers, not playback — twenty seconds each; the two “by their authors” slides are the journal-club preparation.</aside>
+  <aside class="notes">Open: five weeks of models that were given their structure — convolutions that look at neighbours, recurrences that look at yesterday. Today the model decides what to look at, with weights you can read off. Say what the picture is: forty real chips from the lab's dataset, ten classes, and one Swin window drawn over four of them. Timing: 57.5 min without the FLEX block (5-min quiz + 52.5 min core, of which the seven video slides are 2; 56.5 if slide 8 is skipped), 61.5 with it — run the FLEX only if the clock at slide 42 allows. Cut order if short: slide 8 (the full 4 × 4 table — slide 7 already did the arithmetic), then the three extra video slides 22, 32 and 39 (their videos stay on the shelf, A11), then slide 21 (the ViT paper — A7 holds it), then the FLEX. The full attention shapes, the four tests in code with the torch.nn.MultiheadAttention weight mapping, the positional-encoding algebra, the EO encodings card, the Swin card, the three weather backbones, the ViT card, mixed precision and FlashAttention, and the EuroSAT-MS card with the band-order trap all live in the APPENDIX after the lab slide — point students there. In class: the mechanism on real chips, one by-hand table, numbers we measured ourselves, and the four tests they will write before the agent writes code. Seven Watch-at-home slides are pointers, not playback — twenty seconds each; the two “by their authors” slides are the journal-club preparation.</aside>
 </section>
 
 <!-- 1b ─ Reading quiz -->
@@ -79,7 +79,7 @@
       </g>
       <g fill="none" stroke="var(--muted)" stroke-width="1"><path d="M4 78 V84 H376 V78 M394 78 V84 H506 V78 M524 78 V84 H636 V78 M654 78 V84 H766 V78 M784 78 V84 H896 V78"/></g>
       <g font-size="11" fill="var(--muted)" text-anchor="middle">
-        <text x="190" y="100">Part 1 · attention (18 min · the headline)</text><text x="450" y="100">Part 2 · tokens (8)</text><text x="580" y="100">Part 3 · position (11)</text><text x="710" y="100">Part 4 · windows (8)</text><text x="840" y="100">Part 5 · fit (5)</text>
+        <text x="190" y="100">Part 1 · attention (19 min · the headline)</text><text x="450" y="100">Part 2 · tokens (8)</text><text x="580" y="100">Part 3 · position (11)</text><text x="710" y="100">Part 4 · windows (8)</text><text x="840" y="100">Part 5 · fit (5)</text>
       </g>
     </svg>
   </div>
@@ -111,7 +111,7 @@
 <!-- 4 -->
 
 <section class="slide section xl">
-  <p class="kicker">Part 1 · 18 min · the headline</p>
+  <p class="kicker">Part 1 · 19 min · the headline</p>
   <h2>Attention: a Weighted Average You Can Read</h2>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Attention running on a real chip with no learned weights; the same thing by hand with four tokens; then what Q, K, V, heads and masks add; what it costs; the block it lives in. <b>By the end:</b> write attention in twelve lines and name the four tests that prove it.</p></div>
@@ -172,14 +172,14 @@
     <img src="img/fig-w6-attention-chip.png" data-zoom alt="Left: a EuroSAT River chip with an 8 by 8 grid; a water patch is outlined in orange and the greenest patch in blue. Middle: the attention weights of the water patch over all 64 patches, spread along the river. Right: the attention weights of the greenest patch, concentrated on a few vegetation patches." title="Click to enlarge" style="display:block;margin:0 auto;height:34vh;width:auto;max-width:100%">
   </div>
   <ul class="small">
-    <li>Token = the patch’s 13 band means — <b>a plain average here</b>; the real model keeps all 832 numbers and learns the map (slide 17). <span class="accent">Each heat map = one query’s 64 weights: water spreads along the river, the greenest patch concentrates.</span></li>
-    <li>Each patch’s new vector = <b>Σ<sub>j</sub> w<sub>ij</sub> v<sub>j</sub></b>: what it borrowed from related patches; layers of this feed the classifier. <b>One chip = a 64 × 64 table of w</b>; each map is one row.</li>
+    <li>Token = the patch’s 13 band means — <b>a plain average here</b>; the real model keeps all 832 numbers and learns the map (slide 18). <span class="accent">Each heat map = one query’s 64 weights: water spreads along the river, the greenest patch concentrates.</span></li>
+    <li>Weight w<sub>ij</sub> = <b>the share patch j gives patch i’s new vector Σ<sub>j</sub> w<sub>ij</sub> v<sub>j</sub></b> — set by similarity, relative to the other 63. <b>One chip = a 64 × 64 table of w</b>; each map is one row.</li>
   </ul>
   <div class="gloss">
-    <span><b>in the figure</b> — left: the chip on an 8 × 8 grid, orange = wettest patch, blue = greenest; middle, right: each one’s 64 weights on that grid. <b>softmax</b> — turns scores into weights that sum to 1. <b>q, k</b> — z-scored spectra; <b>v</b> — raw.</span>
+    <span><b>in the figure</b> — left: the chip on an 8 × 8 grid, orange = wettest patch, blue = greenest; middle, right: each one’s 64 weights on that grid; top-3 = its three largest weights added. <b>softmax</b> — turns scores into weights that sum to 1. <b>q, k</b> — z-scored spectra; <b>v</b> — raw.</span>
   </div>
   <div class="foot"><span>EuroSAT-MS River_2, 8 px patches, d = 13 · computed for this lecture · uniform weight = 1/64 = 0.016</span></div>
-  <aside class="notes">2.5 min. This is the slide to spend on. Say the recipe while pointing: take the water patch; dot it with every other patch; softmax the 64 numbers; the picture in the middle IS those 64 numbers. Water attends to water — the river lights up — and the forest patch attends to forest. Nothing was trained; the weights fall out of similarity. Then the output: the water token becomes the weighted average of what it attended to. The sentence to leave on the board: attention is a weighted average, and learning only changes what counts as similar. Next slide does the same with four tokens and two numbers each so they can check the arithmetic.</aside>
+  <aside class="notes">2.5 min. This is the slide to spend on. Say the recipe while pointing: take the water patch; dot it with every other patch; softmax the 64 numbers; the picture in the middle IS those 64 numbers. Water attends to water — the river lights up — and the forest patch attends to forest. Nothing was trained; the weights fall out of similarity. Then the output: the water token becomes the weighted average of what it attended to. The sentence to leave on the board: attention is a weighted average, and learning only changes what counts as similar. If asked what a weight means: it is the share patch j contributes to the query’s new vector, computed from similarity but relative to all 64 — that is why the water query’s largest weight (0.077) goes to another water patch (row 5, col 2) and its own is 0.067: 28 water patches look alike and split the share, while only a few patches are as green as the blue query, so it keeps 0.207 for itself and 0.203 for the top-right patch. Top-3 = the three largest of the 64 weights added: 0.077 + 0.067 + 0.057 = 0.20 for water, 0.207 + 0.203 + 0.083 = 0.49 for green (uniform would give 3/64 = 0.05). Next slide does the same with four tokens and two numbers each so they can check the arithmetic.</aside>
 </section>
 
 <!-- 7 -->
@@ -204,7 +204,7 @@
   <div class="gloss">
     <span><b>tokens</b> — mean NDVI (greenness) and NDWI (wetness) of four real chips; real tokens: 13 or 128 numbers. <b>3I</b> — [3 0; 0 3]; ×3 sharpens the weights (×1: crop→forest 0.29, ×3: 0.59) — training learns the scale. <b>√2</b> — √d, d = 2.</span>
   </div>
-  <div class="foot"><span>Where it goes: + the original vector (residual) → MLP → more layers → the chip’s class scores → cross-entropy → gradients update every W (slides 13, 20)</span></div>
+  <div class="foot"><span>Where it goes: + the original vector (residual) → MLP → more layers → the chip’s class scores → cross-entropy → gradients update every W (slides 13, 21)</span></div>
   <aside class="notes">2 min, board. This is slide 6’s arithmetic, shrunk to four tokens with two numbers each so the room can check every number. Walk the crop row left to right. ① q = W_Q x: with the example W = 3I it is just ×3 — say that a trained model learns its own numbers, and that keys use their own W_K (equal here only to keep it short). ② One dot product per token, divided by √2 because each token has two numbers — do the forest one on the board: 1.314 + 1.350 = 2.664, ÷ 1.414 = 1.884. ③ Exponentiate, add the four (11.227), divide: positive weights that sum to 1. ④ Multiply each value by its weight and add: (0.52, −0.45) is crop’s new vector — it moved toward forest because crop’s two numbers point the same way as forest’s. Where the new vector goes (the foot): in a real block it passes W_O and is added to the original vector — the residual; with W_O = I here, (0.20, −0.25) + (0.52, −0.45) = (0.72, −0.70) — then goes through the MLP, and on to the next layer; after the last layer the 64 patch vectors are pooled into 10 class scores and compared with the chip’s one label by cross-entropy, and backpropagation updates every weight — patch embedding, W_Q, W_K, W_V, W_O, MLPs, head — at once. The label is per chip, not per token; these four tokens come from four chips only to make the arithmetic small. Every number on the slide uses the rounded values shown (tools/week06_figs/worked_example.py). Close: on slide 6 the same four steps run for every one of the 64 patches, with 13 numbers instead of 2 — that is the 64 × 64 table; the next slide shows all four rows here.</aside>
 </section>
 
@@ -275,7 +275,7 @@
   </div>
   <p class="big" style="font-family:var(--serif);margin:.2vh 0;max-width:none">Attention(Q, K, V) = softmax(QK<sup>⊤</sup>/√d) V &nbsp;&nbsp;·&nbsp;&nbsp; Q = XW<sub>Q</sub>, K = XW<sub>K</sub>, V = XW<sub>V</sub></p>
   <ul class="small">
-    <li>With unit-variance entries a dot product of d terms has variance d; divide by √d or the softmax saturates and its gradient dies. <span class="accent">Test 1 of the lab’s four (slide 14), shapes: X is N × d in, N × d out, for any N.</span></li>
+    <li>With unit-variance entries a dot product of d terms has variance d; divide by √d or the softmax saturates and its gradient dies. <span class="accent">Test 1 of the lab’s four (slide 15), shapes: X is N × d in, N × d out, for any N.</span></li>
   </ul>
   <div class="gloss">
     <span><b>Q, K, V</b> — the N × d matrices of all queries, keys, values. <b>softmax</b> row-wise: each query’s weights sum to 1. <b>d</b> — the width; in the original paper 512, per head 64.</span>
@@ -377,7 +377,7 @@
     <img src="img/fig-w6-attention-cost.png" data-zoom alt="Left: time per layer against sequence length on log axes, measured on this machine's CPU with numpy: attention rises as N squared from 0.04 milliseconds at 64 tokens to 1.6 seconds at 16,384, the MLP rises linearly; vertical marks show EuroSAT with patch 8, ViT-B/16, ClimaX and a 0.25 degree globe with patch 4. Right: memory of the N by N score matrix in bf16 against N, crossing the T4's 16 gigabytes near 90,000 tokens; at 65,160 tokens it is 8.5 gigabytes for one head of one layer." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
   </div>
   <ul class="small">
-    <li>Scores are an N × N matrix: 64 tokens → 0.04 ms; 16,384 → 1.6 s on this CPU. <span class="accent">The lab’s 64 tokens are free; one 0.25° level of the globe (65,160 tokens — slide 19) needs 8.5 GB of scores per head, per layer.</span></li>
+    <li>Scores are an N × N matrix: 64 tokens → 0.04 ms; 16,384 → 1.6 s on this CPU. <span class="accent">The lab’s 64 tokens are free; one 0.25° level of the globe (65,160 tokens — slide 20) needs 8.5 GB of scores per head, per layer.</span></li>
   </ul>
   <div class="gloss">
     <span><b>N</b> — tokens per sequence; <b>d</b> — width. <b>MLP</b> — the block’s per-token two-layer net (next slide). Attention ∝ 4N²d, the MLP ∝ 16Nd²: equal FLOPs at N = 4d (256 here). <b>in the figure</b> — dashed = the N² and N trends extended, not measured.</span>
@@ -422,6 +422,32 @@
 <!-- 14 -->
 
 <section class="slide xl">
+  <p class="kicker">Part 1 · Heads vs layers, in numbers</p>
+  <h2>One chip through the whole model: every shape</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">Heads split one layer four ways, side by side; layers stack the whole block four times, one after another.</p>
+  <table style="border-collapse:collapse;width:100%;margin:0 0 .6vh">
+    <tr style="color:var(--ink-2)"><th style="padding:.38vh .55vw;text-align:left;font-weight:600">step</th><th style="padding:.38vh .55vw;text-align:left;font-weight:600">what happens</th><th style="padding:.38vh .55vw;text-align:right;font-weight:600">shape</th></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.38vh .55vw;vertical-align:top"><b>input</b></td><td style="padding:.38vh .55vw;vertical-align:top">the chip: 13 bands × 64 × 64 pixels</td><td style="padding:.38vh .55vw;vertical-align:top;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right">13 × 64 × 64</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.38vh .55vw;vertical-align:top"><b>patchify + embed</b></td><td style="padding:.38vh .55vw;vertical-align:top">64 patches of 832 numbers, each × W<sub>embed</sub> (832 × 128)</td><td style="padding:.38vh .55vw;vertical-align:top;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right">64 × 128</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.38vh .55vw;vertical-align:top"><b>+ [cls], + position</b></td><td style="padding:.38vh .55vw;vertical-align:top">one extra token in front; a learned position vector added to every token</td><td style="padding:.38vh .55vw;vertical-align:top;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right">65 × 128</td></tr>
+    <tr style="background:var(--wash);border-top:1px solid var(--hairline)"><td style="padding:.38vh .55vw;vertical-align:top" colspan="3"><b style="color:#2c6fb0">layer 1 → layer 2 → layer 3 → layer 4</b> — the same block repeated, each with its own weights; shape in = shape out</td></tr>
+    <tr style="background:var(--wash);border-top:1px solid var(--hairline)"><td style="padding:.38vh .55vw;vertical-align:top;white-space:nowrap">&nbsp;&nbsp;↳ <b class="accent">attention, 4 heads</b></td><td style="padding:.38vh .55vw;vertical-align:top">each head: Q, K, V 65 × 32 → weights <b>65 × 65</b> → 65 × 32; 4 joined → 65 × 128, × W<sub>O</sub>, + x</td><td style="padding:.38vh .55vw;vertical-align:top;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right">65 × 128</td></tr>
+    <tr style="background:var(--wash);border-top:1px solid var(--hairline)"><td style="padding:.38vh .55vw;vertical-align:top">&nbsp;&nbsp;↳ <b>MLP</b></td><td style="padding:.38vh .55vw;vertical-align:top">each token on its own: 128 → 512 → 128, + x</td><td style="padding:.38vh .55vw;vertical-align:top;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right">65 × 128</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.38vh .55vw;vertical-align:top"><b>classifier, loss</b></td><td style="padding:.38vh .55vw;vertical-align:top">[cls] row after layer 4 → × (128 × 10) → softmax → −log p(true class)</td><td style="padding:.38vh .55vw;vertical-align:top;white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right">10 → 1 number</td></tr>
+  </table>
+  <ul class="small">
+    <li><b class="accent">Head</b> = one of 4 attentions inside a layer, each 32 numbers wide (128 = 4 × 32). <b style="color:#2c6fb0">Layer</b> = one whole block (attention + MLP), repeated 4 times. <span class="accent">Per chip: 4 heads × 4 layers = 16 attention maps of 65 × 65.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>65</b> = 64 patches + 1 [cls] · <b>+ x</b> — residual add (slide 13) · <b>W<sub>O</sub></b> — 128 × 128 · ≈ 0.91 M parameters, 87% in the 4 layers</span>
+  </div>
+  <div class="foot"><span>The lab’s tiny ViT: d = 128, 4 heads, 4–6 layers, ≈ 1 M parameters · a training batch of B chips adds B in front: B × 65 × 128 · tools/week06_figs/model_shapes.py</span></div>
+  <aside class="notes">1.5 min. The building picture: a layer is one floor; the heads are the rooms on that floor — four rooms working at the same time on the same 65 tokens, each with its own W_Q, W_K, W_V and each 32 numbers wide; their four results are joined back to 128, mixed by W_O, added to the token (the residual), and sent through the MLP; then everything goes up to the next floor. Four floors. Point at the shape column: it never changes between floors — 65 × 128 in, 65 × 128 out — which is why you can stack as many layers as you like. Count with the room: 4 heads × 4 layers = 16 attention maps per chip, each 65 × 65, all recomputed for every chip; the parameters (≈ 0.91 M, 87% of them in the four layers) are the fixed, learned part — the maps are not parameters. At the top only the [cls] row is read; the loss is one number per chip; backpropagation goes down through all four floors to the patch embedding. In the lab with three band groups the token count is 192 + 1, so each map is 193 × 193.</aside>
+</section>
+
+<!-- 15 -->
+
+<section class="slide xl">
   <p class="kicker">Part 1 · The four tests</p>
   <h2>Four tests, written before the agent writes code</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Write these before the agent writes code: it makes them pass, you make them hard to pass by accident.</p>
@@ -442,7 +468,7 @@
   <aside class="notes">1.5 min. Read the table down the first column only — the rest is reference. The point is the order of events: the tests exist before the implementation, so the agent is solving a specification, not guessing what you meant; and the lab's first deliverable is the tests failing on a deliberately broken model, because a test that cannot fail has verified nothing. Say which one students skip and regret: test 4, because it needs the weight mapping — Appendix A2 has it. Transition to the watch slide, twenty seconds, then Part 2.</aside>
 </section>
 
-<!-- 15 -->
+<!-- 16 -->
 <section class="slide xl">
   <p class="kicker">Part 1 · Watch at home</p>
   <h2>The mechanism animated, explained, typed live, and with all the math</h2>
@@ -492,7 +518,7 @@
   <aside class="notes">Twenty seconds, no playback. Say what each is for: Chapter 5 if the word "embedding" is still fuzzy; StatQuest if the arithmetic on slides 7–8 needs a second pass; Karpathy if they want to see the exact class the lab asks for typed from nothing — the first seventy minutes are enough; Umar Jamil for every matrix dimension of the original paper. Keep the Note 06 requirement unambiguous: the assigned video is Chapter 6, not Chapter 5.</aside>
 </section>
 
-<!-- 16 -->
+<!-- 17 -->
 
 <section class="slide section xl">
   <p class="kicker">Part 2 · 8 min</p>
@@ -505,7 +531,7 @@
   <aside class="notes">8 minutes. Read the cards in twenty seconds. The part has one idea — a token is a patch and the patch size sets N — and one consequence they must be able to compute: the memory of the score matrix for a grid they are handed. The 0.25-degree slide is the hinge of the whole second half: Part 3 (position) and Part 4 (windows) are both answers to it.</aside>
 </section>
 
-<!-- 17 -->
+<!-- 18 -->
 
 <section class="slide xl">
   <p class="kicker">Part 2 · Patchify</p>
@@ -524,7 +550,7 @@
   <aside class="notes">2 min. Say it as an analogy and then as code: a tokenizer cuts a sentence into words and looks each up in a table; patchify cuts the chip into 8-pixel squares and multiplies each by one matrix — and the two together are a single strided convolution, which is how every implementation writes it. Point at the strip: raster order is arbitrary, and the model will not know it is an image until Part 3 puts the position back. Plant the lab's twist now — one patch embedding per band group — and say why it will make sense after SatMAE.</aside>
 </section>
 
-<!-- 18 -->
+<!-- 19 -->
 
 <section class="slide xl">
   <p class="kicker">Part 2 · The dial</p>
@@ -543,7 +569,7 @@
   <aside class="notes">2 min. Point at the three orange squares: same pixel, three tokens. Left: the token is almost purely road, and there are 256 of them — 65,536 scores per head. Right: the token is a 160-metre square that is one-fifth road, and the linear map has to find the road inside 3,328 numbers; there are 16 of them. The lesson: patch size is set by what the input resolves and what the task needs, and the N² bill follows. Then the one-line callback that sets up the next slide: Aurora changes its patch from 4 to 10 when it moves from 0.25 to 0.1 degrees — exactly to hold N.</aside>
 </section>
 
-<!-- 19 -->
+<!-- 20 -->
 
 <section class="slide xl">
   <p class="kicker">Part 2 · The 0.25° problem</p>
@@ -583,7 +609,7 @@
   <aside class="notes">2 min. Walk the left column slowly — it is the computation they must be able to redo for any grid: points, divide by the patch area, square, times two bytes. Land the 8.5 GB per head per layer against the T4's 16. Then the three doors, one sentence each: Pangu, FuXi and Aurora attend inside 2 × 6 × 12 windows — Part 4; ClimaX works at 5.625 degrees where the whole level is 512 tokens — the grid of Lab 05's ERA5 teaser; Aurora also squeezes 13 levels into 3 latent ones before the backbone sees them. Say the honest sentence: there is no global attention at 0.25 degrees in any operational model; the question is always which escape.</aside>
 </section>
 
-<!-- 20 -->
+<!-- 21 -->
 
 <section class="slide xl">
   <p class="kicker">Part 2 · The ViT paper</p>
@@ -618,7 +644,7 @@
   <aside class="notes">1.5 min (cuttable). The pipeline is the lab's file, box by box — say that. Two findings worth remembering from the paper: positions are a learned table and nothing cleverer helped, which is why Part 3 is about Earth-specific information and not about fancier indexing; and ViT needs data — it loses to a ResNet on ImageNet and only wins from 300 million images up. Tie to Week 1's discussion question: the convolution's locality was the inductive bias traded away, and data bought it back; next week self-supervised pretraining buys it back cheaper, on exactly this file.</aside>
 </section>
 
-<!-- 21 -->
+<!-- 22 -->
 <section class="slide xl">
   <p class="kicker">Part 2 · Watch at home</p>
   <h2>The ViT paper, three ways: five minutes, thirty, and with the inductive-bias argument</h2>
@@ -630,7 +656,7 @@
           <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
         </span>
       </span>
-      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">AI Coffee Break with Letitia · <i>An image is worth 16×16 words: ViT explained</i> · 5 min — <span class="accent">click to play here</span> · the whole pipeline of slide 20, animated.</p>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">AI Coffee Break with Letitia · <i>An image is worth 16×16 words: ViT explained</i> · 5 min — <span class="accent">click to play here</span> · the whole pipeline of slide 21, animated.</p>
     </a>
     <a href="https://www.youtube.com/watch?v=TrdevFK_am4" class="yt" data-id="TrdevFK_am4" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
@@ -639,7 +665,7 @@
           <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
         </span>
       </span>
-      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">Yannic Kilcher · <i>An Image is Worth 16×16 Words (paper explained)</i> · 30 min · slide 20 with the paper’s figures and tables.</p>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">Yannic Kilcher · <i>An Image is Worth 16×16 Words (paper explained)</i> · 30 min · slide 21 with the paper’s figures and tables.</p>
     </a>
     <a href="https://www.youtube.com/watch?v=j6kuz_NqkG0" class="yt" data-id="j6kuz_NqkG0" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
@@ -653,13 +679,13 @@
   </div>
   <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Part 3.</b> Patchify gave the model 64 tokens and no idea where any of them sits — the next part proves it on a chip, then puts the position back in the Earth’s own units.</p>
   <div class="gloss">
-    <span><b>patch size, data, positions</b> — the three knobs these videos turn are the three bullets of slide 20.</span>
+    <span><b>patch size, data, positions</b> — the three knobs these videos turn are the three bullets of slide 21.</span>
   </div>
   <div class="foot"><span>Optional, not assigned · ids verified embeddable on 10 October 2026</span></div>
   <aside class="notes">Twenty seconds, no playback. The five-minute one for anyone who wants the pipeline once more before the lab; Kilcher for the paper’s own tables; Gordić for the inductive-bias discussion that links back to Week 1. Then straight into Part 3.</aside>
 </section>
 
-<!-- 22 -->
+<!-- 23 -->
 
 <section class="slide section xl">
   <p class="kicker">Part 3 · 11 min · the geoscience battleground</p>
@@ -672,7 +698,7 @@
   <aside class="notes">11 minutes. Read the cards in twenty seconds. The frame for the part: in language a token has one coordinate; on the Earth it has five, and each model on the slides that follow chose which ones to tell the network and how. The first slide is a proof, not a claim — the shuffle picture — because students believe "attention sees the image" until they see the output not change.</aside>
 </section>
 
-<!-- 23 -->
+<!-- 24 -->
 
 <section class="slide xl">
   <p class="kicker">Part 3 · Attention is a set operation</p>
@@ -691,7 +717,7 @@
   <aside class="notes">1.2 min. Let the fourth panel make the point: the output of the shuffled chip, put back in place, is the output of the original to machine precision. The model has not seen the image — it has seen a bag of 64 spectra. Then the sentence that sets up every remaining slide of the part: position has to be added as numbers, and on the Earth, position is more than an index.</aside>
 </section>
 
-<!-- 24 -->
+<!-- 25 -->
 
 <section class="slide xl">
   <p class="kicker">Part 3 · Three generic answers</p>
@@ -711,7 +737,7 @@
   <aside class="notes">2 min. Left panel: each row is a token's code — a clock with 32 hands turning at 32 speeds; the fast hands distinguish neighbours, the slow hands distinguish far apart. Right panel is the property that matters: the dot product of two codes depends only on how far apart they are, so attention can learn "look two tokens back" as a fixed pattern. Learned tables are what ViT uses and the 2017 paper found them equivalent. RoPE in one sentence: instead of adding a code to x, rotate q and k by an angle proportional to position; the angle difference survives the dot product, so the score sees m minus n directly — which is why LLaMA and nearly every LLM use it. Do not derive; Appendix A3.</aside>
 </section>
 
-<!-- 25 -->
+<!-- 26 -->
 
 <section class="slide xl">
   <p class="kicker">Part 3 · The battleground</p>
@@ -733,7 +759,7 @@
   <aside class="notes">1.5 min. Read the third column only, top to bottom; the table is the map of the next four slides. The thesis to say once: the backbone is the same in every row — the block from slide 13 — and the research is in what the token is told. Point at the two rows that have no slide: DOFA, which generates the patch-embedding weights from the band's wavelength, is discussion question 2; Presto, 400 thousand parameters on pixel time series, is question 3.</aside>
 </section>
 
-<!-- 26 -->
+<!-- 27 -->
 
 <section class="slide xl">
   <p class="kicker">Part 3 · Which band · SatMAE</p>
@@ -753,7 +779,7 @@
   <aside class="notes">1.5 min. Point at the red edge first — that is why multispectral matters and why the bands are not interchangeable channels: vegetation jumps between 665 and 842 nanometres and water does not. SatMAE's move: treat the band groups like time steps — separate tokens, separate patch embeddings, a group code added like a position, and mask groups independently so the model must predict SWIR from visible. Say the lab's instruction in one breath: the same three groups, 64-pixel chips, 192 tokens. Then the discussion-question hook: DOFA says the group index is a crude code for what is really a wavelength, and generates the embedding weights from the wavelength itself.</aside>
 </section>
 
-<!-- 27 -->
+<!-- 28 -->
 
 <section class="slide xl">
   <p class="kicker">Part 3 · How many metres · Scale-MAE</p>
@@ -772,7 +798,7 @@
   <aside class="notes">1.5 min. Left panel: the same field, imaged at 10 and at 30 metres, gets two different codes because sin-cos counts patches. Right panel: multiply the position by the GSD ratio and the two curves fall on top of each other — the code now counts metres. One formula on the board, pointing at the g over G inside the sine. The number: 5.6 percent average improvement over SatMAE when tested across resolutions. Connect to the previous slide: SatMAE wrote the band into the code; Scale-MAE wrote the metres; next, ClimaX writes the variable.</aside>
 </section>
 
-<!-- 28 -->
+<!-- 29 -->
 
 <section class="slide xl">
   <p class="kicker">Part 3 · Which variable · ClimaX</p>
@@ -813,7 +839,7 @@
   <aside class="notes">1.5 min. Walk it left to right: each variable is its own little image with its own patch embedding; at each grid cell you now have 48 tokens; one learned query asks those 48 "what matters here" and the cross-attention collapses them to one. The design reason is the bullet: pretraining data and fine-tuning data have different variable sets, and a token per variable makes that a missing token rather than a broken first layer. Tie back to the lab's band groups — the same idea, three groups instead of 48 variables — and forward to Aurora, which sums per-variable embeddings instead of cross-attending.</aside>
 </section>
 
-<!-- 29 -->
+<!-- 30 -->
 
 <section class="slide xl">
   <p class="kicker">Part 3 · Where and when · Prithvi-EO-2.0</p>
@@ -850,7 +876,7 @@
   <aside class="notes">1.2 min (cuttable). One sentence per box: the token is a 3-D patch of six bands; the ordinary position code says where in the sample; two more codes say when (year, day of year) and where on the planet (latitude, longitude), each a sin-cos vector times a learned loudness; and each is dropped ten percent of the time so the model does not fall apart on a chip with no metadata. Say why it matters for the lab's data: EuroSAT chips carry no date and no location in the file — so this is a model you could not fully use on them, which is a real limitation, not a detail.</aside>
 </section>
 
-<!-- 30 -->
+<!-- 31 -->
 <section class="slide xl">
   <p class="kicker">Part 3 · Watch at home</p>
   <h2>Positions demystified, RoPE twice, and a 400 K-parameter model by its author</h2>
@@ -862,7 +888,7 @@
           <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
         </span>
       </span>
-      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">AI Coffee Break with Letitia · <i>Positional embeddings in transformers EXPLAINED</i> · 10 min — <span class="accent">click to play here</span> · why sin-cos, with the clock picture of slide 24.</p>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">AI Coffee Break with Letitia · <i>Positional embeddings in transformers EXPLAINED</i> · 10 min — <span class="accent">click to play here</span> · why sin-cos, with the clock picture of slide 25.</p>
     </a>
     <a href="https://www.youtube.com/watch?v=o29P0Kpobz0" class="yt" data-id="o29P0Kpobz0" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
@@ -892,15 +918,15 @@
       <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">Gabriel Tseng (Harvest) · <i>Presto: lightweight pretrained transformers for remote-sensing time series</i> · 48 min · question 3, by its author.</p>
     </a>
   </div>
-  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Next slide:</b> the people who wrote the Earth encodings of slide 25, explaining them — DOFA, Prithvi and the ESA view, for discussion questions 2 and 3.</p>
+  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Next slide:</b> the people who wrote the Earth encodings of slide 26, explaining them — DOFA, Prithvi and the ESA view, for discussion questions 2 and 3.</p>
   <div class="gloss">
     <span><b>author talks</b> — the best preparation for the journal club is hearing the design reason in the author’s own words.</span>
   </div>
   <div class="foot"><span>Optional, not assigned · ids verified embeddable on 10 October 2026</span></div>
-  <aside class="notes">Twenty seconds. The Coffee Break one is the clock picture for slide 24; the two RoPE videos are the derivation we skipped; Tseng is discussion question 3 by its author.</aside>
+  <aside class="notes">Twenty seconds. The Coffee Break one is the clock picture for slide 25; the two RoPE videos are the derivation we skipped; Tseng is discussion question 3 by its author.</aside>
 </section>
 
-<!-- 31 -->
+<!-- 32 -->
 <section class="slide xl">
   <p class="kicker">Part 3 · Watch at home · the Earth encodings, by their authors</p>
   <h2>DOFA, Prithvi-EO-2.0 and the ESA view of Earth-observation foundation models</h2>
@@ -921,7 +947,7 @@
           <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
         </span>
       </span>
-      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">AI for Good (IBM team) · <i>Earth observation foundation models with Prithvi-EO-2.0 and TerraTorch</i> · 115 min · hands-on: the temporal and location codes of slide 29.</p>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">AI for Good (IBM team) · <i>Earth observation foundation models with Prithvi-EO-2.0 and TerraTorch</i> · 115 min · hands-on: the temporal and location codes of slide 30.</p>
     </a>
     <a href="https://www.youtube.com/watch?v=9KDcNz85wbA" class="yt" data-id="9KDcNz85wbA" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
@@ -942,7 +968,7 @@
       <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">Casper Fibæk (ESA Φ-lab) · <i>Earth observation foundation models and their applications</i> · 34 min · the survey view — where Week 10’s comparison starts.</p>
     </a>
   </div>
-  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Part 4.</b> Position solved “where”; the 0.25° bill from slide 19 is still unpaid. Swin pays it by letting a token see only its window — and shifting the window so the walls move.</p>
+  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Part 4.</b> Position solved “where”; the 0.25° bill from slide 20 is still unpaid. Swin pays it by letting a token see only its window — and shifting the window so the walls move.</p>
   <div class="gloss">
     <span><b>TerraTorch</b> — IBM’s fine-tuning toolkit for Prithvi (Week 10 compares Prithvi with two other encoders). <b>SSL4EO</b> — the self-supervised-learning-for-EO summer school.</span>
   </div>
@@ -950,20 +976,20 @@
   <aside class="notes">Twenty seconds. Xiong for question 2 (the wavelength hypernetwork), the Prithvi workshop for anyone on the EO track who will fine-tune it in Week 10, the GRSS webinar for the history, Fibæk for the map of the field. Bridge sentence and into Part 4.</aside>
 </section>
 
-<!-- 32 -->
+<!-- 33 -->
 
 <section class="slide section xl">
   <p class="kicker">Part 4 · 8 min · this week’s paper</p>
   <h2>Windows: Swin, the Shift, and the Three Weather Backbones</h2>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Attention confined to M × M windows and what that does to the N² term; the shift that lets windows talk; the 3-D window over (level, lat, lon) that Pangu and Aurora share (FuXi folds the levels into channels); the paper in one slide. <b>By the end:</b> explain why shifting recovers cross-window flow — question 1 of the journal club.</p></div>
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>It is the escape from slide 19 that every 0.25° Transformer weather model took: a 6 × 12 window costs 9.4 MB of scores per head and level, where the full level cost 8.5 GB.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>It is the escape from slide 20 that every 0.25° Transformer weather model took: a 6 × 12 window costs 9.4 MB of scores per head and level, where the full level cost 8.5 GB.</p></div>
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Pangu-Weather (Nature 2023) · FuXi (2023) · Aurora (Nature 2025) · Swin itself in detection and segmentation backbones · Week 11’s rollout lab can run on your Week 6 ViT.</p></div>
   </div>
   <aside class="notes">8 minutes. Read the cards in twenty seconds. The part exists to make the journal-club paper teachable: windows (why), the shift (how information crosses walls), and then the move that is not in the paper — the third dimension for pressure levels and the globe's wrap-around, which is discussion question 1.</aside>
 </section>
 
-<!-- 33 -->
+<!-- 34 -->
 
 <section class="slide xl">
   <p class="kicker">Part 4 · Windows</p>
@@ -990,7 +1016,7 @@
       <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2"><rect x="420" y="98" width="470" height="56" rx="8"/><rect x="420" y="162" width="470" height="56" rx="8" stroke="var(--accent)" stroke-width="1.8"/></g>
       <g font-size="12.5" fill="currentColor">
         <text x="432" y="118" font-weight="700">Swin stage 1 on 224 px: 56 × 56 = 3,136 tokens, M = 7</text><text x="432" y="136">64 windows of 49 · the score term shrinks 3,136 / 49 = <tspan font-weight="700">64×</tspan></text>
-        <text x="432" y="182" font-weight="700" fill="var(--accent)">one 0.25° level (slide 19): 65,160 tokens, window 6 × 12 = 72</text><text x="432" y="200">scores 65,160 × 72 × 2 B = <tspan font-weight="700" fill="var(--accent)">9.4 MB</tspan> per head — not 8.5 GB</text>
+        <text x="432" y="182" font-weight="700" fill="var(--accent)">one 0.25° level (slide 20): 65,160 tokens, window 6 × 12 = 72</text><text x="432" y="200">scores 65,160 × 72 × 2 B = <tspan font-weight="700" fill="var(--accent)">9.4 MB</tspan> per head — not 8.5 GB</text>
       </g>
     </svg>
   </div>
@@ -1004,7 +1030,7 @@
   <aside class="notes">2 min. Say it with the grid: the orange token scores 16 keys instead of 64 and the thick lines are walls. Then the two formulas: the first term is the three projections and the output map and does not change; the second is the scores, and it goes from hw squared to M squared times hw — linear in the image. Then the globe: 9 megabytes per head instead of 8.5 gigabytes. End on the price so the next slide has a job: nothing crosses the walls.</aside>
 </section>
 
-<!-- 34 -->
+<!-- 35 -->
 
 <section class="slide xl">
   <p class="kicker">Part 4 · The shift</p>
@@ -1047,7 +1073,7 @@
   <aside class="notes">2 min. Left grid: orange and blue are neighbours separated by a wall. Middle grid: next layer, the walls move half a window — the same two tokens are now in one window. Say the receptive-field analogy aloud because it is the answer to question 1: alternating layers grow the reach exactly as stacked 3 × 3 convolutions do. The right card is the engineering: rolling the grid packs the partial windows into full ones and a mask stops cheating across the seam; the ablation numbers are what the paper's Table 4 says the shift is worth — plus one point from the relative bias. Plant question 1: on a globe, longitude wraps, so the roll is physical; latitude ends at the poles, so there the walls are real.</aside>
 </section>
 
-<!-- 35 -->
+<!-- 36 -->
 
 <section class="slide xl">
   <p class="kicker">Part 4 · The weather backbones</p>
@@ -1078,16 +1104,16 @@
     </svg>
   </div>
   <ul class="small">
-    <li>Question 1, planted: along longitude the roll of slide 34 <i>is</i> the geometry (the dateline is a seam that should not exist); along latitude the walls are real — look at how Pangu’s bias table and Aurora’s Fourier codes treat latitude. <span class="accent">Windows pay the N² bill; the third dimension lets a token see the levels above and below it.</span></li>
+    <li>Question 1, planted: along longitude the roll of slide 35 <i>is</i> the geometry (the dateline is a seam that should not exist); along latitude the walls are real — look at how Pangu’s bias table and Aurora’s Fourier codes treat latitude. <span class="accent">Windows pay the N² bill; the third dimension lets a token see the levels above and below it.</span></li>
   </ul>
   <div class="gloss">
-    <span><b>3-D window</b> — 2 levels × 6 lat tokens (6 × 4 × 0.25° = 6°) × 12 lon tokens (12°); Pangu and Aurora. <b>Swin-V2</b> — Swin with the norm after the branch and cosine attention, for stability at scale. <b>Perceiver</b> — slide 19, door 3.</span>
+    <span><b>3-D window</b> — 2 levels × 6 lat tokens (6 × 4 × 0.25° = 6°) × 12 lon tokens (12°); Pangu and Aurora. <b>Swin-V2</b> — Swin with the norm after the branch and cosine attention, for stability at scale. <b>Perceiver</b> — slide 20, door 3.</span>
   </div>
   <div class="foot"><span>Bi et al. 2023, Nature 619:533, Methods · Chen et al. 2023, npj Clim Atmos Sci 6:190 · Bodnar et al. 2025, Nature 641:1180, App. B · details: Appendix A6</span></div>
   <aside class="notes">2 min. Point at the block: tokens live in three dimensions, levels × latitude × longitude, and the window is 2 levels by 6 degrees by 12 degrees — 144 tokens. Then one line per model, reading the bold names: Pangu invented the 3-D window and an Earth-specific bias that knows which latitude it is at; FuXi stacked 48 Swin-V2 blocks and cascaded three models by lead time; Aurora kept the same window, squeezed 13 levels into 3 before the backbone, and is the one you can download. Then the geometry: the roll along longitude is not a trick on a globe, it is the truth — the dateline should be invisible; latitude is where the walls are real, and that is why both models give latitude an absolute code. That is the start of discussion question 1, not its end.</aside>
 </section>
 
-<!-- 36 -->
+<!-- 37 -->
 
 <section class="slide xl">
   <p class="kicker">Part 4 · This week’s paper · 1.5 min</p>
@@ -1122,7 +1148,7 @@
   <aside class="notes">1.5 min, closing Part 4 with the paper on the board. The story to tell: ViT is flat — one scale, every token sees every token — and could not be dropped into the detection and segmentation pipelines the field already had; Swin rebuilt the CNN pyramid out of windowed attention, so its four feature maps slot straight into FPN and UPerNet, and it won everything in 2021. Then the sentence that matters for this course: the weather models did not take the pyramid; they took the window and the shift and added a third dimension. Do not answer the discussion questions; the leader should open with Figure 2 or Figure 4.</aside>
 </section>
 
-<!-- 37 -->
+<!-- 38 -->
 <section class="slide xl">
   <p class="kicker">Part 4 · Watch at home</p>
   <h2>Swin animated, by its author, at code level, and in eleven minutes</h2>
@@ -1164,15 +1190,15 @@
       <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">Microsoft Developer · <i>Developer Tech Minutes: Swin Transformer</i> · 11 min · the short official introduction.</p>
     </a>
   </div>
-  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Next slide:</b> the three weather backbones of slide 35, each explained by one of its authors — Pangu-Weather, FuXi and Aurora.</p>
+  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Next slide:</b> the three weather backbones of slide 36, each explained by one of its authors — Pangu-Weather, FuXi and Aurora.</p>
   <div class="gloss">
-    <span><b>cyclic shift, mask</b> — the two implementation details of slide 34; the Hugging Face session shows both as tensor operations.</span>
+    <span><b>cyclic shift, mask</b> — the two implementation details of slide 35; the Hugging Face session shows both as tensor operations.</span>
   </div>
   <div class="foot"><span>Optional, not assigned · ids verified embeddable on 10 October 2026</span></div>
   <aside class="notes">Twenty seconds. The Coffee Break one if the shift still feels abstract; Han Hu for the paper’s reasoning before the journal club; the Hugging Face session for the cyclic shift and mask as actual tensor code; the Microsoft short for a summary.</aside>
 </section>
 
-<!-- 38 -->
+<!-- 39 -->
 <section class="slide xl">
   <p class="kicker">Part 4 · Watch at home · the weather backbones, by their authors</p>
   <h2>Pangu-Weather, FuXi and Aurora — the 3-D window, from the people who built it</h2>
@@ -1222,7 +1248,7 @@
   <aside class="notes">Twenty seconds. Xie and Zhong for the weather track before the journal club — question 1 is answered in both talks; the seven-minute Aurora overview for everyone; Perdikaris for anyone who will fine-tune Aurora in the capstone. Bridge and go.</aside>
 </section>
 
-<!-- 39 -->
+<!-- 40 -->
 
 <section class="slide xl">
   <p class="kicker">Part 5 · 3 min · why the lab fits in an hour</p>
@@ -1260,7 +1286,7 @@
   <aside class="notes">2.5 min. Left: the bit bars. bf16 is fp32 with the fraction cut off — same exponent, same range, so nothing underflows and there is no loss scaling to manage; fp16 has the range problem and needs it. The number: a T4 does eight times the arithmetic in 16-bit on its tensor cores. Right: FlashAttention is not an approximation; it streams blocks of Q, K and V through the fast on-chip memory, keeps a running max and sum so the softmax is exact, and never writes the N × N matrix — memory linear in N, and up to three times faster end-to-end because attention is bound by data movement. Say the hardware caveat once: a Colab T4 has no bf16 tensor cores and no Flash kernel — there it is fp16 with GradScaler and the memory-efficient kernel, which still never stores N × N. In the lab: the from-scratch attention is for the tests; once test 4 passes they may train with SDPA, because the test proved it computes the same thing.</aside>
 </section>
 
-<!-- 40 -->
+<!-- 41 -->
 <section class="slide xl">
   <p class="kicker">Part 5 · Watch at home</p>
   <h2>FlashAttention by its author, mixed precision in six minutes and from scratch, and why GPUs go brrr</h2>
@@ -1272,7 +1298,7 @@
           <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
         </span>
       </span>
-      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">Tri Dao (Stanford MLSys #67) · <i>FlashAttention</i> · 59 min — <span class="accent">click to play here</span> · tiling, SRAM vs HBM, IO-awareness — slide 39’s right panel.</p>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">Tri Dao (Stanford MLSys #67) · <i>FlashAttention</i> · 59 min — <span class="accent">click to play here</span> · tiling, SRAM vs HBM, IO-awareness — slide 40’s right panel.</p>
     </a>
     <a href="https://www.youtube.com/watch?v=i1fIBtdhjIg" class="yt" data-id="i1fIBtdhjIg" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
@@ -1310,7 +1336,7 @@
   <aside class="notes">Twenty seconds. Tri Dao for the lab’s SDPA line; the NVIDIA six-minute one for everyone before they type autocast; ExplainingAI if they want the bit layouts in code; Horace He for the mental model of what makes a kernel slow. Then the contract.</aside>
 </section>
 
-<!-- 41 -->
+<!-- 42 -->
 
 <section class="slide xl">
   <p class="kicker">Part 5 · The contract</p>
@@ -1347,7 +1373,7 @@
   <aside class="notes">2 min. Deliver it as a contract, the same shape as last week's. The killer sentence is number 1 with the timeline: the tests exist before any model code, and step 3 — breaking a copy and watching them fail — is a graded deliverable, because the commonest way an agent-written model "passes" is a test that asserts nothing. Number 4 is the Week 1 discussion question made concrete: a CNN may well win on 27 thousand chips, and the honest report says so. End of the live budget: ~0:55. Read the clock: at 0:52 or earlier → run the FLEX board exercise; past it → hand the board to the journal-club leader and go to break.</aside>
 </section>
 
-<!-- 42 -->
+<!-- 43 -->
 
 <section class="slide xl">
   <p class="kicker">Part 5 · FLEX ~4 min · teach or skip</p>
@@ -1365,26 +1391,26 @@
   <div class="gloss">
     <span><b>HLS</b> — 30 m Landsat–Sentinel; <b>Presto</b> — pixel time series, question 3. <b>the point</b> — the same two formulas size every model in this course.</span>
   </div>
-  <div class="foot"><span>Run only if the clock allows at slide 41 · the three rows are the three tracks of the capstone: EO chips, weather grids, pixel time series</span></div>
+  <div class="foot"><span>Run only if the clock allows at slide 42 · the three rows are the three tracks of the capstone: EO chips, weather grids, pixel time series</span></div>
   <aside class="notes">FLEX, ~4 min. Answers. A: (224/16)² = 196 tokens per date; with t = 1 and 4 dates, 784 tokens; scores 784² × 2 B = 1.2 MB — trivial; no escape needed; the token should be told row, column, date, and — if available — latitude, longitude and day of year (Prithvi). B: 181 × 360 = 65,160; 8.5 GB per head; windows (Pangu, Aurora) or coarsen (ClimaX) or latent (Aurora's Perceiver); the token needs level, latitude (absolute — the poles are real) and longitude (periodic). C: 12 months × 3 groups = 36 tokens; 36² × 2 B = 2.6 kB — attention is free and the model can be tiny (Presto: 402 K parameters); the token must be told the month and the band group, and ideally the location. The lesson across the rows: the same two formulas size every model in the course, and "position" is a different list in each track.</aside>
 </section>
 
-<!-- 43 -->
+<!-- 44 -->
 
 <section class="slide xl">
   <p class="kicker">Journal club · 30 min · after break · 0 lecture minutes</p>
   <h2>Liu et al. 2021, Swin Transformer — discussion questions</h2>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.4vw;align-items:stretch">
-    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q1 · the shift on a globe</b><br>Why does shifted windowing recover cross-window information flow — and what is the weather-model analog at the poles and the dateline?</p><p class="small muted" style="margin:1vh 0 0">start from slides 34–35</p></div>
-    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q2 · 13 bands, one embedding?</b><br>For a 13-band image, argue for and against: one patch embedding for all bands vs band-group embeddings vs wavelength-conditioned embeddings (DOFA’s answer).</p><p class="small muted" style="margin:1vh 0 0">start from slides 17 and 26 — and from your own lab’s choice</p></div>
-    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q3 · 400 K parameters</b><br>Presto has 400 K parameters and competes with giants on pixel time series — what does that say about scale vs inductive fit?</p><p class="small muted" style="margin:1vh 0 0">start from slide 25 and Tseng et al. 2023, Tables 5 and 13</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q1 · the shift on a globe</b><br>Why does shifted windowing recover cross-window information flow — and what is the weather-model analog at the poles and the dateline?</p><p class="small muted" style="margin:1vh 0 0">start from slides 35–36</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q2 · 13 bands, one embedding?</b><br>For a 13-band image, argue for and against: one patch embedding for all bands vs band-group embeddings vs wavelength-conditioned embeddings (DOFA’s answer).</p><p class="small muted" style="margin:1vh 0 0">start from slides 18 and 27 — and from your own lab’s choice</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q3 · 400 K parameters</b><br>Presto has 400 K parameters and competes with giants on pixel time series — what does that say about scale vs inductive fit?</p><p class="small muted" style="margin:1vh 0 0">start from slide 26 and Tseng et al. 2023, Tables 5 and 13</p></div>
   </div>
   <p class="small muted" style="margin-top:1vh">Groups of 3–4, working from your published entrance tickets (Journal Club tab on the course site) · the drawn leader moderates, the presenter reports back, the questioner takes another group’s report · these three questions are the agenda.</p>
   <div class="foot"><span>Leader opens with one reproduced figure (Fig. 2 or Fig. 4 of the paper) · roles revealed at 13:00 on the course site · optional: <a href="https://arxiv.org/abs/2304.14065">Tseng et al. 2023, Presto</a></span></div>
   <aside class="notes">Journal club: 30 min in groups of 3–4, drawn leader moderating, presenter reporting back; harvest in the last 5 min. Q1: good answers say that alternating window partitions make the reach grow with depth like a CNN's receptive field (the cyclic shift is only the efficient implementation); better ones separate the two axes of a globe — longitude is periodic, so a roll across the dateline is physically exact and the seam mask should NOT be applied there, while latitude ends, so the poles need either padding or an absolute code — and name Pangu's Earth-specific bias (absolute in latitude, relative in longitude) and Aurora's Fourier position/area encodings as the two published answers. Q2: one embedding treats bands as interchangeable channels and cannot handle a sensor with different bands; group embeddings (SatMAE, the lab) buy per-group masking and a sensor-agnostic token but hard-code the grouping; wavelength conditioning (DOFA) makes the embedding a function of physics so a new sensor is a new argument, at the cost of a hypernetwork and the assumption that wavelength is what matters (it ignores bandwidth and SAR). Q3: Presto's 402 K parameters win where the inductive fit is right — one pixel, monthly tokens, band-group and month codes — and lose to Scale-MAE on 64-px EuroSAT images (kNN 0.921 vs 0.960, Table 13) where spatial context matters; the lesson is that scale buys generality but the token design buys fit, and the two are not the same axis. Close with a one-line bridge to lab.</aside>
 </section>
 
-<!-- 44 -->
+<!-- 45 -->
 
 <section class="slide xl">
   <p class="kicker">Lab briefing · 3 min · after journal club</p>
@@ -1422,7 +1448,7 @@
   <aside class="notes">3 min. Set the verification contract explicitly — three checks: (1) before any model code, the four tests exist and fail on a stub; (2) after the agent's code passes, break one thing on purpose (flip the mask triangle, drop the residual) and keep the failing log — that is graded; (3) before training, open one chip with band names and confirm B8A correlates with B8, because the Zenodo files store B8A last and every agent assumes the ESA order. Two more to warn about in one breath: normalization statistics computed on the whole set instead of the training split, and comparing against a CNN trained for a different number of epochs. Say the expectation out loud: on 27 thousand chips the CNN may win; the report is graded on honesty, and next week the same file is pretrained. Dismiss to lab. (Slides after this one are the self-study appendix — tell them it exists, then stop here.)</aside>
 </section>
 
-<!-- 45 -->
+<!-- 46 -->
 
 <section class="slide section">
   <p class="kicker">Appendix · self-study</p>
@@ -1431,7 +1457,7 @@
   <aside class="notes">Not taught in class. These eleven cards hold everything that came off the live path: attention with every shape written out and a twelve-line reference implementation; the four tests in code with the torch weight mapping; the positional-encoding algebra (why the dot product sees the offset, and RoPE); the six Earth encodings written out; the Swin card; the three weather backbones with their exact token grids; the ViT card; mixed precision and FlashAttention; the EuroSAT-MS card with the band-order trap; the assigned video; the shelf. Say the appendix exists, say what is in it, and stop.</aside>
 </section>
 
-<!-- 46 -->
+<!-- 47 -->
 
 <section class="slide">
   <p class="kicker">Appendix A1 · Attention, every shape written out</p>
@@ -1466,7 +1492,7 @@
   <aside class="notes">Not taught in class. This is the file the lab asks for, minus the ViT wrapper. The shape comments are the shape test; the mask line is the mask test; the packing comment is why the equivalence test can copy weights directly.</aside>
 </section>
 
-<!-- 47 -->
+<!-- 48 -->
 
 <section class="slide">
   <p class="kicker">Appendix A2 · The four tests in code</p>
@@ -1495,14 +1521,14 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. Four tests, fifteen lines. The bullet is the one students lose an hour to: the weight packing of torch's module. The deliberate failure is a one-token edit — triu for tril — and it is the proof that test 2 asserts something.</aside>
 </section>
 
-<!-- 48 -->
+<!-- 49 -->
 
 <section class="slide">
   <p class="kicker">Appendix A3 · Positional encodings, derived</p>
   <h2>Why the dot product sees the offset, and what RoPE rotates</h2>
   <div class="card small" style="line-height:1.75">
     <b>Sin-cos (2017).</b> ω<sub>k</sub> = 10000<sup>−2k/d</sup>, k = 0 … d/2 − 1; PE(pos) = [sin(ω<sub>0</sub>pos), cos(ω<sub>0</sub>pos), …, sin(ω<sub>d/2−1</sub>pos), cos(ω<sub>d/2−1</sub>pos)]<br>
-    PE(i)·PE(j) = Σ<sub>k</sub> [sin(ω<sub>k</sub>i) sin(ω<sub>k</sub>j) + cos(ω<sub>k</sub>i) cos(ω<sub>k</sub>j)] = <b>Σ<sub>k</sub> cos(ω<sub>k</sub>(i − j))</b> — a function of the offset only (slide 24, right panel); and PE(pos + Δ) = M<sub>Δ</sub> PE(pos) for a fixed rotation M<sub>Δ</sub>, so a linear map can express “Δ tokens back”.<br>
+    PE(i)·PE(j) = Σ<sub>k</sub> [sin(ω<sub>k</sub>i) sin(ω<sub>k</sub>j) + cos(ω<sub>k</sub>i) cos(ω<sub>k</sub>j)] = <b>Σ<sub>k</sub> cos(ω<sub>k</sub>(i − j))</b> — a function of the offset only (slide 25, right panel); and PE(pos + Δ) = M<sub>Δ</sub> PE(pos) for a fixed rotation M<sub>Δ</sub>, so a linear map can express “Δ tokens back”.<br>
     <b>Learned (ViT, GPT-2).</b> A table E ∈ ℝ<sup>N×d</sup>, trained; fixed N; ViT’s 2-D-aware variants gave nothing (Table 8).<br>
     <b>RoPE (2021).</b> Pair the d coordinates; rotate pair k of q<sub>m</sub> by angle mθ<sub>k</sub>, θ<sub>k</sub> = 10000<sup>−2k/d</sup>: q<sub>m</sub> = R(mΘ) W<sub>Q</sub>x<sub>m</sub>, k<sub>n</sub> = R(nΘ) W<sub>K</sub>x<sub>n</sub>. Since R(a)<sup>⊤</sup>R(b) = R(b − a): <b>q<sub>m</sub>·k<sub>n</sub> = (W<sub>Q</sub>x<sub>m</sub>)<sup>⊤</sup> R((n − m)Θ) (W<sub>K</sub>x<sub>n</sub>)</b> — the score depends on m − n, nothing is added to x, and the values v are untouched. The weight on far tokens decays with |m − n| (RoFormer §3.4.3).<br>
     <b>Relative bias (Swin).</b> s<sub>ij</sub> += B[i − j], a learned table of (2M − 1)² entries per head inside a window: position without any code on the token.
@@ -1511,10 +1537,10 @@ def test_equivalence():                       # the same thing as torch
     <li>Which to use: sin-cos or RoPE when N varies between train and test (a longer sequence, a bigger chip); a learned table when N is fixed and small (the lab); a relative bias when attention is windowed.</li>
   </ul>
   <div class="foot"><span>Vaswani et al. 2017 §3.5 · Su et al. 2021, <i>RoFormer</i>, §3.2–3.4 · Liu et al. 2021 eq. 4 · d2l.ai Ch. 11.6 (self-attention and positional encoding)</span></div>
-  <aside class="notes">Not taught in class. The one derivation worth reproducing without notes is the first line: sin·sin + cos·cos = cos of the difference, summed over frequencies — that is the whole reason the right panel of slide 24 is banded.</aside>
+  <aside class="notes">Not taught in class. The one derivation worth reproducing without notes is the first line: sin·sin + cos·cos = cos of the difference, summed over frequencies — that is the whole reason the right panel of slide 25 is banded.</aside>
 </section>
 
-<!-- 49 -->
+<!-- 50 -->
 
 <section class="slide">
   <p class="kicker">Appendix A4 · The Earth encodings, written out</p>
@@ -1529,10 +1555,10 @@ def test_equivalence():                       # the same thing as torch
     <tr><td style="padding:.3vh .4vw;vertical-align:top"><b>Presto</b> Tseng 2023</td><td style="padding:.3vh .4vw">one channel group at one month: e = h<sup>c</sup>(x) + [learned channel-group code ‖ sin-cos timestep ‖ sin-cos month]; static SRTM and location tokens; random / channel / timestep masking</td><td style="padding:.3vh .4vw">402 K params; 2 layers, d = 128, 8 heads; 12 monthly steps; EuroSAT kNN at 64 px: 0.921 (MS) vs Scale-MAE 0.960 (RGB); wins at 16 px</td></tr>
   </table>
   <div class="foot"><span>arXiv 2207.08051 · 2212.14532 · 2301.10343 · 2412.02732 · 2403.15356 · 2304.14065 — numbers checked against the papers on 9 October 2026</span></div>
-  <aside class="notes">Not taught in class. The table is the answer key to slide 25 and the reference for discussion questions 2 and 3. Students on the EO track should be able to say, for any of the six, what a token is and what it is told, in one sentence each.</aside>
+  <aside class="notes">Not taught in class. The table is the answer key to slide 26 and the reference for discussion questions 2 and 3. Students on the EO track should be able to say, for any of the six, what a token is and what it is told, in one sentence each.</aside>
 </section>
 
-<!-- 50 -->
+<!-- 51 -->
 
 <section class="slide">
   <p class="kicker">Appendix A5 · This week’s paper</p>
@@ -1551,7 +1577,7 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. The card the journal-club leader should have open. Everything in it was checked against the paper's tables.</aside>
 </section>
 
-<!-- 51 -->
+<!-- 52 -->
 
 <section class="slide">
   <p class="kicker">Appendix A6 · The three weather backbones</p>
@@ -1565,10 +1591,10 @@ def test_equivalence():                       # the same thing as torch
     <tr><td style="padding:.3vh .4vw"><b>training</b></td><td style="padding:.3vh .4vw">L1 loss; 192 V100 × 16 days per model; ≈ 64 M params each</td><td style="padding:.3vh .4vw">lat-weighted L1; ≈ 30 h on 8 A100 pretraining, ≈ 2 days per cascade model; params not stated</td><td style="padding:.3vh .4vw">&gt; 1 M hours of data; 32 A100 × 2.5 weeks, bf16; fine-tuned to HRES 0.1°, CAMS pollution, waves, cyclone tracks</td></tr>
   </table>
   <div class="foot"><span>Nature 619:533 · npj Clim Atmos Sci 6:190 · Nature 641:1180 · Pangu and Aurora share the 2 × 6 × 12 window (2 levels × 6° × 12°); FuXi’s are 2-D</span></div>
-  <aside class="notes">Not taught in class. Weather-track students: the row to memorize is "tokens" — it is slide 19 done three ways — and the row to argue about in the journal club is "backbone", where the Earth-specific bias and Aurora's encoder-side position codes are the two answers to question 1.</aside>
+  <aside class="notes">Not taught in class. Weather-track students: the row to memorize is "tokens" — it is slide 20 done three ways — and the row to argue about in the journal club is "backbone", where the Earth-specific bias and Aurora's encoder-side position codes are the two answers to question 1.</aside>
 </section>
 
-<!-- 52 -->
+<!-- 53 -->
 
 <section class="slide">
   <p class="kicker">Appendix A7 · The ViT paper</p>
@@ -1584,7 +1610,7 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. The two numbers to keep: 196 tokens, and the data threshold — ImageNet alone is not enough, which is the entire motivation for next week.</aside>
 </section>
 
-<!-- 53 -->
+<!-- 54 -->
 
 <section class="slide">
   <p class="kicker">Appendix A8 · Mixed precision and FlashAttention</p>
@@ -1599,7 +1625,7 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. The practical rule for the lab: bf16 if the GPU has it (A100, L4), fp16 with GradScaler on a T4; SDPA always, once the equivalence test licenses it.</aside>
 </section>
 
-<!-- 54 -->
+<!-- 55 -->
 
 <section class="slide">
   <p class="kicker">Appendix A9 · Lab reference</p>
@@ -1628,7 +1654,7 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. The band-order trap is the one thing on this card that will silently ruin a lab: the agent will write the group embedding assuming ESA's order, the model will train, and the "red edge" group will contain SWIR2. Make them check B8A against B8 on one chip before training.</aside>
 </section>
 
-<!-- 55 -->
+<!-- 56 -->
 
 <section class="slide">
   <p class="kicker">Appendix A10 · Watch at home · assigned</p>
@@ -1653,11 +1679,11 @@ def test_equivalence():                       # the same thing as torch
       </ul>
     </div>
   </div>
-  <div class="foot"><span>Chapter 5 (<i>Transformers, the tech behind LLMs</i>) is the optional prequel on slide 15 · the assigned video is quizzed; the shelf is not</span></div>
+  <div class="foot"><span>Chapter 5 (<i>Transformers, the tech behind LLMs</i>) is the optional prequel on slide 16 · the assigned video is quizzed; the shelf is not</span></div>
   <aside class="notes">Not taught in class. The summary prompt is the four bullets; the quiz will ask about the noun-and-adjectives picture, the √d and the mask, and the heads.</aside>
 </section>
 
-<!-- 56 -->
+<!-- 57 -->
 
 <section class="slide">
   <p class="kicker">Appendix A11 · More to watch</p>
