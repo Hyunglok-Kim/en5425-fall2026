@@ -565,6 +565,7 @@
   </ul>
   <div class="gloss">
     <span><b>p</b> — patch side in pixels; <b>H</b> — image side. <b>GSD</b> “ground sample distance” — metres per pixel (10 m here), so patch 8 = 80 m. <b>in the figure</b> — the orange square is the same road pixel’s token each time.</span>
+    <span><b>no averaging</b> — all p × p × 13 numbers go in (208, 832 or 3,328) and the learned map turns each patch into the same 128-number token.</span>
   </div>
   <div class="foot"><span>EuroSAT-MS Highway_1 · ViT-B/16 vs ViT-B/32 is this dial (Dosovitskiy 2020, Table 5) · Aurora moves p from 4 to 10 when it fine-tunes at 0.1° — the same dial, for the same reason</span></div>
   <aside class="notes">2 min. Point at the three orange squares: same pixel, three tokens. Left: the token is almost purely road, and there are 256 of them — 65,536 scores per head. Right: the token is a 160-metre square that is one-fifth road, and the linear map has to find the road inside 3,328 numbers; there are 16 of them. The lesson: patch size is set by what the input resolves and what the task needs, and the N² bill follows. Then the one-line callback that sets up the next slide: Aurora changes its patch from 4 to 10 when it moves from 0.25 to 0.1 degrees — exactly to hold N.</aside>
