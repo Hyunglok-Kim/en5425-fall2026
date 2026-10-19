@@ -79,7 +79,7 @@ function render(el, quizzes, states, isPI, mode, base) {
   el.innerHTML = quizzes.map((q) => {
     const s = states[q.id] || {};
     const title = (ko && q.title_ko) ? q.title_ko : q.title;
-    const wk = t(`Week ${q.week}`, `${q.week}주차`);
+    const wk = q.kind === "exam" ? t("Midterm", "중간고사") : t(`Week ${q.week}`, `${q.week}주차`);
     const quizBtn = (s.quiz || isPI) && canLink
       ? `<a class="btn" target="_blank" rel="noopener" href="${fileURL(q, "quiz")}">${t("Quiz PDF", "문제 PDF")}${!s.quiz ? ` <span class="sub" style="margin:0;display:inline">(${t("preview", "미공개 · 미리보기")})</span>` : ""}</a>`
       : s.quiz && !canLink

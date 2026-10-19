@@ -49,6 +49,14 @@
    "kind": "reading"
   },
   {
+   "id": "w08",
+   "week": null,
+   "date": "2026-10-19",
+   "title": "Midterm quiz exam (60 min, closed book, 100 points)",
+   "title_ko": "중간고사 퀴즈 시험 (60분, closed book, 100점)",
+   "kind": "exam"
+  },
+  {
    "id": "w07",
    "week": 7,
    "date": "2026-10-26",
