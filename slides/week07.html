@@ -1,0 +1,1417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Week 7 · Self-Supervised Learning: Pretrain Your First Model</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="deck.css">
+<script src="deck.js" defer></script>
+<script src="ink.js" defer></script>
+<script src="poll.js" defer></script>
+<style>
+/* compact video row (slide 3): small thumbnails; a playing video opens large over the slide,
+   and deck.js restores the thumbnail when the slide is left */
+.ytmini { display:flex; gap:1.4vw; margin-top:1.2vh; }
+.ytmini a.yt { flex:1; min-width:0; display:flex; gap:.8vw; align-items:center; text-decoration:none; color:inherit; }
+.ytmini .ytbox { position:relative; display:block; flex:0 0 9.5vw; }
+.ytmini .ytbox img { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:6px; display:block; }
+.ytmini .play { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.ytmini .play span { background:rgba(0,0,0,.62); color:#fff; border-radius:999px; padding:.6vh 1vh; font-size:1.7vh; line-height:1; }
+.ytmini .cap { font-size:clamp(12.5px,1.85vh,16px); line-height:1.35; color:var(--ink-2); min-width:0; }
+.ytmini .ytbox:has(iframe) { position:fixed; z-index:120; top:10vh; left:50%; transform:translateX(-50%);
+  width:min(80vw,140vh); flex:none; border-radius:10px; box-shadow:0 12px 48px rgba(0,0,0,.45); }
+</style>
+</head>
+<body>
+
+
+<!-- 1 -->
+
+<section class="slide title xl" style="background:linear-gradient(rgba(10,12,18,.40),rgba(10,12,18,.80)),url('img/w7-title-masked.jpg') center/cover no-repeat">
+  <p class="kicker" style="color:#e8a07a">EN5425 / EV4240 · Week 7 · Fall 2026</p>
+  <h1 style="color:#f4efe5;text-shadow:0 2px 24px rgba(0,0,0,.6)">Self-Supervised Learning: Pretrain Your First Model</h1>
+  <p class="big" style="color:#e8e2d8;text-shadow:0 1px 16px rgba(0,0,0,.6)">Half of these chips have three quarters of their patches hidden. A network that learns to fill them back in, with no labels at all, learns what fields, rivers and towns look like. That is how Prithvi, SatMAE and most Earth foundation models (one network pretrained broadly, then adapted to many tasks) were trained, and today you pretrain one yourself.</p>
+  <div class="foot" style="color:#cfc8bc"><span>Deep Learning Applications in Environmental Big Data · Prof. Hyunglok Kim · GIST</span><span>Image: the same forty EuroSAT-MS (multispectral) chips as Week 6, true colour (bands 4-3-2); on every other chip 48 of the 64 patches (75%) are greyed out, the masked autoencoder's default. Helber et al. 2019, MIT licence.</span></div>
+  <aside class="notes">Open: Week 6 built the Transformer; today it learns without labels. Say what the picture is: the same forty EuroSAT chips as last week, and on every other one three quarters of the patches are hidden — the input of the model the lab pretrains today. Timing: 5-min quiz + 50.5 min core (roadmap 1.5, Part 1 14, Part 2 17, Part 3 7, Part 4 7, Part 5 4), plus the 4-min FLEX only if the clock allows. Cut order if short: the two second video slides (Part 1 authors, Part 3 wider picture), the mask-ratio sweep (the lab homework repeats it), the family-tree slide (Appendix A4/A6 hold it), then the FLEX. Seven Watch-at-home slides are pointers, not playback — twenty seconds each. Every number on today's slides that is not from a paper was computed for this lecture on EuroSAT chips: the spectral-redundancy test, the compute bars, the fill-in baseline, and a tiny MAE we pretrained on an Apple M2 Ultra.</aside>
+</section>
+
+<!-- 2 -->
+
+<section class="slide xl">
+  <p class="kicker">0:00 · Reading + video quiz</p>
+  <h2>Quiz first — 5 minutes, closed book</h2>
+  <ul>
+    <li><span class="accent"><b>3 questions on the video assigned in Week 6</b></span> — <i>Attention in transformers, step-by-step</i> (3Blue1Brown, Deep Learning Chapter 6, 26 min).</li>
+    <li><b>2 questions on this week’s paper</b> — He et al. 2021, <i>Masked Autoencoders Are Scalable Vision Learners</i>.</li>
+    <li>No AI, no notes. Swap with your neighbour to grade. Pass = 3 of 5 — the video alone can carry you; <span class="accent">the paper alone cannot</span>.</li>
+    <li>Best 8 of 10 count, 0.75% each; an optional handwritten book summary forgives one wrong answer.</li>
+    <li class="muted">Next Monday, 2 November, is proposal day (Week 8): no quiz, no journal club. The proposal PDF is due Sunday 1 November, 13:00; Note 07 and the video summary are due the same Sunday, 23:59.</li>
+  </ul>
+  <aside class="notes">Distribute at 0:00 sharp, collect at 0:05. Say the composition out loud: three of the five are on the 3Blue1Brown attention chapter assigned in Week 6 (the midterm used it too, so most of the class has seen it twice), two on the MAE paper. Calendar line: next Monday is the Week 8 proposal day, so there is no quiz and no journal club; the proposal PDF is due Sunday 1 November at 13:00, and Note 07 with the video summary is due the same day at 23:59. This week's assigned video (Stanford CS231N Lecture 12, self-supervised learning) is quizzed in Week 9, on 9 November.</aside>
+</section>
+
+<!-- 3 -->
+
+<section class="slide xl">
+  <p class="kicker">Week 7 · 50 min</p>
+  <h2>Today in five blocks — and one chain of cause and effect</h2>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 112" role="img" aria-label="Seven boxes joined left to right by arrows: labels are scarce, pixels are free; hide part of the data and predict it; four things to predict; the trap is collapse; MAE hides 75% and uses a small decoder; on the Earth, hide bands, dates and sensors; judge the encoder with probe, kNN and fine-tune. Brackets under the boxes mark the five lecture parts." style="width:min(98%,1150px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="4" y="16" width="112" height="50" rx="8"/><rect x="134" y="16" width="112" height="50" rx="8" stroke="var(--accent)" stroke-width="1.8"/>
+        <rect x="264" y="16" width="112" height="50" rx="8"/><rect x="394" y="16" width="112" height="50" rx="8"/>
+        <rect x="524" y="16" width="112" height="50" rx="8" stroke="var(--accent)" stroke-width="1.8"/><rect x="654" y="16" width="112" height="50" rx="8"/><rect x="784" y="16" width="112" height="50" rx="8"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M116 41 H134 M246 41 H264 M376 41 H394 M506 41 H524 M636 41 H654 M766 41 H784"/></g>
+      <g fill="currentColor" stroke="none"><path d="M128 37 L134 41 L128 45 Z"/><path d="M258 37 L264 41 L258 45 Z"/><path d="M388 37 L394 41 L388 45 Z"/><path d="M518 37 L524 41 L518 45 Z"/><path d="M648 37 L654 41 L648 45 Z"/><path d="M778 37 L784 41 L778 45 Z"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle">
+        <text x="60" y="37">labels are scarce,</text><text x="60" y="51">pixels are free</text>
+        <text x="190" y="37" fill="var(--accent)" font-weight="700">hide part of it,</text><text x="190" y="51" fill="var(--accent)" font-weight="700">predict it</text>
+        <text x="320" y="37">four things</text><text x="320" y="51">to predict</text>
+        <text x="450" y="37">the trap:</text><text x="450" y="51">collapse</text>
+        <text x="580" y="37" fill="var(--accent)" font-weight="700">MAE: hide 75%,</text><text x="580" y="51" fill="var(--accent)" font-weight="700">small decoder</text>
+        <text x="710" y="37">Earth: hide bands,</text><text x="710" y="51">dates, sensors</text>
+        <text x="840" y="37">judge it: probe,</text><text x="840" y="51">kNN, fine-tune</text>
+      </g>
+      <g fill="none" stroke="var(--muted)" stroke-width="1"><path d="M4 78 V84 H506 V78 M524 78 V84 H636 V78 M654 78 V84 H766 V78 M784 78 V84 H896 V78"/></g>
+      <g font-size="11" fill="var(--muted)" text-anchor="middle">
+        <text x="255" y="100">Part 1 · self-supervised learning: four families, one failure (14 min)</text><text x="580" y="100">Part 2 · MAE (17)</text><text x="710" y="100">Part 3 · Earth masks (7)</text><text x="840" y="100">Part 4 · evaluation (7) · Part 5 · fit (4)</text>
+      </g>
+    </svg>
+  </div>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.1vh,19px);line-height:1.36">
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">1 · Families</td><td style="padding:.4vh .6vw"><b>self-supervised learning (SSL)</b> the labels are made from the data itself · <b>pretext task</b> the made-up job, e.g. fill in hidden patches · <b>contrastive</b> pull two views (random crops, turns) of one image together, push other images away · <b>self-distillation</b> a student copies a slowly updated teacher · <b>latent prediction</b> predict the hidden part’s embedding (the encoder’s output vector), not its pixels · <b>collapse</b> every input gets the same vector</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">2 · MAE</td><td style="padding:.4vh .6vw"><b>masked autoencoder (MAE)</b> hide most patches, rebuild them (this week’s paper) · <b>encoder</b> the part you keep · <b>decoder</b> the part you throw away · <b>mask token</b> one learned vector standing in for every hidden patch</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">3 · Earth masks</td><td style="padding:.4vh .6vw"><b>spectral masking</b> hide a whole group of bands · <b>temporal masking</b> hide a whole date · <b>modality</b> one kind of sensor, e.g. radar or elevation</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">4–5 · Judge, fit</td><td style="padding:.4vh .6vw"><b>frozen</b> weights not updated · <b>linear probe</b> one linear layer trained on frozen features · <b>kNN</b> k-nearest neighbours: a vote of the k closest training chips · <b>(full) fine-tune</b> train every weight · <b>bf16 / fp16</b> 16-bit numbers that roughly halve activation memory (Part 5, in the lab)</td></tr>
+  </table>
+  <div class="ytmini">
+    <a href="https://www.youtube.com/watch?v=iGJ1XSkCyU0" class="yt" data-id="iGJ1XSkCyU0">
+      <span class="ytbox"><img src="img/yt-w7-what-is-ssl.jpg" alt="Boris Meinardus video"><span class="play"><span>&#9654;</span></span></span>
+      <span class="cap"><b>Part 1 words</b> — pretext task, why labels are the bottleneck · Boris Meinardus, <i>What is self-supervised learning?</i> · 10 min</span>
+    </a>
+    <a href="https://www.youtube.com/watch?v=Dp6iICL2dVI" class="yt" data-id="Dp6iICL2dVI">
+      <span class="ytbox"><img src="img/yt-w7-mae-coffee.jpg" alt="AI Coffee Break with Letitia video"><span class="play"><span>&#9654;</span></span></span>
+      <span class="cap"><b>Part 2 words</b> — masking, encoder, decoder · AI Coffee Break, <i>Masked Autoencoders, explained</i> · 13 min</span>
+    </a>
+    <a href="https://www.youtube.com/watch?v=75xclLXkFzI" class="yt" data-id="75xclLXkFzI">
+      <span class="ytbox"><img src="img/yt-w7-geobench.jpg" alt="ServiceNow video"><span class="play"><span>&#9654;</span></span></span>
+      <span class="cap"><b>Part 4 words</b> — benchmarks, probe vs fine-tune · ServiceNow, <i>GEO-Bench v2</i> (an Earth-model benchmark) · 18 min</span>
+    </a>
+  </div>
+  <div class="foot"><span>Click a video to play it large · journal club after the break · every derivation and reference card is in the Appendix</span></div>
+  <aside class="notes">1.5 min. Read the chain left to right once: labels are scarce and pixels free, so hide part of the data and predict it; there are four things a network can be asked to predict; the view-matching families can be cheated by collapse; MAE hides 75% and keeps the decoder small; on the Earth we can also hide bands, dates and sensors; and finally, three ways to judge the result, which disagree. Then the table: one breath per word — each comes back on its own slide. The three videos under the table explain the same words; point at them, do not play them.</aside>
+</section>
+
+<!-- 4 -->
+
+<section class="slide section xl">
+  <p class="kicker">Part 1 · 14 min · the map</p>
+  <h2>Self-Supervised Learning: Four Families and One Failure</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>One recipe — hide part of the data, predict it — and the four things a network can be asked to predict: the pixels, the other view, a teacher’s answer, or the hidden part’s embedding. Then the one failure every agreement-based method must block. <b>By the end:</b> place any Earth foundation model on the family tree.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>Labelled Earth data is tiny and lopsided; unlabelled imagery arrives every day for free. The Earth foundation models you will fine-tune this semester were pretrained mostly without hand-made labels (some add existing maps as targets).</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Prithvi, SatMAE, Scale-MAE (masked pixels) · SeCo (Seasonal Contrast), DINOv3 for satellites (views and teachers) · SSL4EO-S12 (an open pretraining set) · Galileo, AnySat, OlmoEarth (latent prediction) · your lab today.</p></div>
+  </div>
+  <aside class="notes">14 minutes. Read the three cards in thirty seconds. The goal is a map, not a zoo: one recipe, four targets, one failure mode, and a family tree on which every model name of the semester has a place. The assigned CS231N lecture does the history in 75 minutes; here we keep only what decides which model a student should pick and why.</aside>
+</section>
+
+<!-- 5 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Why bother</p>
+  <h2>Labels are scarce, pixels are free</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">A label costs a person’s time; an archived chip costs only storage and compute — so learn from chips first, then spend labels.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w7-scale.png" data-zoom alt="Horizontal bar chart on a log scale: EuroSAT, the lab's labelled set, 27,000 chips; SSL4EO-S12, unlabelled Sentinel-2 chips from 251,079 places times four seasons, 1,004,316; Prithvi-EO-2.0 pretraining, 4,200,000 HLS time-series samples; DINOv3's satellite model, SAT-493M, 493,000,000 images." title="Click to enlarge" style="display:block;margin:0 auto;height:34vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Each orange bar was used <b>without hand-made labels</b> (the bars show scale, not free downloads); the blue bar is what a typical labelled Earth dataset looks like. <span class="accent">And Sentinel-2 alone was already publishing more than 4 TB of new products a day in 2018.</span></li>
+    <li>The semester’s plan: pretrain on the orange, adapt with the blue (Weeks 9–10, the capstone).</li>
+  </ul>
+  <div class="gloss">
+    <span><b>EO</b> — Earth observation. <b>HLS</b> — Harmonized Landsat Sentinel-2: one 30 m product from both missions. <b>sample</b> — one chip, or one short time series of chips.</span>
+  </div>
+  <div class="foot"><span>Helber et al. 2019 (EuroSAT) · Wang et al. 2022 (SSL4EO-S12, one Sentinel-2 product) · Szwarcman et al. 2024 (Prithvi-EO-2.0) · Siméoni et al. 2025 (DINOv3, §8.1) · European Space Agency (ESA) Sentinel Online, 2018</span></div>
+  <aside class="notes">1 min. Read the bars from the top: twenty-seven thousand labelled chips — the size of a good Earth dataset; then a million unlabelled Sentinel-2 chips that anyone can download, four million time series behind Prithvi, half a billion images behind Meta's satellite model. The orange bars carry no labels. Add the ESA number: more than four terabytes of new Sentinel-2 products every day, already in 2018. The rest of today is how to turn the orange bars into something the blue bar can use.</aside>
+</section>
+
+<!-- 6 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · The recipe</p>
+  <h2>Hide part, predict it — one recipe, four targets</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">No one labels the training chips: the data supplies question and answer. Families differ mainly in what is predicted.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 300" role="img" aria-label="A four-row table drawn as boxes. Columns: family, what the network sees, what it must predict, Earth models built this way. Row 1, masked reconstruction: sees a quarter of the patches, predicts the pixels of the hidden ones; MAE; SatMAE, Prithvi, Scale-MAE. Row 2, contrastive: sees two altered views of one chip and other chips, predicts which view is its partner; SimCLR, MoCo; SSL4EO-S12 baselines. Row 3, self-distillation: sees one crop, predicts what a slowly updated teacher outputs for another crop; DINO; DINOv2, DINOv3 for satellite images. Row 4, latent prediction: sees one block, predicts the embedding of hidden blocks; I-JEPA; Galileo, AnySat, OlmoEarth." style="width:min(98%,1150px)">
+      <g font-size="12" fill="var(--muted)"><text x="12" y="16">family</text><text x="214" y="16">what the network sees</text><text x="470" y="16">what it must predict</text><text x="706" y="16">Earth models built this way</text></g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.1">
+        <rect x="4" y="26" width="196" height="62" rx="8" stroke="var(--accent)" stroke-width="1.8"/><rect x="4" y="96" width="196" height="62" rx="8"/><rect x="4" y="166" width="196" height="62" rx="8"/><rect x="4" y="236" width="196" height="62" rx="8"/>
+      </g>
+      <g font-size="14" font-weight="700" fill="currentColor"><text x="16" y="52" fill="var(--accent)">masked reconstruction</text><text x="16" y="122">contrastive</text><text x="16" y="192">self-distillation</text><text x="16" y="262">latent prediction</text></g>
+      <g font-size="12" fill="var(--muted)"><text x="16" y="72">MAE · 2021 (this week)</text><text x="16" y="142">MoCo 2019, SimCLR 2020</text><text x="16" y="212">BYOL 2020, DINO · 2021</text><text x="16" y="282">I-JEPA · 2023</text></g>
+      <!-- row icons: what it sees -->
+      <g stroke="currentColor" stroke-width=".8">
+        <g fill="var(--wash)"><rect x="214" y="32" width="12" height="12"/><rect x="226" y="32" width="12" height="12"/><rect x="238" y="32" width="12" height="12"/><rect x="250" y="32" width="12" height="12"/><rect x="214" y="44" width="12" height="12"/><rect x="226" y="44" width="12" height="12"/><rect x="238" y="44" width="12" height="12"/><rect x="250" y="44" width="12" height="12"/><rect x="214" y="56" width="12" height="12"/><rect x="226" y="56" width="12" height="12"/><rect x="238" y="56" width="12" height="12"/><rect x="250" y="56" width="12" height="12"/><rect x="214" y="68" width="12" height="12"/><rect x="226" y="68" width="12" height="12"/><rect x="238" y="68" width="12" height="12"/><rect x="250" y="68" width="12" height="12"/></g>
+        <g fill="var(--accent)" opacity=".75"><rect x="226" y="32" width="12" height="12"/><rect x="214" y="56" width="12" height="12"/><rect x="250" y="56" width="12" height="12"/><rect x="238" y="68" width="12" height="12"/></g>
+        <g fill="var(--wash)"><rect x="214" y="106" width="30" height="30" transform="rotate(-8 229 121)"/><rect x="252" y="106" width="30" height="30" transform="rotate(10 267 121)"/></g>
+        <g fill="var(--wash)" stroke-dasharray="3 2"><rect x="292" y="112" width="22" height="22"/><rect x="320" y="112" width="22" height="22"/></g>
+        <g fill="var(--wash)"><rect x="214" y="174" width="46" height="46"/></g><g fill="var(--accent)" opacity=".55"><rect x="222" y="182" width="20" height="20"/></g>
+        <g fill="var(--wash)"><rect x="214" y="244" width="46" height="46"/></g><g fill="var(--accent)" opacity=".55"><rect x="216" y="246" width="26" height="30"/></g><g fill="none" stroke-dasharray="3 2"><rect x="244" y="262" width="14" height="26"/></g>
+      </g>
+      <g font-size="12.5" fill="currentColor">
+        <text x="276" y="50">16 of 64 patches</text><text x="276" y="66">(orange = kept)</text>
+        <text x="350" y="120">two views</text><text x="350" y="135">+ other chips</text>
+        <text x="272" y="194">one crop</text><text x="272" y="210">of the chip</text>
+        <text x="272" y="262">one context</text><text x="272" y="278">block</text>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M430 57 H458 M430 127 H458 M430 197 H458 M430 267 H458"/></g>
+      <g fill="currentColor"><path d="M452 53 L458 57 L452 61 Z"/><path d="M452 123 L458 127 L452 131 Z"/><path d="M452 193 L458 197 L452 201 Z"/><path d="M452 263 L458 267 L452 271 Z"/></g>
+      <g font-size="13" fill="currentColor">
+        <text x="470" y="51" fill="var(--accent)" font-weight="700">the pixels of the 48 hidden</text><text x="470" y="68" fill="var(--accent)" font-weight="700">patches</text>
+        <text x="470" y="121" font-weight="700">which view is my partner</text><text x="470" y="138">— embeddings match, others repel</text>
+        <text x="470" y="191" font-weight="700">a teacher’s output for</text><text x="470" y="208">another crop (teacher = slow copy)</text>
+        <text x="470" y="261" font-weight="700">the embedding of the</text><text x="470" y="278">hidden blocks, not their pixels</text>
+      </g>
+      <g font-size="12.5" fill="currentColor">
+        <text x="706" y="51">SatMAE, Prithvi-EO-2.0,</text><text x="706" y="68">Scale-MAE, SpectralGPT</text>
+        <text x="706" y="121">SSL4EO-S12 baselines,</text><text x="706" y="138">SeCo (seasonal contrast)</text>
+        <text x="706" y="191">DINOv2, DINOv3 —</text><text x="706" y="208">a satellite-image version</text>
+        <text x="706" y="261">Galileo, AnySat,</text><text x="706" y="278">OlmoEarth</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>The targets climb from raw to abstract: pixels → which-image → teacher’s answer → embedding. <span class="accent">The higher the target, the less the network wastes on noise — and the easier it is to cheat.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>names</b> — MoCo: momentum contrast · SimCLR: simple contrastive learning · BYOL: bootstrap your own latent · DINO: self-distillation, no labels · I-JEPA: image joint-embedding predictive architecture. <b>view</b> — the same chip after a random crop, turn or flip.</span>
+  </div>
+  <div class="foot"><span>He et al. 2021 (MAE) · Chen et al. 2020 (SimCLR) · Caron et al. 2021 (DINO) · Assran et al. 2023 (I-JEPA) · Earth models: Appendix A6</span></div>
+  <aside class="notes">2 min. One recipe: take an unlabelled chip, hide or change part of it, and make the network predict something about the hidden part. Then read down the third column — that is the only thing that changes between families. Row 1, the pixels: today's paper. Row 2, which altered view belongs to which chip. Row 3, a teacher's answer, where the teacher is a slowly updated copy of the student. Row 4, the embedding of the hidden block. Land the bullet: predicting pixels wastes effort on noise and clouds, predicting embeddings does not — but an embedding target can be met by cheating, which is the next-but-one slide.</aside>
+</section>
+
+<!-- 7 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Contrastive · SimCLR</p>
+  <h2>Two views of one chip should match; every other chip should not</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">The augmentations decide what the model learns to ignore — on satellites, choose them with physics in mind.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w7-augment.png" data-zoom alt="Left: a EuroSAT river chip and two random views of it (cropped, turned, flipped, slightly brighter), labelled the positive pair. Middle: two other chips, forest and industrial, labelled negatives. Right: an 8 by 8 grid for a batch of four chips times two views, with orange cells marking the four pairs that should match." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>The loss is a softmax over the batch: find your partner among 2N − 1 candidates. With N chips (2N views) per batch; SimCLR used 4,096 images and temperature 0.1.</li>
+    <li><span class="accent">For land cover, a 90° turn is a safe view; colour jitter rewrites the spectrum the bands measure.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>negative</b> — any other chip in the batch, assumed to show something different (a second river chip breaks that assumption). <b>SimCLR</b> — a simple framework for contrastive learning.</span>
+  </div>
+  <div class="foot"><span>Chen et al. 2020, SimCLR, ICML · views drawn for this lecture from EuroSAT-MS River_1 · the loss written out: Appendix A2</span></div>
+  <aside class="notes">2 min. Walk the picture left to right: one chip, two random views — that pair should end up with the same embedding; the other chips in the batch should not. The grid on the right is the whole loss: for each of the eight views, a softmax over the other seven, with the orange cell as the right answer. Two points to land. First, the negatives come for free from the batch, which is why SimCLR wants enormous batches. Second, the augmentation is the teacher: whatever you vary, the model learns to ignore. For land-cover tasks seen from above rotations and flips are label-preserving (not for directional variables such as wind, or for shadows), but the colour jitter used for photographs changes the reflectance the bands measure — and a second chip of the same river in the batch is treated as a different thing. SeCo added the seasons of one place as extra views, alongside the usual artificial augmentations.</aside>
+</section>
+
+<!-- 8 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · The one failure</p>
+  <h2>Collapse: map every chip to the same vector and “agree” is satisfied</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">A loss that only asks two views to agree has a lazy answer — output a constant. Each family blocks it differently.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 250" role="img" aria-label="Left panel, healthy: embeddings of chips from four classes form four separate clusters. Middle panel, collapsed: every chip's embedding sits on one point; the agreement loss is zero but the vectors carry no information. Right: a table of what blocks collapse in each family: contrastive, negatives push other chips away; self-distillation, a slow teacher plus centring and sharpening of its output, and the gradient stops at the teacher; masked reconstruction, the target is the real pixels, which a constant cannot match; latent prediction, a slow target encoder plus a predictor." style="width:min(98%,1150px)">
+      <g fill="none" stroke="var(--hairline)" stroke-width="1.2"><rect x="6" y="20" width="200" height="200" rx="10"/><rect x="226" y="20" width="200" height="200" rx="10"/></g>
+      <g font-size="14" font-weight="700"><text x="106" y="14" text-anchor="middle" fill="currentColor">healthy</text><text x="326" y="14" text-anchor="middle" fill="var(--accent)">collapsed</text></g>
+      <g fill="#2c6fb0"><circle cx="50" cy="60" r="5"/><circle cx="62" cy="72" r="5"/><circle cx="44" cy="80" r="5"/><circle cx="66" cy="54" r="5"/></g>
+      <g fill="#ae562f"><circle cx="160" cy="62" r="5"/><circle cx="150" cy="76" r="5"/><circle cx="170" cy="80" r="5"/><circle cx="162" cy="50" r="5"/></g>
+      <g fill="#5e8a3a"><circle cx="56" cy="170" r="5"/><circle cx="70" cy="182" r="5"/><circle cx="46" cy="186" r="5"/><circle cx="64" cy="160" r="5"/></g>
+      <g fill="#8a6fb0"><circle cx="156" cy="168" r="5"/><circle cx="168" cy="178" r="5"/><circle cx="148" cy="186" r="5"/><circle cx="170" cy="160" r="5"/></g>
+      <g font-size="12" fill="var(--muted)" text-anchor="middle"><text x="106" y="124">four classes,</text><text x="106" y="139">four clusters</text></g>
+      <g><circle cx="326" cy="110" r="7" fill="#2c6fb0"/><circle cx="327" cy="111" r="6" fill="#ae562f"/><circle cx="325" cy="111" r="5" fill="#5e8a3a"/><circle cx="326" cy="109" r="4" fill="#8a6fb0"/></g>
+      <g font-size="12.5" text-anchor="middle"><text x="326" y="150" fill="var(--accent)" font-weight="700">every chip → one point</text><text x="326" y="168" fill="currentColor">pure agreement loss = 0</text><text x="326" y="186" fill="currentColor">the vector says nothing</text></g>
+      <g font-size="12" fill="var(--muted)"><text x="450" y="30">family</text><text x="610" y="30">what blocks the lazy answer</text></g>
+      <g fill="none" stroke="var(--hairline)"><path d="M446 40 H896 M446 88 H896 M446 136 H896 M446 184 H896 M446 232 H896"/></g>
+      <g font-size="13.5" font-weight="700" fill="currentColor"><text x="450" y="68">contrastive</text><text x="450" y="116">self-distillation</text><text x="450" y="164" fill="var(--accent)">masked reconstruction</text><text x="450" y="212">latent prediction</text></g>
+      <g font-size="13" fill="currentColor">
+        <text x="610" y="61">negatives: other chips must stay far,</text><text x="610" y="78">so one point for all costs a lot</text>
+        <text x="610" y="109">a slow teacher, no gradient into it,</text><text x="610" y="126">+ predictor (BYOL) or centring (DINO)</text>
+        <text x="610" y="157">the target is the real pixels —</text><text x="610" y="174">a constant cannot rebuild a river</text>
+        <text x="610" y="205">a slow target encoder + a predictor</text><text x="610" y="222">(the guard is architectural, so fragile)</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Watch for it in your own runs: if the loss falls to near zero in a few hundred steps and every embedding is nearly the same vector (cosine ≈ 1 between any two chips), it has collapsed. Cheaper check: the spread of each embedding dimension across a batch must stay well above zero (VICReg, variance–invariance–covariance regularisation, makes this a loss term).</li>
+  </ul>
+  <div class="gloss">
+    <span><b>stop-gradient</b> — no backpropagation into the teacher; DINO and BYOL update it separately, by averaging. <b>centring / sharpening</b> — subtract a running mean from the teacher’s output, then make it peakier, so no single answer wins.</span>
+  </div>
+  <div class="foot"><span>Chen et al. 2020 (SimCLR) · Grill et al. 2020 (BYOL) · Caron et al. 2021 (DINO, §3.1) · He et al. 2021 (MAE) · Assran et al. 2023 (I-JEPA) · Appendix A3</span></div>
+  <aside class="notes">2 min. This is the one idea that makes the family tree make sense. A loss that only asks two views to agree — a plain distance between their embeddings — is minimised by a network that ignores its input and outputs a constant: the middle panel. The real objectives below are built so that this lazy answer no longer wins (SimCLR’s loss stays at log(2N − 1) for a constant, DINO’s at log K, MAE’s pixel target is chip-specific). Read the table: contrastive methods pay for negatives; BYOL and DINO use a teacher that is a slowly averaged copy of the student and never receives gradients, and DINO also centres and sharpens the teacher's output; MAE cannot collapse this way because its target is the actual pixels; JEPA relies on the slow target encoder and a predictor — an architectural guard, which is why it needs care. The practical check for the lab is in the bullet.</aside>
+</section>
+
+<!-- 9 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Self-distillation · DINO (self-distillation with no labels)</p>
+  <h2>A student copies a teacher that is only a slow average of the student</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">No negatives, no labels: small crops must give the teacher’s answer for the two large crops. DINOv3 runs on satellites.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 240" role="img" aria-label="DINO diagram. One chip is cut into two large global crops and several small local crops. All crops go through the student network; only the global crops go through the teacher network. The teacher's output is centred by subtracting a running mean and sharpened with a low temperature, then turned into a probability vector. The student's probability vector for each crop is trained to match the teacher's with a cross-entropy loss. The teacher receives no gradient: its weights are a moving average of the student's weights." style="width:min(98%,1150px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.1">
+        <rect x="6" y="80" width="80" height="80" rx="4"/>
+      </g>
+      <text x="46" y="176" text-anchor="middle" font-size="12.5" fill="currentColor">one chip</text>
+      <g fill="none" stroke="currentColor" stroke-width="1"><path d="M86 105 H120 M86 135 H120"/></g>
+      <g fill="var(--wash)" stroke="var(--accent)" stroke-width="1.6"><rect x="124" y="30" width="52" height="52" rx="3"/><rect x="124" y="92" width="52" height="52" rx="3"/></g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1"><rect x="128" y="158" width="22" height="22" rx="2"/><rect x="154" y="158" width="22" height="22" rx="2"/><rect x="128" y="186" width="22" height="22" rx="2"/><rect x="154" y="186" width="22" height="22" rx="2"/></g>
+      <g font-size="12" fill="currentColor"><text x="124" y="22" fill="var(--accent)">2 global crops</text><text x="182" y="176">small local</text><text x="182" y="191">crops</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M176 56 H330 V40 H360 M176 118 H330 V60 M262 186 H330 V170 H360"/></g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2"><rect x="364" y="22" width="150" height="56" rx="8" stroke="var(--accent)" stroke-width="1.8"/><rect x="364" y="146" width="150" height="56" rx="8"/></g>
+      <g font-size="14" font-weight="700" text-anchor="middle"><text x="439" y="46" fill="var(--accent)">teacher</text><text x="439" y="170" fill="currentColor">student</text></g>
+      <g font-size="12" text-anchor="middle" fill="currentColor"><text x="439" y="64">global crops only</text><text x="439" y="188">every crop</text></g>
+      <g fill="none" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="5 3"><path d="M439 146 V82"/></g>
+      <path d="M435 88 L439 80 L443 88 Z" fill="var(--accent)"/>
+      <g font-size="12" fill="var(--accent)"><text x="446" y="112">weights = moving average</text><text x="446" y="127">of the student’s (no gradient)</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M514 50 H548 M514 174 H700"/></g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.1"><rect x="550" y="22" width="180" height="56" rx="8"/></g>
+      <g font-size="12.5" text-anchor="middle" fill="currentColor"><text x="640" y="44">centre (− running mean)</text><text x="640" y="62">sharpen (low temperature)</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M730 50 H770 V150"/></g>
+      <g fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8"><rect x="704" y="150" width="190" height="52" rx="8"/></g>
+      <g font-size="13" text-anchor="middle"><text x="799" y="172" fill="var(--accent)" font-weight="700">loss: student’s answer</text><text x="799" y="190" fill="currentColor">must match the teacher’s</text></g>
+      
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Intuition: a small crop of a river must match the answer for the large crop, so features must capture “river-ness” from part of it. <span class="accent">Some attention heads outline objects without ever seeing a mask.</span></li>
+    <li>DINOv3 (Meta, 2025) has a satellite twin pretrained on <b>493 million 0.6 m Maxar images</b>, tested on canopy height.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>exponential moving average (EMA)</b> — teacher ← λ·teacher + (1 − λ)·student after each step, λ rising from 0.996 to 1. <b>temperature</b> — divides the scores before the softmax; low = peaky.</span>
+  </div>
+  <div class="foot"><span>Caron et al. 2021, DINO, ICCV, §3.1 · Siméoni et al. 2025, DINOv3 (Meta) · BYOL’s version of the same idea: Grill et al. 2020 · Appendix A3</span></div>
+  <aside class="notes">2 min. Trace the picture: crops of one chip, two big ones and several small ones. The student sees all of them, the teacher only the big ones. The student must output, for a small crop, the same probability vector the teacher outputs for a big crop. The teacher is never trained by the loss — its weights are a slowly moving average of the student's. Collapse is blocked by the two operations in the middle box: centring stops one output from winning for every image, sharpening stops the output from going uniform. Then the payoff: some attention heads of a DINO ViT outline objects, though it never saw a label or a mask. DINOv3 is the 2025 version at scale, with a model trained on satellite imagery.</aside>
+</section>
+
+<!-- 10 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Latent prediction · I-JEPA and its Earth heirs</p>
+  <h2>Predict what the hidden block means, not what it looks like</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Pixels carry haze and noise; an embedding target need not reproduce every pixel. Galileo and OlmoEarth do this.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 246" role="img" aria-label="I-JEPA diagram. A chip's patch grid with one large context block and several target blocks marked. The context block goes through the context encoder and then a predictor, which outputs predicted embeddings for the target blocks' positions. The whole chip goes through a target encoder, a moving average of the context encoder that receives no gradient, and its embeddings at the target positions are the answers. The loss compares predicted and target embeddings, never pixels." style="width:min(98%,1150px)">
+      <g stroke="currentColor" stroke-width=".7" fill="var(--wash)">
+        <rect x="10" y="40" width="160" height="160"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width=".4" opacity=".5"><path d="M30 40 V200 M50 40 V200 M70 40 V200 M90 40 V200 M110 40 V200 M130 40 V200 M150 40 V200 M10 60 H170 M10 80 H170 M10 100 H170 M10 120 H170 M10 140 H170 M10 160 H170 M10 180 H170"/></g>
+      <rect x="10" y="40" width="100" height="120" fill="var(--accent)" opacity=".35" stroke="var(--accent)" stroke-width="1.6"/>
+      <g fill="none" stroke="#2c6fb0" stroke-width="2" stroke-dasharray="4 2"><rect x="110" y="60" width="60" height="40"/><rect x="50" y="160" width="80" height="40"/></g>
+      <g font-size="12" fill="currentColor"><text x="12" y="30">I-JEPA: patch grid of one chip</text></g>
+      <g font-size="12" fill="var(--accent)" font-weight="700"><text x="16" y="56">context block</text></g>
+      <g font-size="12" fill="#2c6fb0" font-weight="700"><text x="178" y="84">target blocks</text><text x="178" y="190">(hidden)</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M110 120 H270 M270 120 V70 H300 M170 214 V222 H600 V172"/></g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2"><rect x="300" y="44" width="130" height="52" rx="8" stroke="var(--accent)" stroke-width="1.8"/><rect x="470" y="44" width="130" height="52" rx="8"/><rect x="510" y="120" width="180" height="52" rx="8"/></g>
+      <g font-size="13.5" font-weight="700" text-anchor="middle"><text x="365" y="66" fill="var(--accent)">context encoder</text><text x="535" y="66" fill="currentColor">predictor</text><text x="600" y="142" fill="currentColor">target encoder</text></g>
+      <g font-size="11.5" text-anchor="middle" fill="currentColor"><text x="365" y="84">the part you keep</text><text x="535" y="84">+ target positions</text><text x="600" y="160">slow average, no gradient</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M430 70 H470 M600 70 H700 M690 146 H700"/></g>
+      <g fill="var(--wash)" stroke="#2c6fb0" stroke-width="1.8"><rect x="704" y="44" width="190" height="128" rx="8"/></g>
+      <g font-size="13" text-anchor="middle"><text x="799" y="76" fill="#2c6fb0" font-weight="700">loss in embedding space</text><text x="799" y="98" fill="currentColor">predicted vectors for the</text><text x="799" y="116" fill="currentColor">target blocks vs the target</text><text x="799" y="134" fill="currentColor">encoder’s vectors there</text><text x="799" y="156" fill="var(--muted)">no pixels, no augmentation</text></g>
+      <g font-size="11.5" fill="var(--muted)"><text x="200" y="236">whole chip → target encoder</text></g>
+    </svg>
+  </div>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(13.5px,2.05vh,18px);line-height:1.35">
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;white-space:nowrap;color:var(--accent);font-weight:650">AnySat · 2024</td><td style="padding:.35vh .6vw">JEPA with patches that adapt to resolution: one model for 11 sensors from 0.2 to 250 m · 125 M parameters</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;white-space:nowrap;color:var(--accent);font-weight:650">Galileo · 2025</td><td style="padding:.35vh .6vw">optical, radar, elevation, weather: big masks → deep latent targets, small masks → shallow ones · 0.8–85 M</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .6vw;white-space:nowrap;color:var(--accent);font-weight:650">OlmoEarth · 2025</td><td style="padding:.35vh .6vw">Ai2’s (Allen Institute for AI) Latent MIM (masked image modelling) Lite: the target, a frozen random projection, never moves · 1.4–300 M</td></tr>
+  </table>
+  <div class="gloss">
+    <span><b>I-JEPA</b> — image joint-embedding predictive architecture. <b>target encoder</b> — a moving-average copy of the context encoder; it supplies the answers, gets no gradient.</span>
+  </div>
+  <div class="foot"><span>Assran et al. 2023, I-JEPA, CVPR · Earth models: Appendix A6</span></div>
+  <aside class="notes">2 min. Same masking idea as MAE, different answer: the context encoder sees one big block, a predictor guesses the embeddings at the hidden blocks' positions, and the answers come from a slowly averaged target encoder that sees the whole chip. The loss lives entirely in embedding space, so the model is not asked to reproduce every pixel exactly — the argument for Earth data, where much of every pixel is atmosphere and noise. Careful: latent space alone does not remove clouds; what is ignored depends on the target, the masks and the loss. The price is the collapse risk from the previous slide, guarded by the slow target and the predictor. Read the table: the three Earth models that took this route, and what each added.</aside>
+</section>
+
+<!-- 11 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · The family tree</p>
+  <h2>Today’s Earth models descend from three lines of influence</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Find a model’s line and you know its pretext task, its collapse guard, and how it should be evaluated.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 270" role="img" aria-label="Timeline from 2018 to 2025 with three rows. Masked reconstruction: BERT 2018, MAE 2021, SatMAE and Scale-MAE 2022, Prithvi and SpectralGPT 2023, Prithvi-EO-2.0 and Prithvi-WxC 2024. Views and teachers: MoCo 2019, SimCLR and BYOL 2020, DINO and SeCo 2021, SSL4EO-S12 2022, DINOv2 2023, DINOv3 with a satellite model 2025. Latent prediction: I-JEPA 2023, AnySat 2024, Galileo and OlmoEarth 2025. Earth-observation models are drawn in orange, general vision models in grey." style="width:min(98%,1150px)">
+      <g font-size="12" fill="var(--muted)" text-anchor="middle"><text x="140" y="262">2018</text><text x="245" y="262">2019</text><text x="350" y="262">2020</text><text x="455" y="262">2021</text><text x="560" y="262">2022</text><text x="665" y="262">2023</text><text x="770" y="262">2024</text><text x="860" y="262">2025</text></g>
+      <g stroke="var(--hairline)" stroke-width="1"><path d="M140 20 V246 M245 20 V246 M350 20 V246 M455 20 V246 M560 20 V246 M665 20 V246 M770 20 V246 M860 20 V246"/></g>
+      <g font-size="13" font-weight="700" fill="currentColor"><text x="4" y="58">masked</text><text x="4" y="74">reconstruction</text><text x="4" y="138">views and</text><text x="4" y="154">teachers</text><text x="4" y="218">latent</text><text x="4" y="234">prediction</text></g>
+      <g fill="none" stroke="var(--muted)" stroke-width="1.4"><path d="M140 64 H860 M245 144 H860 M665 224 H860"/></g>
+      <g font-size="12" text-anchor="middle">
+        <g fill="var(--muted)"><circle cx="140" cy="64" r="5"/><circle cx="455" cy="64" r="6" fill="var(--accent)"/><circle cx="245" cy="144" r="5"/><circle cx="350" cy="144" r="5"/><circle cx="455" cy="144" r="5"/><circle cx="665" cy="144" r="5"/><circle cx="860" cy="144" r="5"/><circle cx="665" cy="224" r="5"/></g>
+        <g fill="#ae562f"><circle cx="560" cy="64" r="5"/><circle cx="665" cy="64" r="5"/><circle cx="770" cy="64" r="5"/><circle cx="455" cy="160" r="4"/><circle cx="560" cy="144" r="5"/><circle cx="860" cy="160" r="4"/><circle cx="770" cy="224" r="5"/><circle cx="860" cy="224" r="5"/></g>
+        <text x="140" y="46" fill="var(--muted)">BERT (text, 15%)</text>
+        <text x="455" y="46" fill="var(--accent)" font-weight="700">MAE (75%)</text>
+        <text x="560" y="90" fill="#ae562f">SatMAE · Scale-MAE</text>
+        <text x="665" y="46" fill="#ae562f">Prithvi · SpectralGPT</text>
+        <text x="770" y="90" fill="#ae562f">Prithvi-EO-2.0</text>
+        <text x="770" y="106" fill="#ae562f">Prithvi-WxC (weather)</text>
+        <text x="350" y="126" fill="var(--muted)">SimCLR · BYOL</text><text x="245" y="126" fill="var(--muted)">MoCo</text>
+        <text x="455" y="126" fill="var(--muted)">DINO</text>
+        <text x="455" y="180" fill="#ae562f">SeCo</text>
+        <text x="560" y="126" fill="#ae562f">SSL4EO-S12</text>
+        <text x="665" y="126" fill="var(--muted)">DINOv2</text>
+        <text x="845" y="126" fill="var(--muted)">DINOv3</text>
+        <text x="845" y="180" fill="#ae562f">DINOv3-sat</text>
+        <text x="665" y="206" fill="var(--muted)">I-JEPA</text>
+        <text x="770" y="244" fill="#ae562f">AnySat</text>
+        <text x="845" y="206" fill="#ae562f">Galileo · OlmoEarth</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Most Earth models here (orange) are masked reconstruction. <span class="accent">The newest mix the lines: Galileo and OlmoEarth keep MAE’s masking but predict in latent space.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>foundation model</b> — one network pretrained on broad data, then adapted to many tasks. <b>dates</b> — first public preprint. <b>BERT</b> — a text model; <b>WxC</b> — weather and climate.</span>
+  </div>
+  <div class="foot"><span>Model cards and dates: Appendix A4 (general) and A6 (Earth) · grey: general vision · orange: Earth observation and weather</span></div>
+  <aside class="notes">1.5 min. The map students should keep. Three rows. Masked reconstruction runs from BERT's 15% word masking through MAE's 75% patch masking to the Earth models built on it: SatMAE, Prithvi, Scale-MAE, SpectralGPT, Prithvi-EO-2.0, and Prithvi-WxC for weather. Views and teachers: MoCo, SimCLR, BYOL, DINO; on the Earth side SeCo (seasons as views), SSL4EO-S12 (the Sentinel-1/2 dataset whose baselines include MoCo and DINO — and also MAE and data2vec), and DINOv3's satellite model. Latent prediction: I-JEPA, then AnySat, Galileo, OlmoEarth. The pattern to say out loud: Earth models trail the general ones by about a year, most of them are masked reconstruction — that is why today's paper is MAE — and the newest ones combine MAE's masking with JEPA's latent targets.</aside>
+</section>
+
+<!-- 12 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Watch at home</p>
+  <h2>The four families animated, from a primer to the JEPA argument</h2>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=iGJ1XSkCyU0" class="yt" data-id="iGJ1XSkCyU0" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-what-is-ssl.jpg" alt="Boris Meinardus video: What Is Self-Supervised Learning and Why Care?" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Boris Meinardus · <i>What is self-supervised learning and why care?</i> · the primer · 10 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=UqJauYELn6c" class="yt" data-id="UqJauYELn6c" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-simclr-deepia.jpg" alt="Deepia video: Contrastive Learning with SimCLR | Deep Learning Animated" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Deepia · <i>Contrastive learning with SimCLR, animated</i> · slide 7 step by step · 15 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=h3ij3F3cPIk" class="yt" data-id="h3ij3F3cPIk" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-dino-kilcher.jpg" alt="Yannic Kilcher video: DINO: Emerging Properties in Self-Supervised Vision Transformers (Facebook AI Research Explained)" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Yannic Kilcher · <i>DINO, paper explained</i> · centring and sharpening, line by line · 39 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=gVEr2cnDE_8" class="yt" data-id="gVEr2cnDE_8" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-jepa-huang.jpg" alt="Jia-Bin Huang video: How AI Learned to Teach Itself [JEPA]" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Jia-Bin Huang · <i>How AI learned to teach itself [JEPA]</i> · predict embeddings, not pixels · 38 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Part 2.</b> Of the four families, one dominates Earth observation: hide most of the patches and rebuild the pixels. That is this week’s paper.</p>
+  <div class="gloss">
+    <span><b>assigned video</b> — Stanford CS231N 2025, Lecture 12, <i>Self-Supervised Learning</i> (75 min, Appendix A9); it opens on YouTube (embedding disabled).</span>
+  </div>
+  <div class="foot"><span>Optional, not assigned · the assigned video is quizzed in Week 9 (9 November); its summary is due with Note 07, Sunday 1 November</span></div>
+  <aside class="notes">Twenty seconds, no playback. Boris Meinardus if "pretext task" is still fuzzy; Deepia if the contrastive loss went by too fast; Yannic Kilcher for DINO's centring and sharpening; Jia-Bin Huang for the JEPA argument, animated. The next slide has the same ideas from the people who invented them.</aside>
+</section>
+
+<!-- 13 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Watch at home · by their authors</p>
+  <h2>SimCLR, MoCo, MAE and JEPA explained by the people who built them</h2>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=IEiytaXnggI" class="yt" data-id="IEiytaXnggI" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-simclr-tingchen.jpg" alt="JumpTrading ELLIS UCL CSML Seminar Series video: Contrastive Self-Supervised Learning and Potential Limitations - Dr Ting Chen from Google Brain" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Ting Chen (SimCLR first author) · <i>Contrastive self-supervised learning and its limitations</i> · 55 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=4VVGtYPM8JE" class="yt" data-id="4VVGtYPM8JE" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-moco-cvpr.jpg" alt="ComputerVisionFoundation Videos video: Momentum Contrast for Unsupervised Visual Representation Learning" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Kaiming He et al. · <i>Momentum Contrast (MoCo)</i>, CVPR 2020 talk · 5 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=D_jt-xO_RmI" target="_blank" rel="noopener" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-kaiming-mit.jpg" alt="MIT Schwarzman College of Computing video: Deep Learning Bootcamp: Kaiming He" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Kaiming He (MoCo, MAE) · <i>Deep Learning Bootcamp</i>, MIT · 76 min — <span class="accent">opens on YouTube</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=yUmDRxV0krg" class="yt" data-id="yUmDRxV0krg" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-lecun-harvard.jpg" alt="Harvard CMSA video: Yann LeCun | Self-Supervised Learning, JEPA, World Models, and the future of AI" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Yann LeCun · <i>Self-supervised learning, JEPA, world models</i>, Harvard · 69 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">For the journal club.</b> Kaiming He is the first author of both MoCo and this week’s MAE paper; his MIT lecture covers both lines of his work, from contrastive views to masking.</p>
+  <div class="gloss">
+    <span><b>MoCo</b> — momentum contrast: keeps a queue of past embeddings as negatives, so it needs no giant batch.</span>
+  </div>
+  <div class="foot"><span>Optional · the MIT lecture opens on YouTube (embedding disabled) · more on the shelf: Appendix A10</span></div>
+  <aside class="notes">Twenty seconds. These are the authors: Ting Chen on what makes SimCLR work and where it breaks; the MoCo CVPR talk; Kaiming He's MIT lecture, the best single preparation for today's journal club, because he wrote both MoCo and MAE; LeCun's case for joint-embedding prediction.</aside>
+</section>
+
+<!-- 14 -->
+
+<section class="slide section xl">
+  <p class="kicker">Part 2 · 17 min · this week’s paper</p>
+  <h2>The Masked Autoencoder: Hide 75%, Rebuild It, Keep the Encoder</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>One chip through MAE with every shape written out; why 75% works for images when BERT masks 15% of words; why the decoder is small and thrown away; reconstructions and a mask-ratio sweep we ran on EuroSAT for this lecture. <b>By the end:</b> write MAE’s masking in five lines and predict what your lab run will show.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>MAE is simple, cheap (the encoder sees a quarter of the patches) and needs no augmentations a satellite image would object to. That is a large part of why most Earth models chose it.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>SatMAE, Scale-MAE, Prithvi-EO-2.0, SpectralGPT, Clay · Prithvi-WxC for weather · your lab: the Week 6 Vision Transformer (ViT) becomes the encoder.</p></div>
+  </div>
+  <aside class="notes">17 minutes; the longest part, because it is this week’s paper and the lab. Read the cards in thirty seconds. This is this week's paper, so the slides follow its logic: the picture, the shapes, the two design choices (75% and the small decoder), the target, and the evidence — with our own EuroSAT runs standing in for the paper's ImageNet figures.</aside>
+</section>
+
+<!-- 15 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · MAE in one picture</p>
+  <h2>Throw away 48 of 64 patches; encode the 16; let a small decoder paint the rest</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">The encoder never sees a hidden patch or a placeholder — that is what makes MAE cheap. Your lab builds exactly this.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 250" role="img" aria-label="MAE pipeline from left to right. A chip cut into 64 patches. A random 75% of them are dropped, leaving 16 visible patches. The 16 visible patches, with their positions, go through the encoder, a full Vision Transformer. Its 16 output vectors are put back in place and the 48 gaps are filled with one shared learned mask token plus each gap's position. A small decoder, two blocks, processes all 64 and outputs pixels for every patch. The loss is the mean squared error on the 48 hidden patches only. After pretraining, the decoder is thrown away and the encoder is kept." style="width:min(98%,1150px)">
+      <defs><pattern id="w7g" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="var(--wash)" stroke="currentColor" stroke-width=".4"/></pattern></defs>
+      <rect x="6" y="50" width="80" height="80" fill="url(#w7g)" stroke="currentColor"/>
+      <g font-size="12" text-anchor="middle" fill="currentColor"><text x="46" y="148">64 patches</text><text x="46" y="163">8 × 8 px,</text><text x="46" y="178">13 bands</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M86 90 H110"/></g><path d="M104 86 L110 90 L104 94 Z" fill="currentColor"/>
+      <rect x="114" y="50" width="80" height="80" fill="var(--wash)" stroke="currentColor" opacity=".35"/>
+      <g fill="var(--accent)" opacity=".85"><rect x="124" y="50" width="10" height="10"/><rect x="164" y="50" width="10" height="10"/><rect x="114" y="70" width="10" height="10"/><rect x="144" y="70" width="10" height="10"/><rect x="184" y="70" width="10" height="10"/><rect x="134" y="80" width="10" height="10"/><rect x="174" y="90" width="10" height="10"/><rect x="114" y="100" width="10" height="10"/><rect x="154" y="100" width="10" height="10"/><rect x="134" y="110" width="10" height="10"/><rect x="184" y="110" width="10" height="10"/><rect x="124" y="120" width="10" height="10"/><rect x="164" y="120" width="10" height="10"/><rect x="144" y="60" width="10" height="10"/><rect x="174" y="60" width="10" height="10"/><rect x="154" y="90" width="10" height="10"/></g>
+      <g font-size="12" text-anchor="middle" fill="currentColor"><text x="154" y="148">keep a random 16</text><text x="154" y="163" fill="var(--accent)">(75% dropped)</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M194 90 H218"/></g><path d="M212 86 L218 90 L212 94 Z" fill="currentColor"/>
+      <g fill="var(--accent)" opacity=".85"><rect x="222" y="58" width="8" height="64"/><rect x="232" y="58" width="8" height="64"/><rect x="242" y="58" width="8" height="64"/><rect x="252" y="58" width="8" height="64"/></g>
+      <g font-size="12" text-anchor="middle" fill="currentColor"><text x="242" y="148">16 tokens</text><text x="242" y="163">+ positions</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M262 90 H286"/></g><path d="M280 86 L286 90 L280 94 Z" fill="currentColor"/>
+      <rect x="290" y="40" width="130" height="100" rx="10" fill="var(--wash)" stroke="var(--accent)" stroke-width="2"/>
+      <g text-anchor="middle"><text x="355" y="78" font-size="15" font-weight="700" fill="var(--accent)">ENCODER</text><text x="355" y="98" font-size="12" fill="currentColor">full ViT, sees</text><text x="355" y="113" font-size="12" fill="currentColor">16 tokens only</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M420 90 H444"/></g><path d="M438 86 L444 90 L438 94 Z" fill="currentColor"/>
+      <g><rect x="448" y="58" width="6" height="64" fill="var(--accent)"/><rect x="456" y="58" width="6" height="64" fill="#9a9789"/><rect x="464" y="58" width="6" height="64" fill="#9a9789"/><rect x="472" y="58" width="6" height="64" fill="var(--accent)"/><rect x="480" y="58" width="6" height="64" fill="#9a9789"/><rect x="488" y="58" width="6" height="64" fill="#9a9789"/><rect x="496" y="58" width="6" height="64" fill="#9a9789"/><rect x="504" y="58" width="6" height="64" fill="var(--accent)"/></g>
+      <g font-size="12" text-anchor="middle" fill="currentColor"><text x="479" y="148">put back in place;</text><text x="479" y="163">48 gaps get one shared</text><text x="479" y="178" fill="#7d7a6f">mask token + position</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M512 90 H536"/></g><path d="M530 86 L536 90 L530 94 Z" fill="currentColor"/>
+      <rect x="540" y="56" width="96" height="68" rx="10" fill="var(--wash)" stroke="currentColor" stroke-width="1.2"/>
+      <g text-anchor="middle"><text x="588" y="82" font-size="14" font-weight="700" fill="currentColor">decoder</text><text x="588" y="100" font-size="12" fill="currentColor">small, all 64</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M636 90 H660"/></g><path d="M654 86 L660 90 L654 94 Z" fill="currentColor"/>
+      <rect x="664" y="50" width="80" height="80" fill="url(#w7g)" stroke="currentColor"/>
+      <g font-size="12" text-anchor="middle" fill="currentColor"><text x="704" y="148">pixels for</text><text x="704" y="163">every patch</text></g>
+      <rect x="760" y="44" width="134" height="92" rx="10" fill="var(--wash)" stroke="#2c6fb0" stroke-width="1.8"/>
+      <g text-anchor="middle"><text x="827" y="70" font-size="13" font-weight="700" fill="#2c6fb0">loss: squared error</text><text x="827" y="88" font-size="12" fill="currentColor">on the 48 hidden</text><text x="827" y="103" font-size="12" fill="currentColor">patches only</text><text x="827" y="122" font-size="11.5" fill="var(--muted)">(visible ones: free)</text></g>
+      <g fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 3"><path d="M290 200 H420 M540 200 H636"/></g>
+      <g font-size="13" text-anchor="middle"><text x="355" y="222" fill="var(--accent)" font-weight="700">kept after pretraining</text><text x="588" y="222" fill="var(--muted)" font-weight="700">thrown away</text></g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Two choices make it work: <b>a high mask ratio</b> (the task cannot be solved by copying a neighbour) and <b>an asymmetric design</b> (the expensive encoder runs on a quarter of the tokens). Next three slides.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>mask token</b> — one learned vector, the same for every gap; only its added position tells the gaps apart. <b>asymmetric</b> — encoder and decoder differ in size and in what they see.</span>
+  </div>
+  <div class="foot"><span>He et al. 2021, MAE, CVPR 2022, §3 and Fig. 1 · the lab’s sizes (8-px patches, 64 tokens) · the shapes in numbers: next slide</span></div>
+  <aside class="notes">2.5 min. Trace left to right, slowly; this is the slide to come back to. Cut the chip into 64 patches. Shuffle, keep 16, drop 48 — 75%. The encoder, a full Vision Transformer, sees only those 16 tokens with their positions: no mask tokens, no hidden patches. Put the 16 outputs back where they came from, fill the 48 gaps with one shared learned vector plus each gap's position, and pass all 64 through a small decoder that outputs pixels for every patch. The loss is the squared error on the 48 hidden patches only. Then the punchline at the bottom: after pretraining the decoder is thrown away — it only learned to paint — and the encoder is what every downstream task uses.</aside>
+</section>
+
+<!-- 16 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · One chip through MAE, in numbers</p>
+  <h2>Every shape, from a 13-band chip to one number of loss</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">These are the shapes of the model we pretrained for this lecture — the size your lab builds from its Week 6 ViT.</p>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.2vh,19.5px);line-height:1.35">
+    <tr style="color:var(--muted)"><td style="padding:.35vh .6vw">step</td><td style="padding:.35vh .6vw">operation</td><td style="padding:.35vh .6vw;white-space:nowrap">shape out</td><td style="padding:.35vh .6vw">what to notice</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw">1</td><td style="padding:.35vh .6vw">patchify the chip (13, 64, 64)</td><td style="padding:.35vh .6vw;white-space:nowrap"><b>64 × 832</b></td><td style="padding:.35vh .6vw">8 × 8 px × 13 bands per patch, as in Week 6</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw">2</td><td style="padding:.35vh .6vw">linear 832 → 128, + position of every patch</td><td style="padding:.35vh .6vw;white-space:nowrap">64 × 128</td><td style="padding:.35vh .6vw">positions are added <i>before</i> dropping, so the encoder knows where its 16 sit</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw">3</td><td style="padding:.35vh .6vw">64 random numbers → sort → keep the first 16</td><td style="padding:.35vh .6vw;white-space:nowrap"><b class="accent">16 × 128</b></td><td style="padding:.35vh .6vw">a new random mask for every chip, every step; remember the order to undo it</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw">4</td><td style="padding:.35vh .6vw">encoder: 4 Transformer blocks</td><td style="padding:.35vh .6vw;white-space:nowrap">16 × 128</td><td style="padding:.35vh .6vw"><span class="accent">16² = 256 scores per head instead of 64² = 4,096: 16× less attention</span> (+1 [CLS] if your ViT has one)</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw">5</td><td style="padding:.35vh .6vw">linear 128 → 64; add 48 copies of the mask token; un-shuffle; + positions</td><td style="padding:.35vh .6vw;white-space:nowrap">64 × 64</td><td style="padding:.35vh .6vw">the decoder is narrower (64) than the encoder (128)</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw">6</td><td style="padding:.35vh .6vw">decoder: 2 blocks, then linear 64 → 832</td><td style="padding:.35vh .6vw;white-space:nowrap">64 × 832</td><td style="padding:.35vh .6vw">one guess for every pixel of every patch</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .6vw">7</td><td style="padding:.35vh .6vw">squared error vs the normalised true patch, averaged over the 48 hidden</td><td style="padding:.35vh .6vw;white-space:nowrap"><b>1 number</b></td><td style="padding:.35vh .6vw">the 16 visible patches add nothing to the loss</td></tr>
+  </table>
+  <ul class="small" style="margin-top:1vh">
+    <li>Our model: encoder 0.90 M parameters, decoder 0.16 M; 1,367 epochs over 4,000 EuroSAT chips took 8 minutes on an Apple M2 Ultra.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>un-shuffle</b> — put each token back at its original patch index (the official code keeps <code>ids_restore</code> for this). <b>normalised patch</b> — the patch minus its own mean, divided by its own spread (slide 19).</span>
+  </div>
+  <div class="foot"><span>He et al. 2021, §3 · official code: github.com/facebookresearch/mae · the five-line masking function: Appendix A1</span></div>
+  <aside class="notes">2 min. Read the shape column top to bottom — 64 by 832, 64 by 128, 16 by 128, 16 by 128, 64 by 64, 64 by 832, one number — and stop on three rows. Row 3: the mask is just sorting 64 random numbers and keeping the first 16; a new mask every time the chip is seen. Row 4: the encoder's attention runs on 16 tokens, so 256 scores per head instead of 4,096 — the reason MAE pretraining is cheap. Row 7: only the 48 hidden patches enter the loss; rebuilding the visible ones would be copying. The parameter line under the table is the model we actually trained for this lecture.</aside>
+</section>
+
+<!-- 17 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Why 75% · measured on EuroSAT</p>
+  <h2>A dumb fill-in already rebuilds most of a chip — so the mask must be high</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Neighbouring patches repeat each other; words carry denser meaning. BERT (a text model) hides 15%, MAE 75%.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w7-redundancy.png" data-zoom alt="Left: error on hidden pixels against the share of patches hidden, for 1,000 EuroSAT test chips. Painting the visible mean stays near 1.0. A distance-weighted fill with no learning gives 0.54 at 10%, 0.56 at 25%, 0.61 at 50%, 0.73 at 75% and 0.95 at 90%. The tiny MAE gives about 0.30 up to 50%, 0.40 at 75% and 0.78 at 90%. Right: the fill error at 75% by class, worst for residential 0.88, industrial 0.80 and permanent crop 0.79, best for annual crop 0.59." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>No learning, yet at 75% the fill beats the mean (0.73 vs 1.0); it fails only near 90%. <span class="accent">At 75% a model helps: the tiny MAE gets 0.40.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>fill</b> — visible pixels averaged with weights 1 / distance². <b>NMSE</b> — normalised mean squared error: hidden-pixel error ÷ the chip’s variance; ≈ 1 ≈ painting the mean.</span>
+  </div>
+  <div class="foot"><span>Computed for this lecture on 1,000 EuroSAT-MS test chips, 8-px patches (tools/week07_figs/redundancy.py) · BERT: Devlin et al. 2018, §3.1 · MAE: He et al. 2021, §1, Fig. 5</span></div>
+  <aside class="notes">2 min. The measurement behind the 75%. We hid random patches of 1,000 EuroSAT test chips and filled them with nothing smarter than a distance-weighted average of the visible pixels. The error grows slowly: 0.54 at 10%, 0.61 at 50%, 0.73 at 75% — still well below painting the mean — and only collapses near 90%. That is spatial redundancy: at BERT’s 15% the task is solved by copying neighbours, so the network learns nothing; at 75% copying is no longer enough, and our tiny MAE (blue) halves the fill’s error. Right panel, the Earth twist: towns and industry are hardest, annual crops and rivers easiest — a ratio tuned on fields may be too high for cities. Then quote the paper (§1): “Images … are natural signals with heavy spatial redundancy — a missing patch can be recovered from neighboring patches with little high-level understanding.”</aside>
+</section>
+
+<!-- 18 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Why the decoder is small</p>
+  <h2>Run the big network on a quarter of the patches: three times less compute</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">The decoder only paints pixels; the meaning must already be in the encoder’s 16 vectors — so it can be narrow.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w7-compute.png" data-zoom alt="Two bar charts of forward compute per chip, relative to an encoder that processes all patches including mask tokens. Left, the lab's MAE: 1.00 for all tokens, 0.54 at 50% masking, 0.33 at 75%, 0.20 at 90%. Right, MAE ViT-L: 1.00, 0.53, 0.30, 0.17. Each bar is split into encoder (orange) and decoder (grey); the decoder share grows as the encoder shrinks." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>At 75% both need about a third of the compute (3.1× and 3.3× less) — the paper’s “3× or more”. Mask tokens in the encoder would cost 3.3× and 14 probe points.</li>
+    <li><span class="accent">Depth matters only for the probe: one decoder block fine-tunes to 84.8%; the probe needs eight (65.5% → 73.5%).</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>in the figure</b> — forward cost counted per block as 24·N·d² (projections, MLP) + 4·N²·d (attention), computed for this slide; N = tokens a network sees, d = its width.</span>
+  </div>
+  <div class="foot"><span>He et al. 2021, §3, Table 1a–b (decoder), Table 2 (speed) · compute: tools/week07_deck/figs/fig_compute.py</span></div>
+  <aside class="notes">1.5 min. Compare the first bar — an encoder that also processes the hidden patches as mask tokens, the way BERT-style image models do — with MAE at 75%: about a third of the cost, for our lab model and for the paper's ViT-Large alike. The grey part is the decoder; it is cheap because it is narrow and shallow, even though it sees all the tokens. The second bullet is the ablation: one decoder block is enough for fine-tuning (84.8%), but the linear probe climbs from 65.5 to 73.5 with eight blocks — the paper's reading is that a deeper decoder takes over the reconstruction-specific layers, so the encoder's output stays more abstract. That is why the default is 8 blocks, but narrow.</aside>
+</section>
+
+<!-- 19 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · The target</p>
+  <h2>Predict each patch’s pattern, not its brightness</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Errors on bright, high-contrast patches dominate a raw-pixel loss; normalising each patch lets every pattern count. Watch the lake.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w7-normpix.png" data-zoom alt="Three 8 by 8 patches of the red band from EuroSAT chips: an industrial roof (mean reflectance 0.179), a lake (0.025) and a field edge (0.114). Top row on one grey scale: the roof dominates, the lake is black. Bottom row, each patch normalised by its own mean and standard deviation: all three show structure; the lake shows amplified speckle noise." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>The MAE target is each hidden patch minus its own mean, over its own standard deviation. In the paper it beats raw pixels: 85.4% vs 84.9% fine-tuned (ViT-L, Table 1c).</li>
+    <li><span class="accent">On Earth data, a flat lake or desert patch has almost no spread: normalising it magnifies small variations into the “pattern” to predict — keep the ε, or mask such patches out of the loss.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>ε</b> — a small number added to the variance before the square root (official code: 10<sup>−6</sup>), so a flat patch does not divide by zero.</span>
+  </div>
+  <div class="foot"><span>He et al. 2021, §3 “Reconstruction target” and Table 1c · patches from EuroSAT-MS Industrial_2, SeaLake_1, AnnualCrop_1, band B04</span></div>
+  <aside class="notes">1.5 min. Top row, one shared scale: the roof is bright, the lake is black, and a squared-error loss would spend almost all its effort on the roof. Bottom row: each patch divided by its own spread — now every patch's pattern counts equally, and the paper shows this target improves accuracy. Then point at the lake: there is almost nothing in it, so normalising magnifies small variations into a pattern the model is asked to predict. On Earth data — water, desert, snow, cloud tops — that is common; the fixes are the epsilon, or leaving near-flat patches and clouds out of the loss. This is the first of the "what changes for EO" points; the rest are on slide 22.</aside>
+</section>
+
+<!-- 20 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · What your lab will produce · measured</p>
+  <h2>Sixteen patches in, a whole chip out — after 8 minutes of pretraining</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Blurry but in the right places — a sanity check that the encoder kept the layout; the probe (Part 4) measures the rest.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w7-recon.png" data-zoom alt="Six EuroSAT test chips, one per column: annual crop, forest, highway, industrial, river, sea or lake. Top row: the original in true colour. Middle row: 48 of 64 patches greyed out. Bottom row: the tiny MAE output with the visible patches pasted back; field boundaries, the river bank and the highway reappear in the right places, roofs and fine texture come back blurred." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Six chips the model never saw. Field edges, the river bank and the highway come back in place; roofs come back as blur — <span class="accent">exactly what a squared-error loss rewards: the average of the plausible answers.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>pasted back</b> — as in the paper’s figures, the 16 visible patches are shown as they were; only the 48 hidden ones are the model’s guess.</span>
+  </div>
+  <div class="foot"><span>Tiny MAE (encoder 0.9 M, decoder 0.16 M), 4,000 EuroSAT-MS chips, 8 min on an Apple M2 Ultra · shown: a twin trained on plain pixels, since normalised outputs cannot be coloured without each hidden patch’s true mean · tools/week07_figs</span></div>
+  <aside class="notes">1.5 min. This is what the lab produces. Walk one column: the middle row is all the encoder saw; the bottom row is the decoder’s painting from those sixteen patches. The fields and the river are in the right places — so the sixteen vectors must contain the layout of the chip. The blur is not a failure: a squared-error loss is minimised by the average of all plausible answers, so fine texture is averaged away. That is also why we keep the encoder and throw the painter away. Be honest about the display: the main model predicts normalised patches, which cannot be coloured without leaking each hidden patch’s true mean, so the picture comes from a twin trained on plain pixels.</aside>
+</section>
+
+<!-- 21 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · The mask-ratio sweep · measured</p>
+  <h2>Our sweep: 50, 75 or 90% hidden — all far above an untrained encoder</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">On EuroSAT the three ratios tie within noise, but each beats random weights by 6–11 points. Your homework repeats this.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w7-maskratio.png" data-zoom alt="Left: one chip at 50, 75 and 90% hidden and the reconstructions of the 75%-trained model. Right: test accuracy against the mask ratio used in pretraining. Linear probe 91.4, 91.9 and 92.3%; kNN 82.3, 83.5 and 85.6%. Reference lines: supervised end to end 95.4%, random-init probe 85.1%, random-init kNN 74.5%. One standard error on 1,000 test chips is 0.9 points." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Probe 91.4 / 91.9 / 92.3% vs 85.1% untrained; kNN 82.3 / 83.5 / 85.6% vs 74.5%. <span class="accent">One seed each, ±0.9 points: do not read “90% is best” into this.</span> The paper also found fine-tuning flat from 40 to 80%.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>linear probe / kNN</b> — accuracy of one linear layer, or of a 20-neighbour vote, on the frozen encoder (Part 4).</span>
+  </div>
+  <div class="foot"><span>Computed for this lecture: one seed per ratio, 4,000 train / 1,000 test chips, 1 s.e. ≈ 0.9 points · the 50% and 90% pictures reuse the 75% model, as the paper’s Fig. 4 does · tools/week07_figs/out/mae_results.json</span></div>
+  <aside class="notes">1.5 min. The lab’s homework, done once for this lecture. Left: the same chip at three ratios — at 90% four patches are all the encoder gets, and the painting goes vague. Right: the probe and kNN accuracy of encoders pretrained at each ratio. The flat lines are the honest result: with one seed each and a standard error of 0.9 points, 50, 75 and 90% tie on this small dataset; what is not a tie is the gap to the dotted lines — every pretrained encoder beats an untrained one by 6 to 11 points. Say that the homework asks them to reproduce this and to report the noise, not a winner.</aside>
+</section>
+
+<!-- 22 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · What changes for Earth data</p>
+  <h2>Four things a photo-trained MAE never had to think about</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">The recipe transfers; the defaults do not. Each row is a choice your lab code makes, on purpose or by accident.</p>
+  <div class="cols" style="grid-template-columns:1fr 1fr;gap:1.2vw 1.6vw;flex:0 0 auto">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Clouds and no-data</b><br>A cloud cannot be predicted from the ground around it, and teaches nothing about the ground. Pretrain on cloud-screened chips, or leave cloudy and no-data pixels out of the loss.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Redundancy differs by landscape</b><br>Our fill test at 75% hidden: annual crop (0.59) and rivers (0.64) are easy, residential (0.88) and industrial (0.80) hard. A ratio tuned on fields can be too high for towns.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">13 bands at three resolutions</b><br>Normalise per band with training-split statistics; the 20 m and 60 m bands are blurrier, so their patches are easier to fill. Hiding whole band groups (Part 3) makes the task about spectra, not texture.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">The same place, again and again</b><br>Sentinel-2 revisits every 5 days. A random split puts the same field in pretraining and in the probe’s test set — split by location, as in Week 2, or the probe flatters you.</p></div>
+  </div>
+  <div class="gloss">
+    <span><b>no-data</b> — pixels outside the swath or flagged bad, often stored as 0. <b>revisit</b> — the time between two images of the same spot.</span>
+  </div>
+  <div class="foot"><span>Sentinel-2 revisit: 5 days with two satellites at the equator (ESA) · SatMAE: Appendix A6 · Scale-MAE’s scale encoding: Week 6 · leakage-safe splits: Week 2</span></div>
+  <aside class="notes">2 min. Four cards, thirty seconds each, and each one is a line in the lab code. Clouds: either pretrain on screened chips — EuroSAT is already cloud-free — or exclude cloud pixels from the loss, because a model asked to paint clouds wastes capacity on atmosphere. Redundancy: the per-class result from our fill experiment. Bands: per-band normalisation from the training split only, and the coarse bands are easy targets. Revisits: the leakage lesson of Week 2 returns — an MAE pretrained on a place and probed on the same place, a month later, will look better than it is.</aside>
+</section>
+
+<!-- 23 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · This week’s paper · 1.5 min</p>
+  <h2>The paper in one slide — BERT’s idea, made to work for images</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Four ablations carry the argument; each one is a design choice you copy in the lab.</p>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.15vh,19px);line-height:1.36">
+    <tr style="color:var(--muted)"><td style="padding:.35vh .6vw">choice</td><td style="padding:.35vh .6vw">what they tried</td><td style="padding:.35vh .6vw">result (ViT-L = Large, fine-tune / linear probe, %)</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;color:var(--accent);font-weight:650">mask ratio</td><td style="padding:.35vh .6vw">10% … 90%</td><td style="padding:.35vh .6vw">75% best for both; the probe swings by up to 20 points (54.6 → 73.5), fine-tune works from 40 to 80%</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;color:var(--accent);font-weight:650">mask token</td><td style="padding:.35vh .6vw">in the encoder vs only in the decoder</td><td style="padding:.35vh .6vw">encoder: 84.2 / 59.6 at 3.3× the compute; decoder only: 84.9 / 73.5</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;color:var(--accent);font-weight:650">target</td><td style="padding:.35vh .6vw">pixels, normalised pixels, PCA (principal components), BEiT tokens (BERT-style image codes)</td><td style="padding:.35vh .6vw">normalised pixels best: 85.4 / 73.9 — no tokenizer needed</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .6vw;color:var(--accent);font-weight:650">augmentation</td><td style="padding:.35vh .6vw">none, crop, crop + colour jitter</td><td style="padding:.35vh .6vw">crop only is best (84.9 / 73.5); colour jitter hurts (84.3 / 71.9)</td></tr>
+  </table>
+  <ul class="small" style="margin-top:1vh">
+    <li>Headline: ViT-H (Huge) reaches <b>87.8%</b> on ImageNet (448-px fine-tune) using ImageNet alone; pretraining is 3× or more faster than encoding every patch. <span class="accent">The probe gap is honest in the paper: MAE ViT-L probes at 75.8% vs MoCo v3’s 77.6%.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>ablation</b> — change one design choice, keep everything else, measure. <b>MoCo v3</b> — a contrastive ViT method, the main baseline.</span>
+  </div>
+  <div class="foot"><span>He et al. 2021, CVPR 2022 · Fig. 5 (ratio), Table 1b–d, Table 3, Table 12 (App. B) · card: Appendix A5 · quizzed today</span></div>
+  <aside class="notes">1.5 min. Read the four rows as four decisions. Ratio: 75%, and note that the linear probe is far more sensitive to it than fine-tuning. Mask token: putting it into the encoder costs 3.3 times the compute and 14 points of probe accuracy, because the encoder then spends its capacity on placeholders it will never see at test time. Target: plain per-patch-normalised pixels beat BEiT's learned tokens, so no tokenizer is needed. Augmentation: cropping is enough, colour jitter hurts — good news for satellite data, whose colours are measurements. Then the headline numbers, and the honesty point: the paper itself shows MAE losing the linear probe to a contrastive method — Part 4.</aside>
+</section>
+
+<!-- 24 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Watch at home</p>
+  <h2>MAE in thirteen minutes, in detail, from scratch, and the BERT idea it borrowed</h2>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=Dp6iICL2dVI" class="yt" data-id="Dp6iICL2dVI" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-mae-coffee.jpg" alt="AI Coffee Break with Letitia video: Masked Autoencoders Are Scalable Vision Learners – Paper explained and animated!" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">AI Coffee Break · <i>Masked Autoencoders, paper explained</i> · the asymmetric design drawn · 13 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=-EBqzYIJRaQ" class="yt" data-id="-EBqzYIJRaQ" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-mae-mehraban.jpg" alt="Soroush Mehraban video: Masked Autoencoders (MAE) Paper Explained" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Soroush Mehraban · <i>MAE paper explained</i> · 75% masking and the pixel loss in detail · 15 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=iqYpDXXnOvw" class="yt" data-id="iqYpDXXnOvw" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-mae-scratch.jpg" alt="Priyam Mazumdar video: Masked AutoEncoders (MAE) Implementation From Scratch | Self-Supervised Image Pretraining!" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Priyam Mazumdar · <i>MAE implementation from scratch</i> · an MAE typed from scratch · 109 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=dabFOBE4eZI" class="yt" data-id="dabFOBE4eZI" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-beit-coffee.jpg" alt="AI Coffee Break with Letitia video: Pre-training of BERT-based Transformer architectures explained – language and vision!" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">AI Coffee Break · <i>BERT-style pretraining for images (BEiT)</i> · masked tokens instead of pixels · 8 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Part 3.</b> MAE hides random patches. A satellite chip has two more axes to hide along — bands and dates — and the choice of axis decides what the model must learn.</p>
+  <div class="gloss">
+    <span><b>BEiT</b> — BERT pre-training of image Transformers: predicts a discrete code for each hidden patch instead of its pixels; MAE showed plain pixels work as well.</span>
+  </div>
+  <div class="foot"><span>Optional, not assigned · the from-scratch video is long</span></div>
+  <aside class="notes">Twenty seconds. Coffee Break for the picture again; Mehraban for the details of the target and the ablations; Mazumdar for a from-scratch MAE tutorial; the BEiT video for the approach MAE simplified.</aside>
+</section>
+
+<!-- 25 -->
+
+<section class="slide section xl">
+  <p class="kicker">Part 3 · 7 min · structured masking</p>
+  <h2>Masks for the Earth: Hide a Band, a Date, a Sensor</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Four ways to mask a satellite data cube; a measurement of which band groups can be guessed from the others; how SatMAE, SpectralGPT, Galileo and OlmoEarth chose; and the weather model that hides the future. <b>By the end:</b> pick a mask for your capstone data and say what it forces the model to learn.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>What you hide is what the model must learn to infer. Hide random patches and it learns texture; hide a band group and it learns spectra; hide a date and it learns seasons.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>SatMAE (band groups, dates) · SpectralGPT (3-D spectral tokens) · Galileo, OlmoEarth (sensors) · Prithvi-WxC (masked past → future weather; Week 11).</p></div>
+  </div>
+  <aside class="notes">7 minutes. The one sentence: the mask is the curriculum. Concrete first — a picture of the four masks on our chips — then a measurement, then the models.</aside>
+</section>
+
+<!-- 26 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 3 · Four masks</p>
+  <h2>Hide patches, a band group, a date, or big blocks</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">A satellite chip is a cube — space × bands × time — so the mask can cut along any axis. Each cut teaches something else.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w7-masks.png" data-zoom alt="Four masks drawn on EuroSAT forest chips, hidden parts in grey. Random 75 percent: 48 of 64 patches hidden. Spectral group: the three SatMAE band groups as three tiles, the red-edge group B5 B6 B7 B8A hidden. Temporal: three dates of the same place, date 2 hidden; three different forest chips stand in for the dates because EuroSAT has one date per chip. Block: four large rectangular target blocks hidden, as in I-JEPA." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Random → texture and layout (MAE) · spectral → how bands relate (SatMAE hides each band group independently) · temporal → seasons (SatMAE hides each date independently) · block → whole objects, not neighbours’ pixels (I-JEPA, Galileo’s structured masks). <span class="accent">A fifth axis, the sensor, hides radar or elevation entirely (Galileo, OlmoEarth).</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>illustrative</b> — whole-group and whole-date panels extend SatMAE’s idea; SatMAE itself hides 75% of tokens within each group or date. <b>block mask</b> — a few large rectangles.</span>
+  </div>
+  <div class="foot"><span>Drawn for this lecture on EuroSAT-MS forest chips (tools/week07_figs) · Cong et al. 2022 · Assran et al. 2023 · Tseng et al. 2025</span></div>
+  <aside class="notes">1.5 min. Four cuts through the same cube. Random patches, today's MAE: the model learns texture and layout. A whole band group: it must infer one part of the spectrum from the others — next slide measures how hard that is. A whole date: it must know what this place looks like in another season. Big blocks: neighbours no longer give the answer away, so it must recognise whole objects. Mention the fifth axis — a whole sensor — which the multimodal models use. Be honest about the temporal panel: EuroSAT has one date per chip, so three forest chips stand in for three dates.</aside>
+</section>
+
+<!-- 27 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 3 · Hide a band group · measured</p>
+  <h2>In our test, red-edge bands are easy to guess from the rest; shortwave infrared is not</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">A group that is easy to guess makes a weak pretext task; SWIR, which tracks moisture, is the harder one to predict.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w7-spectral.png" data-zoom alt="Left: bar chart of R squared when each SatMAE band group is hidden and predicted pixel by pixel from the other two by linear regression on EuroSAT test chips: 10-metre bands 0.92, red-edge bands 0.96, shortwave infrared 0.40. Right: true band B11 versus the guess from the other bands for an annual-crop chip, where the guess fails badly, and a river chip, where it is close." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>A straight line recovers red-edge (R² 0.96) but only 0.40 of SWIR on 10 test chips — the crop chip misses whole fields. A pilot, not a verdict: test masks downstream. SatMAE hides 75% of tokens independently in each band group, so the model must “peek” across groups; SpectralGPT hides 90% of 3-D spatial–spectral tokens.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>R²</b> — share of the hidden values’ variance the guess explains; 1 = perfect, 0 = no better than the average. <b>SWIR</b> — shortwave infrared (B11, B12), sensitive to water in soil and leaves.</span>
+  </div>
+  <div class="foot"><span>Computed for this lecture: linear regression per pixel, trained on 30 EuroSAT-MS chips, tested on 10 (tools/week07_deck/figs/fig_spectral.py) · groups as in SatMAE (Cong et al. 2022)</span></div>
+  <aside class="notes">1.5 min. The measurement: hide one of SatMAE's three band groups and predict it, pixel by pixel, from the other two with nothing smarter than a straight line. The 10-metre bands come back at R² 0.92 and the red-edge bands at 0.96 — hiding them asks the model to do almost nothing. SWIR comes back at 0.40: on the annual-crop chip the guess is wrong over whole fields, because SWIR responds to moisture in soil and leaves, which the visible bands do not show. That is the argument for spectral masking: it forces the model to learn the relations between bands. Be careful with the claim: this is a 40-chip pilot with a linear predictor, so it motivates band-group masks rather than proving which mask helps — that has to be tested downstream, and on the river chip SWIR is predicted well (R² ≈ 0.97). The moisture explanation is a hypothesis for the error pattern.</aside>
+</section>
+
+<!-- 28 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 3 · Who hides what</p>
+  <h2>Five Earth models, five masks — read the mask as the curriculum</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Each model’s mask was chosen for its data: band groups for Sentinel-2, space–time cubes for time series, sensors for multimodal.</p>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(13.5px,2.1vh,18.5px);line-height:1.36">
+    <tr style="color:var(--muted)"><td style="padding:.35vh .6vw">model</td><td style="padding:.35vh .6vw">token</td><td style="padding:.35vh .6vw">what is hidden</td><td style="padding:.35vh .6vw">what it must learn</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;color:var(--accent);font-weight:650;white-space:nowrap">SatMAE · 2022</td><td style="padding:.35vh .6vw">patch × band group (Sentinel) or patch × date (RGB)</td><td style="padding:.35vh .6vw">75%, independently per group or per date</td><td style="padding:.35vh .6vw">to read a region from another band group or date</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;color:var(--accent);font-weight:650;white-space:nowrap">Prithvi-EO · 2023–24</td><td style="padding:.35vh .6vw">1 × 16 × 16 cube (time × space), 3–4 dates</td><td style="padding:.35vh .6vw">75% of cubes (model config)</td><td style="padding:.35vh .6vw">space and season together</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;color:var(--accent);font-weight:650;white-space:nowrap">SpectralGPT · 2023</td><td style="padding:.35vh .6vw">3-D: space × consecutive bands</td><td style="padding:.35vh .6vw">90%</td><td style="padding:.35vh .6vw">the spectrum’s shape, band to band</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;color:var(--accent);font-weight:650;white-space:nowrap">Galileo · 2025</td><td style="padding:.35vh .6vw">space × time × channel group, 9 modalities</td><td style="padding:.35vh .6vw">large space–time blocks, and small random spans</td><td style="padding:.35vh .6vw">big masks → coarse meaning; small → local detail</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .6vw;color:var(--accent);font-weight:650;white-space:nowrap">OlmoEarth · 2025</td><td style="padding:.35vh .6vw">per sensor and map layer, monthly</td><td style="padding:.35vh .6vw">tokens of Sentinel-1/2, Landsat and map layers; the target is a frozen random projection</td><td style="padding:.35vh .6vw">one representation shared by every sensor</td></tr>
+  </table>
+  <ul class="small" style="margin-top:1vh">
+    <li>SatMAE tested both: hiding the same region in every group (“consistent”) vs independently — <span class="accent">independent won, because the model learns to peek at a visible group to rebuild a hidden one.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>modality</b> — one kind of measurement: optical, radar, elevation, weather, a land-cover map. <b>cube</b> — a 3-D token (time × height × width); Prithvi’s is 1 × 16 × 16, one date deep.</span>
+  </div>
+  <div class="foot"><span>Cong et al. 2022 (§4.1.2, Table 5) · Prithvi Hugging Face configs (mask_ratio 0.75) · Hong et al. 2024 · Tseng et al. 2025 (§2.1) · Ai2 OlmoEarth 2025 · Appendix A6</span></div>
+  <aside class="notes">1.5 min. Read the last column: that is the curriculum each mask sets. SatMAE hides band groups and dates independently, so a region hidden in the SWIR group can be seen in the visible group — and the paper measured that this beats hiding the same region everywhere. Prithvi uses MAE's random 75% over space-time cubes. SpectralGPT pushes to 90% with tokens that span consecutive bands. Galileo mixes big structured blocks, for coarse meaning, with small random spans, for detail. OlmoEarth hides tokens of every sensor and map layer and predicts them in a frozen random latent space. For Q3 on the journal-club slide (40): pick the axis along which your data is redundant, and hide along the one along which it is not.</aside>
+</section>
+
+<!-- 29 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 3 · Weather · Prithvi-WxC</p>
+  <h2>Hide half of today’s atmosphere and ask for tomorrow’s</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">One objective covers both: with lead time 0 it is masked reconstruction, with 6–24 h it is a forecast. Week 11 builds on it.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 220" role="img" aria-label="Prithvi-WxC objective. Two global states, the atmosphere at the previous time and now, each a grid of 160 MERRA-2 variables. Half of their tokens are hidden, alternating between local and global masking. A 2.3-billion-parameter Transformer with local and global attention blocks reads the visible half and predicts the full state at a lead time of 0, 6, 12 or 24 hours. Lead time 0 means rebuilding the hidden half of the present; a positive lead time means forecasting." style="width:min(98%,1150px)">
+      <defs><pattern id="w7h" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="var(--wash)" stroke="currentColor" stroke-width=".35"/></pattern></defs>
+      <rect x="10" y="40" width="150" height="80" fill="url(#w7h)" stroke="currentColor"/><rect x="180" y="40" width="150" height="80" fill="url(#w7h)" stroke="currentColor"/>
+      <g fill="#9a9789" opacity=".85"><rect x="22" y="40" width="12" height="12"/><rect x="58" y="52" width="12" height="12"/><rect x="94" y="40" width="12" height="12"/><rect x="130" y="64" width="12" height="12"/><rect x="10" y="76" width="12" height="12"/><rect x="46" y="88" width="12" height="12"/><rect x="82" y="76" width="12" height="12"/><rect x="118" y="100" width="12" height="12"/><rect x="34" y="108" width="12" height="12"/><rect x="142" y="88" width="12" height="12"/><rect x="70" y="64" width="12" height="12"/><rect x="106" y="52" width="12" height="12"/></g>
+      <g fill="#9a9789" opacity=".85"><rect x="180" y="40" width="48" height="36"/><rect x="264" y="76" width="66" height="44"/><rect x="228" y="100" width="24" height="20"/></g>
+      <g font-size="12.5" text-anchor="middle" fill="currentColor"><text x="85" y="30">atmosphere, t − δt</text><text x="255" y="30">atmosphere, t</text><text x="85" y="140" fill="var(--muted)">160 variables</text><text x="255" y="140" fill="var(--muted)">grey = hidden (50%)</text></g>
+      <g font-size="12" text-anchor="middle" fill="var(--muted)"><text x="170" y="164">masks alternate: scattered (local) and in blocks (global)</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M330 80 H380"/></g><path d="M374 76 L380 80 L374 84 Z" fill="currentColor"/>
+      <rect x="384" y="36" width="190" height="88" rx="10" fill="var(--wash)" stroke="var(--accent)" stroke-width="2"/>
+      <g text-anchor="middle"><text x="479" y="64" font-size="15" font-weight="700" fill="var(--accent)">Prithvi-WxC</text><text x="479" y="84" font-size="12.5" fill="currentColor">2.3 B parameters</text><text x="479" y="102" font-size="12.5" fill="currentColor">local + global attention</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M574 80 H624"/></g><path d="M618 76 L624 80 L618 84 Z" fill="currentColor"/>
+      <rect x="628" y="40" width="150" height="80" fill="url(#w7h)" stroke="#2c6fb0" stroke-width="2"/>
+      <g font-size="12.5" text-anchor="middle"><text x="703" y="30" fill="#2c6fb0" font-weight="700">full state at t + lead</text><text x="703" y="140" fill="currentColor">lead = 0, 6, 12 or 24 h</text></g>
+      <g font-size="12.5" fill="currentColor"><text x="796" y="64">lead 0:</text><text x="796" y="80" fill="var(--muted)">rebuild the</text><text x="796" y="96" fill="var(--muted)">present (MAE)</text><text x="796" y="124">lead &gt; 0:</text><text x="796" y="140" fill="var(--muted)">forecast</text></g>
+      <g font-size="13" text-anchor="middle"><text x="450" y="200" fill="currentColor">X<tspan baseline-shift="sub" font-size="10">t+δt</tspan> ≈ f<tspan baseline-shift="sub" font-size="10">θ</tspan>[ M<tspan baseline-shift="sub" font-size="10">0.5</tspan>( X<tspan baseline-shift="sub" font-size="10">t</tspan>, X<tspan baseline-shift="sub" font-size="10">t−δt</tspan> ) ] &#160;— schematic Eq. 1 (Eq. 2 predicts anomalies), M<tspan baseline-shift="sub" font-size="10">0.5</tspan> = hide 50%</text></g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Why 50%, not 75%? One reading: a 0.5° × 0.625° weather field repeats itself less than a field of crops, and the same model must also forecast — the paper does not argue it; it is the journal club’s Q1. <span class="accent">For the forecast fine-tune the mask is switched off (0%).</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>MERRA-2</b> — Modern-Era Retrospective analysis for Research and Applications 2, NASA’s reanalysis (like ECMWF’s ERA5): past observations blended into a model: 20 surface variables + 10 variables on 14 levels, plus static fields. <b>lead time</b> — how far ahead the prediction is.</span>
+  </div>
+  <div class="foot"><span>Schmude et al. 2024, Prithvi WxC, §2.1 (Eq. 1), §2.4 (50% masking, local/global alternation, 64 A100s) · rollout and forecasting at scale: Week 11</span></div>
+  <aside class="notes">1.5 min. The weather version of MAE. Two global states, the previous one and now, each 160 MERRA-2 variables; half of their tokens hidden, alternating between scattered and block masks; a 2.3-billion-parameter Transformer predicts the full state at a lead time of 0, 6, 12 or 24 hours. With lead time 0 the task is exactly masked reconstruction; with a positive lead time it is a forecast. So one objective trains both a representation and a forecaster — and when they fine-tune for forecasting, they switch the mask off. The 50% ratio, against MAE's 75%, is the bridge to the journal club's first question. Week 11 picks the forecasting half up.</aside>
+</section>
+
+<!-- 30 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 3 · Watch at home · the Earth models, by their builders</p>
+  <h2>Prithvi-EO-2.0, Prithvi-WxC and OlmoEarth, from the teams that pretrained them</h2>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=CB3FKtmuPI8" class="yt" data-id="CB3FKtmuPI8" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-prithvi-eo2.jpg" alt="AI for Good video: Workshop: Earth observation foundation models with Prithvi-EO-2.0 and TerraTorch" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">NASA/IBM · <i>Prithvi-EO-2.0 workshop</i> · pretraining, then fine-tuning · 115 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=C9BusMxZ5Yw" class="yt" data-id="C9BusMxZ5Yw" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-prithvi-wxc.jpg" alt="International Centre for Theoretical Sciences video: The Prithvi WxC Foundation Model for Weather and Climate by Manikandan Padmanabhan" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Prithvi-WxC team · <i>The Prithvi WxC foundation model</i> · 45 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=KNvgMFecJ2k" class="yt" data-id="KNvgMFecJ2k" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-olmoearth-ai2.jpg" alt="Ai2 video: OlmoEarth: Powerful new foundation models and open infrastructure for planetary insights" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Ai2 (Allen Institute for AI) · <i>OlmoEarth</i> · the four-minute introduction · 4 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=wzCHJf6Ly24" class="yt" data-id="wzCHJf6Ly24" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-olmoearth-cole.jpg" alt="Robin Cole video: Building OlmoEarth: AI2’s Open Foundation Model for Satellite Imagery" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Robin Cole with the Ai2 team · <i>Building OlmoEarth</i> · data, pretraining, evaluation · 37 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Part 4.</b> Every one of these teams reports that its model is best. Which number they report — and on which split — can change the ranking.</p>
+  <div class="foot"><span>Optional · more Earth talks on the next slide</span></div>
+  <aside class="notes">Twenty seconds. The builders' own talks — useful for the capstone choice of backbone.</aside>
+</section>
+
+<!-- 31 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 3 · Watch at home · the wider Earth picture</p>
+  <h2>Clay, SSL4EO, ESA’s survey and ECMWF on self-supervision for Earth data</h2>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=nJuQ9_agF_M" class="yt" data-id="nJuQ9_agF_M" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-clay.jpg" alt="TheGeoICT video: Clay - Open Foundation Model of Earth: Soumya Ranjan" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">TheGeoICT · <i>Clay — an open foundation model of Earth</i> · MAE on many sensors · 42 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=xURO5bl7evI" class="yt" data-id="xURO5bl7evI" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-ssl4eo-zhu.jpg" alt="Nico Lang video: SSL4EO-2024 - On the Foundations of Earth and Climate Foundation Models - Xiaoxiang Zhu" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Xiaoxiang Zhu (SSL4EO) · <i>On the foundations of Earth and climate foundation models</i> · 40 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=H8zAOMpA_-c" class="yt" data-id="H8zAOMpA_-c" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-esa-philab-fm.jpg" alt="SFI Visual Intelligence video: Earth Observation Foundation Models and their Applications: Casper Fibæk (The ESA Phi-Lab)" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">ESA Φ-lab (Casper Fibaek) · <i>Earth observation foundation models and their applications</i> · 34 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=wD27uF7lzIw" class="yt" data-id="wD27uF7lzIw" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-ecmwf-ssl.jpg" alt="ECMWF video: Self supervised representation learning" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">ECMWF (Christian Lessig) · <i>Self-supervised representation learning</i> for Earth-system data · 45 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <div class="gloss">
+    <span><b>Clay</b> — an open Earth model trained mainly as an MAE on several satellites. <b>ECMWF</b> — European Centre for Medium-Range Weather Forecasts. <b>Φ-lab</b> — the European Space Agency’s AI lab.</span>
+  </div>
+  <div class="foot"><span>Optional · all four play here · SSL4EO-S12 (Zhu’s group) is the dataset option for today’s lab</span></div>
+  <aside class="notes">Twenty seconds. Clay for an open MAE across sensors; Zhu for the view from the group that built SSL4EO-S12; the ESA survey for where these models help in practice; ECMWF for self-supervision on weather and climate data.</aside>
+</section>
+
+<!-- 32 -->
+
+<section class="slide section xl">
+  <p class="kicker">Part 4 · 7 min · judging a pretrained encoder</p>
+  <h2>Evaluation: Probe, Neighbours, Fine-Tune — and Why They Disagree</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Three ways to read a frozen encoder, our own EuroSAT numbers for each, MAE’s famous gap between probe and fine-tune, and what the GEO-Bench-2 benchmark found about ranking Earth foundation models. <b>By the end:</b> fill the lab’s probe table and say what it can and cannot prove.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>Every Earth foundation model paper claims to be best. Which number it reports — probe, kNN or fine-tune, on which split — can change the ranking.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Note 07’s probe table · the Week 9 scaling sweep · the Week 10 leaderboard · every model card you will read for the capstone.</p></div>
+  </div>
+  <aside class="notes">7 minutes. The goal: students can read a results table in a foundation-model paper and ask the right first question — which protocol, which split, against which baseline.</aside>
+</section>
+
+<!-- 33 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 4 · Three readouts</p>
+  <h2>Freeze it and fit one line, let neighbours vote, or train everything</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Each protocol asks a different question of the same encoder — so each can crown a different winner.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 230" role="img" aria-label="Three panels. Linear probe: the encoder is frozen (a lock), its embedding feeds one linear layer that is trained; it asks whether the classes are already separated by a straight cut. kNN: the encoder is frozen, a test chip's embedding is compared with all training embeddings and its 20 nearest neighbours vote; nothing is trained; it asks whether similar chips sit close together. Fine-tune: every weight of the encoder and a new head is trained; it asks how good a starting point the encoder is." style="width:min(98%,1150px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.1"><rect x="6" y="10" width="282" height="214" rx="10"/><rect x="309" y="10" width="282" height="214" rx="10"/><rect x="612" y="10" width="282" height="214" rx="10" stroke="var(--accent)" stroke-width="1.8"/></g>
+      <g font-size="15" font-weight="700"><text x="22" y="36" fill="currentColor">linear probe</text><text x="325" y="36" fill="currentColor">kNN (k = 20)</text><text x="628" y="36" fill="var(--accent)">fine-tune</text></g>
+      <g fill="#d9d5c7" stroke="currentColor"><rect x="22" y="56" width="110" height="60" rx="6"/><rect x="325" y="56" width="110" height="60" rx="6"/></g>
+      <rect x="628" y="56" width="110" height="60" rx="6" fill="var(--accent)" opacity=".25" stroke="var(--accent)"/>
+      <g font-size="13" text-anchor="middle"><text x="77" y="83" fill="currentColor">encoder</text><text x="77" y="100" fill="var(--muted)">frozen</text><text x="380" y="83" fill="currentColor">encoder</text><text x="380" y="100" fill="var(--muted)">frozen</text><text x="683" y="83" fill="currentColor">encoder</text><text x="683" y="100" fill="var(--accent)">trained</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M132 86 H160 M738 86 H766"/></g>
+      <rect x="164" y="66" width="100" height="40" rx="6" fill="var(--wash)" stroke="var(--accent)" stroke-width="1.6"/><text x="214" y="91" text-anchor="middle" font-size="13" fill="var(--accent)">1 linear layer</text>
+      <rect x="770" y="66" width="100" height="40" rx="6" fill="var(--wash)" stroke="var(--accent)" stroke-width="1.6"/><text x="820" y="91" text-anchor="middle" font-size="13" fill="var(--accent)">new head</text>
+      <g fill="#2c6fb0"><circle cx="470" cy="70" r="4"/><circle cx="486" cy="80" r="4"/><circle cx="478" cy="96" r="4"/><circle cx="500" cy="66" r="4"/></g>
+      <g fill="#ae562f"><circle cx="540" cy="100" r="4"/><circle cx="556" cy="88" r="4"/><circle cx="548" cy="112" r="4"/></g>
+      <circle cx="492" cy="86" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="492" cy="86" r="26" fill="none" stroke="currentColor" stroke-dasharray="3 2"/>
+      <g font-size="12.5" fill="currentColor">
+        <text x="22" y="146">trains: one layer (seconds)</text><text x="22" y="166">asks: are the classes already</text><text x="22" y="182">split by a straight cut?</text><text x="22" y="206" fill="var(--muted)">MAE paper: MoCo v3 higher</text>
+        <text x="325" y="146">trains: nothing</text><text x="325" y="166">asks: do similar chips already</text><text x="325" y="182">sit next to each other?</text><text x="325" y="206" fill="var(--muted)">DINO reports it (k = 20)</text>
+        <text x="628" y="146">trains: every weight (hours)</text><text x="628" y="166">asks: how good a starting</text><text x="628" y="182">point is the encoder?</text><text x="628" y="206" fill="var(--accent)">MAE paper: MAE higher</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>A probe measures what is <i>linearly</i> readable; MAE’s features are rich but not laid out for a straight cut, so they look worse until a few layers are trained. MAE ViT-L: 75.8% by probe (MoCo v3: 77.6%); on the 800-epoch model, tuning only the last block lifts it from 73.5% to 81.0%.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>kNN</b> — k-nearest neighbours: label a test chip by a vote of the 20 training chips whose embeddings are most similar (cosine). <b>head</b> — the small layer on top that outputs the classes.</span>
+  </div>
+  <div class="foot"><span>Protocols as in He et al. 2021 (§4, Fig. 9) and Caron et al. 2021 (kNN, k = 20) · the lab runs the probe and kNN</span></div>
+  <aside class="notes">2 min. Three panels, same encoder. Linear probe: freeze it, train one linear layer — it asks whether the classes are already separated by a straight cut. kNN: freeze it, train nothing, let the twenty nearest training chips vote — it asks whether similar chips already sit together. Fine-tune: train everything — it asks how good a starting point the encoder is. The bottom line of each panel is what the MAE paper found against MoCo v3: the contrastive model probes higher, MAE fine-tunes higher — a pattern, not a law; GEO-Bench-2 shows rankings change with task and protocol. Next slide: our own numbers on EuroSAT.</aside>
+</section>
+
+<!-- 34 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 4 · Our numbers · measured</p>
+  <h2>On EuroSAT, pretraining lifts every readout — and supervised still wins</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">4,000 labelled chips is plenty for a 10-class, 64-px task. With fewer labels the order can flip — that is the lab’s question.</p>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14.5px,2.3vh,20px);line-height:1.4">
+    <tr style="color:var(--muted)"><td style="padding:.45vh .7vw">encoder (same ViT, 0.9 M)</td><td style="padding:.45vh .7vw">linear probe</td><td style="padding:.45vh .7vw">kNN, k = 20</td><td style="padding:.45vh .7vw">fine-tune, 50 epochs</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.45vh .7vw">no network: the 13 band means</td><td style="padding:.45vh .7vw">76.4</td><td style="padding:.45vh .7vw">69.0</td><td style="padding:.45vh .7vw">—</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.45vh .7vw">random weights, never trained</td><td style="padding:.45vh .7vw">85.1</td><td style="padding:.45vh .7vw">74.5</td><td style="padding:.45vh .7vw">93.0</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.45vh .7vw"><b class="accent">MAE, 75%, normalised pixels</b></td><td style="padding:.45vh .7vw"><b>91.9</b></td><td style="padding:.45vh .7vw">83.5</td><td style="padding:.45vh .7vw"><b>94.3</b></td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.45vh .7vw">MAE, 75%, raw pixels</td><td style="padding:.45vh .7vw">89.6</td><td style="padding:.45vh .7vw">84.0</td><td style="padding:.45vh .7vw">—</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.45vh .7vw">supervised, same 8 minutes, with labels</td><td style="padding:.45vh .7vw">95.2</td><td style="padding:.45vh .7vw">95.5</td><td style="padding:.45vh .7vw">95.4 (end to end)</td></tr>
+  </table>
+  <ul class="small" style="margin-top:1vh">
+    <li>MAE’s probe and kNN differ by 8 points; the supervised model’s by none. <span class="accent">MAE features are good but not laid out for neighbours — the paper’s probe-vs-fine-tune story, in miniature.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>fine-tune, 50 epochs</b> — all weights trained for 18 s from the MAE weights or from random weights. <b>% accuracy</b> on 1,000 held-out test chips; 1 s.e. ≈ 0.9 points.</span>
+  </div>
+  <div class="foot"><span>Computed for this lecture: 5,000 EuroSAT-MS chips (500 per class), 80/20 split per class, one seed per run, Apple M2 Ultra · tools/week07_figs/out/mae_results.json</span></div>
+  <aside class="notes">2 min. Read the table top to bottom. The 13 band means with no network already get 76% — EuroSAT is an easy dataset. A random, never-trained ViT gets 85% by probe: random features are better than people expect. Eight minutes of MAE lift that to 92% by probe and 94% after a short fine-tune. A supervised model trained for the same eight minutes on all 4,000 labels still wins at 95%. That is not a failure of pretraining: with this many labels for this easy a task, labels win; the claim of self-supervision is about the regime with few labels and many unlabelled chips, which is exactly what the lab tests by probing with a fraction of the labels. Point at the second bullet: the 8-point gap between MAE’s probe and kNN, against none for the supervised model, is the MAE paper’s finding that its features need some non-linear processing. And the raw-pixel row: the two readouts disagree about which target is better — even on a toy run.</aside>
+</section>
+
+<!-- 35 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 4 · The evidence for Earth models · GEO-Bench-2</p>
+  <h2>No model wins everything, and freezing the encoder reshuffles the ranking</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">A 2025 benchmark of Earth foundation models on 19 datasets: report fine-tuning, and rank by capability, not by one leaderboard.</p>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.4vw;align-items:stretch;flex:0 0 auto">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">1 · No single winner</b><br>Photo-pretrained models (ConvNeXt, a modern convolutional network; DINOv3) lead on high-resolution tasks; Earth models (TerraMind, Prithvi, Clay) on multispectral ones.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">2 · Frozen ≠ fine-tuned</b><br>With the encoder frozen under the same decoder, the models lose accuracy and the ranking changes — so the authors recommend fine-tuning as the protocol. A linear decoder lowers all scores but reorders them less than the other ablations.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">3 · Size is not fit</b><br>“Even the 7B RGB-only (red, green, blue) [DINOv3] model could not surpass the 10× smaller Prithvi-EO-2.0 in crop classification.” Our reading: for crops, the right bands and dates mattered more than parameters.</p></div>
+  </div>
+  <ul class="small" style="margin-top:1.2vh">
+    <li>Reading rule for any results table: <b>which protocol</b>, <b>which split</b> (random or location-held-out), <b>which baseline</b>. <span class="accent">Change one and the winner can change.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>capability group</b> — datasets that share a property (resolution, bands, time) and are ranked together. <b>frozen + decoder</b> — the encoder is fixed and only a task head, e.g. a U-Net decoder (Week 4), is trained.</span>
+  </div>
+  <div class="foot"><span>GEO-Bench-2 (arXiv 2511.15658, 2025): Abstract, §3, §5, App. 6.3.2–6.3.3, Fig. 4 · original GEO-Bench: Lacoste et al. 2023 · Appendix A7</span></div>
+  <aside class="notes">1.5 min. Three findings. One: no model wins everywhere — photo-pretrained models win on high-resolution RGB, Earth models on multispectral tasks. Two, the one tied to today: when the encoder is frozen and only a decoder is trained, every model loses accuracy and the order of the models changes, which is why the authors recommend fine-tuning as the benchmark protocol; careful, this is a frozen encoder with a U-Net-style decoder, not a strict linear probe, and a linear decoder changed the order less. Three: a 7-billion-parameter RGB model loses crop classification to a model ten times smaller that sees the right bands and dates — fit beats size, the Presto lesson from Week 6 again. Then the reading rule: protocol, split, baseline.</aside>
+</section>
+
+<!-- 36 -->
+
+<section class="slide xl">
+  <p class="kicker">Parts 4–5 · Watch at home</p>
+  <h2>Benchmarks, transfer, an Earth evaluation, and mixed precision</h2>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=75xclLXkFzI" class="yt" data-id="75xclLXkFzI" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-geobench.jpg" alt="ServiceNow video: GeoBench V2: From Space Data to Smarter AI" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">ServiceNow · <i>GEO-Bench v2: from space data to smarter AI</i> · slide 35, by its makers · 18 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=prZiTphuzO0" class="yt" data-id="prZiTphuzO0" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-ssl-transfer.jpg" alt="Linus Ericsson video: How Well Do Self-Supervised Models Transfer - CVPR 2021" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Linus Ericsson · <i>How well do self-supervised models transfer?</i> CVPR 2021 · 5 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=kINuYpZroPA" class="yt" data-id="kINuYpZroPA" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-eofm-eval.jpg" alt="TheGeoICT video: Evaluating Foundation Models Trained with Earth Observation Data | Lillianne Thomas | Chapter 10.1" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">TheGeoICT · <i>Evaluating Earth-observation foundation models</i> · the 2022 Pakistan floods · 59 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=ks3oZ7Va8HU" class="yt" data-id="ks3oZ7Va8HU" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-amp-persson.jpg" alt="Aladdin Persson video: PyTorch Quick Tip: Mixed Precision Training (FP16)" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Aladdin Persson · <i>Mixed precision training</i> · autocast + GradScaler, typed · 4 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <div class="foot"><span>Optional · the last video is a mixed-precision coding example (slide 37)</span></div>
+  <aside class="notes">Twenty seconds. GEO-Bench v2 from its authors; the CVPR transfer study that showed SSL rankings change with the downstream task; a hands-on flood evaluation of Earth models; and four minutes of mixed precision code for the lab.</aside>
+</section>
+
+<!-- 37 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 5 · 4 min · mixed precision, hands-on today</p>
+  <h2>Three lines that roughly halve the activation memory</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Week 6 named mixed precision; today you switch it on. Which 16-bit type depends on the GPU you are given.</p>
+  <div class="cols" style="grid-template-columns:1.25fr 1fr;gap:2vw;align-items:start;flex:0 0 auto">
+    <pre class="small" style="margin:0;padding:1vh 1.2vw;background:var(--surface);border-radius:8px;font-size:clamp(12.5px,1.95vh,17px);line-height:1.45;overflow:hidden"><code>scaler = torch.amp.GradScaler("cuda")      # fp16 only
+for x in loader:
+    with torch.autocast("cuda", dtype=DTYPE):
+        loss = mae(x.cuda())                   # forward in mixed precision
+    opt.zero_grad()
+    scaler.scale(loss).backward()              # bf16: loss.backward()
+    scaler.step(opt); scaler.update()          # bf16: opt.step()</code></pre>
+    <table class="small" style="border-collapse:collapse;font-size:clamp(13.5px,2.05vh,18px);line-height:1.35">
+      <tr style="color:var(--muted)"><td style="padding:.35vh .5vw">GPU (graphics processor)</td><td style="padding:.35vh .5vw">DTYPE</td><td style="padding:.35vh .5vw">scaler?</td></tr>
+      <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .5vw">Colab T4</td><td style="padding:.35vh .5vw"><b>float16</b></td><td style="padding:.35vh .5vw">yes</td></tr>
+      <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .5vw">L4, A100</td><td style="padding:.35vh .5vw"><b class="accent">bfloat16</b></td><td style="padding:.35vh .5vw">no</td></tr>
+      <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .5vw">Mac (MPS, Apple’s GPU backend), CPU</td><td style="padding:.35vh .5vw">float32</td><td style="padding:.35vh .5vw">—</td></tr>
+    </table>
+  </div>
+  <ul class="small">
+    <li>fp16 keeps 10 stored fraction bits but a narrow range, so tiny gradients underflow to zero — the scaler multiplies the loss up before backward. <span class="accent">bf16 keeps fp32’s range, so it needs no scaler — but a T4 has no bf16 hardware.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>autocast</b> — picks the precision per operation: matrix multiplies in 16-bit, sensitive ones (softmax, losses) in 32-bit. <b>underflow</b> — a number too small for the format becomes exactly 0.</span>
+  </div>
+  <div class="foot"><span>PyTorch docs, torch.amp (Automatic Mixed Precision) · T4 = NVIDIA Turing (no bf16 tensor cores); A100 = Ampere, L4 = Ada (both bf16) · numbers behind it: Week 6, Appendix A8</span></div>
+  <aside class="notes">3 min. Three lines, and a table that tells each student which version to type. On a Colab T4 the dtype is float16 and the GradScaler is required, because float16 has a narrow exponent range and small gradients underflow to zero; the scaler multiplies the loss before backward and divides the gradients before the step, skipping steps that overflowed. On an L4 or A100, bfloat16 has the same range as float32, so the scaler lines are dropped. On a Mac or CPU, stay in float32 — the lab still fits, just slower. Point out what autocast keeps in 32-bit: reductions, the softmax, the loss. In the lab, have them print the peak memory with and without autocast; that number goes in Note 07.</aside>
+</section>
+
+<!-- 38 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 5 · The contract</p>
+  <h2>Write the pretraining plan down before the agent writes code</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Note 07 opens with these five sentences; an agent can write MAE in a minute, but only you can say what counts as success.</p>
+  <ol class="small" style="font-size:clamp(15px,2.4vh,21px);line-height:1.5">
+    <li><b>Data:</b> which chips pretrain the encoder, and which held-out, location-split chips the probe is tested on.</li>
+    <li><b>Mask:</b> the ratio and the structure (random patches, band groups, dates) — and what it should force the model to learn.</li>
+    <li><b>Target:</b> raw or per-patch normalised pixels; per-band statistics from the training split only; what happens to clouds and no-data.</li>
+    <li><b>Check:</b> the reconstruction grid you will look at, and the collapse sign you will watch for (loss near 0 too fast, identical embeddings).</li>
+    <li><b>Claim:</b> the probe table — pretrained vs random init vs supervised from scratch, equal epochs — and the one sentence it will support.</li>
+  </ol>
+  <div class="gloss">
+    <span><b>equal epochs</b> — the same passes through the labelled chips for every baseline; that is not equal compute — report pretraining time separately.</span>
+  </div>
+  <div class="foot"><span>Same contract as Week 6’s tests-first rule · the claim sentence is graded for honesty, not for winning</span></div>
+  <aside class="notes">1 min. Five sentences, written before any code: data and split, mask, target, check, claim. The point to stress is the claim: on 27 thousand EuroSAT chips a supervised model may beat a 15-minute MAE on a linear probe, and that is a fine result if it is reported honestly with the kNN and fine-tune numbers next to it.</aside>
+</section>
+
+<!-- 39 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 5 · FLEX ~4 min · teach or skip</p>
+  <h2>Board exercise: what does masking save on three real datasets?</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Count tokens, keep a quarter, square: the attention bill of the encoder shrinks by the square of the keep ratio.</p>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14.5px,2.3vh,20px);line-height:1.4">
+    <tr style="color:var(--muted)"><td style="padding:.4vh .6vw">pretraining data</td><td style="padding:.4vh .6vw">tokens N</td><td style="padding:.4vh .6vw">visible at 75%</td><td style="padding:.4vh .6vw">encoder scores per head</td><td style="padding:.4vh .6vw">at 90%?</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw">EuroSAT, 64 px, patch 8</td><td style="padding:.4vh .6vw">64</td><td style="padding:.4vh .6vw">?</td><td style="padding:.4vh .6vw">? (vs 4,096)</td><td style="padding:.4vh .6vw">?</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw">SSL4EO-S12, 264 px, patch 8</td><td style="padding:.4vh .6vw">?</td><td style="padding:.4vh .6vw">?</td><td style="padding:.4vh .6vw">?</td><td style="padding:.4vh .6vw">?</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw">Prithvi-EO-2.0, 224 px, patch 16, 4 dates</td><td style="padding:.4vh .6vw">?</td><td style="padding:.4vh .6vw">?</td><td style="padding:.4vh .6vw">?</td><td style="padding:.4vh .6vw">?</td></tr>
+  </table>
+  <ul class="small" style="margin-top:1.2vh">
+    <li>Then: the decoder still sees all N tokens — at what N does a 2-block, half-width decoder cost as much as the masked encoder? <span class="accent">(Use 24·N·d² + 4·N²·d per block, slide 18.)</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>scores per head</b> — the N × N table of Week 6; for the encoder, N is the number of visible tokens.</span>
+  </div>
+  <div class="foot"><span>Answers in the speaker notes · the decoder question connects to slide 18</span></div>
+  <aside class="notes">Answers. EuroSAT: 64 tokens, 16 visible, 256 scores instead of 4,096 (16×); at 90%, 6 visible, 36 scores (114×). SSL4EO-S12: 33 × 33 = 1,089 tokens, 272 visible, 73,984 scores instead of 1,185,921 (16×); at 90%, 108 visible (floored, as int() does), 11,664 (≈ 102×). Prithvi-EO-2.0: 14 × 14 × 4 dates = 784 tokens, 196 visible, 38,416 scores instead of 614,656 (16×); at 90%, 78 visible, 6,084 (101×). The pattern to draw: keeping a quarter of the tokens divides attention by 16 regardless of N, and the MLP part by 4. Second question: at 75% masking the lab's encoder costs 393,216·N + 128·N² and the decoder 196,608·N + 512·N², equal at N = 512 tokens (e.g. a 128 × 256 chip with patch 8); at N = 64 the decoder is about a third of the bill, and at 90% it is already more than half (slide 18). Run only if the clock allows.</aside>
+</section>
+
+<!-- 40 -->
+
+<section class="slide xl">
+  <p class="kicker">Journal club · 30 min · after break · 0 lecture minutes</p>
+  <h2>He et al. 2021, Masked Autoencoders — discussion questions</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.4vw;align-items:stretch">
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q1 · 75% vs 15%</b><br>Why can MAE mask 75% while BERT masks 15% — and what ratio would you predict for cloud-free Sentinel-2 vs ERA5 fields (compare Prithvi-WxC’s choice)?</p><p class="small muted" style="margin:1vh 0 0">start from slides 17 and 29 and the paper’s Fig. 5</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q2 · the thrown-away decoder</b><br>What exactly does the decoder learn, and why throw it away?</p><p class="small muted" style="margin:1vh 0 0">start from slides 15 and 18 and the paper’s Table 1a–b</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q3 · a mask for the Earth</b><br>Propose one EO-specific masking structure and the invariance it would induce.</p><p class="small muted" style="margin:1vh 0 0">start from slides 26–28 — and from your capstone data</p></div>
+  </div>
+  <p class="small muted" style="margin-top:1vh">The whole class as one team, working from your published entrance tickets (Journal Club tab) · the drawn leader moderates, the presenter synthesises, the questioner challenges the synthesis · these three questions are the agenda.</p>
+  <div class="foot"><span>Leader opens with one reproduced figure (Fig. 2 or Fig. 5 of the paper) · roles revealed at 13:00 on the course site · optional: <a href="https://arxiv.org/abs/2104.14294">DINO</a>, <a href="https://arxiv.org/abs/2002.05709">SimCLR</a></span></div>
+  <aside class="notes">Journal club: 30 min, the whole class as one team; the drawn leader moderates, the presenter synthesises, the questioner challenges the synthesis; harvest in the last 5 min. Q1: good answers quote the paper's argument — language is dense and semantic, images are spatially redundant, so a high ratio is needed to make the task non-trivial — and use the fill-in baseline (slide 17) as evidence; better ones predict a high ratio for cloud-free Sentinel-2 (fields repeat), a lower one for ERA5 or MERRA-2 fields at 0.25–0.5° (smooth but less repetitive at the patch scale, and the model must also forecast), and note that Prithvi-WxC chose 50% while forecasting; the honest caveat is that WxC's paper does not argue the choice. Q2: the decoder learns to turn latent vectors plus positions back into pixels — texture and colour rendering, a low-level skill; it is thrown away because downstream tasks need the encoder's semantics, not pixel painting, and because a deep decoder (Table 1a) mostly helps the linear probe, not fine-tuning. Q3: good proposals name the axis and the invariance — hide a band group → spectral relations (SWIR from the visible bands, slide 27); hide a date → phenology and seasonal change; hide a sensor (radar from optical) → cross-modal physics; hide cloudy pixels only → cloud-robust features; the best ones also say how they would evaluate it. Close with a one-line bridge to lab.</aside>
+</section>
+
+<!-- 41 -->
+
+<section class="slide xl">
+  <p class="kicker">Lab briefing · 3 min · after journal club</p>
+  <h2>Lab: pretrain a mini-MAE on your Week 6 ViT, then probe it honestly</h2>
+  <div class="cols" style="grid-template-columns:1.15fr 1fr;gap:2vw;align-items:start;flex:0 0 auto">
+    <div class="card small" style="min-width:0">
+      <p><b>Pretrain.</b> Week 6 <code>mini_vit.py</code> = encoder; + 2-block decoder, 75% masking, normalised-pixel loss. ≈ 1 M parameters, 16-bit, ≈ 15 min on one GPU, on ≈ 5 k SSL4EO-S12 Sentinel-2 L1C chips (13 bands, as EuroSAT; map the band order).</p>
+      <p><b>Probe.</b> EuroSAT: probe and kNN on the frozen encoder vs random init and supervised-from-scratch, equal epochs.</p>
+      <p><b>Note 07.</b> contract, probe table, reconstruction grids, peak memory. <b>Homework:</b> 50 / 75 / 90% masking.</p>
+    </div>
+    <div style="min-width:0">
+      <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(13.5px,2.05vh,18px);line-height:1.4">
+        <tr style="color:var(--muted)"><td style="padding:.4vh .5vw">encoder</td><td style="padding:.4vh .5vw">probe</td><td style="padding:.4vh .5vw">kNN</td></tr>
+        <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .5vw">random init</td><td style="padding:.4vh .5vw">…</td><td style="padding:.4vh .5vw">…</td></tr>
+        <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .5vw"><b class="accent">MAE, 75%</b></td><td style="padding:.4vh .5vw">…</td><td style="padding:.4vh .5vw">…</td></tr>
+        <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .5vw">supervised, same epochs</td><td style="padding:.4vh .5vw">…</td><td style="padding:.4vh .5vw">…</td></tr>
+      </table>
+      <p class="small muted" style="margin:.8vh 0 0">our own run: slide 34</p>
+    </div>
+  </div>
+  <ul class="small">
+    <li>Verify, do not trust: <span class="accent">look at a reconstruction grid before you trust any number</span> — a blurry but well-placed river is a good sign; flat grey patches mean checking the mask, the target and the display scaling.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>SSL4EO-S12</b> — open, unlabelled Sentinel-1/2 chips for pretraining. <b>HLS chips</b> (Week 3): 6 bands → 384-value patches.</span>
+  </div>
+  <div class="foot"><span>Stuck? → A1 (MAE in code) · A8 (lab reference) · Week 6 A9 (band order)</span></div>
+  <aside class="notes">3 min. Three checks to set explicitly. One: the encoder is their own Week 6 file — if its four tests no longer pass, fix that first. Two: before the probe, look at a reconstruction grid; blurry but correctly placed structure is success, uniform grey is a bug or collapse. Three: the probe split must keep locations apart from anything the encoder pretrained on. Warn about the two quiet errors: normalisation statistics computed on the whole dataset, and a supervised baseline trained for a different number of epochs. Say the expectation: after 15 minutes of pretraining, MAE features will beat random init clearly and may or may not beat supervised on a probe — report what you get. Dismiss to lab; the slides after this are the appendix.</aside>
+</section>
+
+<!-- 42 -->
+
+<section class="slide section">
+  <p class="kicker">Appendix · self-study</p>
+  <h2>The code, the losses and the reference cards</h2>
+  <p class="big muted">Reference material; not covered live.</p>
+  <aside class="notes">Not taught in class. MAE in code with every shape; the contrastive loss written out; DINO's loss with centring and sharpening; the family card; this week's paper card; the Earth and weather SSL models card; the evaluation protocols and GEO-Bench-2; the lab reference; the assigned video; the shelf. Say the appendix exists, say what is in it, and stop.</aside>
+</section>
+
+<!-- 43 -->
+
+<section class="slide">
+  <p class="kicker">Appendix A1 · MAE in code</p>
+  <h2>Masking in five lines, the loss in four</h2>
+  <div class="cols" style="grid-template-columns:1.25fr 1fr;gap:1.6vw;align-items:start">
+    <pre class="small" style="margin:0;padding:1vh 1vw;background:var(--surface);border-radius:8px;font-size:clamp(11.5px,1.75vh,15px);line-height:1.42;overflow:hidden"><code>def random_masking(x, ratio=0.75):          # x: (B, N, d), positions already added
+    B, N, d = x.shape
+    keep = int(N * (1 - ratio))                  # 64 → 16
+    noise = torch.rand(B, N, device=x.device)    # one random number per patch
+    ids_shuffle = noise.argsort(dim=1)           # small noise = kept
+    ids_restore = ids_shuffle.argsort(dim=1)     # undoes the shuffle later
+    ids_keep = ids_shuffle[:, :keep]
+    x_vis = x.gather(1, ids_keep[..., None].expand(-1, -1, d))   # (B, 16, d)
+    mask = torch.ones(B, N, device=x.device); mask[:, :keep] = 0
+    mask = mask.gather(1, ids_restore)           # 1 = hidden, in original order
+    return x_vis, mask, ids_restore
+
+def mae_loss(pred, patches, mask, eps=1e-6):     # pred, patches: (B, N, 832)
+    mu = patches.mean(-1, keepdim=True); var = patches.var(-1, keepdim=True)
+    target = (patches - mu) / (var + eps) ** 0.5 # per-patch normalised pixels
+    err = ((pred - target) ** 2).mean(-1)        # (B, N): one number per patch
+    return (err * mask).sum() / mask.sum()       # hidden patches only</code></pre>
+    <div class="small" style="min-width:0">
+      <p style="margin:0 0 .8vh"><b>Decoder side.</b> <code>y = dec_embed(enc(x_vis))</code> → (B, 16, 64); append <code>N − 16</code> copies of <code>mask_token</code> → (B, 64, 64); <code>y.gather(1, ids_restore…)</code> puts every token back at its patch index; add decoder positions; 2 blocks; <code>Linear(64, 832)</code>.</p>
+      <p style="margin:0 0 .8vh"><b>Tests worth writing first</b> (Week 6 habit): the mask hides exactly 48 per chip; <code>ids_restore</code> inverts <code>ids_shuffle</code>; the loss ignores changes to visible patches; with ratio 0 the encoder sees all 64 (test the masking only — the loss needs at least one hidden patch).</p>
+      <p style="margin:0"><b>Display.</b> For a reconstruction grid, paste the visible patches back and de-normalise predictions — with normalised targets the true patch mean/std is needed, so say which you used.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Follows the official implementation (github.com/facebookresearch/mae, models_mae.py: random_masking, forward_loss with norm_pix_loss)</span></div>
+  <aside class="notes">Not taught in class. The function is the official one, renamed; the four tests on the right are the lab's verification contract for the masking.</aside>
+</section>
+
+<!-- 44 -->
+
+<section class="slide">
+  <p class="kicker">Appendix A2 · The contrastive loss, written out</p>
+  <h2>InfoNCE (information noise-contrastive estimation): find your other view</h2>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr;gap:2vw;align-items:start">
+    <div class="small" style="min-width:0">
+      <p style="margin:0 0 1vh">A batch of N chips gives 2N views; z<sub>i</sub> is the projected embedding of view i, and j is the other view of the same chip.</p>
+      <p style="margin:0 0 1vh;padding:.8vh 1vw;background:var(--surface);border-radius:8px;font-size:clamp(15px,2.4vh,21px)">ℓ<sub>i</sub> = − log &nbsp; exp(sim(z<sub>i</sub>, z<sub>j</sub>) / τ) &nbsp;/&nbsp; Σ<sub>k ≠ i</sub> exp(sim(z<sub>i</sub>, z<sub>k</sub>) / τ)</p>
+      <p style="margin:0 0 .6vh">sim = cosine similarity; τ = temperature; the loss is the mean of ℓ<sub>i</sub> over all 2N views.</p>
+      <ul style="margin:0">
+        <li>It is cross-entropy for a classification with 2N − 1 classes whose label is “my other view” — the grid on slide 7.</li>
+        <li>Each anchor has one positive and 2N − 2 negatives; larger batches helped in SimCLR’s experiments. SimCLR: 4,096 images per batch by default, up to 8,192 (16,382 negatives per pair); τ = 0.1 was best (Table 5).</li>
+        <li>Small τ makes the softmax peaky: the hardest negatives dominate the gradient.</li>
+      </ul>
+    </div>
+    <pre class="small" style="margin:0;padding:1vh 1vw;background:var(--surface);border-radius:8px;font-size:clamp(11.5px,1.75vh,15px);line-height:1.45;overflow:hidden"><code>def info_nce(z1, z2, tau=0.1):        # z1, z2: (N, k), two views
+    z = F.normalize(torch.cat([z1, z2]), dim=1)   # (2N, k)
+    s = z @ z.T / tau                             # cosine / tau
+    s.fill_diagonal_(float("-inf"))               # never match yourself
+    N = z1.shape[0]                               # partner of view i:
+    target = (torch.arange(2*N, device=z.device) + N) % (2*N)
+    return F.cross_entropy(s, target)</code></pre>
+  </div>
+  <div class="foot"><span>Chen et al. 2020, SimCLR, §2.1 (NT-Xent: normalised temperature-scaled cross-entropy) · van den Oord et al. 2018 (InfoNCE) · MoCo replaces the big batch with a queue of past embeddings</span></div>
+  <aside class="notes">Not taught in class. Note the −∞ on the diagonal: the same masking trick as Week 6's attention mask, applied before a softmax.</aside>
+</section>
+
+<!-- 45 -->
+
+<section class="slide">
+  <p class="kicker">Appendix A3 · DINO’s loss, and what blocks collapse</p>
+  <h2>Centre, sharpen, copy slowly</h2>
+  <div class="small" style="min-width:0">
+    <p style="margin:0 0 1vh;padding:.8vh 1vw;background:var(--surface);border-radius:8px;font-size:clamp(15px,2.3vh,20px)">p<sub>t</sub> = softmax((g<sub>t</sub>(x) − c) / τ<sub>t</sub>) &emsp; p<sub>s</sub> = softmax(g<sub>s</sub>(x′) / τ<sub>s</sub>) &emsp; ℓ = − Σ<sub>K</sub> p<sub>t</sub> log p<sub>s</sub></p>
+    <ul style="margin:0">
+      <li><b>x</b>: a global crop seen by the teacher g<sub>t</sub>; <b>x′</b>: any other crop seen by the student g<sub>s</sub>; outputs are K-dimensional (K = 65,536 “prototypes”: learned reference vectors, not land-cover classes).</li>
+      <li><b>Centring:</b> c ← m·c + (1 − m)·batch mean of the raw teacher scores (before softmax) — stops one prototype from winning for every image.</li>
+      <li><b>Sharpening:</b> τ<sub>t</sub> &lt; τ<sub>s</sub> (teacher 0.04 → 0.07, student 0.1) — stops the output from going uniform. Either alone collapses; together they balance.</li>
+      <li><b>Teacher update:</b> θ<sub>t</sub> ← λ θ<sub>t</sub> + (1 − λ) θ<sub>s</sub>, λ from 0.996 to 1 on a cosine schedule; no gradient reaches the teacher.</li>
+      <li><b>Collapse guards by family:</b> SimCLR — negatives · BYOL — predictor + moving-average target · DINO — centring + sharpening + moving average · MAE — a pixel target · I-JEPA — moving-average target + predictor · VICReg — an explicit variance term.</li>
+    </ul>
+  </div>
+  <div class="foot"><span>Caron et al. 2021, DINO, §3.1 and Appendix · Grill et al. 2020, BYOL · Bardes et al. 2022, VICReg · kNN protocol (k = 20, τ = 0.07): DINO Appendix F</span></div>
+  <aside class="notes">Not taught in class.</aside>
+</section>
+
+<!-- 46 -->
+
+<section class="slide">
+  <p class="kicker">Appendix A4 · The family card</p>
+  <h2>Five general methods, side by side</h2>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(12px,1.85vh,16px);line-height:1.35">
+    <tr style="color:var(--muted)"><td style="padding:.3vh .5vw;vertical-align:top">method</td><td style="padding:.3vh .5vw;vertical-align:top">predicts</td><td style="padding:.3vh .5vw;vertical-align:top">collapse guard</td><td style="padding:.3vh .5vw;vertical-align:top">augmentation</td><td style="padding:.3vh .5vw;vertical-align:top">headline (ImageNet)</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>SimCLR</b> 2020</td><td style="padding:.3vh .5vw;vertical-align:top">which view is the partner (NT-Xent, τ 0.1)</td><td style="padding:.3vh .5vw;vertical-align:top">negatives: batch 4,096–8,192</td><td style="padding:.3vh .5vw;vertical-align:top">crop + colour distortion essential</td><td style="padding:.3vh .5vw;vertical-align:top">linear 69.3% (ResNet-50), 76.5% (4× wider)</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>BYOL</b> 2020</td><td style="padding:.3vh .5vw;vertical-align:top">a target network’s projection of another view</td><td style="padding:.3vh .5vw;vertical-align:top">predictor + moving-average target</td><td style="padding:.3vh .5vw;vertical-align:top">SimCLR-style</td><td style="padding:.3vh .5vw;vertical-align:top">linear 74.3% (ResNet-50), 79.6% (larger)</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>DINO</b> 2021</td><td style="padding:.3vh .5vw;vertical-align:top">teacher’s distribution over K = 65,536 prototypes</td><td style="padding:.3vh .5vw;vertical-align:top">centring + sharpening + moving average</td><td style="padding:.3vh .5vw;vertical-align:top">multi-crop: 2 × 224² + several 96²</td><td style="padding:.3vh .5vw;vertical-align:top">ViT-B/8: linear 80.1%, kNN 77.4%</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>MAE</b> 2021</td><td style="padding:.3vh .5vw;vertical-align:top">normalised pixels of 75% hidden patches</td><td style="padding:.3vh .5vw;vertical-align:top">the pixel target itself</td><td style="padding:.3vh .5vw;vertical-align:top">crop only (colour jitter hurts)</td><td style="padding:.3vh .5vw;vertical-align:top">ViT-H 87.8% fine-tune; ViT-L probe 75.8%</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>I-JEPA</b> 2023</td><td style="padding:.3vh .5vw;vertical-align:top">target-encoder embeddings of 4 blocks (15–20% each)</td><td style="padding:.3vh .5vw;vertical-align:top">moving-average target + predictor</td><td style="padding:.3vh .5vw;vertical-align:top">none hand-crafted</td><td style="padding:.3vh .5vw;vertical-align:top">ViT-H/14 on 16 A100s in &lt; 72 h</td></tr>
+  </table>
+  <p class="small" style="margin-top:1vh">Later scale-ups: <b>DINOv2</b> (2023, LVD-142M (Meta’s curated 142 M images), 1.1 B-parameter ViT-g, DINO + iBOT (masked-token self-distillation) losses) · <b>DINOv3</b> (2025, 7 B teacher, LVD-1689M, Gram anchoring, which keeps patch features from drifting; satellite model on SAT-493M, 0.6 m Maxar RGB).</p>
+  <div class="foot"><span>Chen et al. 2020 (Tables 5–6) · Grill et al. 2020 · Caron et al. 2021 (Table 2, §3.2) · He et al. 2021 (Tables 3, 12) · Assran et al. 2023 · Oquab et al. 2023 · Siméoni et al. 2025</span></div>
+  <aside class="notes">Not taught in class.</aside>
+</section>
+
+<!-- 47 -->
+
+<section class="slide">
+  <p class="kicker">Appendix A5 · This week’s paper</p>
+  <h2>Masked Autoencoders Are Scalable Vision Learners — the card</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr;gap:1.8vw;align-items:start">
+    <div class="small" style="min-width:0">
+      <p style="margin:0 0 .6vh"><b>He, Chen, Xie, Li, Dollár, Girshick</b> · Meta AI · arXiv 2111.06377 · CVPR 2022.</p>
+      <ul style="margin:0">
+        <li><b>Design</b> (MSE = mean squared error; FLOPs = floating-point operations): random uniform masking, 75%; encoder = ViT on visible patches only, no mask tokens; decoder 8 blocks × 512 (9% of ViT-L’s FLOPs per token); shared learned mask token + positions added before the decoder; MSE on masked patches only (loss on all pixels: about −0.5 percentage points).</li>
+        <li><b>Target:</b> per-patch normalised pixels (85.4 / 73.9 vs 84.9 / 73.5 raw; ft / lin, ViT-L, 800 epochs).</li>
+        <li><b>Speed:</b> 3.3× fewer training FLOPs, 2.8× faster wall clock (3.5–4.1× with a smaller decoder or ViT-H). ViT-L, 1,600 epochs: 31 h on 128 Google TPU-v3 cores (MoCo v3, 300 epochs: 36 h).</li>
+        <li><b>Schedule:</b> the linear probe has not saturated at 1,600 epochs.</li>
+      </ul>
+    </div>
+    <div class="small" style="min-width:0">
+      <table style="border-collapse:collapse;width:100%;font-size:clamp(12px,1.85vh,16px)">
+        <tr style="color:var(--muted)"><td style="padding:.3vh .5vw">ViT, ImageNet-1K only</td><td style="padding:.3vh .5vw">fine-tune</td><td style="padding:.3vh .5vw">linear probe</td></tr>
+        <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw">B</td><td style="padding:.3vh .5vw">83.6</td><td style="padding:.3vh .5vw">68.0</td></tr>
+        <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw">L</td><td style="padding:.3vh .5vw">85.9</td><td style="padding:.3vh .5vw">75.8</td></tr>
+        <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw">H</td><td style="padding:.3vh .5vw">86.9</td><td style="padding:.3vh .5vw">76.6</td></tr>
+        <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.3vh .5vw">H, 448 px</td><td style="padding:.3vh .5vw"><b>87.8</b></td><td style="padding:.3vh .5vw">—</td></tr>
+      </table>
+      <p style="margin:.8vh 0 0"><b>Partial fine-tuning (ViT-L, the separate 800-epoch model):</b> 0 blocks (probe) 73.5 → half a block (its MLP) 79.1 → 1 block 81.0; 4–6 blocks ≈ full. MoCo v3 probes higher (77.6) but every partial fine-tune is worse (MAE leads by 2.6 points at 4 blocks).</p>
+      <p style="margin:.6vh 0 0"><b>Quote:</b> “linear probing and fine-tuning results are largely uncorrelated … linear separability is not the sole metric for evaluating representation quality.”</p>
+    </div>
+  </div>
+  <div class="foot"><span>§3, §4.1–4.3, Tables 1–3, Fig. 5, 7, 9, App. B Table 12 · code: github.com/facebookresearch/mae</span></div>
+  <aside class="notes">Not taught in class. Every number here is in the paper; the quiz uses none of them.</aside>
+</section>
+
+<!-- 48 -->
+
+<section class="slide">
+  <p class="kicker">Appendix A6 · Earth and weather self-supervised models</p>
+  <h2>Eight models: data, token, objective, size</h2>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(11.5px,1.75vh,15px);line-height:1.32">
+    <tr style="color:var(--muted)"><td style="padding:.3vh .5vw;vertical-align:top">model</td><td style="padding:.3vh .5vw;vertical-align:top">pretraining data</td><td style="padding:.3vh .5vw;vertical-align:top">token and mask</td><td style="padding:.3vh .5vw;vertical-align:top">objective</td><td style="padding:.3vh .5vw;vertical-align:top">size</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>SatMAE</b> 2022</td><td style="padding:.3vh .5vw;vertical-align:top">fMoW-Sentinel (Functional Map of the World): 712,874 training images, 13 bands (B1, B9, B10 dropped)</td><td style="padding:.3vh .5vw;vertical-align:top">3 band groups (spectral model) or dates (temporal model); 75% independent</td><td style="padding:.3vh .5vw;vertical-align:top">MAE pixels</td><td style="padding:.3vh .5vw;vertical-align:top">ViT-L</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>Prithvi-EO-1.0</b> 2023</td><td style="padding:.3vh .5vw;vertical-align:top">&gt; 1 TB HLS, contiguous US, 6 bands, 3 dates</td><td style="padding:.3vh .5vw;vertical-align:top">1×16×16 cubes; 75% (config)</td><td style="padding:.3vh .5vw;vertical-align:top">MAE pixels</td><td style="padding:.3vh .5vw;vertical-align:top">100 M</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>Prithvi-EO-2.0</b> 2024</td><td style="padding:.3vh .5vw;vertical-align:top">4.2 M global HLS time series, 4 dates</td><td style="padding:.3vh .5vw;vertical-align:top">cubes; 75% (config); TL variants add latitude/longitude/date</td><td style="padding:.3vh .5vw;vertical-align:top">MAE pixels</td><td style="padding:.3vh .5vw;vertical-align:top">300 M, 600 M</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>SpectralGPT</b> 2023</td><td style="padding:.3vh .5vw;vertical-align:top">1,473,105 Sentinel-2 images, 12 bands</td><td style="padding:.3vh .5vw;vertical-align:top">3-D spatial–spectral; 90%</td><td style="padding:.3vh .5vw;vertical-align:top">multi-target pixels</td><td style="padding:.3vh .5vw;vertical-align:top">100 / 300 / 600 M</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>AnySat</b> 2024</td><td style="padding:.3vh .5vw;vertical-align:top">GeoPlex: 5 datasets, 11 sensors, 0.2–250 m</td><td style="padding:.3vh .5vw;vertical-align:top">scale-adaptive patches</td><td style="padding:.3vh .5vw;vertical-align:top">JEPA + contrastive</td><td style="padding:.3vh .5vw;vertical-align:top">125 M</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>Galileo</b> 2025</td><td style="padding:.3vh .5vw;vertical-align:top">127,155 instances, 9 modalities</td><td style="padding:.3vh .5vw;vertical-align:top">structured (space–time) + random</td><td style="padding:.3vh .5vw;vertical-align:top">global + local latent contrastive</td><td style="padding:.3vh .5vw;vertical-align:top">0.8 / 5.3 / 85 M</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>OlmoEarth</b> 2025</td><td style="padding:.3vh .5vw;vertical-align:top">285,288 samples (2.56 km, 1 yr): Sentinel-1/2, Landsat + map targets</td><td style="padding:.3vh .5vw;vertical-align:top">per modality, monthly</td><td style="padding:.3vh .5vw;vertical-align:top">Latent MIM Lite (frozen random target)</td><td style="padding:.3vh .5vw;vertical-align:top">1.4 M – 300 M</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.3vh .5vw;vertical-align:top"><b>Prithvi-WxC</b> 2024</td><td style="padding:.3vh .5vw;vertical-align:top">MERRA-2, 160 variables</td><td style="padding:.3vh .5vw;vertical-align:top">50%, local/global alternating</td><td style="padding:.3vh .5vw;vertical-align:top">masked + forecast (lead 0–24 h)</td><td style="padding:.3vh .5vw;vertical-align:top">2.3 B</td></tr>
+  </table>
+  <p class="small" style="margin-top:.8vh">Also: <b>Scale-MAE</b> (aware of ground sample distance, GSD; Week 6) · <b>SSL4EO-S12</b> (251,079 places × 4 seasons × Sentinel-1, Sentinel-2 top-of-atmosphere and surface reflectance, ≈ 3.7 TB; baselines: MoCo, DINO, MAE, data2vec (latent-target masked prediction)) · <b>DINOv3-sat</b> (SAT-493M) · <b>Clay</b> (open, mainly MAE, many sensors).</p>
+  <div class="foot"><span>Cong 2022 · Jakubik 2023 · Szwarcman 2024 · Hong 2024 · Astruc 2024 · Tseng 2025 · Ai2 2025 (arXiv 2511.13655) · Schmude 2024 · Wang 2022 · Prithvi masking ratios from the official Hugging Face configs</span></div>
+  <aside class="notes">Not taught in class. Prithvi's 75% is in the released configs, not in the papers.</aside>
+</section>
+
+<!-- 49 -->
+
+<section class="slide">
+  <p class="kicker">Appendix A7 · Evaluation protocols and GEO-Bench-2</p>
+  <h2>Five readouts, written down exactly</h2>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr;gap:1.8vw;align-items:start">
+    <ul class="small" style="margin:0">
+      <li><b>Linear probe</b> — a linear classifier on the frozen representation. MAE’s recipe adds a non-affine batch normalisation before it, no colour jitter or mixup (blending two images), weight decay 0.</li>
+      <li><b>kNN</b> (DINO, App. F) — store frozen [CLS] (summary-token) features of the training set; a test chip takes a vote of its k = 20 most similar (cosine), weighted by exp(similarity / 0.07). No fitted classifier; k = 20 and temperature 0.07 fixed.</li>
+      <li><b>Partial fine-tune</b> — train the last few blocks (MAE Fig. 9: 0 blocks = probe, 24 = full).</li>
+      <li><b>Full fine-tune</b> — train everything with a new head; end-to-end adaptation, the most expensive reading.</li>
+      <li><b>Frozen + decoder</b> — GEO-Bench-2’s frozen setting: the encoder fixed, a task decoder (e.g. U-Net) trained.</li>
+    </ul>
+    <div class="small" style="min-width:0">
+      <p style="margin:0 0 .6vh"><b>GEO-Bench-2</b> (arXiv 2511.15658, Nov 2025): 19 permissively licensed datasets — classification, segmentation, regression, detection, instance segmentation; nine overlapping capability groups (resolution, bands, time…); ranks by normalised bootstrapped interquartile mean.</p>
+      <ul style="margin:0">
+        <li>No model dominates; photo-pretrained models lead high-resolution tasks, Earth models multispectral ones.</li>
+        <li>Frozen encoders lose accuracy in aggregate and the ranking changes → the authors recommend fine-tuning.</li>
+        <li>The biggest rank change came from feeding a single date to multi-date tasks.</li>
+      </ul>
+      <p style="margin:.6vh 0 0"><b>GEO-Bench</b> (Lacoste et al. 2023): six classification + six segmentation tasks.</p>
+    </div>
+  </div>
+  <div class="foot"><span>He et al. 2021 (App. A.1, §4.3) · Caron et al. 2021 (App. F) · GEO-Bench-2 §2–5, App. 6.3 · Lacoste et al. 2023</span></div>
+  <aside class="notes">Not taught in class.</aside>
+</section>
+
+<!-- 50 -->
+
+<section class="slide">
+  <p class="kicker">Appendix A8 · Lab reference</p>
+  <h2>Data, the autocast switch, and the probe recipe</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr;gap:1.8vw;align-items:start">
+    <ul class="small" style="margin:0">
+      <li><b>Pretraining chips:</b> ≈ 5 k SSL4EO-S12 Sentinel-2 L1C chips (13 bands like EuroSAT; reorder to EuroSAT’s band order; 264 px — crop to 64 px, or patch 8 on 264 px = 1,089 tokens). The Week 3 HLS chips have 6 bands: use a declared common-band subset and 384-value patches throughout. Per-band mean/std from the pretraining chips only.</li>
+      <li><b>Probe data:</b> EuroSAT-MS, 27,000 chips, 64 px, 13 bands, 10 classes; band order in the file: B01…B12, then B8A (Week 6 A9).</li>
+      <li><b>Model:</b> your Week 6 ViT (d 128, 4 heads, 4–6 blocks) as encoder; decoder d 64, 2 blocks; mask 75%; normalised-pixel loss.</li>
+      <li><b>Probe recipe:</b> frozen encoder → mean of the tokens (or [CLS], the summary token) → logistic regression (a linear classifier); kNN k = 20, cosine; same split for all three encoders.</li>
+    </ul>
+    <div class="small" style="min-width:0">
+      <p style="margin:0 0 .6vh"><b>Which 16-bit type?</b></p>
+      <pre style="margin:0;padding:.8vh 1vw;background:var(--surface);border-radius:8px;font-size:clamp(11.5px,1.75vh,15px);line-height:1.42;overflow:hidden"><code>cuda = torch.cuda.is_available()
+major = torch.cuda.get_device_capability()[0] if cuda else 0
+DTYPE = torch.bfloat16 if major >= 8 else torch.float16
+# not is_bf16_supported(): by default it may count
+# emulation and return True on a T4</code></pre>
+      <p style="margin:.8vh 0 0">T4 = compute capability 7.5 → float16 + GradScaler · L4 = 8.9, A100 = 8.0 → bfloat16, no scaler. Log peak memory with <code>torch.cuda.max_memory_allocated()</code>.</p>
+    </div>
+  </div>
+  <div class="foot"><span>PyTorch AMP docs · torch.cuda.is_bf16_supported(including_emulation=True) by default · NVIDIA CUDA GPU list (compute capability) · Wang et al. 2022 (SSL4EO-S12)</span></div>
+  <aside class="notes">Not taught in class. The capability check is the fix for the most common Colab surprise: bf16 "supported" on a T4, then slow or failing.</aside>
+</section>
+
+<!-- 51 -->
+
+<section class="slide">
+  <p class="kicker">Appendix A9 · Watch at home · assigned</p>
+  <h2>This week’s assigned video — Stanford CS231N, self-supervised learning</h2>
+  <div style="display:flex;gap:2vw;margin-top:1vh;align-items:flex-start">
+    <a href="https://www.youtube.com/watch?v=4howBU7THbM" target="_blank" rel="noopener" style="flex:0 0 46%;max-width:46%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block">
+        <img src="img/yt-w7-cs231n-l12.jpg" alt="Stanford CS231N Spring 2025 Lecture 12: Self-Supervised Learning" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block">
+        <span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span>
+      </span>
+      <p class="small muted" style="margin:.5vh 0 0">Stanford Online · <i>CS231N, Spring 2025, Lecture 12: Self-Supervised Learning</i> · 75 min — <span class="accent">opens on YouTube</span> (embedding disabled).</p>
+    </a>
+    <div class="small" style="min-width:0">
+      <p style="margin:0 0 .8vh"><b>Assigned.</b> Three of the Week 9 quiz’s five questions (9 November) come from this video. Your 0.5-page summary is due with Note 07, Sunday 1 November, 23:59.</p>
+      <ul style="margin:0">
+        <li>The pretext tasks before contrastive learning, and why they were replaced.</li>
+        <li>How the lecture explains the contrastive loss, and what limits it (batch size, negatives).</li>
+        <li>MAE and DINO in the lecture’s words: what is predicted, and what stops collapse.</li>
+        <li>One sentence connecting the lecture to today’s lab probe table.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Slides for the lecture: cs231n.stanford.edu/slides/2025 · the optional shelf is not quizzed</span></div>
+  <aside class="notes">Not taught in class. The summary prompt is the four bullets; check the Week 9 quiz questions against the 2025 slide deck before writing them.</aside>
+</section>
+
+<!-- 52 -->
+
+<section class="slide">
+  <p class="kicker">Appendix A10 · More to watch · teachers and satellites</p>
+  <h2>The video shelf — DINOv2, DINOv3 and a canopy map built on DINOv2</h2>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=oGTasd3cliM" class="yt" data-id="oGTasd3cliM" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-dinov3-huang.jpg" alt="Jia-Bin Huang video: How AI Taught Itself to See [DINOv3]" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Jia-Bin Huang · <i>How AI taught itself to see [DINOv3]</i> · 16 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=-eOYWK6m3i8" class="yt" data-id="-eOYWK6m3i8" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-dinov3-meta.jpg" alt="AI at Meta video: Introducing DINOv3: Self-supervised learning for vision at unprecedented scale" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">AI at Meta · <i>Introducing DINOv3</i> · 1 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=RZEkdOc3szU" class="yt" data-id="RZEkdOc3szU" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-dinov2-aibites.jpg" alt="AI Bites video: DINOv2 from Meta AI: Data pipeline, model training and results explained" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">AI Bites · <i>DINOv2: data pipeline, training, results</i> · 12 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=FC9ZCPqEbHc" class="yt" data-id="FC9ZCPqEbHc" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-wri-canopy.jpg" alt="Charbax video: Global Tree Height Map using DiNOv2 AI, Carbon MRV, Restoration Data by World Resources Institute" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">World Resources Institute and Meta · <i>A global tree-height map from DINOv2</i> · 4 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <div class="foot"><span>Embeddability checked on 25 October 2026 · optional, not quizzed</span></div>
+  <aside class="notes">Not taught in class.</aside>
+</section>
+
+<!-- 53 -->
+
+<section class="slide">
+  <p class="kicker">Appendix A11 · More to watch · JEPA and BYOL</p>
+  <h2>The video shelf — latent prediction three ways, and BYOL</h2>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=6bJIkfi8H-E" class="yt" data-id="6bJIkfi8H-E" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-ijepa-papers.jpg" alt="AI Papers Academy video: I-JEPA from Meta AI - A Human-Like Computer Vision Model | Paper Summary" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">AI Papers Academy · <i>I-JEPA in eight minutes</i> · 8 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=Cw8vKl-jD44" class="yt" data-id="Cw8vKl-jD44" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-ijepa-batch.jpg" alt="Mashaan Alshammari video: I-JEPA Explained with a Single Batch Run" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Mashaan Alshammari · <i>I-JEPA traced through one batch</i> · 16 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=7UkJPwz_N_0" class="yt" data-id="7UkJPwz_N_0" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-vjepa-kilcher.jpg" alt="Yannic Kilcher video: V-JEPA: Revisiting Feature Prediction for Learning Visual Representations from Video (Explained)" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Yannic Kilcher · <i>V-JEPA (video JEPA): feature prediction</i> · 50 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=YPfUiOMYOEE" class="yt" data-id="YPfUiOMYOEE" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-byol-kilcher.jpg" alt="Yannic Kilcher video: BYOL: Bootstrap Your Own Latent: A New Approach to Self-Supervised Learning (Paper Explained)" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Yannic Kilcher · <i>BYOL: no negatives, no collapse</i> · 34 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <div class="foot"><span>Embeddability checked on 25 October 2026 · optional, not quizzed</span></div>
+  <aside class="notes">Not taught in class.</aside>
+</section>
+
+<!-- 54 -->
+
+<section class="slide">
+  <p class="kicker">Appendix A12 · More to watch · a full lecture and the lab’s 16 bits</p>
+  <h2>The video shelf — an NYU lecture on self-supervision, and mixed precision explained</h2>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=8L10w1KoOU8" class="yt" data-id="8L10w1KoOU8" style="flex:1;max-width:46%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-nyu-misra-ssl.jpg" alt="Alfredo Canziani (冷在) video: 10L – Self-supervised learning in computer vision" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Ishan Misra (NYU) · <i>Self-supervised learning in computer vision</i> · 96 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=87GhCIQudEA" class="yt" data-id="87GhCIQudEA" style="flex:1;max-width:46%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-amp-explained.jpg" alt="DataMListic video: Mixed Precision Training - Explained" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">DataMListic · <i>Mixed precision training, explained</i> · why bf16 needs no scaler · 11 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <div class="foot"><span>Embeddability checked on 25 October 2026 · optional, not quizzed</span></div>
+  <aside class="notes">Not taught in class.</aside>
+</section>
+
+
+</body>
+</html>

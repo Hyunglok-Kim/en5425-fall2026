@@ -691,27 +691,27 @@
    "date": "2026-10-26",
    "concept": [
     {
-     "min": 20,
+     "min": 14,
      "topic": "SSL taxonomy with lineage map: masked reconstruction (MAE → SatMAE/Prithvi), contrastive (SimCLR), self-distillation (DINO → DINOv3-satellite), latent prediction (I-JEPA → Galileo, AnySat, OlmoEarth's Latent MIM Lite); collapse and how each family avoids it.",
      "topic_ko": "계보 지도와 함께 보는 SSL 분류: masked reconstruction(MAE → SatMAE/Prithvi), contrastive(SimCLR), self-distillation(DINO → DINOv3-satellite), latent prediction(I-JEPA → Galileo, AnySat, OlmoEarth의 Latent MIM Lite) · collapse와 각 계열의 회피법"
     },
     {
-     "min": 15,
+     "min": 17,
      "topic": "MAE mechanics in detail: 75% masking, asymmetric encoder/decoder, normalized-pixel targets, why high masking works for images and what changes for EO (spatial redundancy, cloud pixels).",
      "topic_ko": "MAE 동작 원리 상세: 75% masking, 비대칭 encoder/decoder, normalized-pixel target · 이미지에서 높은 masking이 통하는 이유와 EO에서 달라지는 것(공간 중복성, 구름 픽셀)"
     },
     {
-     "min": 10,
+     "min": 7,
      "topic": "Structured masking for EO/weather: spatial, spectral/band-group, temporal, and modality masking (SatMAE, SpectralGPT, Galileo); Prithvi-WxC's mixed masked+forecast objective as the bridge to W11.",
      "topic_ko": "EO/weather를 위한 구조화된 masking: spatial, spectral/band-group, temporal, modality masking(SatMAE, SpectralGPT, Galileo) · W11로 이어주는 다리인 Prithvi-WxC의 masked+forecast 혼합 objective"
     },
     {
-     "min": 10,
+     "min": 7,
      "topic": "Evaluating SSL: linear probe vs kNN vs full fine-tune; why probe rankings mislead (GEO-Bench-2 evidence).",
      "topic_ko": "SSL 평가: linear probe vs kNN vs full fine-tune · probe 순위가 오도하는 이유(GEO-Bench-2 근거)"
     },
     {
-     "min": 5,
+     "min": 4,
      "topic": "Mixed precision (torch.amp) introduced hands-on in the lab today.",
      "topic_ko": "mixed precision(torch.amp)은 오늘 lab에서 실습으로 도입"
     }
@@ -773,7 +773,8 @@
     "MAE pretraining",
     "SSL evaluation (probe/kNN/FT)",
     "mixed precision (bf16/AMP)"
-   ]
+   ],
+   "slides": true
   },
   {
    "n": 8,
