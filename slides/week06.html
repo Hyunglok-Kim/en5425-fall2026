@@ -34,7 +34,7 @@
   <h1 style="color:#f4efe5;text-shadow:0 2px 24px rgba(0,0,0,.6)">Attention and the Transformer, Built From Scratch</h1>
   <p class="big" style="color:#e8e2d8;text-shadow:0 1px 16px rgba(0,0,0,.6)">Forty Sentinel-2 chips, thirteen bands each, from the dataset you train on today. Every Earth-observation and weather model this course meets from here on — Prithvi, ClimaX, Pangu, Aurora — is built from one operation, attention. Today you write it, test it, and see the choices that make it work on the Earth.</p>
   <div class="foot" style="color:#cfc8bc"><span>Deep Learning Applications in Environmental Big Data · Prof. Hyunglok Kim · GIST</span><span>Image: four EuroSAT-MS chips per class, true colour from bands 4-3-2, read for this lecture straight out of the 2 GB Zenodo archive; the orange grid: image patches grouped into windows, as this week’s paper does (Part 4). Helber et al. 2019, MIT licence.</span></div>
-  <aside class="notes">Open: five weeks of models that were given their structure — convolutions that look at neighbours, recurrences that look at yesterday. Today the model decides what to look at, with weights you can read off. Say what the picture is: forty real chips from the lab's dataset, ten classes, and one Swin window drawn over four of them. Timing: 57.5 min without the FLEX block (5-min quiz + 52.5 min core, of which the seven video slides are 2; 56.5 if slide 8 is skipped), 61.5 with it — run the FLEX only if the clock at slide 42 allows. Cut order if short: slide 8 (the full 4 × 4 table — slide 7 already did the arithmetic), then the three extra video slides 22, 32 and 39 (their videos stay on the shelf, A11), then slide 21 (the ViT paper — A7 holds it), then the FLEX. The full attention shapes, the four tests in code with the torch.nn.MultiheadAttention weight mapping, the positional-encoding algebra, the EO encodings card, the Swin card, the three weather backbones, the ViT card, mixed precision and FlashAttention, and the EuroSAT-MS card with the band-order trap all live in the APPENDIX after the lab slide — point students there. In class: the mechanism on real chips, one by-hand table, numbers we measured ourselves, and the four tests they will write before the agent writes code. Seven Watch-at-home slides are pointers, not playback — twenty seconds each; the two “by their authors” slides are the journal-club preparation.</aside>
+  <aside class="notes">Open: five weeks of models that were given their structure — convolutions that look at neighbours, recurrences that look at yesterday. Today the model decides what to look at, with weights you can read off. Say what the picture is: forty real chips from the lab's dataset, ten classes, and one Swin window drawn over four of them. Timing: 57.5 min without the FLEX block (5-min quiz + 52.5 min core, of which the seven video slides are 2; 56.5 if slide 8 is skipped), 61.5 with it — run the FLEX only if the clock at slide 43 allows. Cut order if short: slide 8 (the full 4 × 4 table — slide 7 already did the arithmetic), then the three extra video slides 22, 33 and 40 (their videos stay on the shelf, A11), then slide 21 (the ViT paper — A7 holds it), then the FLEX. The full attention shapes, the four tests in code with the torch.nn.MultiheadAttention weight mapping, the positional-encoding algebra, the EO encodings card, the Swin card, the three weather backbones, the ViT card, mixed precision and FlashAttention, and the EuroSAT-MS card with the band-order trap all live in the APPENDIX after the lab slide — point students there. In class: the mechanism on real chips, one by-hand table, numbers we measured ourselves, and the four tests they will write before the agent writes code. Seven Watch-at-home slides are pointers, not playback — twenty seconds each; the two “by their authors” slides are the journal-club preparation.</aside>
 </section>
 
 <!-- 1b ─ Reading quiz -->
@@ -745,26 +745,49 @@
 <!-- 26 -->
 
 <section class="slide xl">
+  <p class="kicker">Part 3 · Two words before the table</p>
+  <h2>A token is one cut of the image; GSD is metres per pixel</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Each model on the next slide cuts the chip differently and tags each piece differently — first, what a piece is.</p>
+  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
+    <img src="img/fig-w6-tokens.png" data-zoom alt="Three groups of panels on the slide-24 River chip. Left, ViT and Scale-MAE: the chip cut into an 8 by 8 grid, one orange square marked — one square with all 13 bands is one token, 64 tokens. Middle, SatMAE: the same chip drawn three times, once per band group (B2 B3 B4 B8, B5 B6 B7 B8A, B11 B12), the same orange square on each — three tokens for one square. Right, GSD: the chip at 10 m pixels with an 8-pixel square covering 80 m, and the same ground at 30 m pixels where an 8-pixel square covers 240 m." title="Click to enlarge" style="display:block;margin:0 auto;height:34vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li><b>ViT and Scale-MAE cut the chip the same way</b>: one square, all bands, one token (64 here). <b>SatMAE</b> cuts the same square three times, once per band group: 64 × 3 = 192 tokens, as in the lab.</li>
+    <li><b>GSD</b> decides how much ground a token covers: Sentinel-2 10 m, Landsat 30 m. <span class="accent">Scale-MAE’s one change to ViT: count position in metres, not in squares.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>token</b> — one vector the Transformer reads; here one image square turned into numbers (slide 18). <b>GSD</b> “ground sample distance” — the width of ground one pixel covers.</span>
+  </div>
+  <div class="foot"><span>EuroSAT-MS River_2, the slide-24 chip · the 30 m panel is the same ground averaged 3 × 3 · next: what each model tells its tokens</span></div>
+  <aside class="notes">1.5 min. Two words the table needs. Left: this is all a token is — one square of the chip, every band, flattened and turned into one vector (slide 18); ViT and Scale-MAE cut the image exactly like this, so "same as ViT" means the same 64 tokens. Middle: SatMAE cuts the same square three times, one token per band group — visible + NIR, red edge, SWIR — so one place on the ground becomes three tokens; the lab's mini-ViT does the same, 192 tokens. Right: GSD, metres per pixel. The orange token is 8 pixels both times, but at 10 m it is 80 m of ground and at 30 m it is 240 m. A plain ViT calls both "square number 28"; Scale-MAE multiplies the position by the GSD so the code says how many metres — that is slide 29. Then the table: read only the third column.</aside>
+</section>
+
+<!-- 27 -->
+
+<section class="slide xl">
   <p class="kicker">Part 3 · The battleground</p>
   <h2>On the Earth, a token’s position is five numbers, not one</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">On the Earth, ‘where’ also means which band, which date, which latitude, how many metres per pixel.</p>
   <table style="border-collapse:collapse;width:100%;margin:0 0 .8vh">
-    <tr style="color:var(--ink-2)"><th style="text-align:left;padding:.35vh .5vw">model</th><th style="text-align:left;padding:.35vh .5vw">a token is …</th><th style="text-align:left;padding:.35vh .5vw">and is told …</th><th style="text-align:left;padding:.35vh .5vw">in units of</th></tr>
-    <tr><td style="padding:.35vh .5vw"><b>ViT</b> 2020</td><td style="padding:.35vh .5vw">a 16-px patch of an RGB image</td><td style="padding:.35vh .5vw">its index, from a learned table</td><td style="padding:.35vh .5vw">patches</td></tr>
-    <tr><td style="padding:.35vh .5vw"><b>SatMAE</b> 2022</td><td style="padding:.35vh .5vw">a patch of <i>one band group</i> at one date</td><td style="padding:.35vh .5vw">x, y + band group + year, month, hour</td><td style="padding:.35vh .5vw">wavelength groups, calendar</td></tr>
-    <tr><td style="padding:.35vh .5vw"><b>Scale-MAE</b> 2023</td><td style="padding:.35vh .5vw">a patch at a known GSD</td><td style="padding:.35vh .5vw">position × g/G (GSD ratio)</td><td style="padding:.35vh .5vw"><span class="accent">metres</span></td></tr>
-    <tr><td style="padding:.35vh .5vw"><b>ClimaX</b> 2023</td><td style="padding:.35vh .5vw">a patch of <i>one variable</i></td><td style="padding:.35vh .5vw">own embedding + hours ahead</td><td style="padding:.35vh .5vw">variables, hours ahead</td></tr>
-    <tr><td style="padding:.35vh .5vw"><b>Prithvi-EO-2.0</b> 2024</td><td style="padding:.35vh .5vw">a 16-px patch of 6 Landsat–Sentinel (HLS) bands at one date</td><td style="padding:.35vh .5vw">x, y, t + sin-cos(lat, lon) + sin-cos(year, day)</td><td style="padding:.35vh .5vw">degrees, calendar</td></tr>
-    <tr><td style="padding:.35vh .5vw"><b>DOFA</b> 2024 · <b>Presto</b> 2023</td><td style="padding:.35vh .5vw">a multiband patch · a channel group at one month</td><td style="padding:.35vh .5vw">its bands’ wavelengths (they generate the patch weights) · channel + month</td><td style="padding:.35vh .5vw">micrometres · months</td></tr>
+    <tr style="color:var(--ink-2)"><th style="text-align:left;padding:.35vh .5vw">model</th><th style="text-align:left;padding:.35vh .5vw">one token is …</th><th style="text-align:left;padding:.35vh .5vw">and it is told …</th><th style="text-align:left;padding:.35vh .5vw">counted in</th></tr>
+    <tr><td style="padding:.35vh .5vw"><b>ViT</b> 2020</td><td style="padding:.35vh .5vw">one 16-px square, all colours</td><td style="padding:.35vh .5vw">which square (0, 1, 2 …)</td><td style="padding:.35vh .5vw">squares</td></tr>
+    <tr><td style="padding:.35vh .5vw"><b>SatMAE</b> 2022</td><td style="padding:.35vh .5vw">one square of <i>one band group</i></td><td style="padding:.35vh .5vw">x, y + band group + date</td><td style="padding:.35vh .5vw">band groups, dates</td></tr>
+    <tr><td style="padding:.35vh .5vw"><b>Scale-MAE</b> 2023</td><td style="padding:.35vh .5vw">one square, all bands — as ViT</td><td style="padding:.35vh .5vw">x, y × g/G (the GSD ratio)</td><td style="padding:.35vh .5vw"><span class="accent">metres</span></td></tr>
+    <tr><td style="padding:.35vh .5vw"><b>ClimaX</b> 2023</td><td style="padding:.35vh .5vw">one square of <i>one variable</i></td><td style="padding:.35vh .5vw">which variable + hours ahead</td><td style="padding:.35vh .5vw">variables, hours</td></tr>
+    <tr><td style="padding:.35vh .5vw"><b>Prithvi-EO-2.0</b></td><td style="padding:.35vh .5vw">6 HLS bands, one date</td><td style="padding:.35vh .5vw">x, y, date + lat, lon + day of year</td><td style="padding:.35vh .5vw">degrees, calendar</td></tr>
+    <tr><td style="padding:.35vh .5vw"><b>DOFA</b> · <b>Presto</b></td><td style="padding:.35vh .5vw">any bands · one pixel, one month</td><td style="padding:.35vh .5vw">band wavelengths · channel + month</td><td style="padding:.35vh .5vw">µm · months</td></tr>
   </table>
   <ul class="small">
-    <li>Same Transformer body (backbone) every time (MAE — masked-autoencoder pretraining, Week 7); the design is <i>what the token is told</i>. <span class="accent">Four get a slide;</span> DOFA and Presto are your discussion questions.</li>
+    <li>Same Transformer body every row — the block of slide 13; <span class="accent">the design is what the token is told.</span> Four get a slide; DOFA and Presto are discussion questions 2 and 3.</li>
   </ul>
+  <div class="gloss">
+    <span><b>HLS</b> — Harmonized Landsat Sentinel-2, NASA’s merged 30 m imagery. <b>g/G</b> — this image’s GSD over a reference GSD.</span>
+  </div>
   <div class="foot"><span>Cong 2022 · Reed 2023 · Nguyen 2023 · Szwarcman 2024 · Xiong 2024 · Tseng 2023 — every encoding written out: Appendix A4</span></div>
   <aside class="notes">1.5 min. Read the third column only, top to bottom; the table is the map of the next four slides. The thesis to say once: the backbone is the same in every row — the block from slide 13 — and the research is in what the token is told. Point at the two rows that have no slide: DOFA, which generates the patch-embedding weights from the band's wavelength, is discussion question 2; Presto, 400 thousand parameters on pixel time series, is question 3.</aside>
 </section>
 
-<!-- 27 -->
+<!-- 28 -->
 
 <section class="slide xl">
   <p class="kicker">Part 3 · Which band · SatMAE</p>
@@ -784,7 +807,7 @@
   <aside class="notes">1.5 min. Point at the red edge first — that is why multispectral matters and why the bands are not interchangeable channels: vegetation jumps between 665 and 842 nanometres and water does not. SatMAE's move: treat the band groups like time steps — separate tokens, separate patch embeddings, a group code added like a position, and mask groups independently so the model must predict SWIR from visible. Say the lab's instruction in one breath: the same three groups, 64-pixel chips, 192 tokens. Then the discussion-question hook: DOFA says the group index is a crude code for what is really a wavelength, and generates the embedding weights from the wavelength itself.</aside>
 </section>
 
-<!-- 28 -->
+<!-- 29 -->
 
 <section class="slide xl">
   <p class="kicker">Part 3 · How many metres · Scale-MAE</p>
@@ -803,7 +826,7 @@
   <aside class="notes">1.5 min. Left panel: the same field, imaged at 10 and at 30 metres, gets two different codes because sin-cos counts patches. Right panel: multiply the position by the GSD ratio and the two curves fall on top of each other — the code now counts metres. One formula on the board, pointing at the g over G inside the sine. The number: 5.6 percent average improvement over SatMAE when tested across resolutions. Connect to the previous slide: SatMAE wrote the band into the code; Scale-MAE wrote the metres; next, ClimaX writes the variable.</aside>
 </section>
 
-<!-- 29 -->
+<!-- 30 -->
 
 <section class="slide xl">
   <p class="kicker">Part 3 · Which variable · ClimaX</p>
@@ -844,7 +867,7 @@
   <aside class="notes">1.5 min. Walk it left to right: each variable is its own little image with its own patch embedding; at each grid cell you now have 48 tokens; one learned query asks those 48 "what matters here" and the cross-attention collapses them to one. The design reason is the bullet: pretraining data and fine-tuning data have different variable sets, and a token per variable makes that a missing token rather than a broken first layer. Tie back to the lab's band groups — the same idea, three groups instead of 48 variables — and forward to Aurora, which sums per-variable embeddings instead of cross-attending.</aside>
 </section>
 
-<!-- 30 -->
+<!-- 31 -->
 
 <section class="slide xl">
   <p class="kicker">Part 3 · Where and when · Prithvi-EO-2.0</p>
@@ -881,7 +904,7 @@
   <aside class="notes">1.2 min (cuttable). One sentence per box: the token is a 3-D patch of six bands; the ordinary position code says where in the sample; two more codes say when (year, day of year) and where on the planet (latitude, longitude), each a sin-cos vector times a learned loudness; and each is dropped ten percent of the time so the model does not fall apart on a chip with no metadata. Say why it matters for the lab's data: EuroSAT chips carry no date and no location in the file — so this is a model you could not fully use on them, which is a real limitation, not a detail.</aside>
 </section>
 
-<!-- 31 -->
+<!-- 32 -->
 <section class="slide xl">
   <p class="kicker">Part 3 · Watch at home</p>
   <h2>Positions demystified, RoPE twice, and a 400 K-parameter model by its author</h2>
@@ -923,7 +946,7 @@
       <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">Gabriel Tseng (Harvest) · <i>Presto: lightweight pretrained transformers for remote-sensing time series</i> · 48 min · question 3, by its author.</p>
     </a>
   </div>
-  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Next slide:</b> the people who wrote the Earth encodings of slide 26, explaining them — DOFA, Prithvi and the ESA view, for discussion questions 2 and 3.</p>
+  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Next slide:</b> the people who wrote the Earth encodings of slide 27, explaining them — DOFA, Prithvi and the ESA view, for discussion questions 2 and 3.</p>
   <div class="gloss">
     <span><b>author talks</b> — the best preparation for the journal club is hearing the design reason in the author’s own words.</span>
   </div>
@@ -931,7 +954,7 @@
   <aside class="notes">Twenty seconds. The Coffee Break one is the clock picture for slide 25; the two RoPE videos are the derivation we skipped; Tseng is discussion question 3 by its author.</aside>
 </section>
 
-<!-- 32 -->
+<!-- 33 -->
 <section class="slide xl">
   <p class="kicker">Part 3 · Watch at home · the Earth encodings, by their authors</p>
   <h2>DOFA, Prithvi-EO-2.0 and the ESA view of Earth-observation foundation models</h2>
@@ -952,7 +975,7 @@
           <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
         </span>
       </span>
-      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">AI for Good (IBM team) · <i>Earth observation foundation models with Prithvi-EO-2.0 and TerraTorch</i> · 115 min · hands-on: the temporal and location codes of slide 30.</p>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">AI for Good (IBM team) · <i>Earth observation foundation models with Prithvi-EO-2.0 and TerraTorch</i> · 115 min · hands-on: the temporal and location codes of slide 31.</p>
     </a>
     <a href="https://www.youtube.com/watch?v=9KDcNz85wbA" class="yt" data-id="9KDcNz85wbA" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
@@ -981,7 +1004,7 @@
   <aside class="notes">Twenty seconds. Xiong for question 2 (the wavelength hypernetwork), the Prithvi workshop for anyone on the EO track who will fine-tune it in Week 10, the GRSS webinar for the history, Fibæk for the map of the field. Bridge sentence and into Part 4.</aside>
 </section>
 
-<!-- 33 -->
+<!-- 34 -->
 
 <section class="slide section xl">
   <p class="kicker">Part 4 · 8 min · this week’s paper</p>
@@ -994,7 +1017,7 @@
   <aside class="notes">8 minutes. Read the cards in twenty seconds. The part exists to make the journal-club paper teachable: windows (why), the shift (how information crosses walls), and then the move that is not in the paper — the third dimension for pressure levels and the globe's wrap-around, which is discussion question 1.</aside>
 </section>
 
-<!-- 34 -->
+<!-- 35 -->
 
 <section class="slide xl">
   <p class="kicker">Part 4 · Windows</p>
@@ -1035,7 +1058,7 @@
   <aside class="notes">2 min. Say it with the grid: the orange token scores 16 keys instead of 64 and the thick lines are walls. Then the two formulas: the first term is the three projections and the output map and does not change; the second is the scores, and it goes from hw squared to M squared times hw — linear in the image. Then the globe: 9 megabytes per head instead of 8.5 gigabytes. End on the price so the next slide has a job: nothing crosses the walls.</aside>
 </section>
 
-<!-- 35 -->
+<!-- 36 -->
 
 <section class="slide xl">
   <p class="kicker">Part 4 · The shift</p>
@@ -1078,7 +1101,7 @@
   <aside class="notes">2 min. Left grid: orange and blue are neighbours separated by a wall. Middle grid: next layer, the walls move half a window — the same two tokens are now in one window. Say the receptive-field analogy aloud because it is the answer to question 1: alternating layers grow the reach exactly as stacked 3 × 3 convolutions do. The right card is the engineering: rolling the grid packs the partial windows into full ones and a mask stops cheating across the seam; the ablation numbers are what the paper's Table 4 says the shift is worth — plus one point from the relative bias. Plant question 1: on a globe, longitude wraps, so the roll is physical; latitude ends at the poles, so there the walls are real.</aside>
 </section>
 
-<!-- 36 -->
+<!-- 37 -->
 
 <section class="slide xl">
   <p class="kicker">Part 4 · The weather backbones</p>
@@ -1109,7 +1132,7 @@
     </svg>
   </div>
   <ul class="small">
-    <li>Question 1, planted: along longitude the roll of slide 35 <i>is</i> the geometry (the dateline is a seam that should not exist); along latitude the walls are real — look at how Pangu’s bias table and Aurora’s Fourier codes treat latitude. <span class="accent">Windows pay the N² bill; the third dimension lets a token see the levels above and below it.</span></li>
+    <li>Question 1, planted: along longitude the roll of slide 36 <i>is</i> the geometry (the dateline is a seam that should not exist); along latitude the walls are real — look at how Pangu’s bias table and Aurora’s Fourier codes treat latitude. <span class="accent">Windows pay the N² bill; the third dimension lets a token see the levels above and below it.</span></li>
   </ul>
   <div class="gloss">
     <span><b>3-D window</b> — 2 levels × 6 lat tokens (6 × 4 × 0.25° = 6°) × 12 lon tokens (12°); Pangu and Aurora. <b>Swin-V2</b> — Swin with the norm after the branch and cosine attention, for stability at scale. <b>Perceiver</b> — slide 20, door 3.</span>
@@ -1118,7 +1141,7 @@
   <aside class="notes">2 min. Point at the block: tokens live in three dimensions, levels × latitude × longitude, and the window is 2 levels by 6 degrees by 12 degrees — 144 tokens. Then one line per model, reading the bold names: Pangu invented the 3-D window and an Earth-specific bias that knows which latitude it is at; FuXi stacked 48 Swin-V2 blocks and cascaded three models by lead time; Aurora kept the same window, squeezed 13 levels into 3 before the backbone, and is the one you can download. Then the geometry: the roll along longitude is not a trick on a globe, it is the truth — the dateline should be invisible; latitude is where the walls are real, and that is why both models give latitude an absolute code. That is the start of discussion question 1, not its end.</aside>
 </section>
 
-<!-- 37 -->
+<!-- 38 -->
 
 <section class="slide xl">
   <p class="kicker">Part 4 · This week’s paper · 1.5 min</p>
@@ -1153,7 +1176,7 @@
   <aside class="notes">1.5 min, closing Part 4 with the paper on the board. The story to tell: ViT is flat — one scale, every token sees every token — and could not be dropped into the detection and segmentation pipelines the field already had; Swin rebuilt the CNN pyramid out of windowed attention, so its four feature maps slot straight into FPN and UPerNet, and it won everything in 2021. Then the sentence that matters for this course: the weather models did not take the pyramid; they took the window and the shift and added a third dimension. Do not answer the discussion questions; the leader should open with Figure 2 or Figure 4.</aside>
 </section>
 
-<!-- 38 -->
+<!-- 39 -->
 <section class="slide xl">
   <p class="kicker">Part 4 · Watch at home</p>
   <h2>Swin animated, by its author, at code level, and in eleven minutes</h2>
@@ -1195,15 +1218,15 @@
       <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">Microsoft Developer · <i>Developer Tech Minutes: Swin Transformer</i> · 11 min · the short official introduction.</p>
     </a>
   </div>
-  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Next slide:</b> the three weather backbones of slide 36, each explained by one of its authors — Pangu-Weather, FuXi and Aurora.</p>
+  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Next slide:</b> the three weather backbones of slide 37, each explained by one of its authors — Pangu-Weather, FuXi and Aurora.</p>
   <div class="gloss">
-    <span><b>cyclic shift, mask</b> — the two implementation details of slide 35; the Hugging Face session shows both as tensor operations.</span>
+    <span><b>cyclic shift, mask</b> — the two implementation details of slide 36; the Hugging Face session shows both as tensor operations.</span>
   </div>
   <div class="foot"><span>Optional, not assigned · ids verified embeddable on 10 October 2026</span></div>
   <aside class="notes">Twenty seconds. The Coffee Break one if the shift still feels abstract; Han Hu for the paper’s reasoning before the journal club; the Hugging Face session for the cyclic shift and mask as actual tensor code; the Microsoft short for a summary.</aside>
 </section>
 
-<!-- 39 -->
+<!-- 40 -->
 <section class="slide xl">
   <p class="kicker">Part 4 · Watch at home · the weather backbones, by their authors</p>
   <h2>Pangu-Weather, FuXi and Aurora — the 3-D window, from the people who built it</h2>
@@ -1253,7 +1276,7 @@
   <aside class="notes">Twenty seconds. Xie and Zhong for the weather track before the journal club — question 1 is answered in both talks; the seven-minute Aurora overview for everyone; Perdikaris for anyone who will fine-tune Aurora in the capstone. Bridge and go.</aside>
 </section>
 
-<!-- 40 -->
+<!-- 41 -->
 
 <section class="slide xl">
   <p class="kicker">Part 5 · 3 min · why the lab fits in an hour</p>
@@ -1291,7 +1314,7 @@
   <aside class="notes">2.5 min. Left: the bit bars. bf16 is fp32 with the fraction cut off — same exponent, same range, so nothing underflows and there is no loss scaling to manage; fp16 has the range problem and needs it. The number: a T4 does eight times the arithmetic in 16-bit on its tensor cores. Right: FlashAttention is not an approximation; it streams blocks of Q, K and V through the fast on-chip memory, keeps a running max and sum so the softmax is exact, and never writes the N × N matrix — memory linear in N, and up to three times faster end-to-end because attention is bound by data movement. Say the hardware caveat once: a Colab T4 has no bf16 tensor cores and no Flash kernel — there it is fp16 with GradScaler and the memory-efficient kernel, which still never stores N × N. In the lab: the from-scratch attention is for the tests; once test 4 passes they may train with SDPA, because the test proved it computes the same thing.</aside>
 </section>
 
-<!-- 41 -->
+<!-- 42 -->
 <section class="slide xl">
   <p class="kicker">Part 5 · Watch at home</p>
   <h2>FlashAttention by its author, mixed precision in six minutes and from scratch, and why GPUs go brrr</h2>
@@ -1303,7 +1326,7 @@
           <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
         </span>
       </span>
-      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">Tri Dao (Stanford MLSys #67) · <i>FlashAttention</i> · 59 min — <span class="accent">click to play here</span> · tiling, SRAM vs HBM, IO-awareness — slide 40’s right panel.</p>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.1vh,18px);line-height:1.4">Tri Dao (Stanford MLSys #67) · <i>FlashAttention</i> · 59 min — <span class="accent">click to play here</span> · tiling, SRAM vs HBM, IO-awareness — slide 41’s right panel.</p>
     </a>
     <a href="https://www.youtube.com/watch?v=i1fIBtdhjIg" class="yt" data-id="i1fIBtdhjIg" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
@@ -1341,7 +1364,7 @@
   <aside class="notes">Twenty seconds. Tri Dao for the lab’s SDPA line; the NVIDIA six-minute one for everyone before they type autocast; ExplainingAI if they want the bit layouts in code; Horace He for the mental model of what makes a kernel slow. Then the contract.</aside>
 </section>
 
-<!-- 42 -->
+<!-- 43 -->
 
 <section class="slide xl">
   <p class="kicker">Part 5 · The contract</p>
@@ -1378,7 +1401,7 @@
   <aside class="notes">2 min. Deliver it as a contract, the same shape as last week's. The killer sentence is number 1 with the timeline: the tests exist before any model code, and step 3 — breaking a copy and watching them fail — is a graded deliverable, because the commonest way an agent-written model "passes" is a test that asserts nothing. Number 4 is the Week 1 discussion question made concrete: a CNN may well win on 27 thousand chips, and the honest report says so. End of the live budget: ~0:55. Read the clock: at 0:52 or earlier → run the FLEX board exercise; past it → hand the board to the journal-club leader and go to break.</aside>
 </section>
 
-<!-- 43 -->
+<!-- 44 -->
 
 <section class="slide xl">
   <p class="kicker">Part 5 · FLEX ~4 min · teach or skip</p>
@@ -1396,26 +1419,26 @@
   <div class="gloss">
     <span><b>HLS</b> — 30 m Landsat–Sentinel; <b>Presto</b> — pixel time series, question 3. <b>the point</b> — the same two formulas size every model in this course.</span>
   </div>
-  <div class="foot"><span>Run only if the clock allows at slide 42 · the three rows are the three tracks of the capstone: EO chips, weather grids, pixel time series</span></div>
+  <div class="foot"><span>Run only if the clock allows at slide 43 · the three rows are the three tracks of the capstone: EO chips, weather grids, pixel time series</span></div>
   <aside class="notes">FLEX, ~4 min. Answers. A: (224/16)² = 196 tokens per date; with t = 1 and 4 dates, 784 tokens; scores 784² × 2 B = 1.2 MB — trivial; no escape needed; the token should be told row, column, date, and — if available — latitude, longitude and day of year (Prithvi). B: 181 × 360 = 65,160; 8.5 GB per head; windows (Pangu, Aurora) or coarsen (ClimaX) or latent (Aurora's Perceiver); the token needs level, latitude (absolute — the poles are real) and longitude (periodic). C: 12 months × 3 groups = 36 tokens; 36² × 2 B = 2.6 kB — attention is free and the model can be tiny (Presto: 402 K parameters); the token must be told the month and the band group, and ideally the location. The lesson across the rows: the same two formulas size every model in the course, and "position" is a different list in each track.</aside>
 </section>
 
-<!-- 44 -->
+<!-- 45 -->
 
 <section class="slide xl">
   <p class="kicker">Journal club · 30 min · after break · 0 lecture minutes</p>
   <h2>Liu et al. 2021, Swin Transformer — discussion questions</h2>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.4vw;align-items:stretch">
-    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q1 · the shift on a globe</b><br>Why does shifted windowing recover cross-window information flow — and what is the weather-model analog at the poles and the dateline?</p><p class="small muted" style="margin:1vh 0 0">start from slides 35–36</p></div>
-    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q2 · 13 bands, one embedding?</b><br>For a 13-band image, argue for and against: one patch embedding for all bands vs band-group embeddings vs wavelength-conditioned embeddings (DOFA’s answer).</p><p class="small muted" style="margin:1vh 0 0">start from slides 18 and 27 — and from your own lab’s choice</p></div>
-    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q3 · 400 K parameters</b><br>Presto has 400 K parameters and competes with giants on pixel time series — what does that say about scale vs inductive fit?</p><p class="small muted" style="margin:1vh 0 0">start from slide 26 and Tseng et al. 2023, Tables 5 and 13</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q1 · the shift on a globe</b><br>Why does shifted windowing recover cross-window information flow — and what is the weather-model analog at the poles and the dateline?</p><p class="small muted" style="margin:1vh 0 0">start from slides 36–37</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q2 · 13 bands, one embedding?</b><br>For a 13-band image, argue for and against: one patch embedding for all bands vs band-group embeddings vs wavelength-conditioned embeddings (DOFA’s answer).</p><p class="small muted" style="margin:1vh 0 0">start from slides 18 and 28 — and from your own lab’s choice</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q3 · 400 K parameters</b><br>Presto has 400 K parameters and competes with giants on pixel time series — what does that say about scale vs inductive fit?</p><p class="small muted" style="margin:1vh 0 0">start from slide 27 and Tseng et al. 2023, Tables 5 and 13</p></div>
   </div>
   <p class="small muted" style="margin-top:1vh">Groups of 3–4, working from your published entrance tickets (Journal Club tab on the course site) · the drawn leader moderates, the presenter reports back, the questioner takes another group’s report · these three questions are the agenda.</p>
   <div class="foot"><span>Leader opens with one reproduced figure (Fig. 2 or Fig. 4 of the paper) · roles revealed at 13:00 on the course site · optional: <a href="https://arxiv.org/abs/2304.14065">Tseng et al. 2023, Presto</a></span></div>
   <aside class="notes">Journal club: 30 min in groups of 3–4, drawn leader moderating, presenter reporting back; harvest in the last 5 min. Q1: good answers say that alternating window partitions make the reach grow with depth like a CNN's receptive field (the cyclic shift is only the efficient implementation); better ones separate the two axes of a globe — longitude is periodic, so a roll across the dateline is physically exact and the seam mask should NOT be applied there, while latitude ends, so the poles need either padding or an absolute code — and name Pangu's Earth-specific bias (absolute in latitude, relative in longitude) and Aurora's Fourier position/area encodings as the two published answers. Q2: one embedding treats bands as interchangeable channels and cannot handle a sensor with different bands; group embeddings (SatMAE, the lab) buy per-group masking and a sensor-agnostic token but hard-code the grouping; wavelength conditioning (DOFA) makes the embedding a function of physics so a new sensor is a new argument, at the cost of a hypernetwork and the assumption that wavelength is what matters (it ignores bandwidth and SAR). Q3: Presto's 402 K parameters win where the inductive fit is right — one pixel, monthly tokens, band-group and month codes — and lose to Scale-MAE on 64-px EuroSAT images (kNN 0.921 vs 0.960, Table 13) where spatial context matters; the lesson is that scale buys generality but the token design buys fit, and the two are not the same axis. Close with a one-line bridge to lab.</aside>
 </section>
 
-<!-- 45 -->
+<!-- 46 -->
 
 <section class="slide xl">
   <p class="kicker">Lab briefing · 3 min · after journal club</p>
@@ -1453,7 +1476,7 @@
   <aside class="notes">3 min. Set the verification contract explicitly — three checks: (1) before any model code, the four tests exist and fail on a stub; (2) after the agent's code passes, break one thing on purpose (flip the mask triangle, drop the residual) and keep the failing log — that is graded; (3) before training, open one chip with band names and confirm B8A correlates with B8, because the Zenodo files store B8A last and every agent assumes the ESA order. Two more to warn about in one breath: normalization statistics computed on the whole set instead of the training split, and comparing against a CNN trained for a different number of epochs. Say the expectation out loud: on 27 thousand chips the CNN may win; the report is graded on honesty, and next week the same file is pretrained. Dismiss to lab. (Slides after this one are the self-study appendix — tell them it exists, then stop here.)</aside>
 </section>
 
-<!-- 46 -->
+<!-- 47 -->
 
 <section class="slide section">
   <p class="kicker">Appendix · self-study</p>
@@ -1462,7 +1485,7 @@
   <aside class="notes">Not taught in class. These eleven cards hold everything that came off the live path: attention with every shape written out and a twelve-line reference implementation; the four tests in code with the torch weight mapping; the positional-encoding algebra (why the dot product sees the offset, and RoPE); the six Earth encodings written out; the Swin card; the three weather backbones with their exact token grids; the ViT card; mixed precision and FlashAttention; the EuroSAT-MS card with the band-order trap; the assigned video; the shelf. Say the appendix exists, say what is in it, and stop.</aside>
 </section>
 
-<!-- 47 -->
+<!-- 48 -->
 
 <section class="slide">
   <p class="kicker">Appendix A1 · Attention, every shape written out</p>
@@ -1497,7 +1520,7 @@
   <aside class="notes">Not taught in class. This is the file the lab asks for, minus the ViT wrapper. The shape comments are the shape test; the mask line is the mask test; the packing comment is why the equivalence test can copy weights directly.</aside>
 </section>
 
-<!-- 48 -->
+<!-- 49 -->
 
 <section class="slide">
   <p class="kicker">Appendix A2 · The four tests in code</p>
@@ -1526,7 +1549,7 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. Four tests, fifteen lines. The bullet is the one students lose an hour to: the weight packing of torch's module. The deliberate failure is a one-token edit — triu for tril — and it is the proof that test 2 asserts something.</aside>
 </section>
 
-<!-- 49 -->
+<!-- 50 -->
 
 <section class="slide">
   <p class="kicker">Appendix A3 · Positional encodings, derived</p>
@@ -1545,7 +1568,7 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. The one derivation worth reproducing without notes is the first line: sin·sin + cos·cos = cos of the difference, summed over frequencies — that is the whole reason the right panel of slide 25 is banded.</aside>
 </section>
 
-<!-- 50 -->
+<!-- 51 -->
 
 <section class="slide">
   <p class="kicker">Appendix A4 · The Earth encodings, written out</p>
@@ -1560,10 +1583,10 @@ def test_equivalence():                       # the same thing as torch
     <tr><td style="padding:.3vh .4vw;vertical-align:top"><b>Presto</b> Tseng 2023</td><td style="padding:.3vh .4vw">one channel group at one month: e = h<sup>c</sup>(x) + [learned channel-group code ‖ sin-cos timestep ‖ sin-cos month]; static SRTM and location tokens; random / channel / timestep masking</td><td style="padding:.3vh .4vw">402 K params; 2 layers, d = 128, 8 heads; 12 monthly steps; EuroSAT kNN at 64 px: 0.921 (MS) vs Scale-MAE 0.960 (RGB); wins at 16 px</td></tr>
   </table>
   <div class="foot"><span>arXiv 2207.08051 · 2212.14532 · 2301.10343 · 2412.02732 · 2403.15356 · 2304.14065 — numbers checked against the papers on 9 October 2026</span></div>
-  <aside class="notes">Not taught in class. The table is the answer key to slide 26 and the reference for discussion questions 2 and 3. Students on the EO track should be able to say, for any of the six, what a token is and what it is told, in one sentence each.</aside>
+  <aside class="notes">Not taught in class. The table is the answer key to slide 27 and the reference for discussion questions 2 and 3. Students on the EO track should be able to say, for any of the six, what a token is and what it is told, in one sentence each.</aside>
 </section>
 
-<!-- 51 -->
+<!-- 52 -->
 
 <section class="slide">
   <p class="kicker">Appendix A5 · This week’s paper</p>
@@ -1582,7 +1605,7 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. The card the journal-club leader should have open. Everything in it was checked against the paper's tables.</aside>
 </section>
 
-<!-- 52 -->
+<!-- 53 -->
 
 <section class="slide">
   <p class="kicker">Appendix A6 · The three weather backbones</p>
@@ -1599,7 +1622,7 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. Weather-track students: the row to memorize is "tokens" — it is slide 20 done three ways — and the row to argue about in the journal club is "backbone", where the Earth-specific bias and Aurora's encoder-side position codes are the two answers to question 1.</aside>
 </section>
 
-<!-- 53 -->
+<!-- 54 -->
 
 <section class="slide">
   <p class="kicker">Appendix A7 · The ViT paper</p>
@@ -1615,7 +1638,7 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. The two numbers to keep: 196 tokens, and the data threshold — ImageNet alone is not enough, which is the entire motivation for next week.</aside>
 </section>
 
-<!-- 54 -->
+<!-- 55 -->
 
 <section class="slide">
   <p class="kicker">Appendix A8 · Mixed precision and FlashAttention</p>
@@ -1630,7 +1653,7 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. The practical rule for the lab: bf16 if the GPU has it (A100, L4), fp16 with GradScaler on a T4; SDPA always, once the equivalence test licenses it.</aside>
 </section>
 
-<!-- 55 -->
+<!-- 56 -->
 
 <section class="slide">
   <p class="kicker">Appendix A9 · Lab reference</p>
@@ -1659,7 +1682,7 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. The band-order trap is the one thing on this card that will silently ruin a lab: the agent will write the group embedding assuming ESA's order, the model will train, and the "red edge" group will contain SWIR2. Make them check B8A against B8 on one chip before training.</aside>
 </section>
 
-<!-- 56 -->
+<!-- 57 -->
 
 <section class="slide">
   <p class="kicker">Appendix A10 · Watch at home · assigned</p>
@@ -1688,7 +1711,7 @@ def test_equivalence():                       # the same thing as torch
   <aside class="notes">Not taught in class. The summary prompt is the four bullets; the quiz will ask about the noun-and-adjectives picture, the √d and the mask, and the heads.</aside>
 </section>
 
-<!-- 57 -->
+<!-- 58 -->
 
 <section class="slide">
   <p class="kicker">Appendix A11 · More to watch</p>
