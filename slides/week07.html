@@ -57,10 +57,10 @@
   <p class="kicker">Week 7 · 50 min</p>
   <h2>Today in five blocks — and one chain of cause and effect</h2>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
-    <svg viewBox="0 0 900 112" role="img" aria-label="Seven boxes joined left to right by arrows: labels are scarce, pixels are free; hide part of the data and predict it; four things to predict; the trap is collapse; MAE hides 75% and uses a small decoder; on the Earth, hide bands, dates and sensors; judge the encoder with probe, kNN and fine-tune. Brackets under the boxes mark the five lecture parts." style="width:min(98%,1150px)">
+    <svg viewBox="0 0 900 112" role="img" aria-label="Seven boxes joined left to right by arrows: labels are scarce, pixels are free; hide part of the data and predict it; four things to predict; the trap is collapse; MAE hides 75% and uses a small decoder; on the Earth, hide bands, dates and sensors; judge the encoder with probe, kNN and fine-tune. Brackets under the boxes mark the five lecture parts. The collapse box is tagged: your report, due 2 November." style="width:min(98%,1150px)">
       <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
         <rect x="4" y="16" width="112" height="50" rx="8"/><rect x="134" y="16" width="112" height="50" rx="8" stroke="var(--accent)" stroke-width="1.8"/>
-        <rect x="264" y="16" width="112" height="50" rx="8"/><rect x="394" y="16" width="112" height="50" rx="8"/>
+        <rect x="264" y="16" width="112" height="50" rx="8"/><rect x="394" y="16" width="112" height="50" rx="8" stroke="var(--accent)" stroke-width="1.8" stroke-dasharray="5 3"/>
         <rect x="524" y="16" width="112" height="50" rx="8" stroke="var(--accent)" stroke-width="1.8"/><rect x="654" y="16" width="112" height="50" rx="8"/><rect x="784" y="16" width="112" height="50" rx="8"/>
       </g>
       <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M116 41 H134 M246 41 H264 M376 41 H394 M506 41 H524 M636 41 H654 M766 41 H784"/></g>
@@ -70,13 +70,16 @@
         <text x="190" y="37" fill="var(--accent)" font-weight="700">hide part of it,</text><text x="190" y="51" fill="var(--accent)" font-weight="700">predict it</text>
         <text x="320" y="37">four things</text><text x="320" y="51">to predict</text>
         <text x="450" y="37">the trap:</text><text x="450" y="51">collapse</text>
+      </g>
+      <text x="450" y="11" font-size="11" fill="var(--accent)" font-weight="700" text-anchor="middle">→ your report, due 2 Nov</text>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle">
         <text x="580" y="37" fill="var(--accent)" font-weight="700">MAE: hide 75%,</text><text x="580" y="51" fill="var(--accent)" font-weight="700">small decoder</text>
         <text x="710" y="37">Earth: hide bands,</text><text x="710" y="51">dates, sensors</text>
         <text x="840" y="37">judge it: probe,</text><text x="840" y="51">kNN, fine-tune</text>
       </g>
       <g fill="none" stroke="var(--muted)" stroke-width="1"><path d="M4 78 V84 H506 V78 M524 78 V84 H636 V78 M654 78 V84 H766 V78 M784 78 V84 H896 V78"/></g>
       <g font-size="11" fill="var(--muted)" text-anchor="middle">
-        <text x="255" y="100">Part 1 · self-supervised learning: four families, one failure (14 min)</text><text x="580" y="100">Part 2 · MAE (17)</text><text x="710" y="100">Part 3 · Earth masks (7)</text><text x="840" y="100">Part 4 · evaluation (7) · Part 5 · fit (4)</text>
+        <text x="255" y="100">Part 1 · self-supervised learning: four families, one failure (14 min)</text><text x="580" y="100">Part 2 · MAE (17)</text><text x="710" y="100">Part 3 · Earth (7)</text><text x="840" y="100">Parts 4–5 (7 + 4)</text>
       </g>
     </svg>
   </div>
@@ -84,8 +87,9 @@
     <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">1 · Families</td><td style="padding:.4vh .6vw"><b>self-supervised learning (SSL)</b> the labels are made from the data itself · <b>pretext task</b> the made-up job, e.g. fill in hidden patches · <b>contrastive</b> pull two views (random crops, turns) of one image together, push other images away · <b>self-distillation</b> a student copies a slowly updated teacher · <b>latent prediction</b> predict the hidden part’s embedding (the encoder’s output vector), not its pixels · <b>collapse</b> every input gets the same vector</td></tr>
     <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">2 · MAE</td><td style="padding:.4vh .6vw"><b>masked autoencoder (MAE)</b> hide most patches, rebuild them (this week’s paper) · <b>encoder</b> the part you keep · <b>decoder</b> the part you throw away · <b>mask token</b> one learned vector standing in for every hidden patch</td></tr>
     <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">3 · Earth masks</td><td style="padding:.4vh .6vw"><b>spectral masking</b> hide a whole group of bands · <b>temporal masking</b> hide a whole date · <b>modality</b> one kind of sensor, e.g. radar or elevation</td></tr>
-    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">4–5 · Judge, fit</td><td style="padding:.4vh .6vw"><b>frozen</b> weights not updated · <b>linear probe</b> one linear layer trained on frozen features · <b>kNN</b> k-nearest neighbours: a vote of the k closest training chips · <b>(full) fine-tune</b> train every weight · <b>bf16 / fp16</b> 16-bit numbers that roughly halve activation memory (Part 5, in the lab)</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">4–5 · Judge, fit</td><td style="padding:.4vh .6vw"><b>frozen</b> weights not updated · <b>linear probe</b> one linear layer trained on frozen features · <b>kNN</b> k-nearest neighbours: a vote of the k closest training chips · <b>(full) fine-tune</b> train every weight · <b>bf16 / fp16</b> 16-bit numbers that roughly halve activation memory</td></tr>
   </table>
+  <p class="small" style="margin:.8vh 0 0;padding:.5vh .8vw;border-left:3px solid var(--accent);background:var(--wash)"><b style="color:var(--accent)">Report · due Mon 2 Nov</b> — <b>collapse</b> (slide 8): why it happens, how each family blocks it · <b>≤ 10 pages</b> or a <b>10-min talk</b></p>
   <div class="ytmini">
     <a href="https://www.youtube.com/watch?v=iGJ1XSkCyU0" class="yt" data-id="iGJ1XSkCyU0">
       <span class="ytbox"><img src="img/yt-w7-what-is-ssl.jpg" alt="Boris Meinardus video"><span class="play"><span>&#9654;</span></span></span>
@@ -101,7 +105,7 @@
     </a>
   </div>
   <div class="foot"><span>Click a video to play it large · journal club after the break · every derivation and reference card is in the Appendix</span></div>
-  <aside class="notes">1.5 min. Read the chain left to right once: labels are scarce and pixels free, so hide part of the data and predict it; there are four things a network can be asked to predict; the view-matching families can be cheated by collapse; MAE hides 75% and keeps the decoder small; on the Earth we can also hide bands, dates and sensors; and finally, three ways to judge the result, which disagree. Then the table: one breath per word — each comes back on its own slide. The three videos under the table explain the same words; point at them, do not play them.</aside>
+  <aside class="notes">1.5 min. Read the chain left to right once: labels are scarce and pixels free, so hide part of the data and predict it; there are four things a network can be asked to predict; the view-matching families can be cheated by collapse; MAE hides 75% and keeps the decoder small; on the Earth we can also hide bands, dates and sensors; and finally, three ways to judge the result, which disagree. Then the table: one breath per word — each comes back on its own slide. The three videos under the table explain the same words; point at them, do not play them. Then point at the dashed collapse box and the report line: collapse is next week's report — up to 10 pages, due Monday 2 November, or a 10-minute talk in class instead. Scope to say out loud: what collapse is, why a loss that only asks two views to agree allows it, how each family blocks it (the table on slide 8), and how to spot it in a run; slide 8 and Appendix A3 are the starting material.</aside>
 </section>
 
 <!-- 4 -->
