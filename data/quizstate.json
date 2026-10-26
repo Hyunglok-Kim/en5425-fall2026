@@ -20,10 +20,14 @@
   "key": true
  },
  "w06": {
-  "quiz": false,
-  "key": false
+  "quiz": true,
+  "key": true
  },
  "w08": {
+  "quiz": true,
+  "key": false
+ },
+ "w07": {
   "quiz": false,
   "key": false
  }
