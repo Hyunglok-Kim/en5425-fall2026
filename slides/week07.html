@@ -400,7 +400,7 @@
   <div class="cols" style="grid-template-columns:1fr 1fr;gap:1.2vw 1.6vw;flex:0 0 auto">
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Clouds and no-data</b><br>A cloud cannot be predicted from the ground around it, and teaches nothing about the ground. Pretrain on cloud-screened chips, or leave cloudy and no-data pixels out of the loss.</p></div>
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Redundancy differs by landscape</b><br>Our fill test at 75% hidden: annual crop (0.59) and rivers (0.64) are easy, residential (0.88) and industrial (0.80) hard. A ratio tuned on fields can be too high for towns.</p></div>
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">13 bands at three resolutions</b><br>Normalise per band with training-split statistics; the 20 m and 60 m bands are blurrier, so their patches are easier to fill. Hiding whole band groups (Part 3) makes the task about spectra, not texture.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">13 bands at three resolutions</b><br>Normalise per band with training-split statistics; the 20 m and 60 m bands are blurrier, so their patches are easier to fill. Hiding whole band groups (Part 3, in the appendix) makes the task about spectra, not texture.</p></div>
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">The same place, again and again</b><br>Sentinel-2 revisits every 5 days. A random split puts the same field in pretraining and in the probe’s test set — split by location, as in Week 2, or the probe flatters you.</p></div>
   </div>
   <div class="gloss">
