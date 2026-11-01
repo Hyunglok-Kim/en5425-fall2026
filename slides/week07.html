@@ -413,14 +413,14 @@
 <!-- 12 -->
 
 <section class="slide section xl">
-  <p class="kicker">Part 3 · 5 min · judging a pretrained encoder</p>
-  <h2>Evaluation: Probe, Neighbours, Fine-Tune — and Why They Disagree</h2>
+  <p class="kicker">Part 3 · 5 min · testing the encoder</p>
+  <h2>How good is the encoder? Three ways to check — and they do not agree</h2>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Three ways to read a frozen encoder, our own EuroSAT numbers for each, and MAE’s famous gap between probe and fine-tune. What GEO-Bench-2 found about ranking Earth models is at the back; it returns in Week 10. <b>By the end:</b> fill the lab’s probe table and say what it can and cannot prove.</p></div>
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>Every Earth foundation model paper claims to be best. Which number it reports — probe, kNN or fine-tune, on which split — can change the ranking.</p></div>
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Note 07’s probe table · the Week 10 probe leaderboard · the frozen-probe row of your capstone’s four baselines · every model card you will read.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Three ways to test a frozen encoder: train one small layer on top (probe), let the nearest training chips vote (kNN), or train everything (fine-tune). Our EuroSAT numbers for each. <b>By the end:</b> fill the lab’s table and say what each number does and does not show.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>Every foundation-model paper says it is the best. Change the test — probe, kNN or fine-tune — or change the data split, and the winner can change.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Today’s lab table (Note 07) · the Week 10 comparison of public models · the “frozen probe” row of your capstone · every model card you will read.</p></div>
   </div>
-  <aside class="notes">5 minutes. The goal: students can read a results table in a foundation-model paper and ask the right first question — which protocol, which split, against which baseline.</aside>
+  <aside class="notes">5 minutes. One goal: when students see a results table in a paper, they ask three things first — which test, which data split, compared with what. Say the three tests in plain words: probe = train one small layer on top of the frozen encoder; kNN = no training, the nearest training chips vote; fine-tune = train everything. GEO-Bench-2’s evidence that rankings flip is at the back and returns in Week 10.</aside>
 </section>
 
 <!-- 13 -->
