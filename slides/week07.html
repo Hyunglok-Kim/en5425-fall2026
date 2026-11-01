@@ -288,17 +288,30 @@
   <p class="kicker">Part 2 · Why 75% · measured on EuroSAT</p>
   <h2>A dumb fill-in already rebuilds most of a chip — so the mask must be high</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Neighbouring patches repeat each other; words carry denser meaning. BERT (a text model) hides 15%, MAE 75%.</p>
-  <div class="figure" style="flex:0 0 auto;display:block;margin:0">
-    <img src="img/fig-w7-redundancy.png" data-zoom alt="Left: error on hidden pixels against the share of patches hidden, for 1,000 EuroSAT test chips. Painting the visible mean stays near 1.0. A distance-weighted fill with no learning gives 0.54 at 10%, 0.56 at 25%, 0.61 at 50%, 0.73 at 75% and 0.95 at 90%. The tiny MAE gives about 0.30 up to 50%, 0.40 at 75% and 0.78 at 90%. Right: the fill error at 75% by class, worst for residential 0.88, industrial 0.80 and permanent crop 0.79, best for annual crop 0.59." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
+  <div class="cols" style="grid-template-columns:1.3fr 1fr;gap:1.8vw;align-items:center;flex:0 0 auto">
+    <div class="figure" style="flex:0 0 auto;display:block;margin:0;min-width:0">
+      <img src="img/fig-w7-redundancy.png" data-zoom alt="Left: error on hidden pixels against the share of patches hidden, for 1,000 EuroSAT test chips. Painting the visible mean stays near 1.0. A distance-weighted fill with no learning gives 0.54 at 10%, 0.56 at 25%, 0.61 at 50%, 0.73 at 75% and 0.95 at 90%. The tiny MAE gives about 0.30 up to 50%, 0.40 at 75% and 0.78 at 90%. Right: the fill error at 75% by class, worst for residential 0.88, industrial 0.80 and permanent crop 0.79, best for annual crop 0.59." title="Click to enlarge" style="display:block;margin:0 auto;height:31vh;width:auto;max-width:100%">
+    </div>
+    <div class="card small" style="min-width:0;font-size:clamp(12.5px,1.9vh,16.5px);line-height:1.45">
+      <p style="margin:0 0 .5vh"><b class="accent">NMSE, exactly as computed</b></p>
+      <div style="display:flex;align-items:center;gap:.6vw;flex-wrap:wrap">
+        <span><b>NMSE</b> =</span>
+        <span style="display:inline-flex;flex-direction:column;text-align:center;min-width:0">
+          <span style="padding:0 .4vw .25vh;border-bottom:1.5px solid currentColor">mean over hidden pixels <i>p</i> ∈ H and bands <i>b</i> of (x̂<sub>b,p</sub> − x<sub>b,p</sub>)²</span>
+          <span style="padding:.25vh .4vw 0">mean over all pixels and bands of (x<sub>b,p</sub> − μ<sub>b</sub>)², μ<sub>b</sub> = the chip’s band mean</span>
+        </span>
+      </div>
+      <p style="margin:.7vh 0 0">fill: x̂<sub>b,p</sub> = Σ<sub>v ∈ V</sub> w<sub>p,v</sub> x<sub>b,v</sub>, &nbsp;w<sub>p,v</sub> ∝ 1 / d(p, v)², normalised over all visible pixels V</p>
+    </div>
   </div>
   <ul class="small">
     <li>No learning, yet at 75% the fill beats the mean (0.73 vs 1.0); it fails only near 90%. <span class="accent">At 75% a model helps: the tiny MAE gets 0.40.</span></li>
   </ul>
   <div class="gloss">
-    <span><b>fill</b> — visible pixels averaged with weights 1 / distance². <b>NMSE</b> — normalised mean squared error: hidden-pixel error ÷ the chip’s variance; ≈ 1 ≈ painting the mean.</span>
+    <span><b>fill</b> — the no-learning baseline, an inverse-distance² average of the visible pixels. <b>NMSE</b> — normalised mean squared error; 1 = painting each band with its mean.</span>
   </div>
   <div class="foot"><span>Computed for this lecture on 1,000 EuroSAT-MS test chips, 8-px patches (tools/week07_figs/redundancy.py) · BERT: Devlin et al. 2018, §3.1 · MAE: He et al. 2021, §1, Fig. 5</span></div>
-  <aside class="notes">2 min. The measurement behind the 75%. We hid random patches of 1,000 EuroSAT test chips and filled them with nothing smarter than a distance-weighted average of the visible pixels. The error grows slowly: 0.54 at 10%, 0.61 at 50%, 0.73 at 75% — still well below painting the mean — and only collapses near 90%. That is spatial redundancy: at BERT’s 15% the task is solved by copying neighbours, so the network learns nothing; at 75% copying is no longer enough, and our tiny MAE (blue) halves the fill’s error. Right panel, the Earth twist: towns and industry are hardest, annual crops and rivers easiest — a ratio tuned on fields may be too high for cities. Then quote the paper (§1): “Images … are natural signals with heavy spatial redundancy — a missing patch can be recovered from neighboring patches with little high-level understanding.”</aside>
+  <aside class="notes">2 min. The measurement behind the 75%. We hid random patches of 1,000 EuroSAT test chips and filled them with nothing smarter than a distance-weighted average of the visible pixels. The card on the right is the exact formula: squared error on the hidden pixels, divided by the chip’s own variance, so 1.0 means no better than painting each band with its mean; the fill is an inverse-distance-squared average of all visible pixels. The error grows slowly: 0.54 at 10%, 0.61 at 50%, 0.73 at 75% — still well below painting the mean — and only collapses near 90%. That is spatial redundancy: at BERT’s 15% the task is solved by copying neighbours, so the network learns nothing; at 75% copying is no longer enough, and our tiny MAE (blue) halves the fill’s error. Right panel, the Earth twist: towns and industry are hardest, annual crops and rivers easiest — a ratio tuned on fields may be too high for cities. Then quote the paper (§1): “Images … are natural signals with heavy spatial redundancy — a missing patch can be recovered from neighboring patches with little high-level understanding.”</aside>
 </section>
 
 <!-- 8 -->
