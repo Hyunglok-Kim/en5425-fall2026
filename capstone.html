@@ -132,6 +132,21 @@
     실패한 것이 아니에요 — 이 분야가 궁금해하는 것을 측정한 거예요. 루브릭은 비교의 엄밀함(고정된 split,
     seed, error bar, ablation, 분명하게 서술된 한계)을 채점하지, 표의 어느 행이 굵은 글씨인지를 채점하지 않아요.</span></div>
 
+  <h2><span class="lang-en">The evaluation contract — PREREG.md</span><span class="lang-ko">평가 계약 — PREREG.md</span></h2>
+  <p class="sub"><span class="lang-en">Version 1 is due with Talk 1 (9 Nov) and lives in your repo. Amendments are dated and made before the runs they affect; the test split is run once, after the freeze on Fri 4 Dec. Ten fields:</span><span class="lang-ko">v1은 발표 1(11/9)과 함께 repo에 둡니다. 수정은 날짜를 적어 해당 실험 전에; test split은 12/4(금) 고정 뒤 한 번만 실행합니다. 열 항목:</span></p>
+  <ol>
+    <li><span class="lang-en"><b>Question and hypothesis</b> — one sentence each.</span><span class="lang-ko"><b>질문과 가설</b> — 각각 한 문장.</span></li>
+    <li><span class="lang-en"><b>Task, data, labels</b> — sources, licences, label provenance.</span><span class="lang-ko"><b>task · 데이터 · 라벨</b> — 출처, 라이선스, 라벨 유래.</span></li>
+    <li><span class="lang-en"><b>Splits</b> — the block rule (space and/or time), counts per split, the manifest files and their commit hash, the leakage check you ran.</span><span class="lang-ko"><b>split</b> — 블록 규칙(공간·시간), split별 개수, manifest 파일과 commit hash, 수행한 누수 점검.</span></li>
+    <li><span class="lang-en"><b>Metric</b> — formula, aggregation and weighting, direction; the practical win threshold.</span><span class="lang-ko"><b>지표</b> — 공식, 집계·가중, 방향; 실질적인 이김의 문턱.</span></li>
+    <li><span class="lang-en"><b>The four rows</b> — random-init control, supervised baseline that tries to win, frozen probe, fine-tuned model — and what each may tune.</span><span class="lang-ko"><b>네 행</b> — random-init control, 이기려고 하는 supervised baseline, frozen probe, fine-tuned model — 그리고 각 행이 튜닝해도 되는 것.</span></li>
+    <li><span class="lang-en"><b>Tuning rules</b> — validation only; the budget per row; the checkpoint-selection rule.</span><span class="lang-ko"><b>튜닝 규칙</b> — validation에서만; 행별 예산; checkpoint 선택 규칙.</span></li>
+    <li><span class="lang-en"><b>Seeds</b> — ≥ 3 per stochastic row; deterministic references run once.</span><span class="lang-ko"><b>seed</b> — 확률적 행마다 3개 이상; 결정론적 기준은 한 번.</span></li>
+    <li><span class="lang-en"><b>Uncertainty</b> — paired block bootstrap: the block unit, ≥ 1,000 resamples, 95% intervals, the same resamples for every row.</span><span class="lang-ko"><b>불확실성</b> — paired block bootstrap: 블록 단위, 1,000회 이상 재표집, 95% 구간, 모든 행에 같은 재표집.</span></li>
+    <li><span class="lang-en"><b>Freeze and seal</b> — every recipe and inference setting frozen by Fri 4 Dec; the test split evaluated once for 7 Dec.</span><span class="lang-ko"><b>고정과 봉인</b> — 모든 레시피·추론 설정을 12/4(금)까지 고정; test split은 12/7을 위해 한 번만 평가.</span></li>
+    <li><span class="lang-en"><b>Amendment log</b> — dated entries, each before the runs it affects; post-test analyses labelled exploratory.</span><span class="lang-ko"><b>수정 기록</b> — 날짜가 있는 항목, 각각 해당 실험 전에; test 이후 분석은 탐색적이라고 표시.</span></li>
+  </ol>
+
   <h2><span class="lang-en">Milestones</span><span class="lang-ko">Milestone</span></h2>
   <div class="scroll">
     <table>
@@ -139,21 +154,30 @@
         <th>Milestone</th>
         <th><span class="lang-en">Deliverables</span><span class="lang-ko">산출물</span></th></tr></thead>
       <tbody>
-        <tr><td class="tnum">W8</td><td><b>Proposal</b></td>
-          <td><span class="lang-en">2-page proposal + in-class pitch. Graded on eval-first design and budget realism, not ambition.</span><span
-            class="lang-ko">2페이지 proposal + 수업 내 pitch. 야심이 아니라 평가 우선 설계와 예산 현실성으로 채점해요.</span></td></tr>
-        <tr><td class="tnum">W13</td><td><b><span class="lang-en">M1 — frozen &amp; launched</span><span class="lang-ko">M1 — 계획 확정 &amp; 착수</span></b></td>
-          <td><span class="lang-en">Data and evaluation protocol frozen (splits committed before any results); fine-tuning runs launched; W&amp;B project public.</span><span
-            class="lang-ko">데이터와 평가 프로토콜 고정 (결과가 나오기 전에 split을 commit); fine-tuning run 착수; W&amp;B 프로젝트 공개.</span></td></tr>
-        <tr><td class="tnum">W14</td><td><b><span class="lang-en">M2 — first result</span><span class="lang-ko">M2 — 첫 결과</span></b></td>
-          <td><span class="lang-en">Working checkpoint + first downstream result against interim baselines; structured peer review exchanged.</span><span
-            class="lang-ko">작동하는 checkpoint + 중간 baseline 대비 첫 downstream 결과; 구조화된 동료 평가 교환.</span></td></tr>
-        <tr><td class="tnum">W15</td><td><b>M3 — release candidate</b></td>
-          <td><span class="lang-en">Full evaluation + ablation tables with seeds/error bars; complete model card; release candidate tagged on HF Hub and GitHub; draft slides.</span><span
-            class="lang-ko">seed/error bar가 포함된 전체 평가 + ablation 표; 완성된 model card; HF Hub와 GitHub에 tag된 release candidate; 슬라이드 초안.</span></td></tr>
-        <tr><td class="tnum">W16</td><td><b><span class="lang-en">Recorded demo + release</span><span class="lang-ko">녹화 데모 + release</span></b></td>
-          <td><span class="lang-en">Recorded demo video (~8 min); quickstart verified from a fresh clone; final release (adapters, model card, 6-page report, W&amp;B report) all due Wed 12/16, 23:59 KST. No class meeting — finals week stays yours.</span><span
-            class="lang-ko">녹화 데모 영상(~8분); fresh clone에서 quickstart 검증; 최종 release(adapter, model card, 6페이지 보고서, W&amp;B report)는 12/16(수) 23:59 KST까지. 수업 없음 — 기말고사 주간은 다른 과목에 쓰세요.</span></td></tr>
+        <tr><td class="tnum">11/2</td><td><b><span class="lang-en">Talk 0 — current understanding</span><span class="lang-ko">발표 0 — 현재 이해</span></b></td>
+          <td><span class="lang-en">10 min in class: one lab result, three things you understand, one you do not, your project candidate. Not graded.</span><span
+            class="lang-ko">수업 중 10분: 실습 결과 하나, 이해한 것 셋, 모르는 것 하나, 프로젝트 후보. 채점 없음.</span></td></tr>
+        <tr><td class="tnum">11/9</td><td><b><span class="lang-en">Talk 1 — purpose and evaluation contract · 5%</span><span class="lang-ko">발표 1 — 목적과 평가 계약 · 5%</span></b></td>
+          <td><span class="lang-en">Question and hypothesis; task, place, period, labels; the metric, win threshold and four rows; the evaluation contract (blocked train/validation/test, validation-only tuning, ≥ 3 seeds, paired block bootstrap; test sealed until 4 Dec); base model and budget; risk. Replaces the written proposal; PREREG.md v1 in the repo. Slides (PDF) by Sun 11/8 23:59.</span><span
+            class="lang-ko">질문과 가설; task·지역·기간·라벨; 지표·이김의 문턱·네 행; 평가 계약(블록 train/validation/test, validation에서만 튜닝, seed 3개 이상, paired block bootstrap; test는 12/4까지 봉인); base model과 예산; 리스크. 서면 제안서 대체; repo에 PREREG.md v1. 슬라이드(PDF) 11/8(일) 23:59.</span></td></tr>
+        <tr><td class="tnum">11/16</td><td><b><span class="lang-en">Talk 2 — data archaeology and model design · 5%</span><span class="lang-ko">발표 2 — 데이터 조사와 모델 설계 · 5%</span></b></td>
+          <td><span class="lang-en">Project data and its labels; the base model’s pretraining corpus, targets, licence and overlap with your evaluation data; frozen manifests committed before training; input contract; input → tokens → encoder → target design; the pilot plan. Slides by Sun 11/15 23:59.</span><span
+            class="lang-ko">프로젝트 데이터와 라벨; base model의 pretraining 코퍼스·target·라이선스·내 평가 데이터와의 겹침; 학습 전에 commit한 고정 manifest; 입력 계약; 입력 → 토큰 → encoder → target 설계; 파일럿 계획. 슬라이드 11/15(일) 23:59.</span></td></tr>
+        <tr><td class="tnum">11/23</td><td><b><span class="lang-en">Talk 3 — pilot evidence and compute decision · 5%</span><span class="lang-ko">발표 3 — 파일럿 증거와 compute 결정 · 5%</span></b></td>
+          <td><span class="lang-en">Frozen-probe diagnostic of the checkpoint; two mini-MAE pilots → chosen continuation with resume → probe; adaptation pilot and recipe; step time, memory, resume; quartet readiness; go/shrink decision with a committed run matrix. Slides by Sun 11/22 23:59.</span><span
+            class="lang-ko">checkpoint의 frozen-probe 진단; mini-MAE 파일럿 둘 → 재개를 포함한 추가 학습 → probe; 적응 파일럿과 레시피; step 시간·메모리·재개; 네 행 준비 상태; run matrix를 commit한 진행/축소 결정. 슬라이드 11/22(일) 23:59.</span></td></tr>
+        <tr><td class="tnum">11/30</td><td><b><span class="lang-en">Talk 4 — controlled runs, validation results · 5%</span><span class="lang-ko">발표 4 — 통제 실험, validation 결과 · 5%</span></b></td>
+          <td><span class="lang-en">Validation table with ≥ 3 rows, a qualitative figure with a failure case, debugging evidence, compute vs budget, the plan to freeze by Fri 12/4 and run the sealed test once. Slides by Sun 11/29 23:59.</span><span
+            class="lang-ko">3행 이상의 validation 표, 실패 사례가 있는 정성 그림, 디버깅 증거, compute vs 예산, 12/4(금) 고정 후 봉인된 test를 한 번 실행하는 계획. 슬라이드 11/29(일) 23:59.</span></td></tr>
+        <tr><td class="tnum">12/7</td><td><b><span class="lang-en">Talk 5 — held-out results + peer code review</span><span class="lang-ko">발표 5 — 최종(test) 결과 + 동료 코드 리뷰</span></b></td>
+          <td><span class="lang-en">Complete test table with ≥ 3 seeds and paired block-bootstrap intervals, ablation, disaggregation, the honest conclusion, draft model card; five-person review cycle in session (Dr. Budamala). Slides by Sun 12/6 23:59.</span><span
+            class="lang-ko">seed 3개 이상과 paired block-bootstrap 구간이 있는 완성된 test 표, ablation, 세분화, 정직한 결론, model card 초안; 수업 중 5인 순환 리뷰(Budamala 박사). 슬라이드 12/6(일) 23:59.</span></td></tr>
+        <tr><td class="tnum">12/14</td><td><b><span class="lang-en">Final talk</span><span class="lang-ko">최종 발표</span></b></td>
+          <td><span class="lang-en">15–20 min + 5 of questions, in class: the story, the four-row table defended, a live quickstart from a fresh clone, the release, what the review fixed. Slides by Sun 12/13 23:59.</span><span
+            class="lang-ko">수업 중 15–20분 + 질의 5분: 스토리, 네 행 표의 방어, fresh clone에서 라이브 quickstart, 릴리스, 리뷰로 고친 것. 슬라이드 12/13(일) 23:59.</span></td></tr>
+        <tr><td class="tnum">12/16</td><td><b><span class="lang-en">Release package</span><span class="lang-ko">릴리스 패키지</span></b></td>
+          <td><span class="lang-en">HF Hub release (adapters + task head or full weights, exact base revision, model card), tagged GitHub repo with a working quickstart, report PDF (≤ 6 pages, W&amp;B report linked) submitted on this site — Wed 12/16, 23:59 KST. Talk 5 + final talk + this package = the final 20%.</span><span
+            class="lang-ko">HF Hub release(adapter + task head 또는 전체 가중치, 정확한 base revision, model card), quickstart가 동작하는 tag된 GitHub repo, 보고서 PDF(≤ 6쪽, W&amp;B report 링크) 이 사이트에 제출 — 12/16(수) 23:59 KST. 발표 5 + 최종 발표 + 이 패키지 = 최종 20%.</span></td></tr>
       </tbody>
     </table>
   </div>
@@ -174,16 +198,8 @@
   </div>
 
   <h2><span class="lang-en">Where the grade comes from</span><span class="lang-ko">성적은 어디서 오나요</span></h2>
-  <p class="sub"><span class="lang-en">The capstone drives the 60% project grade: lab portfolio 20% (best 10 of 11 weekly
-    lab notes — the labs are the skill acquisition), proposal 5%, milestones M1–M3 15% (graded on
-    process: eval frozen before results, honest interim tables), final deliverable 20% (release
-    quality, report + model card, demo). See the <a href="syllabus.html">syllabus</a> for the full
-    breakdown and the AI-agent policy that applies to every line of capstone code.</span><span
-    class="lang-ko">Capstone이 프로젝트 성적 60%를 이끌어요: lab 포트폴리오 20% (주간 lab note 11개 중
-    상위 10개 — lab이 곧 기술 습득이에요), proposal 5%, milestone M1–M3 15% (과정으로 채점: 결과 전에
-    평가 고정, 정직한 중간 결과표), 최종 산출물 20% (release 품질, 보고서 + model card, demo).
-    전체 세부 내역과 capstone 코드의 모든 줄에 적용되는 AI 에이전트 정책은
-    <a href="syllabus.html">강의계획</a>에서 확인하세요.</span></p>
+  <p class="sub"><span class="lang-en">The capstone drives the 60% project grade: lab/studio portfolio 20% (best 10 of 11 weekly notes — the labs and studios are the skill acquisition), project talks 1–4 20% (5% each: purpose 11/9, data 11/16, methodology 11/23, first results 11/30 — graded on process: evaluation frozen before results, honest interim tables), final 20% (the 12/7 results talk with peer review, the 12/14 final talk and the 12/16 release package: release quality, report + model card). The talks replace the written proposal and the M1–M3 PDFs; the weights are unchanged. See the <a href="syllabus.html">syllabus</a> for the full breakdown and the AI-agent policy that applies to every line of capstone code.</span><span
+    class="lang-ko">Capstone이 프로젝트 성적 60%를 이끌어요: lab/스튜디오 포트폴리오 20% (주간 노트 11개 중 상위 10개 — lab과 스튜디오가 곧 기술 습득이에요), 프로젝트 발표 1–4 20% (각 5%: 11/9 연구 목적, 11/16 데이터, 11/23 방법론, 11/30 예비 결과 — 과정으로 채점: 결과 전에 평가 고정, 정직한 중간 결과표), 최종 20% (12/7 결과 발표와 동료 리뷰, 12/14 최종 발표, 12/16 릴리스 패키지: release 품질, 보고서 + model card). 발표가 서면 제안서와 M1–M3 PDF를 대체하며 비중은 그대로예요. 전체 세부 내역과 capstone 코드의 모든 줄에 적용되는 AI 에이전트 정책은 <a href="syllabus.html">강의계획</a>에서 확인하세요.</span></p>
 </div>
 </body>
 </html>

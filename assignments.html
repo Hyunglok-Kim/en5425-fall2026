@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     { p: "book", en: "Book summaries — OPTIONAL BONUS", ko: "북 정리 — 선택 (보너스)", sEn: "handwritten scan, no AI · each one forgives one wrong quiz answer", sKo: "손글씨 스캔, AI 금지 · 한 편당 퀴즈 오답 1개 면제" },
     { p: "vid",  en: "Video summaries", ko: "영상 정리", sEn: "0.5-page PDF", sKo: "0.5페이지 PDF" },
     { p: "qz",   en: "Quiz write-ups", ko: "퀴즈 정리", sEn: "redo today's quiz in your own words — PDF, due before class ends (Mon 16:00)", sKo: "오늘 퀴즈를 내 언어로 다시 풀어 PDF 제출 · 수업 끝나기 전(월 16:00) 마감" },
-    { p: "",     en: "HW0 & Capstone", ko: "HW0 · Capstone", sEn: "reports & milestones", sKo: "보고서 · 마일스톤" },
+    { p: "",     en: "HW0 & Capstone", ko: "HW0 · Capstone", sEn: "HW0, project talks & release", sKo: "HW0 · 프로젝트 발표 · 릴리스" },
   ];
 
   /* ---- mirror (static copy, no API): point to the live class address ---- */
@@ -92,9 +92,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     return Number.isFinite(ms) ? ms : null;
   };
   const wkOf = (id) => parseInt(String(id).replace(/^[a-z]+/, ""), 10) || "";
-  const CAP = { hw0: ["HW0 — PDF report", "HW0 — PDF 보고서"], proposal: ["Capstone proposal (PDF)", "Capstone 제안서 (PDF)"],
-    m1: ["Milestone M1 (PDF)", "마일스톤 M1 (PDF)"], m2: ["Milestone M2 (PDF)", "마일스톤 M2 (PDF)"],
-    m3: ["Milestone M3 (PDF)", "마일스톤 M3 (PDF)"], final: ["Final deliverable (PDF)", "최종 산출물 (PDF)"] };
+  const CAP = { hw0: ["HW0 — PDF report", "HW0 — PDF 보고서"], proposal: ["Talk 1 · research purpose — slides (PDF)", "발표 1 · 연구 목적 — 슬라이드 (PDF)"],
+    m1: ["Talk 2 · data — slides (PDF)", "발표 2 · 데이터 — 슬라이드 (PDF)"], m2: ["Talk 3 · methodology — slides (PDF)", "발표 3 · 방법론 — 슬라이드 (PDF)"],
+    m3: ["Talk 4 · first results — slides (PDF)", "발표 4 · 예비 결과 — 슬라이드 (PDF)"], talk5: ["Talk 5 · results — slides (PDF)", "발표 5 · 결과 — 슬라이드 (PDF)"],
+    talk6: ["Final talk — slides (PDF)", "최종 발표 — 슬라이드 (PDF)"], final: ["Final release package — report PDF with links", "최종 릴리스 패키지 — 링크 포함 보고서 PDF"] };
   const labelOf = (r) => {
     const w = wkOf(r.id);
     let base = r.title

@@ -386,21 +386,21 @@ for x in loader:
 
 <section class="slide xl">
   <p class="kicker">Part 5 · 2 min · next Monday</p>
-  <h2>Monday 9 Nov: your first project talk is the research purpose</h2>
+  <h2>9 Nov, your first talk: purpose and evaluation contract</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Ten minutes + three of questions · slides (PDF) on this site by Sun 8 Nov 23:59 · it replaces the written proposal.</p>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.2vw 1.6vw;flex:0 0 auto">
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">1 · The question</b><br>One sentence, and the answer you expect. <i>Does a pretrained Earth model beat a from-scratch U-Net at mapping floods in Korea?</i></p></div>
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">2 · Why a foundation model</b><br>What the pretraining should give you that the Week 4 U-Net from scratch cannot — said now, before you have a number.</p></div>
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">3 · Task, place, period, labels</b><br>One line each; the data talk on 16 Nov goes deep. Name the label source and its weakness.</p></div>
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">4 · Success, named now</b><br>The metric, and the four baselines by name: random-init control, supervised baseline that tries to win, frozen probe, fine-tuned model.</p></div>
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">5 · Budget</b><br>Base model and size; GPU-hours on Kaggle or Colab’s free tier; what you cut if it does not fit — the plan, never the evaluation.</p></div>
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">6 · Risk and plan B</b><br>The one thing most likely to break — data access, labels, compute — and what you do then.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">1 · Question and hypothesis</b><br>One sentence each, and why pretraining might help this task.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">2 · Task, place, period, labels</b><br>One line each; the label source and its weakness.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">3 · Success, defined now</b><br>The metric and its aggregation, a practical win threshold, and the four rows: random-init control, supervised baseline that tries to win, frozen probe, fine-tuned model.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">4 · Evaluation contract</b><br>Blocked train / validation / test; tuning on validation only; ≥ 3 seeds; error bars by paired block bootstrap; test sealed until 4 Dec. PREREG.md v1 in your repo.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">5 · Base model and budget</b><br>Model, exact revision, licence, size; free-tier GPU-hours for four rows, tuning, one ablation, restarts; what you shrink if it does not fit — never the evaluation.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">6 · Risk and plan B</b><br>The one thing most likely to break and what you do then. Amendments are dated, before the runs they affect.</p></div>
   </div>
   <div class="gloss">
-    <span><b>random-init control</b> — your fine-tuning recipe on an untrained copy of the same architecture. <b>frozen probe</b> — the pretrained features with one light head (slide 11).</span>
+    <span><b>paired block bootstrap</b> — resample blocks of space or time, the same blocks for every row, ≥ 1,000 times → a 95% interval</span>
   </div>
-  <div class="foot"><span>Then: 16 Nov data · 23 Nov methodology · 30 Nov first results · 7 Dec results · 14 Dec final talk · the four baselines: Capstone page</span></div>
-  <aside class="notes">2 min. Read the six cards once; they are the slide order for next Monday. Stress two: four — the success criterion is written before any training, with all four baselines named, because the capstone is graded on the rigour of the comparison, not on which row wins; and five — if the plan does not fit a free tier, shrink the plan, never the evaluation. Logistics: ten minutes plus three of questions, slides as a PDF by Sunday night on this site; the talk replaces the written proposal. Then the sequence in the foot: data, methodology, first results, results, and the final talk on 14 December.</aside>
+  <div class="foot"><span>Then: 16 Nov data &amp; design · 23 Nov pilots &amp; compute decision · 30 Nov controlled runs · 7 Dec held-out results · 14 Dec final talk · PREREG.md template: Capstone page</span></div>
+  <aside class="notes">2 min. Read the six cards once; they are the slide order for next Monday. Stress three things. Three: the success criterion is written before any training, with all four rows named, because the capstone is graded on the rigour of the comparison, not on which row wins. Four: this is what GraphCast's team did — the development/test contract fixed before the final runs; your test split is sealed until 4 December and run once, for the 7 December table; PREREG.md version 1 goes in the repo this week, and the Capstone page has the ten fields. Five: if the plan does not fit a free tier, shrink the plan, never the evaluation. Logistics: ten minutes plus three of questions, slides as a PDF by Sunday night on this site; the talk replaces the written proposal. Then the sequence in the foot — it follows the order real foundation-model teams work in: data and design, pilots and the compute decision, controlled runs, held-out results, release.</aside>
 </section>
 
 <!-- 16 -->

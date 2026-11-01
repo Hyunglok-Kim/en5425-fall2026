@@ -797,8 +797,8 @@
     },
     {
      "min": 2,
-     "topic": "Guide for the 9 Nov talk — the research purpose: question, why an FM, task/place/period/labels, success criterion with the four baselines, budget, risk.",
-     "topic_ko": "11/9 발표 가이드 — 연구 목적: 질문, 왜 FM인가, task·지역·기간·라벨, baseline 4종을 포함한 성공 기준, 예산, 리스크"
+     "topic": "Guide for the 9 Nov talk — purpose and evaluation contract: question, task, metric and win threshold, the four rows, blocked train/validation/test with the test sealed, base model and budget, risk; PREREG.md v1.",
+     "topic_ko": "11/9 발표 가이드 — 목적과 평가 계약: 질문, task, 지표와 이김의 문턱, 네 행, test를 봉인한 블록 train/validation/test, base model과 예산, 리스크; PREREG.md v1"
     }
    ],
    "lab": {
@@ -812,8 +812,8 @@
      "PyTorch AMP (bf16/fp16)",
      "W&B"
     ],
-    "deliverable": "Note 07 — due Sun 11/8 23:59: the five-sentence contract, probe table (pretrained vs random vs supervised), reconstruction grids, peak memory. Slides for the 9 Nov talk (PDF) also by Sun 11/8 23:59.",
-    "deliverable_ko": "Note 07 — 11/8(일) 23:59: 다섯 문장 contract, probe 표(pretrained vs random vs supervised), reconstruction grid, peak memory. 11/9 발표 슬라이드(PDF)도 11/8(일) 23:59까지",
+    "deliverable": "Note 07 — due Sun 11/8 23:59: the five-sentence contract, probe table (pretrained vs random vs supervised), reconstruction grids, peak memory. Keep the mini-MAE checkpoint, grids, probe table and mask-ratio logs — they are your evidence for Talks 2–3. Talk 1 slides (PDF) also by Sun 11/8 23:59.",
+    "deliverable_ko": "Note 07 — 11/8(일) 23:59: 다섯 문장 contract, probe 표(pretrained vs random vs supervised), reconstruction grid, peak memory. mini-MAE checkpoint·grid·probe 표·마스킹 비율 로그는 보관 — 발표 2–3의 증거. 발표 1 슬라이드(PDF)도 11/8(일) 23:59까지.",
     "homework": "Masking-ratio ablation (50/75/90%) added to Note 07; collapse report (≤ 10 pages, PDF) due Sun 11/15 23:59.",
     "homework_ko": "masking-ratio ablation(50/75/90%)을 Note 07에 추가 · collapse 보고서(≤ 10쪽, PDF)는 11/15(일) 23:59"
    },
@@ -841,34 +841,29 @@
    "date": "2026-11-09",
    "concept": [
     {
-     "min": 15,
-     "topic": "Foundation-model definition (Bommasani): emergence and homogenization; what transfers from the LLM playbook to EO/weather and what doesn't (no internet-scale text; data is spatially correlated and physically constrained).",
-     "topic_ko": "foundation model의 정의(Bommasani): emergence와 homogenization · LLM playbook에서 EO/weather로 이전되는 것과 아닌 것(인터넷 규모 텍스트 부재 · 데이터는 공간적으로 상관되고 물리적으로 제약됨)"
-    },
-    {
-     "min": 20,
-     "topic": "Scaling laws: Kaplan power laws, Chinchilla compute-optimal N vs D, data-constrained scaling; worked example live: 'you have 10 GPU-hours and 50 GB of chips — solve for model size'.",
-     "topic_ko": "scaling law: Kaplan power law, Chinchilla compute-optimal N vs D, data-constrained scaling · 라이브 실습 예제: '10 GPU-hours와 50 GB chip이 있다 — 모델 크기를 구하라'"
+     "min": 65,
+     "topic": "Project talks 1 — purpose and evaluation contract (10 min + 3 min of questions per student; the drawn questioner asks first). What to prepare: Presentations page.",
+     "topic_ko": "프로젝트 발표 1 — 목적과 평가 계약(1인 10분 + 질의 3분; 추첨된 질문자가 첫 질문). 준비 내용은 발표 페이지."
     },
     {
      "min": 10,
-     "topic": "When pretraining pays: transfer gap vs supervised baselines; PANGAEA/GEO-Bench-2 evidence that it often doesn't — framing your capstone claim honestly.",
-     "topic_ko": "pretraining이 수지맞는 조건: supervised baseline 대비 transfer gap · 흔히 그렇지 않다는 PANGAEA/GEO-Bench-2 근거 — capstone 주장을 정직하게 세우기"
+     "topic": "Foundation models in one slide, then compute budgeting with Chinchilla: what your free-tier GPU-hours can train or fine-tune, worked on one student’s contract.",
+     "topic_ko": "foundation model 한 장, 그리고 Chinchilla로 compute 예산 세우기: 무료 티어 GPU-hours로 무엇을 학습·fine-tuning할 수 있는지, 한 학생의 계약으로 직접 계산"
     },
     {
      "min": 10,
-     "topic": "Emergence skepticism and evaluation-metric artifacts; what 'emergent' could even mean for a weather model.",
-     "topic_ko": "emergence 회의론과 평가 metric의 artifact · 기상 모델에서 'emergent'가 도대체 무엇을 뜻할 수 있는가"
+     "topic": "Corpus archaeology: how Prithvi-EO-2.0 (§2) and Aurora (App. B) built, filtered and split their pretraining corpora, and what to extract into your BASE_MODEL_AUDIT.md; when pretraining pays (PANGAEA, GEO-Bench-2).",
+     "topic_ko": "코퍼스 고고학: Prithvi-EO-2.0(§2)과 Aurora(App. B)가 pretraining 코퍼스를 어떻게 만들고 거르고 나눴는지, BASE_MODEL_AUDIT.md에 무엇을 뽑아 적을지; pretraining이 이득인 조건(PANGAEA, GEO-Bench-2)"
     },
     {
-     "min": 5,
-     "topic": "Lab briefing: you will fit your own scaling law today.",
-     "topic_ko": "lab 브리핑: 오늘 본인의 scaling law를 직접 fitting"
+     "min": 3,
+     "topic": "Next Monday’s talk — data archaeology and model design: project data, the base model’s corpus and targets, frozen manifests, input contract, input → tokens → encoder → target, the pilot plan.",
+     "topic_ko": "다음 주 발표 — 데이터 조사와 모델 설계: 프로젝트 데이터, base model의 코퍼스와 target, 고정 manifest, 입력 계약, 입력 → 토큰 → encoder → target, 파일럿 계획."
     }
    ],
    "lab": {
-    "task": "Fit a mini scaling law for your own model family. The 4-size sweep (launched pre-class as homework) is already done; the 60 in-class minutes go to fitting and diagnosing the power law: plot reconstruction loss (and probe accuracy) vs params on log–log, fit the power law, stress-test where the fit breaks, and extrapolate to your capstone budget — writing the prediction into your proposal.",
-    "task_ko": "본인 모델 계열의 mini scaling law fitting. 4개 크기 sweep(수업 전 homework로 launch)은 이미 완료 · 수업 내 60분은 power law fitting과 진단에 사용: reconstruction loss(와 probe 정확도)를 params 대비 log–log로 플롯, power law fitting, fit이 깨지는 지점 스트레스 테스트, capstone 예산으로 외삽 — 그 예측을 제안서에 기록",
+    "task": "Project studio (65 min): pull your project data; commit blocked train/validation/test manifests before fitting anything; training-split normalisation statistics; a model-input gallery; start BASE_MODEL_AUDIT.md from the base model’s paper and config.",
+    "task_ko": "프로젝트 스튜디오(65분): 프로젝트 데이터 받기; 무엇이든 적합하기 전에 블록 train/validation/test manifest를 commit; 학습 split 정규화 통계; 모델 입력 갤러리; base model의 논문·config로 BASE_MODEL_AUDIT.md 시작.",
     "data": [
      "W3 chip corpus (fixed)",
      "W7 mini-MAE at 4 sizes (~0.1M/0.5M/2M/8M params)"
@@ -878,8 +873,8 @@
      "agent-orchestrated multi-run script",
      "matplotlib"
     ],
-    "deliverable": "Note 09 with the log–log fit reported as a prediction interval plus enumerated failure modes (not a point prediction) + a one-paragraph capstone budget memo (chosen N, D, GPU-hours, predicted loss range).",
-    "deliverable_ko": "Note 09: log–log fit을 (점 예측이 아니라) 예측 구간 + 열거된 실패 모드로 보고 + 한 문단짜리 capstone 예산 메모(선택한 N, D, GPU-hours, 예측 loss 범위)",
+    "deliverable": "Note 09: data pipeline notes, gallery, split map with leakage check, normalisation table, BASE_MODEL_AUDIT.md draft. Talk 2 slides (PDF) by Sun 11/15 23:59.",
+    "deliverable_ko": "Note 09: 데이터 파이프라인 기록, 갤러리, 누수 점검이 있는 split 지도, 정규화 표, BASE_MODEL_AUDIT.md 초안. 발표 2 슬라이드(PDF) 11/15(일) 23:59.",
     "homework": "Pre-class: launch the 4-size scaling sweep (~0.1M/0.5M/2M/8M params, fixed wall-clock on the fixed chip corpus) so all runs finish before the lab.",
     "homework_ko": "수업 전: 4개 크기 scaling sweep(~0.1M/0.5M/2M/8M params, 고정 chip corpus에서 고정 wall-clock) launch — lab 전에 모든 run이 끝나도록"
    },
@@ -935,34 +930,34 @@
    "date": "2026-11-16",
    "concept": [
     {
-     "min": 15,
-     "topic": "Generation 1: SatMAE (temporal/spectral tokens, band-group masking), Scale-MAE (GSD positional encoding, Laplacian decoder), Prithvi-EO-1.0/2.0 (HLS, 3D geolocation+date embeddings, TerraTorch fine-tuning stack — the closest published blueprint to your capstone).",
-     "topic_ko": "1세대: SatMAE(temporal/spectral token, band-group masking), Scale-MAE(GSD positional encoding, Laplacian decoder), Prithvi-EO-1.0/2.0(HLS, 3D geolocation+date embedding, TerraTorch fine-tuning 스택 — capstone에 가장 가까운 공개 청사진)"
-    },
-    {
-     "min": 15,
-     "topic": "Generation 2, sensor-agnostic and multimodal: DOFA/Copernicus-FM (wavelength-conditioned hypernetwork patch embeds), TerraMind (any-to-any generation, Thinking-in-Modalities), Galileo (dual global+local latent objectives, structured space/time/modality masking), SpectralGPT, SkySense.",
-     "topic_ko": "2세대, sensor-agnostic·멀티모달: DOFA/Copernicus-FM(wavelength-conditioned hypernetwork patch embed), TerraMind(any-to-any 생성, Thinking-in-Modalities), Galileo(global+local 이중 latent objective, 구조화된 space/time/modality masking), SpectralGPT, SkySense"
-    },
-    {
-     "min": 15,
-     "topic": "Generation 3, embeddings as the product: AlphaEarth Foundations (64-D annual 10 m embeddings in GEE — a 'virtual satellite', not a backbone), TESSERA (open competitor), Major-TOM embeddings; OlmoEarth as the fully open small-model + platform exemplar; DINOv3-satellite as the outsider that wins on high-res RGB.",
-     "topic_ko": "3세대, 제품으로서의 embedding: AlphaEarth Foundations(GEE의 64-D 연간 10 m embedding — backbone이 아니라 'virtual satellite'), TESSERA(공개 경쟁자), Major-TOM embedding · 완전 공개 소형 모델 + 플랫폼 모범인 OlmoEarth · 고해상도 RGB에서 이기는 외부자 DINOv3-satellite"
+     "min": 65,
+     "topic": "Project talks 2 — data archaeology and model design (10 min + 3 min of questions per student; the drawn questioner asks first). What to prepare: Presentations page.",
+     "topic_ko": "프로젝트 발표 2 — 데이터 조사와 모델 설계(1인 10분 + 질의 3분; 추첨된 질문자가 첫 질문). 준비 내용은 발표 페이지."
     },
     {
      "min": 10,
-     "topic": "Honest evaluation: GEO-Bench → GEO-Bench-2 capability groups ('no model dominates'), PANGAEA's U-Net reality check, the 89-GFM usability study; what your capstone eval must therefore include.",
-     "topic_ko": "정직한 평가: GEO-Bench → GEO-Bench-2 capability group('지배적 모델은 없다'), PANGAEA의 U-Net 현실 점검, 89개 GFM usability 연구 · 따라서 capstone eval에 반드시 들어가야 할 것"
+     "topic": "Three generations of Earth foundation models in three slides — masked pixels (SatMAE, Prithvi-EO-2.0), sensor-agnostic (DOFA, TerraMind), embedding fields (AlphaEarth, TESSERA) — and which one your project touches.",
+     "topic_ko": "지구 foundation model 3세대를 세 장으로 — masked pixels(SatMAE, Prithvi-EO-2.0), sensor-agnostic(DOFA, TerraMind), embedding field(AlphaEarth, TESSERA) — 내 프로젝트는 어디에 닿는가"
+    },
+    {
+     "min": 10,
+     "topic": "Code: load Prithvi-EO-2.0 (TerraTorch), OlmoEarth-Nano and Presto; frozen probe on your validation split; pilot discipline — tiny-batch overfit, step time, peak memory, interrupt and resume.",
+     "topic_ko": "코드: Prithvi-EO-2.0(TerraTorch), OlmoEarth-Nano, Presto 불러오기; 내 validation split에서 frozen probe; 파일럿 규율 — 작은 배치 overfit, step 시간, peak memory, 중단과 재개"
     },
     {
      "min": 5,
-     "topic": "Lab briefing.",
-     "topic_ko": "lab 브리핑"
+     "topic": "Honest evaluation: GEO-Bench-2’s “no model dominates” and PANGAEA’s U-Net check.",
+     "topic_ko": "정직한 평가: GEO-Bench-2의 “어떤 모델도 다 이기지 않는다”, PANGAEA의 U-Net 점검"
+    },
+    {
+     "min": 3,
+     "topic": "Next Monday’s talk — pilot evidence and compute decision: checkpoint diagnostic, two mini-MAE pilots → continuation with resume → probe, adaptation pilot and recipe, engineering numbers, quartet readiness, go/shrink with a committed run matrix.",
+     "topic_ko": "다음 주 발표 — 파일럿 증거와 compute 결정: checkpoint 진단, mini-MAE 파일럿 둘 → 재개 포함 추가 학습 → probe, 적응 파일럿과 레시피, 엔지니어링 숫자, 네 행 준비 상태, run matrix를 commit한 진행/축소."
     }
    ],
    "lab": {
-    "task": "Mini-GFM leaderboard, in-class core: linear-probe three frozen encoders — (a) your W7 mini-MAE, (b) OlmoEarth-Nano (HF checkpoint), (c) Presto — on ONE classification task with the same split: EuroSAT-MS.",
-    "task_ko": "mini-GFM leaderboard, 수업 내 핵심: frozen encoder 3종 — (a) W7 mini-MAE, (b) OlmoEarth-Nano(HF checkpoint), (c) Presto — 를 같은 split의 단일 분류 task에서 linear probe: EuroSAT-MS",
+    "task": "Project studio (65 min): two mini-MAE pilots on the Week 7 corpus at a fixed time budget → choose one → continue ten minutes with an interruption and resume → frozen probe; frozen probe of your public base model on your validation split; a short adaptation pilot with memory and throughput measured.",
+    "task_ko": "프로젝트 스튜디오(65분): 7주차 코퍼스에서 같은 시간 예산의 mini-MAE 파일럿 둘 → 하나 선택 → 중단·재개를 포함해 10분 추가 학습 → frozen probe; 내 validation split에서 공개 base model의 frozen probe; 메모리·처리량을 측정한 짧은 적응 파일럿.",
     "data": [
      "EuroSAT-MS",
      "OlmoEarth-Nano checkpoint (HF Hub)",
@@ -974,8 +969,8 @@
      "GEE (optional)",
      "W&B"
     ],
-    "deliverable": "Note 10 — leaderboard table + 200-word 'which encoder for which task and why', citing GEO-Bench-2's capability-group logic.",
-    "deliverable_ko": "Note 10 — leaderboard 표 + GEO-Bench-2 capability-group 논리를 인용한 200단어짜리 '어떤 task에 어떤 encoder를, 왜'",
+    "deliverable": "Note 10: pilot table (two sizes + continuation), probe results, memory/throughput/resume evidence, the run matrix. Talk 3 slides (PDF) by Sun 11/22 23:59.",
+    "deliverable_ko": "Note 10: 파일럿 표(두 크기 + 추가 학습), probe 결과, 메모리·처리량·재개 증거, run matrix. 발표 3 슬라이드(PDF) 11/22(일) 23:59.",
     "homework": "Optional extensions: a dense-task probe (Sen1Floods11 with a 1×1-conv head) and a fourth AlphaEarth Satellite Embeddings column from GEE over a Korean AOI. Required: capstone corpus curation — assemble and document your fine-tuning dataset (default track) or pretraining chip corpus (Hydro-FM team).",
     "homework_ko": "선택 확장: dense-task probe(1×1-conv head를 단 Sen1Floods11)와 한국 AOI에 대한 GEE의 AlphaEarth Satellite Embeddings 네 번째 열. 필수: capstone corpus 큐레이션 — fine-tuning dataset(기본 트랙) 또는 pretraining chip corpus(Hydro-FM 팀)를 구성하고 문서화"
    },
@@ -1027,29 +1022,29 @@
    "date": "2026-11-23",
    "concept": [
     {
+     "min": 65,
+     "topic": "Project talks 3 — pilot evidence and compute decision (10 min + 3 min of questions per student; the drawn questioner asks first). What to prepare: Presentations page.",
+     "topic_ko": "프로젝트 발표 3 — 파일럿 증거와 compute 결정(1인 10분 + 질의 3분; 추첨된 질문자가 첫 질문). 준비 내용은 발표 페이지."
+    },
+    {
      "min": 10,
-     "topic": "Problem setup: atmospheric state as a tensor (variables × levels × lat × lon), ERA5 as corpus, initial-condition provenance (ERA5 vs operational analysis — an evaluation trap), 2026 operational status (AIFS, NOAA AIGFS, WeatherNext 2).",
-     "topic_ko": "문제 설정: 대기 상태를 tensor로(variables × levels × lat × lon), corpus로서의 ERA5, 초기조건 출처(ERA5 vs 현업 analysis — 평가의 함정), 2026 현업 운영 현황(AIFS, NOAA AIGFS, WeatherNext 2)"
+     "topic": "Evaluation you can defend, for every track: metric definitions, paired block bootstrap over blocks of time and space, validation vs the sealed test, what a “win” means.",
+     "topic_ko": "어느 트랙이든 방어할 수 있는 평가: 지표 정의, 시간·공간 블록의 paired block bootstrap, validation과 봉인된 test, ‘이김’의 정의"
     },
     {
-     "min": 20,
-     "topic": "Paradigm tour, one architecture slide each: deterministic transformers (Pangu's 3D Earth-specific attention, Stormer, FuXi/FengWu), graph/mesh (GraphCast's icosahedral encode-process-decode, AIFS), spherical operators (SFNO — why FFTs on lat-lon grids are wrong at the poles), probabilistic/generative (GenCast diffusion, FGN/WeatherNext 2, FourCastNet 3), hybrid (NeuralGCM), obs-direct (Aardvark, GraphDOP), and the pretrain→fine-tune FMs proper (ClimaX variable tokenization, Aurora, Prithvi-WxC).",
-     "topic_ko": "패러다임 투어, 아키텍처당 슬라이드 한 장: deterministic transformer(Pangu의 3D Earth-specific attention, Stormer, FuXi/FengWu), graph/mesh(GraphCast의 icosahedral encode-process-decode, AIFS), spherical operator(SFNO — lat-lon 격자의 FFT가 극에서 틀리는 이유), probabilistic/generative(GenCast diffusion, FGN/WeatherNext 2, FourCastNet 3), hybrid(NeuralGCM), obs-direct(Aardvark, GraphDOP), 그리고 진짜 pretrain→fine-tune FM(ClimaX variable tokenization, Aurora, Prithvi-WxC)"
+     "min": 10,
+     "topic": "Weather track: the state tensor and ERA5, one slide per paradigm (Pangu, GraphCast, Aurora/Stormer), lat-weighted RMSE, ACC, CRPS, rollout stability. If no weather-track project exists, this time goes to the studio.",
+     "topic_ko": "기상 트랙: 상태 텐서와 ERA5, 패러다임별 한 장(Pangu, GraphCast, Aurora/Stormer), lat-weighted RMSE, ACC, CRPS, rollout 안정성. 기상 트랙 프로젝트가 없으면 이 시간은 스튜디오로"
     },
     {
-     "min": 15,
-     "topic": "Rollout stability engineering: multi-step loss curricula (GraphCast's schedule), fine-tuning horizon, blurring/double-penalty, power-spectra diagnostics, effective resolution.",
-     "topic_ko": "rollout 안정성 엔지니어링: multi-step loss curriculum(GraphCast의 schedule), fine-tuning horizon, blurring/double-penalty, power-spectra 진단, effective resolution"
-    },
-    {
-     "min": 15,
-     "topic": "Metrics you must be able to derive: lat-weighted RMSE, ACC vs climatology (and the 0.6 'useful skill' convention), bias; probabilistic: CRPS as generalized MAE, spread–skill, rank histograms; the WeatherBench2 protocol (test years, headline scorecard).",
-     "topic_ko": "직접 유도할 줄 알아야 하는 metric: lat-weighted RMSE, climatology 대비 ACC(그리고 0.6 'useful skill' 관례), bias · 확률적 metric: generalized MAE로서의 CRPS, spread–skill, rank histogram · WeatherBench2 protocol(test 연도, headline scorecard)"
+     "min": 3,
+     "topic": "Next Monday’s talk — controlled runs and first results on validation: ≥ 3 rows, a figure with a failure, debugging evidence, compute vs budget, the plan to freeze by 4 Dec.",
+     "topic_ko": "다음 주 발표 — validation에서의 통제 실험과 첫 결과: 3행 이상, 실패가 있는 그림, 디버깅 증거, compute vs 예산, 12/4 고정 계획."
     }
    ],
    "lab": {
-    "task": "Train a tiny weather emulator on the WeatherBench2 ERA5 5.625° Zarr (Z500 + T850, 6-h steps, ~1979–2015 train / 2018–2019 test): small U-Net or your W6 ViT (~1–3M params) predicting residual (Δstate) targets, with per-variable-per-level normalization and static input channels (orography, land–sea mask). Write the lat-weighted MSE loss yourself and test it against analytic values (agent writes the test). Evaluate lat-weighted RMSE and ACC vs persistence and climatology baselines at 1–5-day leads via autoregressive rollout; plot the zonal power spectrum at day 1 vs day 5 to see blurring.",
-    "task_ko": "WeatherBench2 ERA5 5.625° Zarr(Z500 + T850, 6-h step, train ~1979–2015 / test 2018–2019)로 tiny weather emulator 학습: 작은 U-Net 또는 W6 ViT(~1–3M params)로 residual(Δstate) target 예측, per-variable-per-level normalization과 static 입력 채널(orography, land–sea mask) 사용. lat-weighted MSE loss를 직접 작성하고 해석값 대비 테스트(테스트는 에이전트가 작성). autoregressive rollout으로 1–5일 lead에서 persistence·climatology baseline 대비 lat-weighted RMSE와 ACC 평가 · day 1 vs day 5의 zonal power spectrum을 그려 blurring 확인",
+    "task": "Project studio (65 min): launch the full run matrix — the four rows with genuine tuning of the supervised competitor on validation (Week 4 U-Net; persistence and climatology for forecasting), replicates, the registered ablation; metric code with paired block-bootstrap CIs.",
+    "task_ko": "프로젝트 스튜디오(65분): 전체 run matrix 착수 — validation에서 supervised 경쟁자(4주차 U-Net; 예측 과제는 persistence·climatology)를 제대로 튜닝한 네 행, 반복, 등록한 ablation; paired block-bootstrap CI가 있는 지표 코드.",
     "data": [
      "WeatherBench2 ERA5 5.625° Zarr (Z500 + T850)"
     ],
@@ -1059,8 +1054,8 @@
      "W&B",
      "ClimateLearn (optional scaffold)"
     ],
-    "deliverable": "Note 11 — WB2-style scorecard table (model vs persistence vs climatology), ACC-vs-lead-time plot, spectra figure, rollout animation GIF. This is the weather-direction capstone seed; provisional W8 weather proposals hit their revision gate after this week.",
-    "deliverable_ko": "Note 11 — WB2 스타일 scorecard 표(model vs persistence vs climatology), ACC vs lead time 플롯, spectra 그림, rollout 애니메이션 GIF · 이것이 weather 방향 capstone의 씨앗 · W8의 잠정 weather 제안은 이번 주 이후 수정 게이트 통과",
+    "deliverable": "Note 11: validation table so far with CIs, run matrix status. Talk 4 slides (PDF) by Sun 11/29 23:59.",
+    "deliverable_ko": "Note 11: 지금까지의 validation 표(CI 포함), run matrix 현황. 발표 4 슬라이드(PDF) 11/29(일) 23:59.",
     "homework": null
    },
    "reading": {
@@ -1112,34 +1107,34 @@
    "date": "2026-11-30",
    "concept": [
     {
-     "min": 15,
-     "topic": "Training engineering: bf16/AMP recap, gradient accumulation, activation/gradient checkpointing (memory math from W2 revisited), DDP concepts (all-reduce, effective batch size, LR scaling) and when FSDP matters; streaming dataloaders (WebDataset/streaming Zarr) so GPUs never starve.",
-     "topic_ko": "training 엔지니어링: bf16/AMP 복습, gradient accumulation, activation/gradient checkpointing(W2의 메모리 계산 재방문), DDP 개념(all-reduce, effective batch size, LR scaling)과 FSDP가 중요해지는 시점 · GPU가 굶지 않게 하는 streaming dataloader(WebDataset/streaming Zarr)"
-    },
-    {
-     "min": 15,
-     "topic": "Fine-tuning spectrum: linear probe → decoder-only → LoRA/PEFT (derive the low-rank update, rank/alpha choices) → full FT; decoder heads for dense EO tasks (UperNet-style, TerraTorch conventions) and forecast heads for weather.",
-     "topic_ko": "fine-tuning 스펙트럼: linear probe → decoder-only → LoRA/PEFT(low-rank update 유도, rank/alpha 선택) → full FT · dense EO task용 decoder head(UperNet 스타일, TerraTorch 관례)와 weather용 forecast head"
-    },
-    {
-     "min": 15,
-     "topic": "Evaluation and ablation design for the capstone: minimum honest set = {random-init control, supervised baseline (your W4 U-Net or persistence/climatology), frozen probe, fine-tuned}, one ablation axis (masking ratio, data volume, or model size), seeds and error bars.",
-     "topic_ko": "capstone을 위한 평가·ablation 설계: 최소한의 정직한 세트 = {random-init control, supervised baseline(W4 U-Net 또는 persistence/climatology), frozen probe, fine-tuned}, ablation 축 1개(masking ratio, 데이터 양, 또는 모델 크기), seed와 error bar"
-    },
-    {
-     "min": 15,
-     "topic": "Significance testing for forecast and benchmark comparisons: paired block bootstrap over time (and space), why naive per-sample tests lie under autocorrelation, error bars for scorecard tables.",
-     "topic_ko": "예보·벤치마크 비교를 위한 유의성 검정: 시간(그리고 공간)에 대한 paired block bootstrap, autocorrelation 아래에서 naive per-sample 검정이 거짓말하는 이유, scorecard 표의 error bar"
+     "min": 65,
+     "topic": "Project talks 4 — controlled runs and first results (validation) (10 min + 3 min of questions per student; the drawn questioner asks first). What to prepare: Presentations page.",
+     "topic_ko": "프로젝트 발표 4 — 통제 실험과 첫 결과(validation)(1인 10분 + 질의 3분; 추첨된 질문자가 첫 질문). 준비 내용은 발표 페이지."
     },
     {
      "min": 10,
-     "topic": "Release engineering: HF Hub mechanics (weights, config, README.md model card), semantic versioning, licenses for models and data (Copernicus, NASA open-data terms), W&B reports as the lab notebook of record.",
-     "topic_ko": "릴리스 엔지니어링: HF Hub 메커니즘(weights, config, README.md model card), semantic versioning, 모델·데이터 라이선스(Copernicus, NASA 공개 데이터 약관), 공식 lab notebook으로서의 W&B report"
+     "topic": "LoRA: the low-rank update derived, rank and alpha, where to attach it; decoder heads for dense tasks.",
+     "topic_ko": "LoRA: low-rank 업데이트 유도, rank와 alpha, 어디에 붙이나; dense task용 decoder head"
+    },
+    {
+     "min": 8,
+     "topic": "Freeze and seal: why every recipe is frozen before the test split is touched, and the test run once; ablation design and significance for your table.",
+     "topic_ko": "고정과 봉인: 왜 test split을 건드리기 전에 모든 레시피를 고정하고 test는 한 번만 실행하는가; 표를 위한 ablation 설계와 유의성"
+    },
+    {
+     "min": 7,
+     "topic": "Release: HF Hub mechanics — adapters plus task head, exact base revision — the model card, licences for models and data.",
+     "topic_ko": "릴리스: HF Hub 사용법 — adapter + task head, 정확한 base revision — model card, 모델·데이터 라이선스"
+    },
+    {
+     "min": 3,
+     "topic": "Next Monday’s talk — held-out results, with Dr. Budamala: the complete test table with ≥ 3 seeds and block-bootstrap intervals, ablation, disaggregation, the honest conclusion, draft model card.",
+     "topic_ko": "다음 주 발표 — 최종(test) 결과(Budamala 박사 진행): seed 3개 이상과 block-bootstrap 구간이 있는 완성된 test 표, ablation, 세분화, 정직한 결론, model card 초안."
     }
    ],
    "lab": {
-    "task": "Capstone dress rehearsal, in-class core: (a) attach LoRA adapters (peft) to your W7/W9 pretrained mini-MAE (or OlmoEarth-Nano) and fine-tune on Sen1Floods11 (geo rehearsal) or fine-tune the W11 emulator on a Korea-region T2m patch (weather rehearsal); (b) build a CRPS mini-ensemble via MC-dropout and score it; (c) push the checkpoint to HF Hub with an agent-drafted, human-corrected model card; run DDP on 2 GPUs on the shared server if available (otherwise simulate with accumulation).",
-    "task_ko": "capstone 총연습, 수업 내 핵심: (a) W7/W9 pretrained mini-MAE(또는 OlmoEarth-Nano)에 LoRA adapter(peft)를 붙여 Sen1Floods11에서 fine-tuning(geo 리허설) 또는 W11 emulator를 한국 지역 T2m patch에서 fine-tuning(weather 리허설); (b) MC-dropout으로 CRPS mini-ensemble 구축·채점; (c) 에이전트 초안 + 사람 교정 model card와 함께 checkpoint를 HF Hub에 push · 공유 서버 GPU 2장이 가능하면 DDP 실행(아니면 accumulation으로 시뮬레이션)",
+    "task": "Project studio (65 min): finish ≥ 3 seeds per stochastic row, validation selection and the ablation; freeze every recipe and inference setting by Fri 12/4; run the sealed test once by Sun 12/6; push the HF Hub model-card skeleton.",
+    "task_ko": "프로젝트 스튜디오(65분): 확률적 행마다 seed 3개 이상, validation 선택, ablation 마무리; 12/4(금)까지 모든 레시피·추론 설정 고정; 12/6(일)까지 봉인된 test를 한 번 실행; HF Hub model card 뼈대 push.",
     "data": [
      "Sen1Floods11 (geo rehearsal)",
      "WeatherBench2 ERA5 Korea-region T2m patch (weather rehearsal)"
@@ -1150,8 +1145,8 @@
      "HF Hub",
      "W&B"
     ],
-    "deliverable": "Note 12 — LoRA fine-tune result, CRPS mini-ensemble score, live HF Hub link with model card; homework adds the three-way fine-tuning table and memory/throughput mini-benchmark.",
-    "deliverable_ko": "Note 12 — LoRA fine-tune 결과, CRPS mini-ensemble 점수, model card가 달린 라이브 HF Hub 링크 · homework에서 3-way fine-tuning 표와 메모리/throughput 미니 벤치마크 추가",
+    "deliverable": "Note 12: frozen recipes (commit hash), seed table, HF Hub link. Talk 5 slides (PDF) by Sun 12/6 23:59.",
+    "deliverable_ko": "Note 12: 고정된 레시피(commit hash), seed 표, HF Hub 링크. 발표 5 슬라이드(PDF) 12/6(일) 23:59.",
     "homework": "Probe vs LoRA vs full-FT three-way comparison in one W&B report; enable gradient checkpointing + accumulation and measure the memory/throughput trade-off.",
     "homework_ko": "probe vs LoRA vs full-FT 3-way 비교를 W&B report 하나로 · gradient checkpointing + accumulation을 켜고 메모리/throughput trade-off 측정"
    },
@@ -1199,31 +1194,36 @@
   {
    "n": 13,
    "phase": "Capstone Sprints",
-   "title": "Agentic ML Engineering + Capstone Sprint 1",
-   "goal": "Turn your AI agent from code generator into experiment orchestrator; launch the capstone run. Milestone M1 due.",
-   "title_ko": "Agentic ML 엔지니어링 + Capstone Sprint 1",
-   "goal_ko": "AI 에이전트를 코드 생성기에서 실험 orchestrator로 격상시키고, capstone 학습 run을 시작합니다. Milestone M1 제출.",
+   "title": "Results Talks + Peer Code Review",
+   "goal": "Present the full table with error bars and an ablation; have your evaluation code read and run by a peer. Dr. Budamala runs the session (the instructor is at AGU).",
+   "title_ko": "결과 발표 + 동료 코드 리뷰",
+   "goal_ko": "error bar가 있는 전체 표와 ablation을 발표하고, 평가 코드를 동료가 읽고 실행하게 합니다. Budamala 박사가 진행합니다(담당교수는 AGU 참석).",
    "date": "2026-12-07",
    "concept": [
     {
-     "min": 15,
-     "topic": "Agentic engineering for ML: multi-agent patterns (planner/implementer/reviewer), MCP servers for W&B and HF, agent-run ablation loops with guardrails (immutable eval script, human-approved config diffs).",
-     "topic_ko": "ML을 위한 agentic 엔지니어링: multi-agent 패턴(planner/implementer/reviewer), W&B·HF용 MCP server, guardrail을 갖춘 에이전트 주도 ablation 루프(불변 eval 스크립트, 사람이 승인하는 config diff)"
+     "min": 65,
+     "topic": "Project talks 5 — held-out results (10 min + 3 min of questions per student; the drawn questioner asks first). What to prepare: Presentations page.",
+     "topic_ko": "프로젝트 발표 5 — 최종(test) 결과(1인 10분 + 질의 3분; 추첨된 질문자가 첫 질문). 준비 내용은 발표 페이지."
     },
     {
      "min": 10,
-     "topic": "CI for research code: smoke-test on 1 batch, deterministic seeds, config-as-code (hydra/yaml); pre-registration of the capstone eval protocol (frozen this week, before results exist).",
-     "topic_ko": "연구 코드를 위한 CI: 1 batch smoke-test, deterministic seed, config-as-code(hydra/yaml) · capstone eval protocol의 사전 등록(결과가 나오기 전, 이번 주에 freeze)"
+     "topic": "Reproducibility checklist: seeds, lockfiles, data versions, the exact commit behind every number.",
+     "topic_ko": "재현성 체크리스트: seed, lockfile, 데이터 버전, 모든 숫자 뒤의 정확한 commit"
     },
     {
-     "min": 10,
-     "topic": "Chinchilla applied: each team defends its N/D/GPU-hour triple against its W9 scaling fit in 60 seconds.",
-     "topic_ko": "Chinchilla 실전 적용: 각 팀이 자기 N/D/GPU-hour 조합을 W9 scaling fit에 비추어 60초 안에 방어"
+     "min": 5,
+     "topic": "Peer-review protocol: a five-person cycle (1→2→3→4→5→1) — run the next student’s smoke test, read their eval/, file ≥ 3 substantive issues.",
+     "topic_ko": "동료 리뷰 규칙: 5인 순환(1→2→3→4→5→1) — 다음 사람의 smoke test 실행, eval/ 읽기, 실질적인 이슈 3개 이상"
+    },
+    {
+     "min": 3,
+     "topic": "Next Monday’s talk — the final talk (15–20 min): the whole story, a live quickstart, the release.",
+     "topic_ko": "다음 주 발표 — 최종 발표(15–20분): 전체 스토리, 라이브 quickstart, 릴리스."
     }
    ],
    "lab": {
-    "task": "Capstone sprint studio, led by Dr. Budamala: freeze data pipeline and eval protocol; launch fine-tuning/eval runs (checkpoint-resumable); design reviews at the bench. The instructor is at AGU — Dr. Budamala runs the session.",
-    "task_ko": "capstone sprint 스튜디오, Dr. Budamala 진행: 데이터 파이프라인과 eval protocol freeze · fine-tuning/eval run launch(checkpoint에서 재개 가능) · 벤치별 설계 리뷰. 교수는 AGU 출장 — Dr. Budamala가 세션 진행",
+    "task": "Capstone sprint studio: the five-person review cycle; fix what the review found, with a dated correction log; rerun every affected comparison.",
+    "task_ko": "capstone 스프린트 스튜디오: 5인 순환 리뷰; 리뷰에서 나온 것을 날짜 적힌 수정 기록과 함께 고치고, 영향받은 비교는 모두 재실행.",
     "data": [],
     "tools": [
      "W&B (alerts, MCP)",
@@ -1231,8 +1231,8 @@
      "hydra/yaml configs",
      "Claude Code/Codex"
     ],
-    "deliverable": "M1 (PDF on this site, due Fri 12/4 23:59): frozen data/ + eval/ modules with CI green; runs launched with public W&B link; pre-registered eval protocol.",
-    "deliverable_ko": "M1(PDF, 이 사이트에 Fri 12/4 23:59까지): CI green인 frozen data/ + eval/ 모듈 · 공개 W&B 링크와 함께 launch된 run · 사전 등록된 eval protocol",
+    "deliverable": "Talk 5 slides (PDF) by Sun 12/6 23:59; ≥ 3 issues given and received; draft model card in the repo.",
+    "deliverable_ko": "발표 5 슬라이드(PDF) 12/6(일) 23:59; 이슈 3개 이상 주고받기; repo에 model card 초안.",
     "homework": null
    },
    "reading": {
@@ -1266,39 +1266,34 @@
   {
    "n": 14,
    "phase": "Capstone Sprints",
-   "title": "Capstone Sprint 2 + Peer Code Review; Model Cards and Reproducibility",
-   "goal": "Fine-tune and evaluate the model; subject your code to structured peer review. Milestone M2 due.",
-   "title_ko": "Capstone Sprint 2 + 동료 코드 리뷰; Model Card와 재현성",
-   "goal_ko": "모델을 fine-tuning하고 평가하며, 코드를 구조화된 동료 리뷰에 부칩니다. Milestone M2 제출.",
+   "title": "Final Talks",
+   "goal": "Tell the whole story in 15–20 minutes, run the quickstart live from a fresh clone, and show the release.",
+   "title_ko": "최종 발표",
+   "goal_ko": "15–20분 안에 전체 스토리를 말하고, fresh clone에서 quickstart를 라이브로 실행하고, 릴리스를 보여 줍니다.",
    "date": "2026-12-14",
    "concept": [
     {
+     "min": 120,
+     "topic": "Final talks: 15–20 min + 5 min of questions per student — question → data → method → results → honest conclusion; live quickstart; release status.",
+     "topic_ko": "최종 발표: 1인 15–20분 + 질의 5분 — 질문 → 데이터 → 방법 → 결과 → 정직한 결론; 라이브 quickstart; 릴리스 상태"
+    },
+    {
      "min": 15,
-     "topic": "Model cards and data cards done properly: intended use, out-of-scope use, eval disaggregation (by region/biome/lead time), limitations that are specific, not liability boilerplate.",
-     "topic_ko": "제대로 쓰는 model card와 data card: 의도된 용도, 범위 밖 용도, eval 세분화(지역/biome/lead time별), 면책 보일러플레이트가 아닌 구체적 한계"
-    },
-    {
-     "min": 10,
-     "topic": "Reproducibility checklist: seeds, environment lockfiles, data versioning/DOIs, exact commit for every number in the report; license compatibility of your release.",
-     "topic_ko": "재현성 체크리스트: seed, 환경 lockfile, 데이터 버저닝/DOI, 보고서의 모든 숫자에 대한 정확한 commit · 릴리스의 라이선스 호환성"
-    },
-    {
-     "min": 5,
-     "topic": "Peer-review protocol: assigned reviewer pairs (geo↔weather cross-track), review = run their smoke test + read eval code + file ≥3 substantive GitHub issues.",
-     "topic_ko": "peer-review protocol: 지정 리뷰어 페어(geo↔weather 교차 트랙), 리뷰 = 상대 smoke test 실행 + eval 코드 읽기 + 실질적 GitHub issue 3건 이상 제출"
+     "topic": "Course retrospective: the 2026 landscape a year on, and how to turn a capstone into a workshop paper.",
+     "topic_ko": "과목 회고: 1년 뒤의 2026 지형도, capstone을 워크숍 논문으로 만드는 법"
     }
    ],
    "lab": {
-    "task": "Capstone sprint studio, led by Dr. Budamala: downstream fine-tuning with the mandatory baseline set; structured peer code review in session (>=3 substantive issues given and received).",
-    "task_ko": "capstone sprint 스튜디오, Dr. Budamala 진행: 필수 baseline 세트와 함께 downstream fine-tuning · 세션 내 구조화된 동료 코드 리뷰(실질적 issue 3건 이상 주고받기)",
+    "task": "No lab — final talks. The release package is due Wed 12/16 23:59.",
+    "task_ko": "실습 없음 — 최종 발표. 릴리스 패키지는 12/16(수) 23:59.",
     "data": [],
     "tools": [
      "GitHub (issues, review)",
      "W&B",
      "peft/HF Hub"
     ],
-    "deliverable": "M2: checkpoint archived; ≥1 fine-tuned downstream result with baselines table; peer review given and received (issue links); draft model card in repo.",
-    "deliverable_ko": "M2: checkpoint 보관 완료 · baseline 표를 갖춘 fine-tuned downstream 결과 1건 이상 · 주고받은 peer review(issue 링크) · repo 내 model card 초안",
+    "deliverable": "Final talk slides (PDF) by Sun 12/13 23:59.",
+    "deliverable_ko": "최종 발표 슬라이드(PDF) 12/13(일) 23:59.",
     "homework": null
    },
    "reading": {
@@ -1330,34 +1325,29 @@
   {
    "n": 15,
    "phase": "Capstone Sprints",
-   "title": "Wrap-up: evaluation, documentation, release candidate — final polish week",
-   "goal": "Finish evaluation and ablation, harden documentation, cut a release candidate. Milestone M3 due.",
-   "title_ko": "마무리: 평가·문서화·릴리스 후보 — 최종 정리 주간",
-   "goal_ko": "평가와 ablation을 마무리하고 문서를 다듬어 release candidate를 만듭니다. Milestone M3 제출.",
+   "title": "Release polish (async)",
+   "goal": "Finish the release package: evaluation tables with seeds and error bars, model card, README quickstart, tagged release.",
+   "title_ko": "릴리스 마무리 (비대면)",
+   "goal_ko": "릴리스 패키지 마무리: seed·error bar가 있는 평가 표, model card, README quickstart, tag된 release.",
    "date": "2026-12-15",
    "concept": [
     {
      "min": 10,
-     "topic": "Release engineering final pass: HF Hub versioned release, GitHub tag, W&B report as appendix, GitHub Pages project page.",
-     "topic_ko": "릴리스 엔지니어링 최종 점검: HF Hub 버전 릴리스, GitHub tag, 부록으로서의 W&B report, GitHub Pages 프로젝트 페이지"
-    },
-    {
-     "min": 10,
-     "topic": "Recorded-demo rubric: what the ~8-minute video must show (problem, data, evidence, baselines, ablation, limitations, live quickstart run).",
-     "topic_ko": "녹화 데모 rubric: ~8분 영상이 반드시 보여줄 것(문제, 데이터, 근거, baseline, ablation, 한계, 라이브 quickstart 실행)"
+     "topic": "Release engineering final pass: HF Hub versioned release, GitHub tag, W&B report as appendix, project page.",
+     "topic_ko": "릴리스 엔지니어링 마지막 점검: HF Hub 버전 release, GitHub tag, 부록으로서의 W&B report, 프로젝트 페이지"
     }
    ],
    "lab": {
-    "task": "Final polish on your own schedule: complete the ablation, finalize eval tables with seeds/error bars, finish model card and README quickstart, tag the release candidate. Questions via GitHub issues.",
-    "task_ko": "각자 일정에 맞춘 최종 정리: ablation 완료, seed/error bar가 있는 eval 표 확정, model card와 README quickstart 마무리, release candidate tag. 질문은 GitHub issue로",
+    "task": "On your own schedule: final tables, model card, README quickstart, tag the release candidate. Questions via GitHub issues.",
+    "task_ko": "각자 일정대로: 최종 표, model card, README quickstart, release candidate tag. 질문은 GitHub issue로.",
     "data": [],
     "tools": [
      "HF Hub",
      "GitHub (tags, Pages)",
      "W&B"
     ],
-    "deliverable": "M3: full results + ablation tables; complete model card; release candidate tagged on HF Hub + GitHub; draft slides.",
-    "deliverable_ko": "M3: 전체 결과 + ablation 표 · 완성된 model card · HF Hub + GitHub에 tag된 release candidate · 슬라이드 초안",
+    "deliverable": "Everything in the 12/16 package.",
+    "deliverable_ko": "12/16 패키지에 들어갈 모든 것.",
     "homework": null
    },
    "reading": {
@@ -1405,35 +1395,25 @@
   {
    "n": 16,
    "phase": "Capstone Sprints",
-   "title": "Demo Week: recorded presentations + public release (no class meeting)",
-   "goal": "Ship it.",
-   "title_ko": "데모 주간: 녹화 발표 + 공개 릴리스 (수업 없음)",
-   "goal_ko": "완성하고, 공개합니다.",
+   "title": "Release due (no class meeting)",
+   "goal": "Ship it: the release package is due Wed 12/16 23:59 KST.",
+   "title_ko": "릴리스 마감 (수업 없음)",
+   "goal_ko": "완성하고 공개합니다: 릴리스 패키지 마감 12/16(수) 23:59 KST.",
    "date": "2026-12-16",
    "concept": [
     {
-     "min": 120,
-     "topic": "Recorded demo (~8 min video): problem, data, evidence, downstream results vs baselines, ablation, limitations, HF Hub + project page walk-through.",
-     "topic_ko": "녹화 데모(~8분 영상): 문제, 데이터, 근거, baseline 대비 downstream 결과, ablation, 한계, HF Hub + 프로젝트 페이지 워크스루"
-    },
-    {
      "min": 15,
-     "topic": "Release verification (async): an assigned peer + the instructor clone your repo fresh and run the README quickstart; it must work.",
-     "topic_ko": "릴리스 검증(async): 지정 peer + 교수가 repo를 새로 clone해 README quickstart 실행 — 반드시 작동해야 함"
-    },
-    {
-     "min": 15,
-     "topic": "Course retrospective: what the 2026 landscape will look like in 2027; how to turn a capstone into a workshop paper (AGU/EGU, NeurIPS CCAI, ICLR ML4RS).",
-     "topic_ko": "과목 회고: 2026 지형도는 2027년에 어떤 모습일까 · capstone을 workshop 논문으로 만드는 법(AGU/EGU, NeurIPS CCAI, ICLR ML4RS)"
+     "topic": "Release verification (async): an assigned peer and the instructor clone your repo fresh and run the README quickstart; it must work.",
+     "topic_ko": "릴리스 검증(비대면): 지정된 동료와 담당교수가 repo를 새로 clone해 README quickstart를 실행 — 반드시 동작해야 함"
     }
    ],
    "lab": {
-    "task": "No lab — recorded demo + public release week. Everything due Wed 12/16 23:59 KST, report PDF submitted on this site.",
-    "task_ko": "lab 없음 — 녹화 데모 + 공개 릴리스 주간. 모든 제출물은 Wed 12/16 23:59 KST까지, 보고서 PDF는 이 사이트에 제출",
+    "task": "No class. Release package due Wed 12/16 23:59 KST: HF Hub release with model card, tagged GitHub repo with a working quickstart, report PDF (≤ 6 pages, W&B report linked) submitted on this site.",
+    "task_ko": "수업 없음. 릴리스 패키지 마감 12/16(수) 23:59 KST: model card가 있는 HF Hub release, quickstart가 동작하는 tag된 GitHub repo, 보고서 PDF(≤ 6쪽, W&B report 링크)를 이 사이트에 제출.",
     "data": [],
     "tools": [],
-    "deliverable": "Final package due Wed 12/16 23:59 KST: HF Hub release with model card, tagged GitHub repo with working quickstart, 6-page report (PDF on this site), W&B report link, recorded demo video link.",
-    "deliverable_ko": "최종 패키지, Wed 12/16 23:59 KST까지: model card를 갖춘 HF Hub 릴리스, 작동하는 quickstart가 있는 tag된 GitHub repo, 6쪽 보고서(이 사이트에 PDF), W&B report 링크, 녹화 데모 영상 링크",
+    "deliverable": "Release package (report PDF with links) — Wed 12/16 23:59 KST.",
+    "deliverable_ko": "릴리스 패키지(링크 포함 보고서 PDF) — 12/16(수) 23:59 KST.",
     "homework": null
    },
    "reading": {
