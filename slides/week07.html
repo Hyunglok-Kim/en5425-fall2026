@@ -116,7 +116,7 @@
   <h2>Throw away 48 of 64 patches; encode the 16; let a small decoder paint the rest</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">The encoder never sees a hidden patch or a placeholder — that is what makes MAE cheap. Your lab builds exactly this.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
-    <svg viewBox="0 0 900 250" role="img" aria-label="MAE pipeline from left to right. A chip cut into 64 patches. A random 75% of them are dropped, leaving 16 visible patches. The 16 visible patches, with their positions, go through the encoder, a full Vision Transformer. Its 16 output vectors are put back in place and the 48 gaps are filled with one shared learned mask token plus each gap's position. A small decoder, two blocks, processes all 64 and outputs pixels for every patch. The loss is the mean squared error on the 48 hidden patches only. After pretraining, the decoder is thrown away and the encoder is kept." style="width:min(98%,1150px)">
+    <svg viewBox="0 0 900 250" role="img" aria-label="MAE pipeline from left to right. A chip cut into 64 patches. A random 75% of them are dropped, leaving 16 visible patches. The 16 visible patches, with their positions, go through the encoder, a full Vision Transformer. Its 16 output vectors are put back in place and the 48 gaps are filled with one shared learned mask token plus each gap's position. A small decoder, two blocks, processes all 64 and outputs pixels for every patch. The loss is the mean squared error on the 48 hidden patches only. After pretraining, the decoder is thrown away and the encoder is kept." style="width:min(84%,980px)">
       <defs><pattern id="w7g" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="var(--wash)" stroke="currentColor" stroke-width=".4"/></pattern></defs>
       <rect x="6" y="50" width="80" height="80" fill="url(#w7g)" stroke="currentColor"/>
       <g font-size="12" text-anchor="middle" fill="currentColor"><text x="46" y="148">64 patches</text><text x="46" y="163">8 × 8 px,</text><text x="46" y="178">13 bands</text></g>
@@ -145,14 +145,34 @@
       <g font-size="13" text-anchor="middle"><text x="355" y="222" fill="var(--accent)" font-weight="700">kept after pretraining</text><text x="588" y="222" fill="var(--muted)" font-weight="700">thrown away</text></g>
     </svg>
   </div>
-  <ul class="small">
-    <li>Two choices make it work: <b>a high mask ratio</b> (the task cannot be solved by copying a neighbour) and <b>an asymmetric design</b> (the expensive encoder runs on a quarter of the tokens). Next three slides.</li>
-  </ul>
+  <div class="figure" style="flex:0 0 auto;margin:.2vh 0 .4vh">
+    <svg viewBox="0 0 900 112" role="img" aria-label="Inside the encoder. Left: four of the 16 cards that go in, each a small coloured patch with its grid coordinate, labelled: 16 cards in, each patch read as 128 numbers plus its position. Middle: the encoder box, four blocks, in which each card looks at the other 15 and rewrites itself, four times. Right: the same four cards coming out, each now carrying a description such as river, runs down-right, or cropland, rows east to west, labelled: 16 descriptions out, same count, now with context, nothing is filled here." style="width:min(84%,980px)">
+      <text x="8" y="13" font-size="11" fill="var(--muted)" font-weight="700">inside the encoder</text>
+      <g stroke="currentColor" stroke-width="1" fill="var(--wash)">
+        <rect x="8" y="24" width="52" height="46" rx="5"/><rect x="66" y="24" width="52" height="46" rx="5"/><rect x="124" y="24" width="52" height="46" rx="5"/><rect x="182" y="24" width="52" height="46" rx="5"/>
+      </g>
+      <g stroke="none"><rect x="14" y="30" width="14" height="14" fill="#3b6fb0"/><rect x="72" y="30" width="14" height="14" fill="#3b6fb0"/><rect x="130" y="30" width="14" height="14" fill="#5a8a3a"/><rect x="188" y="30" width="14" height="14" fill="#8a9a3a"/></g>
+      <g font-size="11" fill="currentColor"><text x="32" y="42">(2,5)</text><text x="90" y="42">(3,5)</text><text x="148" y="42">(1,1)</text><text x="206" y="42">(6,7)</text></g>
+      <g font-size="9.5" fill="var(--muted)"><text x="14" y="62">dark blue</text><text x="72" y="62">dark blue</text><text x="130" y="62">green</text><text x="188" y="62">yellow-green</text></g>
+      <g font-size="11" fill="currentColor" text-anchor="middle"><text x="121" y="90">16 cards in: each patch read as</text><text x="121" y="104">128 numbers, plus its position</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M240 47 H264"/></g><path d="M258 43 L264 47 L258 51 Z" fill="currentColor"/>
+      <rect x="270" y="20" width="256" height="56" rx="8" fill="var(--wash)" stroke="var(--accent)" stroke-width="2"/>
+      <g text-anchor="middle"><text x="398" y="40" font-size="13" font-weight="700" fill="var(--accent)">ENCODER · 4 blocks</text><text x="398" y="56" font-size="11" fill="currentColor">each card looks at the other 15,</text><text x="398" y="69" font-size="11" fill="currentColor">then rewrites itself — four times over</text></g>
+      <g font-size="11" fill="var(--muted)" text-anchor="middle"><text x="398" y="90">no hidden patch, no placeholder, no pixels:</text><text x="398" y="104">16 vectors in, 16 vectors out</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M532 47 H556"/></g><path d="M550 43 L556 47 L550 51 Z" fill="currentColor"/>
+      <g stroke="var(--accent)" stroke-width="1.2" fill="var(--wash)">
+        <rect x="562" y="24" width="80" height="46" rx="5"/><rect x="648" y="24" width="80" height="46" rx="5"/><rect x="734" y="24" width="80" height="46" rx="5"/><rect x="820" y="24" width="78" height="46" rx="5"/>
+      </g>
+      <g font-size="11" fill="currentColor"><text x="568" y="40">(2,5)</text><text x="654" y="40">(3,5)</text><text x="740" y="40">(1,1)</text><text x="826" y="40">(6,7)</text></g>
+      <g font-size="10" fill="var(--accent)"><text x="568" y="54">river, runs ↘</text><text x="568" y="65">fields either side</text><text x="654" y="54">river bank</text><text x="654" y="65">next to (2,5)</text><text x="740" y="54">cropland,</text><text x="740" y="65">rows E–W</text><text x="826" y="54">field edge,</text><text x="826" y="65">dry soil</text></g>
+      <g font-size="11" fill="currentColor" text-anchor="middle"><text x="730" y="90">16 descriptions out — same count, now with</text><text x="730" y="104">the context of the whole chip; nothing is filled here</text></g>
+    </svg>
+  </div>
   <div class="gloss">
     <span><b>mask token</b> — one learned vector, the same for every gap; only its added position tells the gaps apart. <b>asymmetric</b> — encoder and decoder differ in size and in what they see.</span>
   </div>
-  <div class="foot"><span>He et al. 2021, MAE, CVPR 2022, §3 and Fig. 1 · the lab’s sizes (8-px patches, 64 tokens) · the shapes in numbers: next slide</span></div>
-  <aside class="notes">2.5 min. Trace left to right, slowly; this is the slide to come back to. Cut the chip into 64 patches. Shuffle, keep 16, drop 48 — 75%. The encoder, a full Vision Transformer, sees only those 16 tokens with their positions: no mask tokens, no hidden patches. Put the 16 outputs back where they came from, fill the 48 gaps with one shared learned vector plus each gap's position, and pass all 64 through a small decoder that outputs pixels for every patch. The loss is the squared error on the 48 hidden patches only. Then the punchline at the bottom: after pretraining the decoder is thrown away — it only learned to paint — and the encoder is what every downstream task uses.</aside>
+  <div class="foot"><span>Two choices make it work: a high mask ratio (no copying a neighbour) and the asymmetric design (the big encoder sees a quarter of the tokens) — next three slides · He et al. 2021 §3, Fig. 1 · shapes in numbers: next slide</span></div>
+  <aside class="notes">2.5 min. Trace left to right, slowly; this is the slide to come back to. Cut the chip into 64 patches. Shuffle, keep 16, drop 48 — 75%. The encoder, a full Vision Transformer, sees only those 16 tokens with their positions: no mask tokens, no hidden patches. Put the 16 outputs back where they came from, fill the 48 gaps with one shared learned vector plus each gap's position, and pass all 64 through a small decoder that outputs pixels for every patch. The loss is the squared error on the 48 hidden patches only. Then the punchline at the bottom: after pretraining the decoder is thrown away — it only learned to paint — and the encoder is what every downstream task uses. Then the strip underneath, which answers "what does the encoder actually do with 16 tokens and positions": sixteen cards go in, each a patch read as 128 numbers with its coordinate stamped on; inside, every card looks at the other fifteen and rewrites itself, four times over; sixteen cards come out — the same count — but now each one describes its patch in the context of the whole chip: river running down-right, cropland with east–west rows. Nothing is filled in here and no pixels are produced; the patch embedding 832 → 128 and the positions are part of this box. That is what the decoder will have to paint from, and the only reason the lab keeps the encoder.</aside>
 </section>
 
 <!-- 5 -->
