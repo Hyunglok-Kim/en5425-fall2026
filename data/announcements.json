@@ -1,5 +1,10 @@
 [
   {
+    "date": "2026-11-01",
+    "pin": true,
+    "text": "New rhythm from Mon 2 Nov. Tomorrow: no quiz · 13:00 your 10-min talks (what you understand so far; last slide = your project candidate: track, base model, data) · 14:15 Week 7 lecture, Parts 2–5 only — the masked autoencoder, how to judge it, mixed precision (Part 1 was 26 Oct) · 14:45 lab: pretrain your mini-MAE. Note 07 and video summary 07 are now due Sun 8 Nov 23:59. From 9 Nov each week runs quiz → project talks (10 min + 3 min each) → a short lecture (20–30 min) → project studio; no journal club. Talk stages: 9 Nov research purpose (replaces the written proposal — slides PDF on this site by Sun 8 Nov 23:59) · 16 Nov data · 23 Nov methodology · 30 Nov first results · 7 Dec results · 14 Dec final talks. Collapse report (≤ 10 pages, written): Sun 15 Nov 23:59. 11/2(월)부터 수업 리듬이 바뀝니다. 내일: 퀴즈 없음 · 13:00 10분 발표(지금까지 이해한 것 · 마지막 장 = 프로젝트 후보: 트랙·base model·데이터) · 14:15 7주차 강의 Part 2–5만 — masked autoencoder, 평가 방법, mixed precision(Part 1은 10/26에 진행) · 14:45 실습: mini-MAE pretraining. Note 07과 영상 정리 07 마감은 11/8(일) 23:59로 옮겼습니다. 11/9부터는 매주 퀴즈 → 프로젝트 발표(1인 10분 + 질의 3분) → 짧은 강의(20–30분) → 프로젝트 스튜디오로 진행하며 저널클럽은 없습니다. 발표 단계: 11/9 연구 목적(서면 제안서 대체 — 슬라이드 PDF를 11/8(일) 23:59까지 이 사이트에 제출) · 11/16 데이터 · 11/23 방법론 · 11/30 예비 결과 · 12/7 결과 · 12/14 최종 발표. Collapse 보고서(≤ 10쪽, 서면): 11/15(일) 23:59."
+  },
+  {
     "date": "2026-10-12",
     "pin": true,
     "text": "Oct 19 (no lecture): the Book Check is replaced by a closed-book quiz exam — 5 questions drawn from the Week 2–6 reading quizzes and the assigned videos through Week 6; still counts as two quiz slots, TA-proctored. The hand-summarized textbook chapters are no longer examined; book summaries stay an optional bonus. 10/19(강의 없음): 교과서 점검 대신 closed-book 퀴즈 시험을 봅니다 — 2–6주차 리딩 퀴즈와 6주차까지 배정된 영상에서 5문항 출제, 퀴즈 2회분 반영, 조교 감독. 손으로 정리한 교과서 챕터는 더 이상 시험 범위가 아니며, 북 정리는 계속 선택 보너스입니다."

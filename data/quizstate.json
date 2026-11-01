@@ -28,7 +28,7 @@
   "key": false
  },
  "w07": {
-  "quiz": false,
+  "quiz": true,
   "key": false
  }
 }

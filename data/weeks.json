@@ -728,8 +728,8 @@
      "PyTorch AMP (bf16)",
      "W&B"
     ],
-    "deliverable": "Note 07 with probe-accuracy table (pretrained vs random vs supervised) and reconstruction grids. This checkpoint and codebase are every student's hands-on pretraining experience and the capstone seed — reused in the W9 scaling sweep and the W10 leaderboard; the HydroAI lab's Hydro-FM team builds on it directly.",
-    "deliverable_ko": "Note 07: probe 정확도 표(pretrained vs random vs supervised)와 reconstruction grid · 이 checkpoint와 codebase가 전원의 실전 pretraining 경험이자 capstone의 씨앗 — W9 scaling sweep과 W10 leaderboard에서 재사용, HydroAI lab의 Hydro-FM 팀은 이를 직접 기반으로 삼음",
+    "deliverable": "Lab held on 11/2 (Part 1 lecture 10/26, Parts 2–5 on 11/2); Note 07 due Sun 11/8 23:59. Note 07 with probe-accuracy table (pretrained vs random vs supervised) and reconstruction grids. This checkpoint and codebase are every student's hands-on pretraining experience and the capstone seed — reused in the W9 scaling sweep and the W10 leaderboard; the HydroAI lab's Hydro-FM team builds on it directly.",
+    "deliverable_ko": "실습은 11/2에 진행(Part 1 강의 10/26, Part 2–5는 11/2); Note 07 마감 11/8(일) 23:59. Note 07: probe 정확도 표(pretrained vs random vs supervised)와 reconstruction grid · 이 checkpoint와 codebase가 전원의 실전 pretraining 경험이자 capstone의 씨앗 — W9 scaling sweep과 W10 leaderboard에서 재사용, HydroAI lab의 Hydro-FM 팀은 이를 직접 기반으로 삼음",
     "homework": "Masking-ratio ablation: rerun pretraining at 50/75/90% masking; add reconstruction grids and the probe mini-ablation table to Note 07.",
     "homework_ko": "masking-ratio ablation: 50/75/90% masking으로 pretraining 재실행 · reconstruction grid와 probe mini-ablation 표를 Note 07에 추가"
    },
@@ -779,43 +779,43 @@
   {
    "n": 8,
    "phase": "Pretraining Core",
-   "title": "Midterm: Portfolio Review and Capstone Proposal Pitches",
-   "goal": "Convert seven weeks of labs into a credible, compute-budgeted capstone proposal.",
-   "title_ko": "중간 점검: 포트폴리오 리뷰와 Capstone 제안 발표",
-   "goal_ko": "지난 7주의 실습을 compute 예산까지 갖춘 설득력 있는 capstone 제안서로 완성합니다.",
+   "title": "Project Talks I · Week 7, Parts 2–5: the Masked Autoencoder · Mini-MAE Lab",
+   "goal": "Say where your project stands in ten minutes; then the masked autoencoder in a 23-minute lecture and your first pretraining run in the lab — the capstone seed. Part 1 of Week 7 (the four SSL families, collapse) was taught on 26 Oct.",
+   "title_ko": "프로젝트 발표 I · 7주차 Part 2–5: Masked Autoencoder · mini-MAE 실습",
+   "goal_ko": "10분 발표로 내 프로젝트의 현재 위치를 말하고, 23분 강의로 masked autoencoder를 익힌 뒤 실습에서 첫 pretraining을 돌립니다 — capstone의 씨앗. 7주차 Part 1(SSL 네 가족, collapse)은 10/26에 다뤘습니다.",
    "date": "2026-11-02",
    "concept": [
     {
-     "min": 15,
-     "topic": "How to write a capstone proposal: data → objective → architecture → compute budget → evaluation-first design (name your baselines and metrics before training anything).",
-     "topic_ko": "capstone 제안서 쓰는 법: data → objective → architecture → compute 예산 → evaluation-first 설계(무엇이든 학습하기 전에 baseline과 metric부터 명명)"
+     "min": 65,
+     "topic": "Project talks, round 1: 10 min + 3 min of questions per student — what you understand so far; last slide = your project candidate (track, base model, data). No quiz today.",
+     "topic_ko": "프로젝트 발표 1라운드: 학생당 10분 + 질의 3분 — 지금까지 이해한 것; 마지막 슬라이드 = 프로젝트 후보(트랙·base model·데이터). 오늘 퀴즈 없음"
     },
     {
-     "min": 10,
-     "topic": "Compute budgeting at course scale: back-of-envelope FLOPs, tokens-seen, GPU-hours; Chinchilla logic previewed (formalized in W9).",
-     "topic_ko": "과목 규모의 compute 예산 수립: 어림 계산 FLOPs, tokens-seen, GPU-hours · Chinchilla 논리 예고(W9에서 정식화)"
+     "min": 23,
+     "topic": "Week 7, Parts 2–5 (Week 7 slides, from Part 2): MAE in one picture and every shape; why 75% masking; the normalised-pixel target; our EuroSAT reconstructions; what changes for Earth data; probe / kNN / fine-tune readouts and our numbers; mixed precision; the pretraining contract. Part 3 (Earth masks) moves to Week 10.",
+     "topic_ko": "7주차 Part 2–5(7주차 슬라이드, Part 2부터): 그림 한 장과 모든 shape로 보는 MAE · 왜 75% 마스킹인가 · normalised-pixel target · EuroSAT 복원 결과 · 지구 데이터에서 달라지는 것 · probe/kNN/fine-tune 평가와 우리 숫자 · mixed precision · pretraining contract. Part 3(지구용 마스크)은 10주차로"
     },
     {
-     "min": 10,
-     "topic": "Track briefing: default track for everyone = fine-tune and rigorously evaluate a public FM (LoRA, free-tier compute); pretraining is experienced by all in the W7/W9 labs; from-scratch development is reserved for the HydroAI lab team's joint Hydro-FM project. Weather-direction proposals are provisional, with a revision gate after W11. Scope ladders for EV4240 vs EN5425.",
-     "topic_ko": "트랙 브리핑: 전원의 기본 트랙 = 공개 FM을 fine-tuning하고 엄밀히 평가(LoRA, 무료 티어 compute) · pretraining은 W7/W9 lab에서 전원이 경험 · from-scratch 개발은 HydroAI lab 팀의 공동 Hydro-FM 프로젝트 전용 · weather 방향 제안은 잠정 승인, W11 이후 수정 게이트 · EV4240 vs EN5425 범위 사다리"
-    },
-    {
-     "min": 40,
-     "topic": "Proposal pitches, round 1: 5-min pitch + 3-min hostile-but-kind Q&A per student/team (instructor + one assigned peer discussant each).",
-     "topic_ko": "제안 발표 1라운드: 학생/팀당 5분 pitch + 3분의 까칠하지만 친절한 Q&A(교수 + 지정 peer discussant 1명)"
+     "min": 2,
+     "topic": "Guide for the 9 Nov talk — the research purpose: question, why an FM, task/place/period/labels, success criterion with the four baselines, budget, risk.",
+     "topic_ko": "11/9 발표 가이드 — 연구 목적: 질문, 왜 FM인가, task·지역·기간·라벨, baseline 4종을 포함한 성공 기준, 예산, 리스크"
     }
    ],
    "lab": {
-    "task": "Pitches continue; every student files written feedback (GitHub issues) on two peers' proposals; instructor sign-off queue. Portfolio spot-check: instructor clones two random repos and re-runs a lab note live — a reproducibility culture moment.",
-    "task_ko": "발표 계속 진행 · 모든 학생이 동료 제안 2건에 서면 피드백 제출(GitHub issue) · 교수 승인 대기열. 포트폴리오 불시 점검: 교수가 무작위 repo 2개를 clone해 lab note를 현장에서 재실행 — 재현성 문화의 순간",
-    "data": [],
-    "tools": [
-     "GitHub (issues, PR review)"
+    "task": "Week 7 lab: pretrain a mini-MAE on your Week 6 ViT (≈1 M params, 16-bit, ≈15 min on one GPU) on ≈5 k SSL4EO-S12 Sentinel-2 chips; then probe and kNN on EuroSAT against random init and supervised-from-scratch at equal epochs; look at a reconstruction grid before trusting any number.",
+    "task_ko": "7주차 실습: Week 6 ViT 기반 mini-MAE(≈1 M params, 16-bit, GPU 1장 ≈15분)를 SSL4EO-S12 Sentinel-2 chip ≈5 k장으로 pretraining · EuroSAT에서 probe·kNN으로 random init, 동일 epoch의 supervised-from-scratch와 비교 · 숫자를 믿기 전에 reconstruction grid부터 확인",
+    "data": [
+     "SSL4EO-S12 subset (~5k chips)",
+     "EuroSAT-MS (probe)"
     ],
-    "deliverable": "2-page proposal (data, objective, base model, compute budget, downstream tasks, eval protocol, risk plan) — PDF submitted on this site by Sun 11/1 13:00; pitched in class 11/2.",
-    "deliverable_ko": "2쪽 제안서(data, objective, base model, compute 예산, downstream task, eval protocol, risk plan) — PDF를 Sun 11/1 13:00까지 이 사이트에 제출 · 11/2 수업에서 발표",
-    "homework": null
+    "tools": [
+     "PyTorch AMP (bf16/fp16)",
+     "W&B"
+    ],
+    "deliverable": "Note 07 — due Sun 11/8 23:59: the five-sentence contract, probe table (pretrained vs random vs supervised), reconstruction grids, peak memory. Slides for the 9 Nov talk (PDF) also by Sun 11/8 23:59.",
+    "deliverable_ko": "Note 07 — 11/8(일) 23:59: 다섯 문장 contract, probe 표(pretrained vs random vs supervised), reconstruction grid, peak memory. 11/9 발표 슬라이드(PDF)도 11/8(일) 23:59까지",
+    "homework": "Masking-ratio ablation (50/75/90%) added to Note 07; collapse report (≤ 10 pages, PDF) due Sun 11/15 23:59.",
+    "homework_ko": "masking-ratio ablation(50/75/90%)을 Note 07에 추가 · collapse 보고서(≤ 10쪽, PDF)는 11/15(일) 23:59"
    },
    "reading": {
     "memo": "none",
@@ -824,10 +824,12 @@
     "questions": []
    },
    "skills": [
-    "eval-first experimental design",
-    "compute budgeting",
+    "MAE pretraining",
+    "SSL evaluation (probe/kNN)",
+    "mixed precision",
     "scientific communication"
-   ]
+   ],
+   "slides": true
   },
   {
    "n": 9,
