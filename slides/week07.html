@@ -362,14 +362,14 @@
     <img src="img/fig-w7-normpix.png" data-zoom alt="Three 8 by 8 patches of the red band from EuroSAT chips: an industrial roof (mean reflectance 0.179), a lake (0.025) and a field edge (0.114). Top row on one grey scale: the roof dominates, the lake is black. Bottom row, each patch normalised by its own mean and standard deviation: all three show structure; the lake shows amplified speckle noise." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
   </div>
   <ul class="small">
-    <li>The MAE target is each hidden patch minus its own mean, over its own standard deviation. In the paper it beats raw pixels: 85.4% vs 84.9% fine-tuned (ViT-L, Table 1c).</li>
+    <li>The target for a hidden patch is <b>t = (x − μ) / √(σ² + ε)</b>, with μ and σ² the mean and variance of that patch’s own 832 values (8 × 8 px × 13 bands); the loss is the squared error between the decoder’s output and t. In the paper it beats raw pixels: 85.4% vs 84.9% fine-tuned (ViT-L, Table 1c).</li>
     <li><span class="accent">On Earth data, a flat lake or desert patch has almost no spread: normalising it magnifies small variations into the “pattern” to predict — keep the ε, or mask such patches out of the loss.</span></li>
   </ul>
   <div class="gloss">
     <span><b>ε</b> — a small number added to the variance before the square root (official code: 10<sup>−6</sup>), so a flat patch does not divide by zero.</span>
   </div>
   <div class="foot"><span>He et al. 2021, §3 “Reconstruction target” and Table 1c · patches from EuroSAT-MS Industrial_2, SeaLake_1, AnnualCrop_1, band B04</span></div>
-  <aside class="notes">1.5 min. Top row, one shared scale: the roof is bright, the lake is black, and a squared-error loss would spend almost all its effort on the roof. Bottom row: each patch divided by its own spread — now every patch's pattern counts equally, and the paper shows this target improves accuracy. Then point at the lake: there is almost nothing in it, so normalising magnifies small variations into a pattern the model is asked to predict. On Earth data — water, desert, snow, cloud tops — that is common; the fixes are the epsilon, or leaving near-flat patches and clouds out of the loss. This is the first of the "what changes for EO" points; the rest are on slide 11.</aside>
+  <aside class="notes">1.5 min. Top row, one shared scale: the roof is bright, the lake is black, and a squared-error loss would spend almost all its effort on the roof. Bottom row: each patch minus its own mean, divided by its own spread — the formula in the first bullet, computed over the 832 values of that one patch — now every patch's pattern counts equally, and the paper shows this target improves accuracy. Then point at the lake: there is almost nothing in it, so normalising magnifies small variations into a pattern the model is asked to predict. On Earth data — water, desert, snow, cloud tops — that is common; the fixes are the epsilon, or leaving near-flat patches and clouds out of the loss. This is the first of the "what changes for EO" points; the rest are on slide 11.</aside>
 </section>
 
 <!-- 10 -->
