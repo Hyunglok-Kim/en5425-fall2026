@@ -33,7 +33,7 @@
   <h1 style="color:#f4efe5;text-shadow:0 2px 24px rgba(0,0,0,.6)">Self-Supervised Learning: Pretrain Your First Model</h1>
   <p class="big" style="color:#e8e2d8;text-shadow:0 1px 16px rgba(0,0,0,.6)">Half of these chips have three quarters of their patches hidden. A network that learns to fill them back in, with no labels at all, learns what fields, rivers and towns look like. That is how Prithvi, SatMAE and most Earth foundation models (one network pretrained broadly, then adapted to many tasks) were trained, and today you pretrain one yourself.</p>
   <div class="foot" style="color:#cfc8bc"><span>Deep Learning Applications in Environmental Big Data · Prof. Hyunglok Kim · GIST</span><span>Image: the same forty EuroSAT-MS (multispectral) chips as Week 6, true colour (bands 4-3-2); on every other chip 48 of the 64 patches (75%) are greyed out, the masked autoencoder's default. Helber et al. 2019, MIT licence.</span></div>
-  <aside class="notes">Open: on 26 October Part 1 drew the map — four families, one failure; today the paper’s model, and the lab. Say what the picture is: the same forty EuroSAT chips as last week, and on every other one three quarters of the patches are hidden — the input of the model the lab pretrains today. Timing: no quiz (quiz 7 was 26 Oct); the students’ ten-minute talks open the session; then 27 min of lecture (roadmap 1.5, Part 2 15, Part 4 5, Part 5 5 including the 9 Nov talk guide) and the 3-min lab briefing. Cut order if short: the four Earth cards (slide 11 — each is a line in the lab code, say so in the briefing instead), then the why-75% measurement. Part 1, Part 3, the asymmetric-cost bars, the mask-ratio sweep, the paper card, GEO-Bench-2, the FLEX, the discussion questions and all video shelves are at the back of the deck. Every number on today's slides that is not from a paper was computed for this lecture on EuroSAT chips: the spectral-redundancy test, the compute bars, the fill-in baseline, and a tiny MAE we pretrained on an Apple M2 Ultra.</aside>
+  <aside class="notes">Open: on 26 October Part 1 drew the map — four families, one failure; today the paper’s model, and the lab. Say what the picture is: the same forty EuroSAT chips as last week, and on every other one three quarters of the patches are hidden — the input of the model the lab pretrains today. Timing: no quiz (quiz 7 was 26 Oct); the students’ ten-minute talks open the session; then 27 min of lecture (roadmap 1.5, Part 2 15, Part 3 5, Part 4 5 including the 9 Nov talk guide) and the 3-min lab briefing. Cut order if short: the four Earth cards (slide 11 — each is a line in the lab code, say so in the briefing instead), then the why-75% measurement. Part 1, the Earth-mask slides, the asymmetric-cost bars, the mask-ratio sweep, the paper card, GEO-Bench-2, the FLEX, the discussion questions and all video shelves are at the back of the deck. Every number on today's slides that is not from a paper was computed for this lecture on EuroSAT chips: the spectral-redundancy test, the compute bars, the fill-in baseline, and a tiny MAE we pretrained on an Apple M2 Ultra.</aside>
 </section>
 
 <!-- 2 -->
@@ -67,15 +67,15 @@
       </g>
       <g fill="none" stroke="var(--muted)" stroke-width="1"><path d="M4 78 V84 H506 V78 M524 78 V84 H636 V78 M654 78 V84 H766 V78 M784 78 V84 H896 V78"/></g>
       <g font-size="11" fill="var(--muted)" text-anchor="middle">
-        <text x="255" y="100">Part 1 · taught 26 Oct · slides at the back of the deck</text><text x="580" y="100">Part 2 · MAE (15 min)</text><text x="710" y="100">Part 3 · at the back</text><text x="840" y="100">Parts 4–5 (5 + 5)</text>
+        <text x="255" y="100">Part 1 · taught 26 Oct · slides at the back of the deck</text><text x="580" y="100">Part 2 · MAE (15 min)</text><text x="710" y="100">Earth masks · at the back</text><text x="840" y="100">Parts 3–4 (5 + 5)</text>
       </g>
     </svg>
   </div>
   <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.1vh,19px);line-height:1.36">
     <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--muted);font-weight:650">1 · 26 Oct</td><td style="padding:.4vh .6vw;color:var(--ink-2)"><b>self-supervised learning (SSL)</b> the labels are made from the data itself · <b>pretext task</b> the made-up job, e.g. fill in hidden patches · <b>contrastive</b> pull two views (random crops, turns) of one image together, push other images away · <b>self-distillation</b> a student copies a slowly updated teacher · <b>latent prediction</b> predict the hidden part’s embedding (the encoder’s output vector), not its pixels · <b>collapse</b> every input gets the same vector</td></tr>
     <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">2 · MAE</td><td style="padding:.4vh .6vw"><b>masked autoencoder (MAE)</b> hide most patches, rebuild them (this week’s paper) · <b>encoder</b> the part you keep · <b>decoder</b> the part you throw away · <b>mask token</b> one learned vector standing in for every hidden patch</td></tr>
-    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--muted);font-weight:650">3 · at the back</td><td style="padding:.4vh .6vw;color:var(--ink-2)"><b>spectral masking</b> hide a whole group of bands · <b>temporal masking</b> hide a whole date · <b>modality</b> one kind of sensor, e.g. radar or elevation</td></tr>
-    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">4–5 · Judge, fit</td><td style="padding:.4vh .6vw"><b>frozen</b> weights not updated · <b>linear probe</b> one linear layer trained on frozen features · <b>kNN</b> k-nearest neighbours: a vote of the k closest training chips · <b>(full) fine-tune</b> train every weight · <b>bf16 / fp16</b> 16-bit numbers that roughly halve activation memory</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--muted);font-weight:650">Earth masks</td><td style="padding:.4vh .6vw;color:var(--ink-2)"><b>spectral masking</b> hide a whole group of bands · <b>temporal masking</b> hide a whole date · <b>modality</b> one kind of sensor, e.g. radar or elevation</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">3–4 · Judge, fit</td><td style="padding:.4vh .6vw"><b>frozen</b> weights not updated · <b>linear probe</b> one linear layer trained on frozen features · <b>kNN</b> k-nearest neighbours: a vote of the k closest training chips · <b>(full) fine-tune</b> train every weight · <b>bf16 / fp16</b> 16-bit numbers that roughly halve activation memory</td></tr>
   </table>
   <p class="small" style="margin:.8vh 0 0;padding:.5vh .8vw;border-left:3px solid var(--accent);background:var(--wash)"><b style="color:var(--accent)">Report · due Sun 15 Nov 23:59</b> — <b>collapse</b> (slide 24, A3): why it happens, how each family blocks it · <b>≤ 10 pages</b>, PDF</p>
   <div class="ytmini">
@@ -89,11 +89,11 @@
     </a>
     <a href="https://www.youtube.com/watch?v=75xclLXkFzI" class="yt" data-id="75xclLXkFzI">
       <span class="ytbox"><img src="img/yt-w7-geobench.jpg" alt="ServiceNow video"><span class="play"><span>&#9654;</span></span></span>
-      <span class="cap"><b>Part 4 words</b> — benchmarks, probe vs fine-tune · ServiceNow, <i>GEO-Bench v2</i> (an Earth-model benchmark) · 18 min</span>
+      <span class="cap"><b>Part 3 words</b> — benchmarks, probe vs fine-tune · ServiceNow, <i>GEO-Bench v2</i> (an Earth-model benchmark) · 18 min</span>
     </a>
   </div>
   <div class="foot"><span>Click a video to play it large · lab straight after this lecture · Part 1 and every reference card are in the Appendix</span></div>
-  <aside class="notes">1.5 min. Point at the greyed boxes: that was 26 October — labels scarce, hide-and-predict, four targets, the collapse trap. Today is the rest of the chain in 27 minutes: MAE hides 75% and keeps the decoder small; three ways to judge the encoder, which disagree; then mixed precision so the lab fits, the five-sentence contract, and what next Monday's talk must contain. The Earth masks (Part 3) moved to the back — they return in Week 10 with Prithvi. Table: one breath per word; row 1 is last time's vocabulary, row 3 is for later. Then the report line: collapse, up to 10 pages, PDF, due Sunday 15 November 23:59 — the 10-minute talk option is gone because from 9 November the talk slot belongs to your project. Scope to say out loud: what collapse is, why a loss that only asks two views to agree allows it, how each family blocks it (the table on slide 24), and how to spot it in a run; slide 24 and Appendix A3 are the starting material. The lab starts right after slide 18.</aside>
+  <aside class="notes">1.5 min. Point at the greyed boxes: that was 26 October — labels scarce, hide-and-predict, four targets, the collapse trap. Today is the rest of the chain in 27 minutes: MAE hides 75% and keeps the decoder small; three ways to judge the encoder, which disagree; then mixed precision so the lab fits, the five-sentence contract, and what next Monday's talk must contain. The Earth-mask slides moved to the back — they return in Week 10 with Prithvi. Table: one breath per word; row 1 is last time's vocabulary, row 3 is for later. Then the report line: collapse, up to 10 pages, PDF, due Sunday 15 November 23:59 — the 10-minute talk option is gone because from 9 November the talk slot belongs to your project. Scope to say out loud: what collapse is, why a loss that only asks two views to agree allows it, how each family blocks it (the table on slide 24), and how to spot it in a run; slide 24 and Appendix A3 are the starting material. The lab starts right after slide 18.</aside>
 </section>
 
 <!-- 3 -->
@@ -377,7 +377,7 @@
 <section class="slide xl">
   <p class="kicker">Part 2 · What your lab will produce · measured</p>
   <h2>Sixteen patches in, a whole chip out — after 8 minutes of pretraining</h2>
-  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Blurry but in the right places — a sanity check that the encoder kept the layout; the probe (Part 4) measures the rest.</p>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Blurry but in the right places — a sanity check that the encoder kept the layout; the probe (Part 3) measures the rest.</p>
   <div class="figure" style="flex:0 0 auto;display:block;margin:0">
     <img src="img/fig-w7-recon.png" data-zoom alt="Six EuroSAT test chips, one per column: annual crop, forest, highway, industrial, river, sea or lake. Top row: the original in true colour. Middle row: 48 of 64 patches greyed out. Bottom row: the tiny MAE output with the visible patches pasted back; field boundaries, the river bank and the highway reappear in the right places, roofs and fine texture come back blurred." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
   </div>
@@ -400,7 +400,7 @@
   <div class="cols" style="grid-template-columns:1fr 1fr;gap:1.2vw 1.6vw;flex:0 0 auto">
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Clouds and no-data</b><br>A cloud cannot be predicted from the ground around it, and teaches nothing about the ground. Pretrain on cloud-screened chips, or leave cloudy and no-data pixels out of the loss.</p></div>
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Redundancy differs by landscape</b><br>Our fill test at 75% hidden: annual crop (0.59) and rivers (0.64) are easy, residential (0.88) and industrial (0.80) hard. A ratio tuned on fields can be too high for towns.</p></div>
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">13 bands at three resolutions</b><br>Normalise per band with training-split statistics; the 20 m and 60 m bands are blurrier, so their patches are easier to fill. Hiding whole band groups (Part 3, in the appendix) makes the task about spectra, not texture.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">13 bands at three resolutions</b><br>Normalise per band with training-split statistics; the 20 m and 60 m bands are blurrier, so their patches are easier to fill. Hiding whole band groups (Earth masks, in the appendix) makes the task about spectra, not texture.</p></div>
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">The same field shows up many times</b><br>Sentinel-2 photographs every spot again every 5 days, so one field appears in many chips. Split chips at random and the same field lands in both the pretraining set and the probe’s test set — the probe then rewards memory. Split by place instead: every chip of an area goes to one side (Week 2).</p></div>
   </div>
   <div class="gloss">
@@ -413,7 +413,7 @@
 <!-- 12 -->
 
 <section class="slide section xl">
-  <p class="kicker">Part 4 · 5 min · judging a pretrained encoder</p>
+  <p class="kicker">Part 3 · 5 min · judging a pretrained encoder</p>
   <h2>Evaluation: Probe, Neighbours, Fine-Tune — and Why They Disagree</h2>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Three ways to read a frozen encoder, our own EuroSAT numbers for each, and MAE’s famous gap between probe and fine-tune. What GEO-Bench-2 found about ranking Earth models is at the back; it returns in Week 10. <b>By the end:</b> fill the lab’s probe table and say what it can and cannot prove.</p></div>
@@ -426,7 +426,7 @@
 <!-- 13 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 4 · Three readouts</p>
+  <p class="kicker">Part 3 · Three readouts</p>
   <h2>Freeze it and fit one line, let neighbours vote, or train everything</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Each protocol asks a different question of the same encoder — so each can crown a different winner.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
@@ -462,7 +462,7 @@
 <!-- 14 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 4 · Our numbers · measured</p>
+  <p class="kicker">Part 3 · Our numbers · measured</p>
   <h2>On EuroSAT, pretraining lifts every readout — and supervised still wins</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">4,000 labelled chips is plenty for a 10-class, 64-px task. With fewer labels the order can flip — that is the lab’s question.</p>
   <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14.5px,2.3vh,20px);line-height:1.4">
@@ -486,7 +486,7 @@
 <!-- 15 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 5 · 2 min · mixed precision, hands-on today</p>
+  <p class="kicker">Part 4 · 2 min · mixed precision, hands-on today</p>
   <h2>Three lines that roughly halve the activation memory</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Week 6 named mixed precision; today you switch it on. Which 16-bit type depends on the GPU you are given.</p>
   <div class="cols" style="grid-template-columns:1.25fr 1fr;gap:2vw;align-items:start;flex:0 0 auto">
@@ -517,7 +517,7 @@ for x in loader:
 <!-- 16 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 5 · The contract</p>
+  <p class="kicker">Part 4 · The contract</p>
   <h2>Write the pretraining plan down before the agent writes code</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Note 07 opens with these five sentences; an agent can write MAE in a minute, but only you can say what counts as success.</p>
   <ol class="small" style="font-size:clamp(15px,2.4vh,21px);line-height:1.5">
@@ -537,7 +537,7 @@ for x in loader:
 <!-- 17 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 5 · 2 min · next Monday</p>
+  <p class="kicker">Part 4 · 2 min · next Monday</p>
   <h2>9 Nov, your first talk: purpose and evaluation contract</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Ten minutes + three of questions · slides (PDF) on this site by Sun 8 Nov 23:59 · it replaces the written proposal.</p>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.2vw 1.6vw;flex:0 0 auto">
@@ -592,7 +592,7 @@ for x in loader:
   <p class="kicker">Appendix · self-study</p>
   <h2>Part 1 from 26 October, the slides skipped on 2 November, then the code, the losses and the reference cards</h2>
   <p class="big muted">Part 1 was taught live on 26 October; everything after it is reference material.</p>
-  <aside class="notes">Not taught on 2 November. First Part 1 as given on 26 October — four families, collapse, the family tree, its videos. Then the slides cut from today's 23 minutes: the asymmetric-cost bars, the mask-ratio sweep, the paper card, Part 3 on Earth masks with Prithvi-WxC, GEO-Bench-2, the FLEX board exercise, the discussion questions. Then the original appendix: MAE in code with every shape; the contrastive loss written out; DINO's loss with centring and sharpening; the family card; this week's paper card; the Earth and weather SSL models card; the evaluation protocols and GEO-Bench-2; the lab reference; the assigned video; the shelf. Say the appendix exists, say what is in it, and stop.</aside>
+  <aside class="notes">Not taught on 2 November. First Part 1 as given on 26 October — four families, collapse, the family tree, its videos. Then the slides cut from today's 23 minutes: the asymmetric-cost bars, the mask-ratio sweep, the paper card, the Earth-mask slides with Prithvi-WxC, GEO-Bench-2, the FLEX board exercise, the discussion questions. Then the original appendix: MAE in code with every shape; the contrastive loss written out; DINO's loss with centring and sharpening; the family card; this week's paper card; the Earth and weather SSL models card; the evaluation protocols and GEO-Bench-2; the lab reference; the assigned video; the shelf. Say the appendix exists, say what is in it, and stop.</aside>
 </section>
 
 <!-- 20 -->
@@ -962,7 +962,7 @@ for x in loader:
     <li>Probe 91.4 / 91.9 / 92.3% vs 85.1% untrained; kNN 82.3 / 83.5 / 85.6% vs 74.5%. <span class="accent">One seed each, ±0.9 points: do not read “90% is best” into this.</span> The paper also found fine-tuning flat from 40 to 80%.</li>
   </ul>
   <div class="gloss">
-    <span><b>linear probe / kNN</b> — accuracy of one linear layer, or of a 20-neighbour vote, on the frozen encoder (Part 4).</span>
+    <span><b>linear probe / kNN</b> — accuracy of one linear layer, or of a 20-neighbour vote, on the frozen encoder (Part 3).</span>
   </div>
   <div class="foot"><span>Computed for this lecture: one seed per ratio, 4,000 train / 1,000 test chips, 1 s.e. ≈ 0.9 points · the 50% and 90% pictures reuse the 75% model, as the paper’s Fig. 4 does · tools/week07_figs/out/mae_results.json</span></div>
   <aside class="notes">1.5 min. The lab’s homework, done once for this lecture. Left: the same chip at three ratios — at 90% four patches are all the encoder gets, and the painting goes vague. Right: the probe and kNN accuracy of encoders pretrained at each ratio. The flat lines are the honest result: with one seed each and a standard error of 0.9 points, 50, 75 and 90% tie on this small dataset; what is not a tie is the gap to the dotted lines — every pretrained encoder beats an untrained one by 6 to 11 points. Say that the homework asks them to reproduce this and to report the noise, not a winner.</aside>
@@ -988,7 +988,7 @@ for x in loader:
     <span><b>ablation</b> — change one design choice, keep everything else, measure. <b>MoCo v3</b> — a contrastive ViT method, the main baseline.</span>
   </div>
   <div class="foot"><span>He et al. 2021, CVPR 2022 · Fig. 5 (ratio), Table 1b–d, Table 3, Table 12 (App. B) · card: Appendix A5 · quizzed today</span></div>
-  <aside class="notes">1.5 min. Read the four rows as four decisions. Ratio: 75%, and note that the linear probe is far more sensitive to it than fine-tuning. Mask token: putting it into the encoder costs 3.3 times the compute and 14 points of probe accuracy, because the encoder then spends its capacity on placeholders it will never see at test time. Target: plain per-patch-normalised pixels beat BEiT's learned tokens, so no tokenizer is needed. Augmentation: cropping is enough, colour jitter hurts — good news for satellite data, whose colours are measurements. Then the headline numbers, and the honesty point: the paper itself shows MAE losing the linear probe to a contrastive method — Part 4.</aside>
+  <aside class="notes">1.5 min. Read the four rows as four decisions. Ratio: 75%, and note that the linear probe is far more sensitive to it than fine-tuning. Mask token: putting it into the encoder costs 3.3 times the compute and 14 points of probe accuracy, because the encoder then spends its capacity on placeholders it will never see at test time. Target: plain per-patch-normalised pixels beat BEiT's learned tokens, so no tokenizer is needed. Augmentation: cropping is enough, colour jitter hurts — good news for satellite data, whose colours are measurements. Then the headline numbers, and the honesty point: the paper itself shows MAE losing the linear probe to a contrastive method — Part 3.</aside>
 </section>
 
 <!-- 33 -->
@@ -1014,7 +1014,7 @@ for x in loader:
       <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">AI Coffee Break · <i>BERT-style pretraining for images (BEiT)</i> · masked tokens instead of pixels · 8 min — <span class="accent">click to play here</span></p>
     </a>
   </div>
-  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Part 3.</b> MAE hides random patches. A satellite chip has two more axes to hide along — bands and dates — and the choice of axis decides what the model must learn.</p>
+  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to the Earth-mask slides.</b> MAE hides random patches. A satellite chip has two more axes to hide along — bands and dates — and the choice of axis decides what the model must learn.</p>
   <div class="gloss">
     <span><b>BEiT</b> — BERT pre-training of image Transformers: predicts a discrete code for each hidden patch instead of its pixels; MAE showed plain pixels work as well.</span>
   </div>
@@ -1025,7 +1025,7 @@ for x in loader:
 <!-- 34 -->
 
 <section class="slide section xl">
-  <p class="kicker">Skipped on 2 Nov · Part 3 · structured masking · returns in Week 10</p>
+  <p class="kicker">Skipped on 2 Nov · Earth masks · structured masking · returns in Week 10</p>
   <h2>Masks for the Earth: Hide a Band, a Date, a Sensor</h2>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Four ways to mask a satellite data cube; a measurement of which band groups can be guessed from the others; how SatMAE, SpectralGPT, Galileo and OlmoEarth chose; and the weather model that hides the future. <b>By the end:</b> pick a mask for your capstone data and say what it forces the model to learn.</p></div>
@@ -1038,7 +1038,7 @@ for x in loader:
 <!-- 35 -->
 
 <section class="slide xl">
-  <p class="kicker">Skipped on 2 Nov · Part 3 · Four masks</p>
+  <p class="kicker">Skipped on 2 Nov · Earth masks · Four masks</p>
   <h2>Hide patches, a band group, a date, or big blocks</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">A satellite chip is a cube — space × bands × time — so the mask can cut along any axis. Each cut teaches something else.</p>
   <div class="figure" style="flex:0 0 auto;display:block;margin:0">
@@ -1057,7 +1057,7 @@ for x in loader:
 <!-- 36 -->
 
 <section class="slide xl">
-  <p class="kicker">Skipped on 2 Nov · Part 3 · Hide a band group · measured</p>
+  <p class="kicker">Skipped on 2 Nov · Earth masks · Hide a band group · measured</p>
   <h2>In our test, red-edge bands are easy to guess from the rest; shortwave infrared is not</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">A group that is easy to guess makes a weak pretext task; SWIR, which tracks moisture, is the harder one to predict.</p>
   <div class="figure" style="flex:0 0 auto;display:block;margin:0">
@@ -1076,7 +1076,7 @@ for x in loader:
 <!-- 37 -->
 
 <section class="slide xl">
-  <p class="kicker">Skipped on 2 Nov · Part 3 · Who hides what</p>
+  <p class="kicker">Skipped on 2 Nov · Earth masks · Who hides what</p>
   <h2>Five Earth models, five masks — read the mask as the curriculum</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Each model’s mask was chosen for its data: band groups for Sentinel-2, space–time cubes for time series, sensors for multimodal.</p>
   <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(13.5px,2.1vh,18.5px);line-height:1.36">
@@ -1100,7 +1100,7 @@ for x in loader:
 <!-- 38 -->
 
 <section class="slide xl">
-  <p class="kicker">Skipped on 2 Nov · Part 3 · Weather · Prithvi-WxC</p>
+  <p class="kicker">Skipped on 2 Nov · Earth masks · Weather · Prithvi-WxC</p>
   <h2>Hide half of today’s atmosphere and ask for tomorrow’s</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">One objective covers both: with lead time 0 it is masked reconstruction, with 6–24 h it is a forecast. Week 11 builds on it.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
@@ -1134,7 +1134,7 @@ for x in loader:
 <!-- 39 -->
 
 <section class="slide xl">
-  <p class="kicker">Skipped on 2 Nov · Part 3 · Watch at home · the Earth models, by their builders</p>
+  <p class="kicker">Skipped on 2 Nov · Earth masks · Watch at home · the Earth models, by their builders</p>
   <h2>Prithvi-EO-2.0, Prithvi-WxC and OlmoEarth, from the teams that pretrained them</h2>
   <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
     <a href="https://www.youtube.com/watch?v=CB3FKtmuPI8" class="yt" data-id="CB3FKtmuPI8" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
@@ -1154,7 +1154,7 @@ for x in loader:
       <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Robin Cole with the Ai2 team · <i>Building OlmoEarth</i> · data, pretraining, evaluation · 37 min — <span class="accent">click to play here</span></p>
     </a>
   </div>
-  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Part 4.</b> Every one of these teams reports that its model is best. Which number they report — and on which split — can change the ranking.</p>
+  <p class="small" style="margin:1.1vh 0 0;padding:.6vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0"><b class="accent">Bridge to Part 3.</b> Every one of these teams reports that its model is best. Which number they report — and on which split — can change the ranking.</p>
   <div class="foot"><span>Optional · more Earth talks on the next slide</span></div>
   <aside class="notes">Twenty seconds. The builders' own talks — useful for the capstone choice of backbone.</aside>
 </section>
@@ -1162,7 +1162,7 @@ for x in loader:
 <!-- 40 -->
 
 <section class="slide xl">
-  <p class="kicker">Skipped on 2 Nov · Part 3 · Watch at home · the wider Earth picture</p>
+  <p class="kicker">Skipped on 2 Nov · Earth masks · Watch at home · the wider Earth picture</p>
   <h2>Clay, SSL4EO, ESA’s survey and ECMWF on self-supervision for Earth data</h2>
   <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
     <a href="https://www.youtube.com/watch?v=nJuQ9_agF_M" class="yt" data-id="nJuQ9_agF_M" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
@@ -1192,7 +1192,7 @@ for x in loader:
 <!-- 41 -->
 
 <section class="slide xl">
-  <p class="kicker">Skipped 2 Nov · Part 4 · GEO-Bench-2</p>
+  <p class="kicker">Skipped 2 Nov · Part 3 · GEO-Bench-2</p>
   <h2>No model wins everything, and freezing the encoder reshuffles the ranking</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">A 2025 benchmark of Earth foundation models on 19 datasets: report fine-tuning, and rank by capability, not by one leaderboard.</p>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.4vw;align-items:stretch;flex:0 0 auto">
@@ -1213,7 +1213,7 @@ for x in loader:
 <!-- 42 -->
 
 <section class="slide xl">
-  <p class="kicker">Skipped on 2 Nov · Parts 4–5 · Watch at home</p>
+  <p class="kicker">Skipped on 2 Nov · Parts 3–4 · Watch at home</p>
   <h2>Benchmarks, transfer, an Earth evaluation, and mixed precision</h2>
   <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
     <a href="https://www.youtube.com/watch?v=75xclLXkFzI" class="yt" data-id="75xclLXkFzI" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
@@ -1240,7 +1240,7 @@ for x in loader:
 <!-- 43 -->
 
 <section class="slide xl">
-  <p class="kicker">Skipped on 2 Nov · Part 5 · FLEX ~4 min · teach or skip</p>
+  <p class="kicker">Skipped on 2 Nov · Part 4 · FLEX ~4 min · teach or skip</p>
   <h2>Board exercise: what does masking save on three real datasets?</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Count tokens, keep a quarter, square: the attention bill of the encoder shrinks by the square of the keep ratio.</p>
   <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14.5px,2.3vh,20px);line-height:1.4">
