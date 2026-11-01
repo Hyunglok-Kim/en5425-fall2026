@@ -33,13 +33,13 @@
   <h1 style="color:#f4efe5;text-shadow:0 2px 24px rgba(0,0,0,.6)">Self-Supervised Learning: Pretrain Your First Model</h1>
   <p class="big" style="color:#e8e2d8;text-shadow:0 1px 16px rgba(0,0,0,.6)">Half of these chips have three quarters of their patches hidden. A network that learns to fill them back in, with no labels at all, learns what fields, rivers and towns look like. That is how Prithvi, SatMAE and most Earth foundation models (one network pretrained broadly, then adapted to many tasks) were trained, and today you pretrain one yourself.</p>
   <div class="foot" style="color:#cfc8bc"><span>Deep Learning Applications in Environmental Big Data · Prof. Hyunglok Kim · GIST</span><span>Image: the same forty EuroSAT-MS (multispectral) chips as Week 6, true colour (bands 4-3-2); on every other chip 48 of the 64 patches (75%) are greyed out, the masked autoencoder's default. Helber et al. 2019, MIT licence.</span></div>
-  <aside class="notes">Open: on 26 October Part 1 drew the map — four families, one failure; today the paper’s model, and the lab. Say what the picture is: the same forty EuroSAT chips as last week, and on every other one three quarters of the patches are hidden — the input of the model the lab pretrains today. Timing: no quiz (quiz 7 was 26 Oct); the students’ ten-minute talks open the session; then 25 min of lecture (roadmap 1.5, Part 2 13, Part 4 5, Part 5 5 including the 9 Nov talk guide) and the 3-min lab briefing. Cut order if short: the four Earth cards (slide 10 — each is a line in the lab code, say so in the briefing instead), then the why-75% measurement. Part 1, Part 3, the asymmetric-cost bars, the mask-ratio sweep, the paper card, GEO-Bench-2, the FLEX, the discussion questions and all video shelves are at the back of the deck. Every number on today's slides that is not from a paper was computed for this lecture on EuroSAT chips: the spectral-redundancy test, the compute bars, the fill-in baseline, and a tiny MAE we pretrained on an Apple M2 Ultra.</aside>
+  <aside class="notes">Open: on 26 October Part 1 drew the map — four families, one failure; today the paper’s model, and the lab. Say what the picture is: the same forty EuroSAT chips as last week, and on every other one three quarters of the patches are hidden — the input of the model the lab pretrains today. Timing: no quiz (quiz 7 was 26 Oct); the students’ ten-minute talks open the session; then 27 min of lecture (roadmap 1.5, Part 2 15, Part 4 5, Part 5 5 including the 9 Nov talk guide) and the 3-min lab briefing. Cut order if short: the four Earth cards (slide 11 — each is a line in the lab code, say so in the briefing instead), then the why-75% measurement. Part 1, Part 3, the asymmetric-cost bars, the mask-ratio sweep, the paper card, GEO-Bench-2, the FLEX, the discussion questions and all video shelves are at the back of the deck. Every number on today's slides that is not from a paper was computed for this lecture on EuroSAT chips: the spectral-redundancy test, the compute bars, the fill-in baseline, and a tiny MAE we pretrained on an Apple M2 Ultra.</aside>
 </section>
 
 <!-- 2 -->
 
 <section class="slide xl">
-  <p class="kicker">Week 7 · second session · 25 min</p>
+  <p class="kicker">Week 7 · second session · 27 min</p>
   <h2>Today: build the MAE, judge it, make it fit</h2>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
     <svg viewBox="0 0 900 112" role="img" aria-label="Seven boxes joined left to right by arrows: labels are scarce, pixels are free; hide part of the data and predict it; four things to predict; the trap is collapse; MAE hides 75% and uses a small decoder; on the Earth, hide bands, dates and sensors; judge the encoder with probe, kNN and fine-tune. The first four boxes and the Earth box are greyed out: Part 1 was taught on 26 October and the Earth masks moved to the back of the deck. Brackets under the boxes mark the parts. The collapse box is tagged: your report, due 15 November." style="width:min(98%,1150px)">
@@ -67,7 +67,7 @@
       </g>
       <g fill="none" stroke="var(--muted)" stroke-width="1"><path d="M4 78 V84 H506 V78 M524 78 V84 H636 V78 M654 78 V84 H766 V78 M784 78 V84 H896 V78"/></g>
       <g font-size="11" fill="var(--muted)" text-anchor="middle">
-        <text x="255" y="100">Part 1 · taught 26 Oct · slides at the back of the deck</text><text x="580" y="100">Part 2 · MAE (13 min)</text><text x="710" y="100">Part 3 · at the back</text><text x="840" y="100">Parts 4–5 (5 + 5)</text>
+        <text x="255" y="100">Part 1 · taught 26 Oct · slides at the back of the deck</text><text x="580" y="100">Part 2 · MAE (15 min)</text><text x="710" y="100">Part 3 · at the back</text><text x="840" y="100">Parts 4–5 (5 + 5)</text>
       </g>
     </svg>
   </div>
@@ -77,7 +77,7 @@
     <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--muted);font-weight:650">3 · at the back</td><td style="padding:.4vh .6vw;color:var(--ink-2)"><b>spectral masking</b> hide a whole group of bands · <b>temporal masking</b> hide a whole date · <b>modality</b> one kind of sensor, e.g. radar or elevation</td></tr>
     <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">4–5 · Judge, fit</td><td style="padding:.4vh .6vw"><b>frozen</b> weights not updated · <b>linear probe</b> one linear layer trained on frozen features · <b>kNN</b> k-nearest neighbours: a vote of the k closest training chips · <b>(full) fine-tune</b> train every weight · <b>bf16 / fp16</b> 16-bit numbers that roughly halve activation memory</td></tr>
   </table>
-  <p class="small" style="margin:.8vh 0 0;padding:.5vh .8vw;border-left:3px solid var(--accent);background:var(--wash)"><b style="color:var(--accent)">Report · due Sun 15 Nov 23:59</b> — <b>collapse</b> (slide 23, A3): why it happens, how each family blocks it · <b>≤ 10 pages</b>, PDF</p>
+  <p class="small" style="margin:.8vh 0 0;padding:.5vh .8vw;border-left:3px solid var(--accent);background:var(--wash)"><b style="color:var(--accent)">Report · due Sun 15 Nov 23:59</b> — <b>collapse</b> (slide 24, A3): why it happens, how each family blocks it · <b>≤ 10 pages</b>, PDF</p>
   <div class="ytmini">
     <a href="https://www.youtube.com/watch?v=iGJ1XSkCyU0" class="yt" data-id="iGJ1XSkCyU0">
       <span class="ytbox"><img src="img/yt-w7-what-is-ssl.jpg" alt="Boris Meinardus video"><span class="play"><span>&#9654;</span></span></span>
@@ -93,20 +93,20 @@
     </a>
   </div>
   <div class="foot"><span>Click a video to play it large · lab straight after this lecture · Part 1 and every reference card are in the Appendix</span></div>
-  <aside class="notes">1.5 min. Point at the greyed boxes: that was 26 October — labels scarce, hide-and-predict, four targets, the collapse trap. Today is the rest of the chain in 25 minutes: MAE hides 75% and keeps the decoder small; three ways to judge the encoder, which disagree; then mixed precision so the lab fits, the five-sentence contract, and what next Monday's talk must contain. The Earth masks (Part 3) moved to the back — they return in Week 10 with Prithvi. Table: one breath per word; row 1 is last time's vocabulary, row 3 is for later. Then the report line: collapse, up to 10 pages, PDF, due Sunday 15 November 23:59 — the 10-minute talk option is gone because from 9 November the talk slot belongs to your project. Scope to say out loud: what collapse is, why a loss that only asks two views to agree allows it, how each family blocks it (the table on slide 23), and how to spot it in a run; slide 23 and Appendix A3 are the starting material. The lab starts right after slide 17.</aside>
+  <aside class="notes">1.5 min. Point at the greyed boxes: that was 26 October — labels scarce, hide-and-predict, four targets, the collapse trap. Today is the rest of the chain in 27 minutes: MAE hides 75% and keeps the decoder small; three ways to judge the encoder, which disagree; then mixed precision so the lab fits, the five-sentence contract, and what next Monday's talk must contain. The Earth masks (Part 3) moved to the back — they return in Week 10 with Prithvi. Table: one breath per word; row 1 is last time's vocabulary, row 3 is for later. Then the report line: collapse, up to 10 pages, PDF, due Sunday 15 November 23:59 — the 10-minute talk option is gone because from 9 November the talk slot belongs to your project. Scope to say out loud: what collapse is, why a loss that only asks two views to agree allows it, how each family blocks it (the table on slide 24), and how to spot it in a run; slide 24 and Appendix A3 are the starting material. The lab starts right after slide 18.</aside>
 </section>
 
 <!-- 3 -->
 
 <section class="slide section xl">
-  <p class="kicker">Part 2 · 13 min · this week’s paper</p>
+  <p class="kicker">Part 2 · 15 min · this week’s paper</p>
   <h2>The Masked Autoencoder: Hide 75%, Rebuild It, Keep the Encoder</h2>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>One chip through MAE with every shape written out; why 75% works for images when BERT masks 15% of words; the target; reconstructions we ran on EuroSAT for this lecture; what changes for Earth data. <b>By the end:</b> write MAE’s masking in five lines and predict what your lab run will show.</p></div>
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>MAE is simple, cheap (the encoder sees a quarter of the patches) and needs no augmentations a satellite image would object to. That is a large part of why most Earth models chose it.</p></div>
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>SatMAE, Scale-MAE, Prithvi-EO-2.0, SpectralGPT, Clay · Prithvi-WxC for weather · your lab: the Week 6 Vision Transformer (ViT) becomes the encoder.</p></div>
   </div>
-  <aside class="notes">13 minutes; the longest part, because it is this week’s paper and the lab. Read the cards in thirty seconds. The slides follow the paper's logic: the picture, the encoder’s inside, the shapes, the 75% choice, the target, the evidence from our own EuroSAT runs, and the four things Earth data changes. The asymmetric-cost bars and the mask-ratio sweep are at the back; the homework repeats the sweep.</aside>
+  <aside class="notes">15 minutes; the longest part, because it is this week’s paper and the lab. Read the cards in thirty seconds. The slides follow the paper's logic: the picture, the encoder’s inside, the shapes, the 75% choice, the target, the evidence from our own EuroSAT runs, and the four things Earth data changes. The asymmetric-cost bars and the mask-ratio sweep are at the back; the homework repeats the sweep.</aside>
 </section>
 
 <!-- 4 -->
@@ -276,7 +276,7 @@
     <li>Our model: encoder 0.90 M parameters, decoder 0.16 M; 1,367 epochs over 4,000 EuroSAT chips took 8 minutes on an Apple M2 Ultra.</li>
   </ul>
   <div class="gloss">
-    <span><b>un-shuffle</b> — put each token back at its original patch index (the official code keeps <code>ids_restore</code> for this). <b>normalised patch</b> — the patch minus its own mean, divided by its own spread (slide 8).</span>
+    <span><b>un-shuffle</b> — put each token back at its original patch index (the official code keeps <code>ids_restore</code> for this). <b>normalised patch</b> — the patch minus its own mean, divided by its own spread (slide 9).</span>
   </div>
   <div class="foot"><span>He et al. 2021, §3 · official code: github.com/facebookresearch/mae · the five-line masking function: Appendix A1</span></div>
   <aside class="notes">2 min. Read the shape column top to bottom — 64 by 832, 64 by 128, 16 by 128, 16 by 128, 64 by 64, 64 by 832, one number — and stop on three rows. Row 3: the mask is just sorting 64 random numbers and keeping the first 16; a new mask every time the chip is seen. Row 4: the encoder's attention runs on 16 tokens, so 256 scores per head instead of 4,096 — the reason MAE pretraining is cheap. Row 7: only the 48 hidden patches enter the loss; rebuilding the visible ones would be copying. The parameter line under the table is the model we actually trained for this lecture.</aside>
@@ -304,6 +304,44 @@
 <!-- 8 -->
 
 <section class="slide xl">
+  <p class="kicker">Part 2 · Your field · 2 min</p>
+  <h2>Soil moisture is smoother than any EuroSAT chip — so mask more? No: mask differently</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">At 9–36 km soil moisture is interpolation-friendly: random patches teach copying. The information is in time and in the drivers.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh">
+    <svg viewBox="0 0 900 250" role="img" aria-label="Left: the no-learning fill error against the share of patches hidden. The measured EuroSAT curve rises from 0.54 at 10% to 0.73 at 75% and 0.95 at 90%; the tiny MAE sits near 0.30 until 50%, 0.40 at 75%, 0.78 at 90%; a dashed sketch for a 36-kilometre soil-moisture field stays far lower until about 90%, labelled not measured yet. Right: four boxes — block masking, temporal masking, variable masking, forecast target — each naming the models that use it." style="width:min(98%,1150px)">
+      <text x="60" y="12" font-size="10.5" fill="var(--muted)" font-weight="700">no-learning fill error (NMSE) vs share hidden</text>
+      <line x1="60" y1="20" x2="400" y2="20" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 3"/><text x="398" y="16" font-size="9" fill="var(--muted)" text-anchor="end">paint the mean = 1.0</text>
+      <line x1="60" y1="200" x2="400" y2="200" stroke="currentColor" stroke-width="1"/><line x1="60" y1="20" x2="60" y2="200" stroke="currentColor" stroke-width="1"/>
+      <g font-size="9.5" fill="currentColor" text-anchor="middle"><text x="94.0" y="213">10%</text><text x="145.0" y="213">25%</text><text x="230.0" y="213">50%</text><text x="315.0" y="213">75%</text><text x="366.0" y="213">90%</text><text x="230" y="228" fill="var(--muted)">share of patches hidden</text></g>
+      <g font-size="9" fill="var(--muted)" text-anchor="end"><text x="55" y="203">0</text><text x="55" y="113">0.5</text><text x="55" y="24">1</text></g>
+      <polyline points="94.0,102.8 145.0,99.2 230.0,90.2 315.0,68.6 366.0,29.0" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="94.0" cy="102.8" r="3" fill="currentColor"/><circle cx="145.0" cy="99.2" r="3" fill="currentColor"/><circle cx="230.0" cy="90.2" r="3" fill="currentColor"/><circle cx="315.0" cy="68.6" r="3" fill="currentColor"/><circle cx="366.0" cy="29.0" r="3" fill="currentColor"/>
+      <polyline points="94.0,146.0 145.0,146.0 230.0,146.0 315.0,128.0 366.0,59.6" fill="none" stroke="#2c6fb0" stroke-width="1.6"/><circle cx="94.0" cy="146.0" r="3" fill="#2c6fb0"/><circle cx="145.0" cy="146.0" r="3" fill="#2c6fb0"/><circle cx="230.0" cy="146.0" r="3" fill="#2c6fb0"/><circle cx="315.0" cy="128.0" r="3" fill="#2c6fb0"/><circle cx="366.0" cy="59.6" r="3" fill="#2c6fb0"/>
+      <polyline points="94.0,173.0 145.0,169.4 230.0,160.4 315.0,137.0 366.0,74.0" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="5 3"/>
+      <text x="96" y="80" font-size="9.5" fill="currentColor">EuroSAT fill, measured (slide 7)</text>
+      <text x="150" y="140" font-size="9.5" fill="#2c6fb0">tiny MAE on EuroSAT</text>
+      <text x="96" y="190" font-size="9.5" fill="var(--accent)" font-weight="700">soil moisture at 36 km? a sketch — nobody has measured it</text>
+      <text x="440" y="12" font-size="10.5" fill="var(--muted)" font-weight="700">mask differently — what the field’s models do</text>
+      <g stroke="var(--accent)" stroke-width="1.2" fill="var(--wash)"><rect x="440" y="20" width="222" height="86" rx="6"/><rect x="670" y="20" width="222" height="86" rx="6"/><rect x="440" y="116" width="222" height="86" rx="6"/><rect x="670" y="116" width="222" height="86" rx="6"/></g>
+      <g font-size="11" font-weight="700" fill="var(--accent)"><text x="450" y="38">Block masking</text><text x="680" y="38">Temporal masking</text><text x="450" y="134">Variable masking</text><text x="680" y="134">Forecast target</text></g>
+      <g font-size="9.5" fill="currentColor">
+        <text x="450" y="54">one big hole instead of scattered patches:</text><text x="450" y="66">interpolation cannot fill it</text><text x="450" y="82" fill="var(--muted)">I-JEPA · Galileo (long-span masks)</text>
+        <text x="680" y="54">hide whole dates; predict the drydown</text><text x="680" y="66">from the rest of the time series</text><text x="680" y="82" fill="var(--muted)">SatMAE · masked lookback, J. Hydrol. 2025</text>
+        <text x="450" y="150">hide soil moisture, keep rain, air</text><text x="450" y="162">temperature, NDVI — learn the water balance</text><text x="450" y="178" fill="var(--muted)">KG-VSF driver → response · OlmoEarth</text>
+        <text x="680" y="150">half of today + yesterday → tomorrow;</text><text x="680" y="162">reconstruction alone is too easy</text><text x="680" y="178" fill="var(--muted)">Prithvi-WxC: 50% masked + Δt</text>
+      </g>
+      <text x="440" y="224" font-size="9.5" fill="var(--muted)">ratio follows redundancy — images 75%, video 90% (Feichtenhofer et al. 2022)</text><text x="440" y="238" font-size="9.5" fill="var(--muted)">scale matters — 36 km is smooth, 30 m SMAP-HydroBlocks is not: measure before choosing</text>
+    </svg>
+  </div>
+  <div class="gloss">
+    <span><b>redundancy</b> — how well a hidden value is predicted by its neighbours. <b>block mask</b> — one contiguous hidden region instead of scattered patches.</span>
+  </div>
+  <div class="foot"><span>Evidence: video MAE optimum 90% (Feichtenhofer 2022) · Enki rebuilds SST with most pixels hidden (Prochaska 2023) · Baguan: plain MAE can hurt a forecaster (2025) · StefaLand masks attribute/time-series tokens (2025) · ST-Transformer: self-supervised SMAP 1 km imputation, no ratio study (2023) · IGARSS 2026: Prithvi ≈ hand-crafted on 113 ISMN sites · test the target: physical units beat anomalies in an S2S ViT (arXiv 2610.07060) · the dashed curve is an unwritten paper</span></div>
+  <aside class="notes">2 min, the previous slide applied to the field most of you work in. Left: the EuroSAT fill curve you just saw, and a dashed sketch of what a 36-kilometre soil-moisture map would do — stay low until nearly everything is hidden, because the field is smooth. Nobody has measured that curve; say so, it is a paper. If it looks like the sketch, random patches at 75% teach a model to copy its neighbours, and more masking only pushes it towards painting the climatology. Right: what the field's models did instead — block masks that interpolation cannot fill (I-JEPA, Galileo), hiding dates so the model learns the drydown (SatMAE, the J. Hydrol. 2025 masked lookback), hiding the variable so it learns the water balance from rain and temperature (KG-VSF, OlmoEarth), and Prithvi-WxC's answer for smooth atmospheric fields: 50% masked plus a forecast target. Two cautions: scale — 36 km is smooth, 30 m SMAP-HydroBlocks is not, so measure before choosing; and the target — an S2S soil-moisture ViT found physical units beat standardised anomalies, so even the obvious anomaly target has to be tested. The bullets are the evidence next door and at home; the honest one is IGARSS 2026, Prithvi embeddings adding nothing on 113 stations — exactly the kind of result the capstone rubric rewards. This slide is a Talk 2/3 question: what does your field's curve look like, and which mask follows?</aside>
+</section>
+
+<!-- 9 -->
+
+<section class="slide xl">
   <p class="kicker">Part 2 · The target</p>
   <h2>Predict each patch’s pattern, not its brightness</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Errors on bright, high-contrast patches dominate a raw-pixel loss; normalising each patch lets every pattern count. Watch the lake.</p>
@@ -318,10 +356,10 @@
     <span><b>ε</b> — a small number added to the variance before the square root (official code: 10<sup>−6</sup>), so a flat patch does not divide by zero.</span>
   </div>
   <div class="foot"><span>He et al. 2021, §3 “Reconstruction target” and Table 1c · patches from EuroSAT-MS Industrial_2, SeaLake_1, AnnualCrop_1, band B04</span></div>
-  <aside class="notes">1.5 min. Top row, one shared scale: the roof is bright, the lake is black, and a squared-error loss would spend almost all its effort on the roof. Bottom row: each patch divided by its own spread — now every patch's pattern counts equally, and the paper shows this target improves accuracy. Then point at the lake: there is almost nothing in it, so normalising magnifies small variations into a pattern the model is asked to predict. On Earth data — water, desert, snow, cloud tops — that is common; the fixes are the epsilon, or leaving near-flat patches and clouds out of the loss. This is the first of the "what changes for EO" points; the rest are on slide 10.</aside>
+  <aside class="notes">1.5 min. Top row, one shared scale: the roof is bright, the lake is black, and a squared-error loss would spend almost all its effort on the roof. Bottom row: each patch divided by its own spread — now every patch's pattern counts equally, and the paper shows this target improves accuracy. Then point at the lake: there is almost nothing in it, so normalising magnifies small variations into a pattern the model is asked to predict. On Earth data — water, desert, snow, cloud tops — that is common; the fixes are the epsilon, or leaving near-flat patches and clouds out of the loss. This is the first of the "what changes for EO" points; the rest are on slide 11.</aside>
 </section>
 
-<!-- 9 -->
+<!-- 10 -->
 
 <section class="slide xl">
   <p class="kicker">Part 2 · What your lab will produce · measured</p>
@@ -340,7 +378,7 @@
   <aside class="notes">1.5 min. This is what the lab produces. Walk one column: the middle row is all the encoder saw; the bottom row is the decoder’s painting from those sixteen patches. The fields and the river are in the right places — so the sixteen vectors must contain the layout of the chip. The blur is not a failure: a squared-error loss is minimised by the average of all plausible answers, so fine texture is averaged away. That is also why we keep the encoder and throw the painter away. Be honest about the display: the main model predicts normalised patches, which cannot be coloured without leaking each hidden patch’s true mean, so the picture comes from a twin trained on plain pixels.</aside>
 </section>
 
-<!-- 10 -->
+<!-- 11 -->
 
 <section class="slide xl">
   <p class="kicker">Part 2 · What changes for Earth data</p>
@@ -359,7 +397,7 @@
   <aside class="notes">2 min. Four cards, thirty seconds each, and each one is a line in the lab code. Clouds: either pretrain on screened chips — EuroSAT is already cloud-free — or exclude cloud pixels from the loss, because a model asked to paint clouds wastes capacity on atmosphere. Redundancy: the per-class result from our fill experiment. Bands: per-band normalisation from the training split only, and the coarse bands are easy targets. Revisits: the leakage lesson of Week 2 returns — an MAE pretrained on a place and probed on the same place, a month later, will look better than it is.</aside>
 </section>
 
-<!-- 11 -->
+<!-- 12 -->
 
 <section class="slide section xl">
   <p class="kicker">Part 4 · 5 min · judging a pretrained encoder</p>
@@ -372,7 +410,7 @@
   <aside class="notes">5 minutes. The goal: students can read a results table in a foundation-model paper and ask the right first question — which protocol, which split, against which baseline.</aside>
 </section>
 
-<!-- 12 -->
+<!-- 13 -->
 
 <section class="slide xl">
   <p class="kicker">Part 4 · Three readouts</p>
@@ -408,7 +446,7 @@
   <aside class="notes">2 min. Three panels, same encoder. Linear probe: freeze it, train one linear layer — it asks whether the classes are already separated by a straight cut. kNN: freeze it, train nothing, let the twenty nearest training chips vote — it asks whether similar chips already sit together. Fine-tune: train everything — it asks how good a starting point the encoder is. The bottom line of each panel is what the MAE paper found against MoCo v3: the contrastive model probes higher, MAE fine-tunes higher — a pattern, not a law; GEO-Bench-2 shows rankings change with task and protocol. Next slide: our own numbers on EuroSAT.</aside>
 </section>
 
-<!-- 13 -->
+<!-- 14 -->
 
 <section class="slide xl">
   <p class="kicker">Part 4 · Our numbers · measured</p>
@@ -432,7 +470,7 @@
   <aside class="notes">2 min. Read the table top to bottom. The 13 band means with no network already get 76% — EuroSAT is an easy dataset. A random, never-trained ViT gets 85% by probe: random features are better than people expect. Eight minutes of MAE lift that to 92% by probe and 94% after a short fine-tune. A supervised model trained for the same eight minutes on all 4,000 labels still wins at 95%. That is not a failure of pretraining: with this many labels for this easy a task, labels win; the claim of self-supervision is about the regime with few labels and many unlabelled chips, which is exactly what the lab tests by probing with a fraction of the labels. Point at the second bullet: the 8-point gap between MAE’s probe and kNN, against none for the supervised model, is the MAE paper’s finding that its features need some non-linear processing. And the raw-pixel row: the two readouts disagree about which target is better — even on a toy run.</aside>
 </section>
 
-<!-- 14 -->
+<!-- 15 -->
 
 <section class="slide xl">
   <p class="kicker">Part 5 · 2 min · mixed precision, hands-on today</p>
@@ -463,7 +501,7 @@ for x in loader:
   <aside class="notes">2 min. Three lines, and a table that tells each student which version to type. On a Colab T4 the dtype is float16 and the GradScaler is required, because float16 has a narrow exponent range and small gradients underflow to zero; the scaler multiplies the loss before backward and divides the gradients before the step, skipping steps that overflowed. On an L4 or A100, bfloat16 has the same range as float32, so the scaler lines are dropped. On a Mac or CPU, stay in float32 — the lab still fits, just slower. Point out what autocast keeps in 32-bit: reductions, the softmax, the loss. In the lab, have them print the peak memory with and without autocast; that number goes in Note 07.</aside>
 </section>
 
-<!-- 15 -->
+<!-- 16 -->
 
 <section class="slide xl">
   <p class="kicker">Part 5 · The contract</p>
@@ -483,7 +521,7 @@ for x in loader:
   <aside class="notes">1 min. Five sentences, written before any code: data and split, mask, target, check, claim. The point to stress is the claim: on 27 thousand EuroSAT chips a supervised model may beat a 15-minute MAE on a linear probe, and that is a fine result if it is reported honestly with the kNN and fine-tune numbers next to it.</aside>
 </section>
 
-<!-- 16 -->
+<!-- 17 -->
 
 <section class="slide xl">
   <p class="kicker">Part 5 · 2 min · next Monday</p>
@@ -504,7 +542,7 @@ for x in loader:
   <aside class="notes">2 min. Read the six cards once; they are the slide order for next Monday. Stress three things. Three: the success criterion is written before any training, with all four rows named, because the capstone is graded on the rigour of the comparison, not on which row wins. Four: this is what GraphCast's team did — the development/test contract fixed before the final runs; your test split is sealed until 4 December and run once, for the 7 December table; PREREG.md version 1 goes in the repo this week, and the Capstone page has the ten fields. Five: if the plan does not fit a free tier, shrink the plan, never the evaluation. Logistics: ten minutes plus three of questions, slides as a PDF by Sunday night on this site; the talk replaces the written proposal. Then the sequence in the foot — it follows the order real foundation-model teams work in: data and design, pilots and the compute decision, controlled runs, held-out results, release.</aside>
 </section>
 
-<!-- 17 -->
+<!-- 18 -->
 
 <section class="slide xl">
   <p class="kicker">Lab briefing · 3 min · after the lecture</p>
@@ -522,7 +560,7 @@ for x in loader:
         <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .5vw"><b class="accent">MAE, 75%</b></td><td style="padding:.4vh .5vw">…</td><td style="padding:.4vh .5vw">…</td></tr>
         <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .5vw">supervised, same epochs</td><td style="padding:.4vh .5vw">…</td><td style="padding:.4vh .5vw">…</td></tr>
       </table>
-      <p class="small muted" style="margin:.8vh 0 0">our own run: slide 13</p>
+      <p class="small muted" style="margin:.8vh 0 0">our own run: slide 14</p>
     </div>
   </div>
   <ul class="small">
@@ -535,7 +573,7 @@ for x in loader:
   <aside class="notes">3 min. Three checks to set explicitly. One: the encoder is their own Week 6 file — if its four tests no longer pass, fix that first. Two: before the probe, look at a reconstruction grid; blurry but correctly placed structure is success, uniform grey is a bug or collapse. Three: the probe split must keep locations apart from anything the encoder pretrained on. Warn about the two quiet errors: normalisation statistics computed on the whole dataset, and a supervised baseline trained for a different number of epochs. Say the expectation: after 15 minutes of pretraining, MAE features will beat random init clearly and may or may not beat supervised on a probe — report what you get. Dismiss to lab; the slides after this are the appendix.</aside>
 </section>
 
-<!-- 18 -->
+<!-- 19 -->
 
 <section class="slide section">
   <p class="kicker">Appendix · self-study</p>
@@ -544,7 +582,7 @@ for x in loader:
   <aside class="notes">Not taught on 2 November. First Part 1 as given on 26 October — four families, collapse, the family tree, its videos. Then the slides cut from today's 23 minutes: the asymmetric-cost bars, the mask-ratio sweep, the paper card, Part 3 on Earth masks with Prithvi-WxC, GEO-Bench-2, the FLEX board exercise, the discussion questions. Then the original appendix: MAE in code with every shape; the contrastive loss written out; DINO's loss with centring and sharpening; the family card; this week's paper card; the Earth and weather SSL models card; the evaluation protocols and GEO-Bench-2; the lab reference; the assigned video; the shelf. Say the appendix exists, say what is in it, and stop.</aside>
 </section>
 
-<!-- 19 -->
+<!-- 20 -->
 
 <section class="slide section xl">
   <p class="kicker">Part 1 · taught on Mon 26 Oct · kept for reference</p>
@@ -557,7 +595,7 @@ for x in loader:
   <aside class="notes">Taught on 26 October; kept here for reference. Read the three cards in thirty seconds. The goal is a map, not a zoo: one recipe, four targets, one failure mode, and a family tree on which every model name of the semester has a place. The assigned CS231N lecture does the history in 75 minutes; here we keep only what decides which model a student should pick and why.</aside>
 </section>
 
-<!-- 20 -->
+<!-- 21 -->
 
 <section class="slide xl">
   <p class="kicker">Part 1 · Why bother</p>
@@ -577,7 +615,7 @@ for x in loader:
   <aside class="notes">1 min. Read the bars from the top: twenty-seven thousand labelled chips — the size of a good Earth dataset; then a million unlabelled Sentinel-2 chips that anyone can download, four million time series behind Prithvi, half a billion images behind Meta's satellite model. The orange bars carry no labels. Add the ESA number: more than four terabytes of new Sentinel-2 products every day, already in 2018. The rest of today is how to turn the orange bars into something the blue bar can use.</aside>
 </section>
 
-<!-- 21 -->
+<!-- 22 -->
 
 <section class="slide xl">
   <p class="kicker">Part 1 · The recipe</p>
@@ -632,7 +670,7 @@ for x in loader:
   <aside class="notes">2 min. One recipe: take an unlabelled chip, hide or change part of it, and make the network predict something about the hidden part. Then read down the third column — that is the only thing that changes between families. Row 1, the pixels: today's paper. Row 2, which altered view belongs to which chip. Row 3, a teacher's answer, where the teacher is a slowly updated copy of the student. Row 4, the embedding of the hidden block. Land the bullet: predicting pixels wastes effort on noise and clouds, predicting embeddings does not — but an embedding target can be met by cheating, which is the next-but-one slide.</aside>
 </section>
 
-<!-- 22 -->
+<!-- 23 -->
 
 <section class="slide xl">
   <p class="kicker">Part 1 · Contrastive · SimCLR</p>
@@ -652,7 +690,7 @@ for x in loader:
   <aside class="notes">2 min. Walk the picture left to right: one chip, two random views — that pair should end up with the same embedding; the other chips in the batch should not. The grid on the right is the whole loss: for each of the eight views, a softmax over the other seven, with the orange cell as the right answer. Two points to land. First, the negatives come for free from the batch, which is why SimCLR wants enormous batches. Second, the augmentation is the teacher: whatever you vary, the model learns to ignore. For land-cover tasks seen from above rotations and flips are label-preserving (not for directional variables such as wind, or for shadows), but the colour jitter used for photographs changes the reflectance the bands measure — and a second chip of the same river in the batch is treated as a different thing. SeCo added the seasons of one place as extra views, alongside the usual artificial augmentations.</aside>
 </section>
 
-<!-- 23 -->
+<!-- 24 -->
 
 <section class="slide xl">
   <p class="kicker">Part 1 · The one failure</p>
@@ -690,7 +728,7 @@ for x in loader:
   <aside class="notes">2 min. This is the one idea that makes the family tree make sense. A loss that only asks two views to agree — a plain distance between their embeddings — is minimised by a network that ignores its input and outputs a constant: the middle panel. The real objectives below are built so that this lazy answer no longer wins (SimCLR’s loss stays at log(2N − 1) for a constant, DINO’s at log K, MAE’s pixel target is chip-specific). Read the table: contrastive methods pay for negatives; BYOL and DINO use a teacher that is a slowly averaged copy of the student and never receives gradients, and DINO also centres and sharpens the teacher's output; MAE cannot collapse this way because its target is the actual pixels; JEPA relies on the slow target encoder and a predictor — an architectural guard, which is why it needs care. The practical check for the lab is in the bullet.</aside>
 </section>
 
-<!-- 24 -->
+<!-- 25 -->
 
 <section class="slide xl">
   <p class="kicker">Part 1 · Self-distillation · DINO (self-distillation with no labels)</p>
@@ -733,7 +771,7 @@ for x in loader:
   <aside class="notes">2 min. Trace the picture: crops of one chip, two big ones and several small ones. The student sees all of them, the teacher only the big ones. The student must output, for a small crop, the same probability vector the teacher outputs for a big crop. The teacher is never trained by the loss — its weights are a slowly moving average of the student's. Collapse is blocked by the two operations in the middle box: centring stops one output from winning for every image, sharpening stops the output from going uniform. Then the payoff: some attention heads of a DINO ViT outline objects, though it never saw a label or a mask. DINOv3 is the 2025 version at scale, with a model trained on satellite imagery.</aside>
 </section>
 
-<!-- 25 -->
+<!-- 26 -->
 
 <section class="slide xl">
   <p class="kicker">Part 1 · Latent prediction · I-JEPA and its Earth heirs</p>
@@ -772,7 +810,7 @@ for x in loader:
   <aside class="notes">2 min. Same masking idea as MAE, different answer: the context encoder sees one big block, a predictor guesses the embeddings at the hidden blocks' positions, and the answers come from a slowly averaged target encoder that sees the whole chip. The loss lives entirely in embedding space, so the model is not asked to reproduce every pixel exactly — the argument for Earth data, where much of every pixel is atmosphere and noise. Careful: latent space alone does not remove clouds; what is ignored depends on the target, the masks and the loss. The price is the collapse risk from the previous slide, guarded by the slow target and the predictor. Read the table: the three Earth models that took this route, and what each added.</aside>
 </section>
 
-<!-- 26 -->
+<!-- 27 -->
 
 <section class="slide xl">
   <p class="kicker">Part 1 · The family tree</p>
@@ -816,7 +854,7 @@ for x in loader:
   <aside class="notes">1.5 min. The map students should keep. Three rows. Masked reconstruction runs from BERT's 15% word masking through MAE's 75% patch masking to the Earth models built on it: SatMAE, Prithvi, Scale-MAE, SpectralGPT, Prithvi-EO-2.0, and Prithvi-WxC for weather. Views and teachers: MoCo, SimCLR, BYOL, DINO; on the Earth side SeCo (seasons as views), SSL4EO-S12 (the Sentinel-1/2 dataset whose baselines include MoCo and DINO — and also MAE and data2vec), and DINOv3's satellite model. Latent prediction: I-JEPA, then AnySat, Galileo, OlmoEarth. The pattern to say out loud: Earth models trail the general ones by about a year, most of them are masked reconstruction — that is why today's paper is MAE — and the newest ones combine MAE's masking with JEPA's latent targets.</aside>
 </section>
 
-<!-- 27 -->
+<!-- 28 -->
 
 <section class="slide xl">
   <p class="kicker">Part 1 · Watch at home</p>
@@ -847,7 +885,7 @@ for x in loader:
   <aside class="notes">Twenty seconds, no playback. Boris Meinardus if "pretext task" is still fuzzy; Deepia if the contrastive loss went by too fast; Yannic Kilcher for DINO's centring and sharpening; Jia-Bin Huang for the JEPA argument, animated. The next slide has the same ideas from the people who invented them.</aside>
 </section>
 
-<!-- 28 -->
+<!-- 29 -->
 
 <section class="slide xl">
   <p class="kicker">Part 1 · Watch at home · by their authors</p>
@@ -878,7 +916,7 @@ for x in loader:
   <aside class="notes">Twenty seconds. These are the authors: Ting Chen on what makes SimCLR work and where it breaks; the MoCo CVPR talk; Kaiming He's MIT lecture, the best single preparation for today's journal club, because he wrote both MoCo and MAE; LeCun's case for joint-embedding prediction.</aside>
 </section>
 
-<!-- 29 -->
+<!-- 30 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped on 2 Nov · Part 2 · Why the decoder is small</p>
@@ -898,7 +936,7 @@ for x in loader:
   <aside class="notes">1.5 min. Compare the first bar — an encoder that also processes the hidden patches as mask tokens, the way BERT-style image models do — with MAE at 75%: about a third of the cost, for our lab model and for the paper's ViT-Large alike. The grey part is the decoder; it is cheap because it is narrow and shallow, even though it sees all the tokens. The second bullet is the ablation: one decoder block is enough for fine-tuning (84.8%), but the linear probe climbs from 65.5 to 73.5 with eight blocks — the paper's reading is that a deeper decoder takes over the reconstruction-specific layers, so the encoder's output stays more abstract. That is why the default is 8 blocks, but narrow.</aside>
 </section>
 
-<!-- 30 -->
+<!-- 31 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped on 2 Nov · Part 2 · The mask-ratio sweep · measured</p>
@@ -917,7 +955,7 @@ for x in loader:
   <aside class="notes">1.5 min. The lab’s homework, done once for this lecture. Left: the same chip at three ratios — at 90% four patches are all the encoder gets, and the painting goes vague. Right: the probe and kNN accuracy of encoders pretrained at each ratio. The flat lines are the honest result: with one seed each and a standard error of 0.9 points, 50, 75 and 90% tie on this small dataset; what is not a tie is the gap to the dotted lines — every pretrained encoder beats an untrained one by 6 to 11 points. Say that the homework asks them to reproduce this and to report the noise, not a winner.</aside>
 </section>
 
-<!-- 31 -->
+<!-- 32 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped on 2 Nov · Part 2 · This week’s paper · 1.5 min</p>
@@ -940,7 +978,7 @@ for x in loader:
   <aside class="notes">1.5 min. Read the four rows as four decisions. Ratio: 75%, and note that the linear probe is far more sensitive to it than fine-tuning. Mask token: putting it into the encoder costs 3.3 times the compute and 14 points of probe accuracy, because the encoder then spends its capacity on placeholders it will never see at test time. Target: plain per-patch-normalised pixels beat BEiT's learned tokens, so no tokenizer is needed. Augmentation: cropping is enough, colour jitter hurts — good news for satellite data, whose colours are measurements. Then the headline numbers, and the honesty point: the paper itself shows MAE losing the linear probe to a contrastive method — Part 4.</aside>
 </section>
 
-<!-- 32 -->
+<!-- 33 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped on 2 Nov · Part 2 · Watch at home</p>
@@ -971,7 +1009,7 @@ for x in loader:
   <aside class="notes">Twenty seconds. Coffee Break for the picture again; Mehraban for the details of the target and the ablations; Mazumdar for a from-scratch MAE tutorial; the BEiT video for the approach MAE simplified.</aside>
 </section>
 
-<!-- 33 -->
+<!-- 34 -->
 
 <section class="slide section xl">
   <p class="kicker">Skipped on 2 Nov · Part 3 · structured masking · returns in Week 10</p>
@@ -984,7 +1022,7 @@ for x in loader:
   <aside class="notes">7 minutes. The one sentence: the mask is the curriculum. Concrete first — a picture of the four masks on our chips — then a measurement, then the models.</aside>
 </section>
 
-<!-- 34 -->
+<!-- 35 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped on 2 Nov · Part 3 · Four masks</p>
@@ -1003,7 +1041,7 @@ for x in loader:
   <aside class="notes">1.5 min. Four cuts through the same cube. Random patches, today's MAE: the model learns texture and layout. A whole band group: it must infer one part of the spectrum from the others — next slide measures how hard that is. A whole date: it must know what this place looks like in another season. Big blocks: neighbours no longer give the answer away, so it must recognise whole objects. Mention the fifth axis — a whole sensor — which the multimodal models use. Be honest about the temporal panel: EuroSAT has one date per chip, so three forest chips stand in for three dates.</aside>
 </section>
 
-<!-- 35 -->
+<!-- 36 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped on 2 Nov · Part 3 · Hide a band group · measured</p>
@@ -1022,7 +1060,7 @@ for x in loader:
   <aside class="notes">1.5 min. The measurement: hide one of SatMAE's three band groups and predict it, pixel by pixel, from the other two with nothing smarter than a straight line. The 10-metre bands come back at R² 0.92 and the red-edge bands at 0.96 — hiding them asks the model to do almost nothing. SWIR comes back at 0.40: on the annual-crop chip the guess is wrong over whole fields, because SWIR responds to moisture in soil and leaves, which the visible bands do not show. That is the argument for spectral masking: it forces the model to learn the relations between bands. Be careful with the claim: this is a 40-chip pilot with a linear predictor, so it motivates band-group masks rather than proving which mask helps — that has to be tested downstream, and on the river chip SWIR is predicted well (R² ≈ 0.97). The moisture explanation is a hypothesis for the error pattern.</aside>
 </section>
 
-<!-- 36 -->
+<!-- 37 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped on 2 Nov · Part 3 · Who hides what</p>
@@ -1043,10 +1081,10 @@ for x in loader:
     <span><b>modality</b> — one kind of measurement: optical, radar, elevation, weather, a land-cover map. <b>cube</b> — a 3-D token (time × height × width); Prithvi’s is 1 × 16 × 16, one date deep.</span>
   </div>
   <div class="foot"><span>Cong et al. 2022 (§4.1.2, Table 5) · Prithvi Hugging Face configs (mask_ratio 0.75) · Hong et al. 2024 · Tseng et al. 2025 (§2.1) · Ai2 OlmoEarth 2025 · Appendix A6</span></div>
-  <aside class="notes">1.5 min. Read the last column: that is the curriculum each mask sets. SatMAE hides band groups and dates independently, so a region hidden in the SWIR group can be seen in the visible group — and the paper measured that this beats hiding the same region everywhere. Prithvi uses MAE's random 75% over space-time cubes. SpectralGPT pushes to 90% with tokens that span consecutive bands. Galileo mixes big structured blocks, for coarse meaning, with small random spans, for detail. OlmoEarth hides tokens of every sensor and map layer and predicts them in a frozen random latent space. For Q3 on the journal-club slide (43): pick the axis along which your data is redundant, and hide along the one along which it is not.</aside>
+  <aside class="notes">1.5 min. Read the last column: that is the curriculum each mask sets. SatMAE hides band groups and dates independently, so a region hidden in the SWIR group can be seen in the visible group — and the paper measured that this beats hiding the same region everywhere. Prithvi uses MAE's random 75% over space-time cubes. SpectralGPT pushes to 90% with tokens that span consecutive bands. Galileo mixes big structured blocks, for coarse meaning, with small random spans, for detail. OlmoEarth hides tokens of every sensor and map layer and predicts them in a frozen random latent space. For Q3 on the journal-club slide (44): pick the axis along which your data is redundant, and hide along the one along which it is not.</aside>
 </section>
 
-<!-- 37 -->
+<!-- 38 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped on 2 Nov · Part 3 · Weather · Prithvi-WxC</p>
@@ -1080,7 +1118,7 @@ for x in loader:
   <aside class="notes">1.5 min. The weather version of MAE. Two global states, the previous one and now, each 160 MERRA-2 variables; half of their tokens hidden, alternating between scattered and block masks; a 2.3-billion-parameter Transformer predicts the full state at a lead time of 0, 6, 12 or 24 hours. With lead time 0 the task is exactly masked reconstruction; with a positive lead time it is a forecast. So one objective trains both a representation and a forecaster — and when they fine-tune for forecasting, they switch the mask off. The 50% ratio, against MAE's 75%, is the bridge to the journal club's first question. Week 11 picks the forecasting half up.</aside>
 </section>
 
-<!-- 38 -->
+<!-- 39 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped on 2 Nov · Part 3 · Watch at home · the Earth models, by their builders</p>
@@ -1108,7 +1146,7 @@ for x in loader:
   <aside class="notes">Twenty seconds. The builders' own talks — useful for the capstone choice of backbone.</aside>
 </section>
 
-<!-- 39 -->
+<!-- 40 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped on 2 Nov · Part 3 · Watch at home · the wider Earth picture</p>
@@ -1138,7 +1176,7 @@ for x in loader:
   <aside class="notes">Twenty seconds. Clay for an open MAE across sensors; Zhu for the view from the group that built SSL4EO-S12; the ESA survey for where these models help in practice; ECMWF for self-supervision on weather and climate data.</aside>
 </section>
 
-<!-- 40 -->
+<!-- 41 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped 2 Nov · Part 4 · GEO-Bench-2</p>
@@ -1159,7 +1197,7 @@ for x in loader:
   <aside class="notes">1.5 min. Three findings. One: no model wins everywhere — photo-pretrained models win on high-resolution RGB, Earth models on multispectral tasks. Two, the one tied to today: when the encoder is frozen and only a decoder is trained, every model loses accuracy and the order of the models changes, which is why the authors recommend fine-tuning as the benchmark protocol; careful, this is a frozen encoder with a U-Net-style decoder, not a strict linear probe, and a linear decoder changed the order less. Three: a 7-billion-parameter RGB model loses crop classification to a model ten times smaller that sees the right bands and dates — fit beats size, the Presto lesson from Week 6 again. Then the reading rule: protocol, split, baseline.</aside>
 </section>
 
-<!-- 41 -->
+<!-- 42 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped on 2 Nov · Parts 4–5 · Watch at home</p>
@@ -1167,7 +1205,7 @@ for x in loader:
   <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
     <a href="https://www.youtube.com/watch?v=75xclLXkFzI" class="yt" data-id="75xclLXkFzI" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-geobench.jpg" alt="ServiceNow video: GeoBench V2: From Space Data to Smarter AI" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
-      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">ServiceNow · <i>GEO-Bench v2: from space data to smarter AI</i> · slide 40, by its makers · 18 min — <span class="accent">click to play here</span></p>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">ServiceNow · <i>GEO-Bench v2: from space data to smarter AI</i> · slide 41, by its makers · 18 min — <span class="accent">click to play here</span></p>
     </a>
     <a href="https://www.youtube.com/watch?v=prZiTphuzO0" class="yt" data-id="prZiTphuzO0" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w7-ssl-transfer.jpg" alt="Linus Ericsson video: How Well Do Self-Supervised Models Transfer - CVPR 2021" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
@@ -1182,11 +1220,11 @@ for x in loader:
       <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38">Aladdin Persson · <i>Mixed precision training</i> · autocast + GradScaler, typed · 4 min — <span class="accent">click to play here</span></p>
     </a>
   </div>
-  <div class="foot"><span>Optional · the last video is a mixed-precision coding example (slide 14)</span></div>
+  <div class="foot"><span>Optional · the last video is a mixed-precision coding example (slide 15)</span></div>
   <aside class="notes">Twenty seconds. GEO-Bench v2 from its authors; the CVPR transfer study that showed SSL rankings change with the downstream task; a hands-on flood evaluation of Earth models; and four minutes of mixed precision code for the lab.</aside>
 </section>
 
-<!-- 42 -->
+<!-- 43 -->
 
 <section class="slide xl">
   <p class="kicker">Skipped on 2 Nov · Part 5 · FLEX ~4 min · teach or skip</p>
@@ -1199,31 +1237,31 @@ for x in loader:
     <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw">Prithvi-EO-2.0, 224 px, patch 16, 4 dates</td><td style="padding:.4vh .6vw">?</td><td style="padding:.4vh .6vw">?</td><td style="padding:.4vh .6vw">?</td><td style="padding:.4vh .6vw">?</td></tr>
   </table>
   <ul class="small" style="margin-top:1.2vh">
-    <li>Then: the decoder still sees all N tokens — at what N does a 2-block, half-width decoder cost as much as the masked encoder? <span class="accent">(Use 24·N·d² + 4·N²·d per block, slide 29.)</span></li>
+    <li>Then: the decoder still sees all N tokens — at what N does a 2-block, half-width decoder cost as much as the masked encoder? <span class="accent">(Use 24·N·d² + 4·N²·d per block, slide 30.)</span></li>
   </ul>
   <div class="gloss">
     <span><b>scores per head</b> — the N × N table of Week 6; for the encoder, N is the number of visible tokens.</span>
   </div>
-  <div class="foot"><span>Answers in the speaker notes · the decoder question connects to slide 29</span></div>
-  <aside class="notes">Answers. EuroSAT: 64 tokens, 16 visible, 256 scores instead of 4,096 (16×); at 90%, 6 visible, 36 scores (114×). SSL4EO-S12: 33 × 33 = 1,089 tokens, 272 visible, 73,984 scores instead of 1,185,921 (16×); at 90%, 108 visible (floored, as int() does), 11,664 (≈ 102×). Prithvi-EO-2.0: 14 × 14 × 4 dates = 784 tokens, 196 visible, 38,416 scores instead of 614,656 (16×); at 90%, 78 visible, 6,084 (101×). The pattern to draw: keeping a quarter of the tokens divides attention by 16 regardless of N, and the MLP part by 4. Second question: at 75% masking the lab's encoder costs 393,216·N + 128·N² and the decoder 196,608·N + 512·N², equal at N = 512 tokens (e.g. a 128 × 256 chip with patch 8); at N = 64 the decoder is about a third of the bill, and at 90% it is already more than half (slide 29). Run only if the clock allows.</aside>
+  <div class="foot"><span>Answers in the speaker notes · the decoder question connects to slide 30</span></div>
+  <aside class="notes">Answers. EuroSAT: 64 tokens, 16 visible, 256 scores instead of 4,096 (16×); at 90%, 6 visible, 36 scores (114×). SSL4EO-S12: 33 × 33 = 1,089 tokens, 272 visible, 73,984 scores instead of 1,185,921 (16×); at 90%, 108 visible (floored, as int() does), 11,664 (≈ 102×). Prithvi-EO-2.0: 14 × 14 × 4 dates = 784 tokens, 196 visible, 38,416 scores instead of 614,656 (16×); at 90%, 78 visible, 6,084 (101×). The pattern to draw: keeping a quarter of the tokens divides attention by 16 regardless of N, and the MLP part by 4. Second question: at 75% masking the lab's encoder costs 393,216·N + 128·N² and the decoder 196,608·N + 512·N², equal at N = 512 tokens (e.g. a 128 × 256 chip with patch 8); at N = 64 the decoder is about a third of the bill, and at 90% it is already more than half (slide 30). Run only if the clock allows.</aside>
 </section>
 
-<!-- 43 -->
+<!-- 44 -->
 
 <section class="slide xl">
   <p class="kicker">Self-study · the paper’s discussion questions · no journal club this week</p>
   <h2>He et al. 2021, Masked Autoencoders — discussion questions</h2>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.4vw;align-items:stretch">
-    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q1 · 75% vs 15%</b><br>Why can MAE mask 75% while BERT masks 15% — and what ratio would you predict for cloud-free Sentinel-2 vs ERA5 fields (compare Prithvi-WxC’s choice)?</p><p class="small muted" style="margin:1vh 0 0">start from slides 7 and 37 and the paper’s Fig. 5</p></div>
-    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q2 · the thrown-away decoder</b><br>What exactly does the decoder learn, and why throw it away?</p><p class="small muted" style="margin:1vh 0 0">start from slides 4 and 29 and the paper’s Table 1a–b</p></div>
-    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q3 · a mask for the Earth</b><br>Propose one EO-specific masking structure and the invariance it would induce.</p><p class="small muted" style="margin:1vh 0 0">start from slides 34–36 — and from your capstone data</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q1 · 75% vs 15%</b><br>Why can MAE mask 75% while BERT masks 15% — and what ratio would you predict for cloud-free Sentinel-2 vs ERA5 fields (compare Prithvi-WxC’s choice)?</p><p class="small muted" style="margin:1vh 0 0">start from slides 7 and 38 and the paper’s Fig. 5</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q2 · the thrown-away decoder</b><br>What exactly does the decoder learn, and why throw it away?</p><p class="small muted" style="margin:1vh 0 0">start from slides 4 and 30 and the paper’s Table 1a–b</p></div>
+    <div class="card" style="min-width:0"><p style="margin:0"><b class="accent">Q3 · a mask for the Earth</b><br>Propose one EO-specific masking structure and the invariance it would induce.</p><p class="small muted" style="margin:1vh 0 0">start from slides 35–37 — and from your capstone data</p></div>
   </div>
   <p class="small muted" style="margin-top:1vh">The whole class as one team, working from your published entrance tickets (Journal Club tab) · the drawn leader moderates, the presenter synthesises, the questioner challenges the synthesis · these three questions are the agenda.</p>
   <div class="foot"><span>Leader opens with one reproduced figure (Fig. 2 or Fig. 5 of the paper) · roles revealed at 13:00 on the course site · optional: <a href="https://arxiv.org/abs/2104.14294">DINO</a>, <a href="https://arxiv.org/abs/2002.05709">SimCLR</a></span></div>
-  <aside class="notes">Journal club: 30 min, the whole class as one team; the drawn leader moderates, the presenter synthesises, the questioner challenges the synthesis; harvest in the last 5 min. Q1: good answers quote the paper's argument — language is dense and semantic, images are spatially redundant, so a high ratio is needed to make the task non-trivial — and use the fill-in baseline (slide 7) as evidence; better ones predict a high ratio for cloud-free Sentinel-2 (fields repeat), a lower one for ERA5 or MERRA-2 fields at 0.25–0.5° (smooth but less repetitive at the patch scale, and the model must also forecast), and note that Prithvi-WxC chose 50% while forecasting; the honest caveat is that WxC's paper does not argue the choice. Q2: the decoder learns to turn latent vectors plus positions back into pixels — texture and colour rendering, a low-level skill; it is thrown away because downstream tasks need the encoder's semantics, not pixel painting, and because a deep decoder (Table 1a) mostly helps the linear probe, not fine-tuning. Q3: good proposals name the axis and the invariance — hide a band group → spectral relations (SWIR from the visible bands, slide 35); hide a date → phenology and seasonal change; hide a sensor (radar from optical) → cross-modal physics; hide cloudy pixels only → cloud-robust features; the best ones also say how they would evaluate it. Close with a one-line bridge to lab.</aside>
+  <aside class="notes">Journal club: 30 min, the whole class as one team; the drawn leader moderates, the presenter synthesises, the questioner challenges the synthesis; harvest in the last 5 min. Q1: good answers quote the paper's argument — language is dense and semantic, images are spatially redundant, so a high ratio is needed to make the task non-trivial — and use the fill-in baseline (slide 7) as evidence; better ones predict a high ratio for cloud-free Sentinel-2 (fields repeat), a lower one for ERA5 or MERRA-2 fields at 0.25–0.5° (smooth but less repetitive at the patch scale, and the model must also forecast), and note that Prithvi-WxC chose 50% while forecasting; the honest caveat is that WxC's paper does not argue the choice. Q2: the decoder learns to turn latent vectors plus positions back into pixels — texture and colour rendering, a low-level skill; it is thrown away because downstream tasks need the encoder's semantics, not pixel painting, and because a deep decoder (Table 1a) mostly helps the linear probe, not fine-tuning. Q3: good proposals name the axis and the invariance — hide a band group → spectral relations (SWIR from the visible bands, slide 36); hide a date → phenology and seasonal change; hide a sensor (radar from optical) → cross-modal physics; hide cloudy pixels only → cloud-robust features; the best ones also say how they would evaluate it. Close with a one-line bridge to lab.</aside>
 </section>
 
-<!-- 44 -->
+<!-- 45 -->
 
 <section class="slide">
   <p class="kicker">Appendix A1 · MAE in code</p>
@@ -1256,7 +1294,7 @@ def mae_loss(pred, patches, mask, eps=1e-6):     # pred, patches: (B, N, 832)
   <aside class="notes">Not taught in class. The function is the official one, renamed; the four tests on the right are the lab's verification contract for the masking.</aside>
 </section>
 
-<!-- 45 -->
+<!-- 46 -->
 
 <section class="slide">
   <p class="kicker">Appendix A2 · The contrastive loss, written out</p>
@@ -1267,7 +1305,7 @@ def mae_loss(pred, patches, mask, eps=1e-6):     # pred, patches: (B, N, 832)
       <p style="margin:0 0 1vh;padding:.8vh 1vw;background:var(--surface);border-radius:8px;font-size:clamp(15px,2.4vh,21px)">ℓ<sub>i</sub> = − log &nbsp; exp(sim(z<sub>i</sub>, z<sub>j</sub>) / τ) &nbsp;/&nbsp; Σ<sub>k ≠ i</sub> exp(sim(z<sub>i</sub>, z<sub>k</sub>) / τ)</p>
       <p style="margin:0 0 .6vh">sim = cosine similarity; τ = temperature; the loss is the mean of ℓ<sub>i</sub> over all 2N views.</p>
       <ul style="margin:0">
-        <li>It is cross-entropy for a classification with 2N − 1 classes whose label is “my other view” — the grid on slide 22.</li>
+        <li>It is cross-entropy for a classification with 2N − 1 classes whose label is “my other view” — the grid on slide 23.</li>
         <li>Each anchor has one positive and 2N − 2 negatives; larger batches helped in SimCLR’s experiments. SimCLR: 4,096 images per batch by default, up to 8,192 (16,382 negatives per pair); τ = 0.1 was best (Table 5).</li>
         <li>Small τ makes the softmax peaky: the hardest negatives dominate the gradient.</li>
       </ul>
@@ -1284,7 +1322,7 @@ def mae_loss(pred, patches, mask, eps=1e-6):     # pred, patches: (B, N, 832)
   <aside class="notes">Not taught in class. Note the −∞ on the diagonal: the same masking trick as Week 6's attention mask, applied before a softmax.</aside>
 </section>
 
-<!-- 46 -->
+<!-- 47 -->
 
 <section class="slide">
   <p class="kicker">Appendix A3 · DINO’s loss, and what blocks collapse</p>
@@ -1303,7 +1341,7 @@ def mae_loss(pred, patches, mask, eps=1e-6):     # pred, patches: (B, N, 832)
   <aside class="notes">Not taught in class.</aside>
 </section>
 
-<!-- 47 -->
+<!-- 48 -->
 
 <section class="slide">
   <p class="kicker">Appendix A4 · The family card</p>
@@ -1321,7 +1359,7 @@ def mae_loss(pred, patches, mask, eps=1e-6):     # pred, patches: (B, N, 832)
   <aside class="notes">Not taught in class.</aside>
 </section>
 
-<!-- 48 -->
+<!-- 49 -->
 
 <section class="slide">
   <p class="kicker">Appendix A5 · This week’s paper</p>
@@ -1352,7 +1390,7 @@ def mae_loss(pred, patches, mask, eps=1e-6):     # pred, patches: (B, N, 832)
   <aside class="notes">Not taught in class. Every number here is in the paper; the quiz uses none of them.</aside>
 </section>
 
-<!-- 49 -->
+<!-- 50 -->
 
 <section class="slide">
   <p class="kicker">Appendix A6 · Earth and weather self-supervised models</p>
@@ -1373,7 +1411,7 @@ def mae_loss(pred, patches, mask, eps=1e-6):     # pred, patches: (B, N, 832)
   <aside class="notes">Not taught in class. Prithvi's 75% is in the released configs, not in the papers.</aside>
 </section>
 
-<!-- 50 -->
+<!-- 51 -->
 
 <section class="slide">
   <p class="kicker">Appendix A7 · Evaluation protocols and GEO-Bench-2</p>
@@ -1400,7 +1438,7 @@ def mae_loss(pred, patches, mask, eps=1e-6):     # pred, patches: (B, N, 832)
   <aside class="notes">Not taught in class.</aside>
 </section>
 
-<!-- 51 -->
+<!-- 52 -->
 
 <section class="slide">
   <p class="kicker">Appendix A8 · Lab reference</p>
@@ -1426,7 +1464,7 @@ DTYPE = torch.bfloat16 if major >= 8 else torch.float16
   <aside class="notes">Not taught in class. The capability check is the fix for the most common Colab surprise: bf16 "supported" on a T4, then slow or failing.</aside>
 </section>
 
-<!-- 52 -->
+<!-- 53 -->
 
 <section class="slide">
   <p class="kicker">Appendix A9 · Watch at home · assigned</p>
@@ -1453,7 +1491,7 @@ DTYPE = torch.bfloat16 if major >= 8 else torch.float16
   <aside class="notes">Not taught in class. The summary prompt is the four bullets; check the Week 9 quiz questions against the 2025 slide deck before writing them.</aside>
 </section>
 
-<!-- 53 -->
+<!-- 54 -->
 
 <section class="slide">
   <p class="kicker">Appendix A10 · More to watch · teachers and satellites</p>
@@ -1480,7 +1518,7 @@ DTYPE = torch.bfloat16 if major >= 8 else torch.float16
   <aside class="notes">Not taught in class.</aside>
 </section>
 
-<!-- 54 -->
+<!-- 55 -->
 
 <section class="slide">
   <p class="kicker">Appendix A11 · More to watch · JEPA and BYOL</p>
@@ -1507,7 +1545,7 @@ DTYPE = torch.bfloat16 if major >= 8 else torch.float16
   <aside class="notes">Not taught in class.</aside>
 </section>
 
-<!-- 55 -->
+<!-- 56 -->
 
 <section class="slide">
   <p class="kicker">Appendix A12 · More to watch · a full lecture and the lab’s 16 bits</p>
