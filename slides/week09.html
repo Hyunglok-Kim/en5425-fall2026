@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Week 9 · Foundation Models and Scaling Laws</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="deck.css">
+<script src="deck.js" defer></script>
+<script src="ink.js" defer></script>
+<script src="poll.js" defer></script>
+<style>
+/* compact video row (slide 3): small thumbnails; a playing video opens large over the slide,
+   and deck.js restores the thumbnail when the slide is left */
+.ytmini { display:flex; gap:1.4vw; margin-top:1.2vh; }
+.ytmini a.yt { flex:1; min-width:0; display:flex; gap:.8vw; align-items:center; text-decoration:none; color:inherit; }
+.ytmini .ytbox { position:relative; display:block; flex:0 0 9.5vw; }
+.ytmini .ytbox img { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:6px; display:block; }
+.ytmini .play { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.ytmini .play span { background:rgba(0,0,0,.62); color:#fff; border-radius:999px; padding:.6vh 1vh; font-size:1.7vh; line-height:1; }
+.ytmini .cap { font-size:clamp(12.5px,1.85vh,16px); line-height:1.35; color:var(--ink-2); min-width:0; }
+.ytmini .ytbox:has(iframe) { position:fixed; z-index:120; top:10vh; left:50%; transform:translateX(-50%);
+  width:min(80vw,140vh); flex:none; border-radius:10px; box-shadow:0 12px 48px rgba(0,0,0,.45); }
+</style>
+</head>
+<body>
+
+
+<!-- 1 -->
+
+<section class="slide title xl" style="background:linear-gradient(rgba(10,12,18,.30),rgba(10,12,18,.78)),url('img/w9-title-isoflop.jpg') center/cover no-repeat">
+  <p class="kicker" style="color:#e8a07a">EN5425 / EV4240 · Week 9 · Mon 9 Nov 2026</p>
+  <h1 style="color:#f4efe5;text-shadow:0 2px 24px rgba(0,0,0,.6)">Foundation Models and Scaling Laws</h1>
+  <p class="big" style="color:#e8e2d8;text-shadow:0 1px 16px rgba(0,0,0,.6)">Each curve is one compute budget. Spend it on a bigger model or on more data — somewhere in between is a best size, and the dotted line joins those best sizes. Today: what makes a model a foundation model, how to budget your capstone honestly, and what is inside the corpus your base model learned from.</p>
+  <div class="foot" style="color:#cfc8bc"><span>Deep Learning Applications in Environmental Big Data · Prof. Hyunglok Kim · GIST</span><span>Image: predicted loss against model size for budgets from 10¹⁵ to 10²⁵ FLOPs (floating-point operations), Chinchilla’s loss formula with the constants refitted by Besiroglu et al. 2024; drawn for this lecture.</span></div>
+  <aside class="notes">Timing for 9 Nov: Talk 1 by every student first (10 min + 3 min of questions each, the drawn questioner asks first, ≈ 65 min). Then this lecture, 23 min: roadmap 1.5 · Part 1 (foundation models and compute) 10 · Part 2 (corpus archaeology) 9 · next talk 2.5. Then the 65-minute project studio (slide 14). Cut order if short: the "what is a token of your data" slide (6) — say its one sentence — then the Aurora slide (10), whose lesson the overlap slide repeats. Open with the picture: every curve is a fixed budget of compute; walking right along a curve means a bigger model trained on fewer tokens; the bottom of each curve is the best split; the dotted line joins the bottoms. That is the Chinchilla result in one image, and the budget slide asks where your capstone sits on it.</aside>
+</section>
+
+<!-- 2 -->
+
+<section class="slide xl">
+  <p class="kicker">Week 9 · 23 min after the talks</p>
+  <h2>Today: price your plan, then read your base model’s corpus</h2>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 104" role="img" aria-label="Seven boxes joined left to right by arrows. Part 1: one model pretrained broadly, adapted to many tasks; loss falls as a power law; a fixed budget has a best size; your contract in GPU-hours. Part 2: read the base model's corpus; check overlap with your test data; when does pretraining pay. Brackets under the boxes mark Part 1 (10 min) and Part 2 (9 min)." style="width:min(98%,1150px)">
+      <g fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8">
+        <rect x="4" y="10" width="112" height="50" rx="8"/><rect x="132" y="10" width="112" height="50" rx="8"/><rect x="260" y="10" width="112" height="50" rx="8"/><rect x="388" y="10" width="112" height="50" rx="8"/>
+      </g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.4">
+        <rect x="528" y="10" width="112" height="50" rx="8"/><rect x="656" y="10" width="112" height="50" rx="8"/><rect x="784" y="10" width="112" height="50" rx="8"/>
+      </g>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M116 35 H132 M244 35 H260 M372 35 H388 M500 35 H528 M640 35 H656 M768 35 H784"/></g>
+      <g fill="currentColor"><path d="M126 31 L132 35 L126 39 Z"/><path d="M254 31 L260 35 L254 39 Z"/><path d="M382 31 L388 35 L382 39 Z"/><path d="M522 31 L528 35 L522 39 Z"/><path d="M650 31 L656 35 L650 39 Z"/><path d="M778 31 L784 35 L778 39 Z"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle">
+        <text x="60" y="31">pretrain once,</text><text x="60" y="45">adapt many</text>
+        <text x="188" y="31">loss falls as</text><text x="188" y="45">a power law</text>
+        <text x="316" y="31">fixed budget →</text><text x="316" y="45">a best size</text>
+        <text x="444" y="31" font-weight="700" fill="var(--accent)">your contract</text><text x="444" y="45" font-weight="700" fill="var(--accent)">in GPU-hours</text>
+        <text x="584" y="31">read the base</text><text x="584" y="45">model’s corpus</text>
+        <text x="712" y="31" font-weight="700" fill="var(--accent)">overlap with</text><text x="712" y="45" font-weight="700" fill="var(--accent)">your test?</text>
+        <text x="840" y="31">when does</text><text x="840" y="45">pretraining pay?</text>
+      </g>
+      <g fill="none" stroke="var(--muted)" stroke-width="1"><path d="M4 70 V76 H500 V70 M528 70 V76 H896 V70"/></g>
+      <g font-size="11.5" fill="var(--muted)" text-anchor="middle"><text x="252" y="93">Part 1 · foundation models and compute (10 min)</text><text x="712" y="93">Part 2 · corpus archaeology (9 min)</text></g>
+    </svg>
+  </div>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.1vh,19px);line-height:1.36">
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">1 · Compute</td><td style="padding:.4vh .6vw"><b>foundation model</b> one network pretrained on broad data, then adapted to many tasks · <b>FLOP</b> one floating-point operation (an add or a multiply) · <b>GPU-hour</b> one GPU busy for one hour · <b>scaling law</b> loss falls as a smooth power of model size and data · <b>compute-optimal</b> the size–data split with the lowest loss for a budget · <b>token</b> one input unit: a word piece in text, a patch for images</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">2 · Corpus</td><td style="padding:.4vh .6vw"><b>corpus</b> all the data a model was pretrained on · <b>HLS</b> Harmonized Landsat Sentinel-2, NASA’s 30 m surface-reflectance product · <b>reanalysis</b> a model-plus-observations reconstruction of past weather, e.g. ERA5 · <b>overlap / leakage</b> your test places or dates were already in the corpus · <b>U-Net</b> a small supervised segmentation network, the usual baseline</td></tr>
+  </table>
+  <p class="small" style="margin:.8vh 0 0;padding:.5vh .8vw;border-left:3px solid var(--accent);background:var(--wash)"><b style="color:var(--accent)">Talk 2 · Mon 16 Nov</b> — data archaeology and model design · slides by Sun 15 Nov 23:59 (slide 13)</p>
+  <div class="foot"><span>Studio straight after the lecture (slide 14) · reading: Hoffmann et al. 2022 (Chinchilla) · formulas and the audit template in the Appendix</span></div>
+  <aside class="notes">1.5 min. Read the chain left to right. Part 1 answers "what can my compute buy?" — and ends with a GPU-hour number for every row of the contract you just presented. Part 2 answers "what did my base model already see?" — and ends with the overlap check that goes into Talk 2. The two orange-bold boxes are the two things you take into the studio. Table: one breath per word.</aside>
+</section>
+
+<!-- 3 -->
+
+<section class="slide section xl">
+  <p class="kicker">Part 1 · 10 min · this week’s paper</p>
+  <h2>Foundation Models, and What Your Compute Can Buy</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>One definition and four Earth examples; Chinchilla’s finding that model size and data must grow together; what “a token” means for your data; a worked budget for a typical capstone. <b>By the end:</b> put a GPU-hour number on every row of your contract.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>Your Talk 1 named a base model and a budget. Scaling laws say which of the two is the real limit — and on a free tier the answer decides whether you adapt a model or train one.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Every large-model team sizes its run with these laws before training: Chinchilla, Llama, and in our field Aurora’s and Prithvi-WxC’s choice of size and data. Week 10 measures it on your own pilots.</p></div>
+  </div>
+  <aside class="notes">10 minutes. Read the cards in thirty seconds. Four slides: the definition, the curve, the token, the budget. The reading is Chinchilla; Kaplan and Bommasani are optional and sit in the appendix.</aside>
+</section>
+
+<!-- 4 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Definition · 2 min</p>
+  <h2>A foundation model: pretrain once on broad data, adapt to many tasks</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">The expensive part is paid once, by someone else; you pay only for the adaptation. That is the deal your capstone tests.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 250" role="img" aria-label="Left, broad unlabelled data: satellite archives such as HLS, and reanalysis such as ERA5. An arrow labelled pretrain once, self-supervised, expensive, leads to a box labelled base model. From it four arrows labelled adapt, cheap, lead to four tasks: flood mapping, crop types, an air-quality forecast and a cyclone track. Under the figure, four Earth foundation models: Prithvi-EO-2.0, Aurora, Prithvi-WxC and AlphaEarth Foundations." style="width:min(96%,1150px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.3">
+        <rect x="6" y="40" width="170" height="64" rx="8"/><rect x="6" y="120" width="170" height="64" rx="8"/>
+      </g>
+      <g font-size="14" fill="currentColor" text-anchor="middle">
+        <text x="91" y="66" font-weight="700">satellite archives</text><text x="91" y="86">HLS, Sentinel-1/2</text>
+        <text x="91" y="146" font-weight="700">reanalysis, forecasts</text><text x="91" y="166">ERA5, MERRA-2</text>
+      </g>
+      <text x="91" y="26" font-size="13" fill="var(--muted)" text-anchor="middle">broad data, no labels</text>
+      <path d="M180 112 H368" stroke="var(--accent)" stroke-width="3" fill="none"/><path d="M360 104 L372 112 L360 120 Z" fill="var(--accent)"/>
+      <g font-size="13.5" fill="var(--accent)" text-anchor="middle"><text x="274" y="96" font-weight="700">pretrain once</text><text x="274" y="134">self-supervised · weeks</text><text x="274" y="151">on tens of GPUs</text></g>
+      <rect x="376" y="74" width="150" height="76" rx="10" fill="var(--accent)" opacity=".14" stroke="var(--accent)" stroke-width="2"/>
+      <text x="451" y="108" font-size="16" font-weight="700" fill="currentColor" text-anchor="middle">base model</text><text x="451" y="128" font-size="13" fill="var(--muted)" text-anchor="middle">public weights</text>
+      <g stroke="currentColor" stroke-width="1.4" fill="none"><path d="M528 100 L660 32 M528 106 L660 88 M528 118 L660 144 M528 124 L660 200"/></g>
+      <text x="596" y="232" font-size="13" fill="var(--accent)" font-weight="700" text-anchor="middle">adapt · cheap</text>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="664" y="14" width="230" height="38" rx="7"/><rect x="664" y="70" width="230" height="38" rx="7"/><rect x="664" y="126" width="230" height="38" rx="7"/><rect x="664" y="182" width="230" height="38" rx="7"/>
+      </g>
+      <g font-size="14" fill="currentColor"><text x="676" y="38">flood map from Sentinel-1</text><text x="676" y="94">crop types from HLS</text><text x="676" y="150">air-quality forecast</text><text x="676" y="206">tropical-cyclone track</text></g>
+      <text x="779" y="240" font-size="13" fill="var(--muted)" text-anchor="middle">each: 100s–1,000s of labels</text>
+    </svg>
+  </div>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.15vh,19px);line-height:1.38">
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw"><b>Prithvi-EO-2.0</b> · NASA–IBM</td><td style="padding:.35vh .6vw">300 M / 600 M · HLS time series · land tasks</td><td style="padding:.35vh .6vw"><b>Aurora</b> · Microsoft</td><td style="padding:.35vh .6vw">1.3 B · weather, air quality, waves, cyclones</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .6vw"><b>Prithvi-WxC</b> · NASA–IBM</td><td style="padding:.35vh .6vw">2.3 B · MERRA-2 · downscaling, gravity waves</td><td style="padding:.35vh .6vw"><b>AlphaEarth</b> · Google DeepMind</td><td style="padding:.35vh .6vw">yearly 64-number embedding per 10 m pixel</td></tr>
+  </table>
+  <div class="foot"><span>Definition: Bommasani et al. 2021, §1 — “any model that is trained on broad data … that can be adapted … to a wide range of downstream tasks”</span></div>
+  <aside class="notes">2 min. The definition is Bommasani's: broad data, adaptation to many tasks; scale is what made it work, not what defines it. The picture is the economics: the left arrow costs weeks on tens of GPUs and is done once by a lab; the right arrows are what you do, with hundreds or thousands of labels. Read the four Earth models in one line each — two of them (Prithvi-EO-2.0 and Aurora) are today's archaeology examples. The capstone's question, in this picture: does the left arrow help your right arrow, compared with a model that never took the left arrow (the random-init control) and a strong model trained only on your labels (the supervised baseline)?</aside>
+</section>
+
+<!-- 5 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Chinchilla, the reading · 2.5 min</p>
+  <h2>For a fixed budget there is a best size — grow data with it</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Chinchilla (70 B parameters, 1.4 T tokens) beat Gopher (280 B, 300 B tokens) on the same compute: Gopher was too big for its data.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <img src="img/fig-w9-isoflop.png" data-zoom alt="Predicted loss against parameter count on a log axis, one U-shaped curve per compute budget. Blue: one Kaggle week on a T4, best size about 118 million parameters. Grey: 10 to the 20 FLOPs, best about 851 million. Orange: the Gopher and Chinchilla budget of 5.76 times 10 to the 23 FLOPs, best about 73 billion; Chinchilla (70 billion parameters, 1.4 trillion tokens) sits at the bottom, Gopher (280 billion, 300 billion tokens) to its right on the rising side." title="Click to enlarge" style="display:block;margin:0 auto;height:38vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Double the compute → <b>√2 × more parameters and √2 × more tokens</b>; at the optimum, <span class="accent">≈ 20 tokens per parameter</span>.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>scaling law</b> — loss falls as a smooth power of model size N and data D · <b>compute-optimal</b> — the N, D pair with the lowest loss for a budget C ≈ 6 N D FLOPs · <b>token</b> — one input unit: a word piece in text, a patch for us</span>
+  </div>
+  <div class="foot"><span>Curves: L(N, D) = E + A / N<sup>α</sup> + B / D<sup>β</sup>, Hoffmann et al. 2022 §3.3, constants refitted by Besiroglu et al. 2024 · fitted on text, not Earth data · tools/week09_deck/figs/fig_isoflop.py</span></div>
+  <aside class="notes">2.5 min. Walk along the orange curve: same compute everywhere on it; left is a small model trained on a lot of data, right a big model on little. The bottom is the best split. In 2021 the field sat to the right — Gopher, 280 billion parameters on 300 billion tokens. Chinchilla spent the same compute on a model four times smaller with four times more data, and won on almost every benchmark. The rule that came out: parameters and tokens should grow together, each by the square root of the compute, which ends near 20 tokens per parameter. The blue curve is the point for us: a week of free GPU puts the best size around 100 million parameters — if you had 3 billion tokens of fresh data, which you do not; next slide. Honest caveat: these curves are fitted on text; the exponents for images and weather fields are different and measured far less often (A3).</aside>
+</section>
+
+<!-- 6 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · What is a token of your data? · 2 min</p>
+  <h2>Earth models are data-poor and repeat their corpus hundreds of times</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Chinchilla counts fresh text tokens. Earth archives are small in unique tokens, so their models loop over them — and a repeat is worth less.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <img src="img/fig-w9-tokens.png" data-zoom alt="Tokens per parameter on a log axis for four models; hollow dot = unique tokens in the corpus, filled dot = tokens seen in training with repeats. Chinchilla 70 B: 20 and 20, about one epoch of text. Aurora 1.3 B: about 239 unique and 718 seen, about three epochs, derived. Prithvi-EO-2.0 300 M: 11 unique and 4,390 seen over 400 epochs. Our Week 7 mini-MAE 0.9 M: 0.28 unique and 389 seen over 1,367 epochs. A dashed line marks 20 tokens per parameter." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Text: up to <b>4 epochs ≈ fresh data</b>, little gain after ≈ 16. For Earth data, <span class="accent">grow the data faster than the model</span> (TESSERA v2: data ∝ C<sup>0.63</sup>, model ∝ C<sup>0.36</sup>).</li>
+  </ul>
+  <div class="gloss">
+    <span><b>token here</b> — Prithvi: one 16 × 16 patch of 6 bands on one date (784 per 4-date chip) · Aurora: one 4 × 4 patch of all variables on one level at 0.25° · ours: one 8 × 8 patch of 13 bands</span>
+  </div>
+  <div class="foot"><span>Muennighoff et al. 2023 · TESSERA v2 §3.3 · Prithvi-EO-2.0 §III · Aurora Supp. §C–D (counts derived, ≈) · figs/fig_tokens.py</span></div>
+  <aside class="notes">2 min. This is the reading's first question — "what is a token of ERA5?". The answer: a patch, like an image. Read the dots. Chinchilla: 20 fresh text tokens per parameter, seen once. Prithvi-EO-2.0-300M: its 4.2 million four-date chips hold about 11 unique patch tokens per parameter — fewer than Chinchilla's rule — so it trains 400 epochs and sees each token 400 times. Aurora has more unique tokens per parameter (a global field every 6 hours adds up), but neighbouring hours are nearly identical, so "unique" overstates it. Our own mini-MAE had a quarter of a token per parameter and saw each one 1,367 times; it still learned useful features, because each pass hides a different 75% (masking acts like fresh data, partly). Two lessons. One, for text, repeating up to 4 epochs costs almost nothing and returns vanish after about 16 (Muennighoff). Two, the one EO study that fitted Chinchilla-style exponents found data should grow faster than the model — and that pretraining loss barely predicts downstream skill (|r| below 0.2), so judge pilots by a probe on your validation split, not by the loss curve. Reading question for ERA5: 40 years every 6 hours at Aurora's 4 × 4 patches is about 58,000 frames × 65,000 patches ≈ 4 billion tokens per level.</aside>
+</section>
+
+<!-- 7 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Worked budget · 3 min</p>
+  <h2>Your contract in GPU-hours: adapting fits, pretraining does not</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Every row of your Talk 1 contract has a price. Write it down now, then replace it with a measured step time on 23 Nov.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <img src="img/fig-w9-budget.png" data-zoom alt="Left: horizontal bars of estimated T4 GPU-hours for a capstone that adapts a 300-million-parameter model on 2,000 labelled chips: frozen probe times three seeds 0.01 h, fine-tune times three 1.0 h, random-init control times three 3.3 h, supervised baseline times three 0.6 h, tuning with six fine-tune configurations 2.0 h, one ablation with two settings times three seeds 2.0 h, restart reserve 2.6 h; about 11 GPU-hours in total. Right: the same 11 hours against 30 hours for one Kaggle week, 105 hours from 9 November to 4 December, and 154 hours to pretrain the same 300-million-parameter encoder compute-optimally on 6 billion tokens, about 31 million chips." title="Click to enlarge" style="display:block;margin:0 auto;height:38vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Cost ≈ <b>6 × parameters × tokens seen</b>. <span class="accent">The random-init control is the dearest row — and the one you may not drop.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>Assumed:</b> Prithvi-EO-2.0-300M encoder · 2,000 train + 500 validation chips, 224 × 224, one date → 196 tokens · fine-tune 30 epochs, scratch 100 · T4 at 30% of its 65 TFLOP/s (16-bit) · supervised U-Net 0.2 h a seed, a guess</span>
+  </div>
+  <div class="foot"><span>Computed for this lecture: tools/week09_deck/figs/budget.py → budget.json · Kaggle ≈ 30 free GPU-hours a week (T4 / P100), Capstone page</span></div>
+  <aside class="notes">3 min. This is the slide to work with one student's contract: ask whoever gave the clearest budget in Talk 1 for their model size, number of chips, tokens per chip and epochs, and redo the arithmetic on the board — 6 × N × tokens per chip × chips × epochs, divided by about 2 × 10^13 FLOP/s. With the default numbers: one fine-tune of a 300 M encoder on 2,000 chips for 30 epochs is about a third of a GPU-hour; the whole contract with three seeds, tuning, one ablation and a 30% restart reserve is about 11 hours — a third of one Kaggle week. The expensive row is the random-init control, because a model trained from scratch needs more epochs; do not drop it, it is what tells you whether pretraining mattered. The right panel is the point of the scaling law: pretraining the same encoder the Chinchilla way — 20 tokens per parameter, 6 billion tokens, about 31 million chips — would cost about 150 hours, five Kaggle weeks, and you do not have 31 million chips. So the capstone adapts a public model, and the mini-MAE pilots stay small. Caveats to say: 30% utilisation is an assumption, attention and the decoder head are left out (a few per cent for 196 tokens; more for long time series), and the T4's 16 GB of memory may force a small batch or LoRA (low-rank adaptation, Week 12) — measure on 23 November.</aside>
+</section>
+
+<!-- 8 -->
+
+<section class="slide section xl">
+  <p class="kicker">Part 2 · 9 min</p>
+  <h2>Corpus Archaeology: Read What Your Base Model Was Trained On</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>How Prithvi-EO-2.0 (land) and Aurora (atmosphere) built, filtered and split their pretraining data; the overlap check; when pretraining pays at all. <b>By the end:</b> open BASE_MODEL_AUDIT.md and fill its first five lines.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>A base model that saw your test region or years during pretraining makes your result look better than it is. You cannot rule that out without reading the corpus section.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Model cards and data cards on Hugging Face; the “data” section of every foundation-model paper; your Talk 2 on 16 Nov, item 2.</p></div>
+  </div>
+  <aside class="notes">9 minutes. "Archaeology" because the corpus is buried: a paragraph in §2 or an appendix, a config on Hugging Face, sometimes a sampling script. Two examples, one check, one question (does pretraining pay?), then the audit file.</aside>
+</section>
+
+<!-- 9 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Example 1 · Prithvi-EO-2.0 §III-A · 2.5 min</p>
+  <h2>Prithvi-EO-2.0: a sampled, filtered and split corpus — read each step</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Every arrow is a choice that decides what the model knows. Your audit copies each one, with its section number.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 236" role="img" aria-label="A five-step funnel from left to right. One: all 18,000 HLS land tiles. Two: choose 3,191 tiles by land cover (Copernicus 100 m) and ecoregion (RESOLVE, 846 regions); urban over-sampled, sea and desert down-sampled. Three: split by tile, 95% train and 5% validation: 3,028 and 163 tiles. Four: cut 256 by 256 chips with four dates 1 to 6 months apart, 2014 to 2023, 6 bands at 30 m. Five: drop a chip if more than 1% of pixels are missing or more than 20% are cloud, and drop training chips that overlap a validation area. Result: 4.2 million training and 46 thousand validation chips. A note below: not stated, whether downstream benchmark areas were kept out." style="width:min(98%,1150px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.2">
+        <rect x="4" y="20" width="160" height="150" rx="8"/><rect x="184" y="20" width="160" height="150" rx="8"/><rect x="364" y="20" width="160" height="150" rx="8"/><rect x="544" y="20" width="160" height="150" rx="8"/>
+      </g>
+      <rect x="724" y="20" width="172" height="150" rx="8" fill="var(--accent)" opacity=".14" stroke="var(--accent)" stroke-width="2"/>
+      <g fill="currentColor"><path d="M166 95 L180 95 M173 89 L180 95 L173 101" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M346 95 L360 95 M353 89 L360 95 L353 101" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M526 95 L540 95 M533 89 L540 95 L533 101" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M706 95 L720 95 M713 89 L720 95 L713 101" stroke="currentColor" stroke-width="1.6" fill="none"/></g>
+      <g font-size="13.5" fill="currentColor">
+        <text x="16" y="44" font-weight="700" fill="var(--accent)">1 · archive</text><text x="16" y="70">all 18,000 HLS</text><text x="16" y="88">land tiles</text><text x="16" y="114">(≈ 110 × 110 km each)</text>
+        <text x="196" y="44" font-weight="700" fill="var(--accent)">2 · stratify</text><text x="196" y="70">land cover (100 m)</text><text x="196" y="88">+ 846 ecoregions</text><text x="196" y="112">urban over-sampled;</text><text x="196" y="130">sea, desert down</text>
+        <text x="376" y="44" font-weight="700" fill="var(--accent)">3 · split by tile</text><text x="376" y="70">95% train: 3,028</text><text x="376" y="88">5% validation: 163</text><text x="376" y="114">before any chip</text><text x="376" y="132">is cut</text>
+        <text x="556" y="44" font-weight="700" fill="var(--accent)">4 · chips</text><text x="556" y="70">256 × 256, 4 dates</text><text x="556" y="88">1–6 months apart</text><text x="556" y="112">2014–2023</text><text x="556" y="130">6 bands, 30 m</text>
+        <text x="736" y="44" font-weight="700" fill="var(--accent)">5 · filter</text><text x="736" y="70">&gt; 1% missing → out</text><text x="736" y="88">&gt; 20% cloud → out</text><text x="736" y="106">train ∩ val area → out</text>
+        <text x="736" y="140" font-weight="700">4.2 M train</text><text x="736" y="158" font-weight="700">46 k validation</text>
+      </g>
+      <text x="450" y="204" font-size="14" fill="var(--accent)" font-weight="700" text-anchor="middle">Not stated: whether flood, burn-scar or crop benchmark areas were kept out of the corpus.</text>
+      <text x="450" y="226" font-size="12.5" fill="var(--muted)" text-anchor="middle">Cost: 400 epochs, 80 A100 GPUs, ≈ 21,000 GPU-hours for the 300 M model · weights Apache-2.0</text>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Bands B02–B07 (blue, green, red, near-infrared, two short-wave infrared): <span class="accent">feed exactly these, in this order, with its mean and std</span> from the model’s config.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>stratify</b> — sample so that every land-cover class and ecoregion is represented · <b>Fmask</b> — the HLS quality band that flags cloud and cloud shadow</span>
+  </div>
+  <div class="foot"><span>Szwarcman et al., Prithvi-EO-2.0, arXiv 2412.02732v3 §III-A–B · Hugging Face config ibm-nasa-geospatial/Prithvi-EO-2.0-300M · course-design/wf_week9-facts.md §7</span></div>
+  <aside class="notes">2.5 min. Walk the five boxes. One, the archive is every HLS land tile. Two, they did not take all of it: they picked tiles so that every land-cover class and almost every ecoregion appears, pushed urban up and sea and desert down — so the model has seen more cities and farmland than the Earth has. Three, the split is by tile and happens before cutting chips; that is the blocked split you committed in Talk 1. Four, each sample is four dates, one to six months apart, from 2014 to 2023, six bands, 30 m. Five, cloudy or incomplete chips are thrown away — so the model has rarely seen a cloud; if your task has clouds, that is a mismatch you should name. And they dropped training chips that overlapped validation areas. The orange line is the archaeology finding: the paper does not say whether benchmark areas were excluded. For your project that means: if your test region and years fall inside 2014–2023 HLS land, you cannot rule out that the encoder saw them; say so, and prefer a test period after 2023 where you can. Cost line: 21,000 A100-hours for the 300 M model — 700 times your Kaggle week.</aside>
+</section>
+
+<!-- 10 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Example 2 · Aurora, Supplementary §C · 2 min</p>
+  <h2>Aurora: ten datasets, all ending in 2020 — so test on 2022 and later</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">For a weather model the clean split is by time. Read where the corpus ends before you choose your test years.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <img src="img/fig-w9-aurora.png" data-zoom alt="Horizontal bars of the years covered by Aurora's pretraining datasets: ERA5 reanalysis 1979 to 2020, 106 TB, highlighted; MERRA-2 reanalysis 1980 to 2020; IFS HRES forecasts 2016 to 2020; IFS ENS ensemble 2018 to 2020, 538 TB; GFS forecasts 2015 to 2020; GEFS reforecasts 2000 to 2019, 455 TB; two CMIP6 climate simulations 1950 to 2014. A light band marks the validation year 2020, a darker band the test years 2022 and 2023. 1,268 TB in all." title="Click to enlarge" style="display:block;margin:0 auto;height:35vh;width:auto;max-width:100%">
+  </div>
+  <ul class="small">
+    <li>Normalised with <b>ERA5 means and stds for every dataset</b>; ERA5 loss weighted × 2. <span class="accent">Note: the 2020 validation year sits inside the pretraining years.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>reforecast</b> — an old forecast re-run with today’s model · <b>CMIP6</b> — the climate-model comparison project; here, simulated weather, not observations</span>
+  </div>
+  <div class="foot"><span>Bodnar et al., Nature 2025, Supplementary Table C3 and §C.4 (arXiv 2405.13063v3 §11) · 1.3 B parameters, 150 k steps on 32 A100s ≈ 2.5 weeks · weights MIT · wf_week9-facts.md §8</span></div>
+  <aside class="notes">2 min. The section is in the supplement, Section C — not Appendix B, as our schedule said. Ten datasets, 1.3 petabytes: reanalyses, forecasts, ensembles, even climate simulations. Three things to read off. First, everything ends in 2020; the test years are 2022 and 2023 — a clean split by time, and the one you should copy if your project is about weather or climate: put your test years after the corpus ends. Second, normalisation: Aurora uses ERA5's means and standard deviations for every dataset; when you fine-tune, keep those statistics rather than recomputing your own. Third, a small honesty check: the validation year 2020 is inside the pretraining datasets' range — the kind of detail the audit should record, not hide. They also found that adding every dataset was not always better than ERA5 alone: more data is not automatically better data.</aside>
+</section>
+
+<!-- 11 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · The overlap check · 2 min</p>
+  <h2>Did your base model already see your test data?</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">If it did, the frozen probe and the fine-tune look better than they would on new places or years. Decide now, before any run.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 200" role="img" aria-label="Three rows, one per answer to the question: is your test block in the base model's corpus? Known no, for example a test year after the corpus ends: test as planned. Known yes: move the test block to new places or later years, or add a held-out block that is clean. Unknown, as for Prithvi-EO-2.0's benchmark areas: write UNVERIFIED in the audit, test on years after the corpus ends where you can, and report the frozen probe both on the possibly-seen and on the clean block." style="width:min(98%,1150px)">
+      <g font-size="14.5" fill="currentColor">
+        <rect x="4" y="8" width="230" height="56" rx="8" fill="var(--wash)" stroke="currentColor" stroke-width="1.2"/><text x="18" y="32" font-weight="700">Known: no overlap</text><text x="18" y="52" fill="var(--muted)">e.g. Aurora, test 2022 +</text>
+        <text x="256" y="42">→  test as planned; cite the section that shows it.</text>
+        <rect x="4" y="74" width="230" height="56" rx="8" fill="var(--wash)" stroke="currentColor" stroke-width="1.2"/><text x="18" y="98" font-weight="700">Known: overlap</text><text x="18" y="118" fill="var(--muted)">your test is in the corpus</text>
+        <text x="256" y="108">→  move the test block: new places or later years. Amend PREREG.md, dated.</text>
+        <rect x="4" y="140" width="230" height="56" rx="8" fill="var(--accent)" opacity=".14" stroke="var(--accent)" stroke-width="2"/><text x="18" y="164" font-weight="700" fill="var(--accent)">Unknown</text><text x="18" y="184" fill="var(--muted)">e.g. Prithvi’s benchmark areas</text>
+        <text x="256" y="164">→  write <tspan font-weight="700">UNVERIFIED</tspan> in the audit; add a block after the corpus ends;</text><text x="276" y="186">report the probe on both blocks — a gap is evidence of memorisation.</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>BASE_MODEL_AUDIT.md, first lines: <b>model + exact revision · corpus sensors / variables · places and dates · filters and normalisation · held-out data and overlap with your test · licence</b>.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>exact revision</b> — the Hugging Face commit hash of the weights you load, so a silent update cannot change your results</span>
+  </div>
+  <div class="foot"><span>Template: Appendix A4 · it goes in your repo by Sun 15 Nov and is card 2 of Talk 2</span></div>
+  <aside class="notes">2 min. Three cases. Known no overlap — Aurora with a test year of 2022 or later: test as planned, and cite the section. Known overlap — for example your test region and years are inside ERA5 1979–2020 and you use Aurora: move the test block, and amend PREREG.md with a date, before the run. Unknown — the common case, Prithvi's benchmark areas: you cannot prove a negative, so write UNVERIFIED, add a test block after the corpus ends (2024 or later for Prithvi-EO-2.0), and report the frozen probe on both blocks; if the possibly-seen block scores clearly higher, that is evidence the encoder remembered it. Then the six audit lines: read them once; A4 is the template, and you start it in the studio today.</aside>
+</section>
+
+<!-- 12 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · When does pretraining pay? · 2 min</p>
+  <h2>With many labels a plain U-Net often wins; with few, pretraining starts to pay</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">That is why your contract has a supervised baseline that tries to win — and why your label count decides the result.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 220" role="img" aria-label="Bar chart from the PANGAEA benchmark: how many of its datasets a model finishes in the top two, at 100, 50 and 10 percent of the labels. The supervised U-Net trained from scratch: 6, 4 and 2. The best foundation model at 10 percent, CROMA: 6. Beside it, three quoted findings: foundation models do not consistently outperform supervised models (PANGAEA); no single model dominates across all tasks (GEO-Bench-2); pretraining loss barely predicts downstream skill (TESSERA v2)." style="width:min(98%,1150px)">
+      <line x1="40" y1="180" x2="400" y2="180" stroke="currentColor" stroke-width="1.2"/>
+      <g fill="var(--muted)"><rect x="60" y="60" width="60" height="120"/><rect x="160" y="100" width="60" height="80"/><rect x="260" y="140" width="60" height="40"/></g>
+      <rect x="330" y="60" width="60" height="120" fill="var(--accent)"/>
+      <g font-size="15" fill="currentColor" text-anchor="middle">
+        <text x="90" y="52" font-weight="700">6</text><text x="190" y="92" font-weight="700">4</text><text x="290" y="132" font-weight="700">2</text><text x="360" y="52" font-weight="700" fill="var(--accent)">6</text>
+        <text x="90" y="200">100%</text><text x="190" y="200">50%</text><text x="290" y="200">10%</text><text x="360" y="200" fill="var(--accent)">10%</text>
+      </g>
+      <text x="190" y="20" font-size="14" fill="currentColor" text-anchor="middle" font-weight="700">U-Net from scratch, by share of labels</text>
+      <text x="360" y="20" font-size="14" fill="var(--accent)" text-anchor="middle" font-weight="700">CROMA</text>
+      <text x="220" y="218" font-size="12.5" fill="var(--muted)" text-anchor="middle">datasets where the model finishes top 2 (of 11)</text>
+      <g font-size="14.5" fill="currentColor">
+        <text x="440" y="48" font-weight="700">PANGAEA</text><text x="440" y="70">“do not consistently outperform supervised models”</text>
+        <text x="440" y="110" font-weight="700">GEO-Bench-2</text><text x="440" y="132">“no single model dominates across all tasks”</text>
+        <text x="440" y="172" font-weight="700">TESSERA v2</text><text x="440" y="194">“pretraining loss barely predicts downstream performance”</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Cheap ablation for your contract: <span class="accent">rerun the four rows at 10% of your labels</span> — the gap that appears there is the case for pretraining.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>PANGAEA</b> — an Earth-model benchmark of 11 datasets; frozen encoders + a UPerNet decoder vs a U-Net and a ViT trained from scratch · <b>CROMA</b> — a radar + optical pretrained model</span>
+  </div>
+  <div class="foot"><span>Marsocci et al. 2025, PANGAEA, arXiv 2412.04204v2 §5.1–5.2 · GEO-Bench-2, arXiv 2511.15658, Abstract · Feng et al. 2026, TESSERA v2, Abstract · wf_week9-facts.md §6, §9</span></div>
+  <aside class="notes">2 min. PANGAEA froze each foundation model's encoder, put the same decoder on it, and compared with a U-Net trained from scratch. With all labels, the U-Net is in the top two on six datasets — more than any foundation model; it is best on burn scars, floods and small farms. Cut the labels to 10% and the U-Net drops to two, while CROMA reaches six. GEO-Bench-2 says the same in other words: no model wins everywhere. TESSERA adds a warning for your pilots: a lower pretraining loss does not mean a better downstream model. For the capstone: your supervised baseline must be tuned and allowed to win; and if you have time for one ablation, the label fraction is the most informative — it shows where, if anywhere, pretraining pays. Caveat: PANGAEA's Prithvi was the 1.0 era; Prithvi-EO-2.0 was not in that table.</aside>
+</section>
+
+<!-- 13 -->
+
+<section class="slide xl">
+  <p class="kicker">Next Monday · 2.5 min</p>
+  <h2>16 Nov, Talk 2: data archaeology and model design</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Ten minutes + three of questions · slides (PDF) in the Talk 2 slot by Sun 15 Nov 23:59 · nothing is trained before it.</p>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.2vw 1.6vw;flex:0 0 auto">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">1 · Project data</b><br>Source, licence, the download command, extent and shape, where the labels come from and their known errors; a gallery of actual model inputs.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">2 · Base-model archaeology</b><br>Its corpus: sensors or variables, places and dates, filters, licence, and any overlap with your test data. Cite the section or config; mark what you cannot find <b>UNVERIFIED</b>.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">3 · Frozen manifests</b><br>Train / validation / test counts, label balance, the block map, leakage checks — and the commit that froze them, dated before any training.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">4 · Input contract</b><br>Bands or variables, units, gaps, clouds. Keep the base model’s own normalisation; fit any new statistics on your training split only.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">5 · Model design</b><br>Input → tokens → encoder → target, with shapes; tie one choice to your Week 7 mini-MAE evidence.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">6 · Pilot plan, not yet run</b><br>Two mini-MAE sizes at a fixed time budget, their probes, a short adaptation pilot of the public model; compute caps and pass/fail criteria.</p></div>
+  </div>
+  <div class="gloss">
+    <span><b>manifest</b> — a file listing exactly which chips (or dates) are in each split · <b>input contract</b> — what the model expects to receive: bands, order, units, scaling</span>
+  </div>
+  <div class="foot"><span>Repo by Sunday: data/ · split manifests · data card · BASE_MODEL_AUDIT.md (template A4) · then 23 Nov pilots &amp; compute decision · 30 Nov controlled runs · 7 Dec held-out results · 14 Dec final</span></div>
+  <aside class="notes">2.5 min. Read the six cards once; they are next Monday's slide order. Stress card 2 — it is today's Part 2 turned into a deliverable — and card 3: the manifest commit must be dated before any training; the studio today is where it happens. Card 6 is a plan, not results: the pilots are run the week after and shown on 23 November, and today's budget slide gives the numbers they should be capped at. Logistics: PDF in the Talk 2 slot by Sunday 15 November, 23:59.</aside>
+</section>
+
+<!-- 14 -->
+
+<section class="slide xl">
+  <p class="kicker">Project studio · 65 min · after the lecture</p>
+  <h2>Studio: freeze your splits before you fit anything</h2>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr;gap:2vw;align-items:start;flex:0 0 auto">
+    <div class="card small" style="min-width:0">
+      <p><b>1 · Pull your data</b> into <code>data/</code> with one script you can rerun.</p>
+      <p><b>2 · Commit the manifests</b> — blocked train / validation / test — before any model touches them.</p>
+      <p><b>3 · Normalisation table</b> from the training split only.</p>
+      <p><b>4 · Input gallery</b> — 16 chips exactly as the model will see them.</p>
+      <p><b>5 · BASE_MODEL_AUDIT.md</b> — the first five lines from the paper and config.</p>
+    </div>
+    <div class="card small" style="min-width:0">
+      <p style="margin:0 0 .6vh"><b class="accent">Check before you leave</b></p>
+      <p style="margin:0"><code>git log --format='%ad %s' -- splits/</code><br>shows a manifest commit dated today, earlier than any file in <code>runs/</code>.</p>
+      <p style="margin:1vh 0 0">Blocks: no tile, field or date appears in two splits — the leakage check in Note 09.</p>
+    </div>
+  </div>
+  <div class="gloss">
+    <span><b>blocked split</b> — whole regions or whole years go to one split, so neighbouring, near-identical chips cannot sit on both sides</span>
+  </div>
+  <div class="foot"><span>Note 09 (pipeline notes, gallery, split map with leakage check, normalisation table, BASE_MODEL_AUDIT.md draft) and Talk 2 slides — Sun 15 Nov 23:59</span></div>
+  <aside class="notes">1 min, then dismiss to the studio. The order matters: data, then manifests committed, then statistics from training only, then the gallery, then the audit. Walk round and ask each student to show the git log line. Anyone without data access by the end of the studio tells me today, not on Sunday.</aside>
+</section>
+
+<!-- 15 -->
+
+<section class="slide section xl">
+  <p class="kicker">Appendix</p>
+  <h2>Reference cards</h2>
+  <ul class="small">
+    <li><b>A1</b> Kaplan 2020 vs Chinchilla 2022 — why the advice changed · <b>A2</b> counting FLOPs: 6 N D, attention, and MAE’s 25% encoder</li>
+    <li><b>A3</b> data-limited scaling: repeating your corpus · <b>A4</b> BASE_MODEL_AUDIT.md template · <b>A5</b> readings and videos</li>
+  </ul>
+  <div class="foot"><span>The studio starts after slide 14.</span></div>
+  <aside class="notes">Not presented. Point students here for the formulas and the audit template.</aside>
+</section>
+
+<!-- 16 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A1 · Kaplan 2020 vs Chinchilla 2022</p>
+  <h2>A1 · Why the advice changed: “make it bigger” became “grow both”</h2>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14.5px,2.3vh,20px);line-height:1.4">
+    <tr style="color:var(--muted)"><td style="padding:.45vh .7vw"></td><td style="padding:.45vh .7vw">Kaplan et al. 2020</td><td style="padding:.45vh .7vw">Hoffmann et al. 2022 (Chinchilla)</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.45vh .7vw">best size N ∝ C<sup>a</sup></td><td style="padding:.45vh .7vw">a = 0.73</td><td style="padding:.45vh .7vw">a = 0.50 / 0.49 / 0.46 (three approaches, Table 2)</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.45vh .7vw">tokens D ∝ C<sup>b</sup></td><td style="padding:.45vh .7vw">b = 0.27</td><td style="padding:.45vh .7vw">b = 0.50 / 0.51 / 0.54</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.45vh .7vw">why</td><td style="padding:.45vh .7vw" colspan="2">Kaplan used one fixed learning-rate schedule and mostly small models (Chinchilla §2)</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.45vh .7vw">Table 3 rows</td><td style="padding:.45vh .7vw" colspan="2">1 B params → 20.2 B tokens · 10 B → 205.1 B · 67 B → 1.5 T — hence “≈ 20 tokens per parameter”</td></tr>
+  </table>
+  <ul class="small">
+    <li>The paper never writes “20 tokens per parameter”; it is read off Table 3. Its own fitted formula (App. D.2: E 1.69, A 406.4, B 410.7, α 0.34, β 0.28) implies ≈ 70; Besiroglu et al. 2024 refitted it → ≈ 20. Slide 5 uses the refit.</li>
+  </ul>
+  <div class="foot"><span>arXiv 2001.08361 eq. 6.1 · arXiv 2203.15556 §2, §3.3, Tables 2–3 · arXiv 2404.10102 · wf_week9-facts.md §1–3</span></div>
+  <aside class="notes">Reference only.</aside>
+</section>
+
+<!-- 17 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A2 · Counting compute</p>
+  <h2>A2 · GPU-hours = 6 · N · tokens ÷ (peak × utilisation × 3600)</h2>
+  <ul class="small">
+    <li><b>6 N per token:</b> forward 2 N (one multiply + one add per weight), backward 4 N (PaLM App. B). A frozen probe needs only the forward pass, once: 2 N per token.</li>
+    <li><b>Attention</b> adds ≈ 4 · T² · d per layer. ViT-L (24 layers, d 1024): +3% at T = 196 tokens, +13% at T = 784 (Prithvi’s four dates). Long time series: count it.</li>
+    <li><b>MAE pretraining:</b> the encoder sees 25% of the tokens, so its cost is ≈ ¼; add the decoder (Week 7, A5).</li>
+    <li><b>Utilisation:</b> real runs reach a fraction of peak — GPT-3 21%, Gopher 33%, PaLM 46% (PaLM Table 3, model-FLOPs utilisation). We assumed 30% on a T4 (65 TFLOP/s at 16 bits); a P100 has no tensor cores (18.7 TFLOP/s).</li>
+    <li><b>Then measure:</b> time 50 steps, multiply out. That number replaces this formula in Talk 3.</li>
+  </ul>
+  <div class="foot"><span>PaLM, arXiv 2204.02311 §4.1, App. B · NVIDIA T4 and P100 data sheets · Kaggle: “30 hours or sometimes higher” a week, 12-hour sessions · Colab publishes no limits · wf_week9-facts.md §11</span></div>
+  <aside class="notes">Reference only.</aside>
+</section>
+
+<!-- 18 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A3 · Data-limited scaling, and Earth-data evidence</p>
+  <h2>A3 · When the corpus is fixed: repeat it, and judge by the downstream task</h2>
+  <ul class="small">
+    <li><b>Muennighoff et al. 2023 (text):</b> “up to 4 epochs of repeated data yields negligible changes to loss compared to having unique data”; gains fade after ≈ 16 epochs.</li>
+    <li><b>Aurora:</b> at a fixed 5 k GPU-hours, validation loss ∝ N<sup>−0.026</sup> — ≈ 6% better per 10× parameters (Supp. §G). Adding every dataset was not always better than ERA5 alone.</li>
+    <li><b>Wickrema et al. 2025:</b> over a quadrillion pixels, “performance is consistent with a data-limited regime”.</li>
+    <li><b>TESSERA v2 (2026):</b> best encoder ∝ C<sup>0.36</sup>, data ∝ C<sup>0.63</sup>; pretraining loss vs downstream skill |r| &lt; 0.2.</li>
+    <li><b>PhilEO scaling (2025):</b> a 200 M U-Net beats larger models on regression in low-shot settings.</li>
+  </ul>
+  <div class="foot"><span>arXiv 2305.16264 · Aurora, Nature 2025 Supp. §G · arXiv 2512.23903 · arXiv 2607.03949 §3.2–3.3 · arXiv 2506.14765 · wf_week9-facts.md §4, §6</span></div>
+  <aside class="notes">Reference only. Answers reading question 2 (why exponents differ for imagery): redundancy between neighbouring patches and dates, repeated epochs, masking as augmentation, and the weak link between loss and downstream skill.</aside>
+</section>
+
+<!-- 19 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A4 · Template</p>
+  <h2>A4 · BASE_MODEL_AUDIT.md — copy into your repo</h2>
+<pre style="font-size:clamp(12.5px,1.95vh,17px);line-height:1.38;margin:0"># BASE_MODEL_AUDIT.md — v1, YYYY-MM-DD
+model:        ibm-nasa-geospatial/Prithvi-EO-2.0-300M @ &lt;commit hash&gt;   licence: Apache-2.0
+paper:        arXiv 2412.02732v3 §III-A (data), §III-B (training)
+inputs:       HLS B02 B03 B04 B05 B06 B07 · 30 m · 4 × 224 × 224 · mean/std from config.json
+corpus:       sensors/variables · places (how sampled) · dates · chip size · filters (cloud, missing)
+split:        how the corpus was split; what was held out
+overlap:      my test block = &lt;region, years&gt; → in corpus? YES / NO / UNVERIFIED (why)
+targets:      what it was trained to predict (masked pixels? next state?) — observation or derived map?
+compute:      parameters · epochs/steps · GPU-hours (as reported)
+gaps:         every field I could not find → UNVERIFIED, with where I looked</pre>
+  <div class="foot"><span>Fill one line per field, cite a section or file for each · Talk 2, card 2 · Note 09</span></div>
+  <aside class="notes">Reference only. The example values are Prithvi-EO-2.0-300M; replace them with your model.</aside>
+</section>
+
+<!-- 20 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A5 · Read and watch</p>
+  <h2>A5 · The reading, two optional papers, four videos</h2>
+  <ul class="small">
+    <li><b>Read:</b> Hoffmann et al. 2022, Chinchilla (arXiv 2203.15556) · optional: Kaplan et al. 2020 · Bommasani et al. 2021, §§1–2 · for Talk 2: Prithvi-EO-2.0 §III, Aurora Supp. §C</li>
+  </ul>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=5eqRuVp65eY" class="yt" data-id="5eqRuVp65eY" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w9-welch.jpg" alt="Welch Labs video: AI can&#x27;t cross this line and we don&#x27;t know why." style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>The week’s video</b> — the compute-optimal frontier · Welch Labs · 24 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=Zy23dMqk_Rs" class="yt" data-id="Zy23dMqk_Rs" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w9-ryanrad.jpg" alt="Ryan Rad video: LLM Scaling Laws Explained: Kaplan vs. Chinchilla vs. Inference-Optimal" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>Kaplan vs Chinchilla</b> · Ryan Rad · 13 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=Zi4u-JWpY5w" class="yt" data-id="Zi4u-JWpY5w" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w9-aurora-msr.jpg" alt="Microsoft Research video: Project Aurora: The first large-scale foundation model of the atmosphere" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>Aurora</b>, from its authors · Microsoft Research · 7 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=oa9YvFcrpvs" class="yt" data-id="oa9YvFcrpvs" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w9-aurora-penn.jpg" alt="Penn Engineering AI video: Aurora, A Foundation Model for the Earth System" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>Aurora in three minutes</b> · Penn Engineering · 3 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <div class="foot"><span>All four embed (checked 7 Nov 2026) · longer: Edan Meyer, “Chinchilla Explained” (33 min) · Welch Labs is 24 min — watch at home</span></div>
+  <aside class="notes">Reference only.</aside>
+</section>
+
+
+</body>
+</html>

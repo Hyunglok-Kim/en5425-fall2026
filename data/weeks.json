@@ -852,8 +852,8 @@
     },
     {
      "min": 10,
-     "topic": "Corpus archaeology: how Prithvi-EO-2.0 (§2) and Aurora (App. B) built, filtered and split their pretraining corpora, and what to extract into your BASE_MODEL_AUDIT.md; when pretraining pays (PANGAEA, GEO-Bench-2).",
-     "topic_ko": "코퍼스 고고학: Prithvi-EO-2.0(§2)과 Aurora(App. B)가 pretraining 코퍼스를 어떻게 만들고 거르고 나눴는지, BASE_MODEL_AUDIT.md에 무엇을 뽑아 적을지; pretraining이 이득인 조건(PANGAEA, GEO-Bench-2)"
+     "topic": "Corpus archaeology: how Prithvi-EO-2.0 (§III-A) and Aurora (Supplementary §C) built, filtered and split their pretraining corpora, and what to extract into your BASE_MODEL_AUDIT.md; when pretraining pays (PANGAEA, GEO-Bench-2).",
+     "topic_ko": "코퍼스 고고학: Prithvi-EO-2.0(§III-A)과 Aurora(보충자료 §C)가 pretraining 코퍼스를 어떻게 만들고 거르고 나눴는지, BASE_MODEL_AUDIT.md에 무엇을 뽑아 적을지; pretraining이 이득인 조건(PANGAEA, GEO-Bench-2)"
     },
     {
      "min": 3,
@@ -918,7 +918,8 @@
     "compute-optimal budgeting",
     "transfer-learning framing",
     "automated sweep orchestration"
-   ]
+   ],
+   "slides": true
   },
   {
    "n": 10,
