@@ -207,9 +207,9 @@
   <p class="kicker">Part 2</p>
   <h2>Corpus Archaeology: Read What Your Base Model Was Trained On</h2>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>How Prithvi-EO-2.0 (land) and Aurora (atmosphere) built, filtered and split their pretraining data; the overlap check; when pretraining pays at all. <b>By the end:</b> open BASE_MODEL_AUDIT.md and fill its first five lines.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>How Prithvi-EO-2.0 (land) and Aurora (atmosphere) built, filtered and split their pretraining data; the overlap check; when pretraining pays at all. <b>By the end:</b> open BASE_MODEL_AUDIT.md and fill its first lines.</p></div>
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>A base model that saw your test region or years during pretraining makes your result look better than it is. You cannot rule that out without reading the corpus section.</p></div>
-    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Model cards and data cards on Hugging Face; the “data” section of every foundation-model paper; your Talk 2 on 16 Nov, item 2.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Every released model says what it was trained on — in its paper’s data section and its Hugging Face page (the <i>model card</i>). Prithvi-EO-2.0: HLS, 2014–2023, cloudy chips removed. Aurora: ERA5 and nine other datasets, up to 2020. <b>For you:</b> Talk 2 on 16 Nov, card 2 — your base model’s data, and whether it overlaps your test.</p></div>
   </div>
   <aside class="notes">9 minutes. "Archaeology" because the corpus is buried: a paragraph in §2 or an appendix, a config on Hugging Face, sometimes a sampling script. Two examples, one check, one question (does pretraining pay?), then the audit file.</aside>
 </section>
