@@ -39,10 +39,10 @@
 <!-- 2 -->
 
 <section class="slide xl">
-  <p class="kicker">Week 9 · 23 min after the talks</p>
+  <p class="kicker">Week 9 · after the talks</p>
   <h2>Today: price your plan, then read your base model’s corpus</h2>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
-    <svg viewBox="0 0 900 104" role="img" aria-label="Seven boxes joined left to right by arrows. Part 1: one model pretrained broadly, adapted to many tasks; loss falls as a power law; a fixed budget has a best size; your contract in GPU-hours. Part 2: read the base model's corpus; check overlap with your test data; when does pretraining pay. Brackets under the boxes mark Part 1 (10 min) and Part 2 (9 min)." style="width:min(98%,1150px)">
+    <svg viewBox="0 0 900 104" role="img" aria-label="Seven boxes joined left to right by arrows. Part 1: one model pretrained broadly, adapted to many tasks; loss falls as a power law; a fixed budget has a best size; your contract in GPU-hours. Part 2: read the base model's corpus; check overlap with your test data; when does pretraining pay. Brackets under the boxes mark Part 1 and Part 2." style="width:min(98%,1150px)">
       <g fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8">
         <rect x="4" y="10" width="112" height="50" rx="8"/><rect x="132" y="10" width="112" height="50" rx="8"/><rect x="260" y="10" width="112" height="50" rx="8"/><rect x="388" y="10" width="112" height="50" rx="8"/>
       </g>
@@ -61,7 +61,7 @@
         <text x="840" y="31">when does</text><text x="840" y="45">pretraining pay?</text>
       </g>
       <g fill="none" stroke="var(--muted)" stroke-width="1"><path d="M4 70 V76 H500 V70 M528 70 V76 H896 V70"/></g>
-      <g font-size="11.5" fill="var(--muted)" text-anchor="middle"><text x="252" y="93">Part 1 · foundation models and compute (10 min)</text><text x="712" y="93">Part 2 · corpus archaeology (9 min)</text></g>
+      <g font-size="11.5" fill="var(--muted)" text-anchor="middle"><text x="252" y="93">Part 1 · foundation models and compute</text><text x="712" y="93">Part 2 · corpus archaeology</text></g>
     </svg>
   </div>
   <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.1vh,19px);line-height:1.36">
@@ -76,7 +76,7 @@
 <!-- 3 -->
 
 <section class="slide section xl">
-  <p class="kicker">Part 1 · 10 min · this week’s paper</p>
+  <p class="kicker">Part 1 · this week’s paper</p>
   <h2>Foundation Models, and What Your Compute Can Buy</h2>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>One definition and four Earth examples; Chinchilla’s finding that model size and data must grow together; what “a token” means for your data; a worked budget for a typical capstone. <b>By the end:</b> put a GPU-hour number on every row of your contract.</p></div>
@@ -89,7 +89,7 @@
 <!-- 4 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 1 · Definition · 2 min</p>
+  <p class="kicker">Part 1 · Definition</p>
   <h2>A foundation model: pretrain once on broad data, adapt to many tasks</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">The expensive part is paid once, by someone else; you pay only for the adaptation. That is the deal your capstone tests.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
@@ -126,7 +126,7 @@
 <!-- 5 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 1 · Chinchilla, the reading · 2.5 min</p>
+  <p class="kicker">Part 1 · Chinchilla, the reading</p>
   <h2>For a fixed budget there is a best size — grow data with it</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Chinchilla (70 B parameters, 1.4 T tokens) beat Gopher (280 B, 300 B tokens) on the same compute: Gopher was too big for its data.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
@@ -145,7 +145,7 @@
 <!-- 6 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 1 · What is a token of your data? · 2 min</p>
+  <p class="kicker">Part 1 · What is a token of your data?</p>
   <h2>Earth models are data-poor and repeat their corpus hundreds of times</h2>
   <p class="small" style="margin:-1.6vh 0 1vh;color:var(--ink-2);line-height:1.45">Chinchilla’s 20 counts fresh text tokens. Earth archives hold few unique tokens, so their models loop over them.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
@@ -167,7 +167,7 @@
 <!-- 7 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 1 · Worked budget · 3 min</p>
+  <p class="kicker">Part 1 · Worked budget</p>
   <h2>Your contract in GPU-hours: adapting fits, pretraining does not</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Every row of your Talk 1 contract has a price. Write it down now, then replace it with a measured step time on 23 Nov.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
@@ -186,7 +186,7 @@
 <!-- 8 -->
 
 <section class="slide section xl">
-  <p class="kicker">Part 2 · 9 min</p>
+  <p class="kicker">Part 2</p>
   <h2>Corpus Archaeology: Read What Your Base Model Was Trained On</h2>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
     <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>How Prithvi-EO-2.0 (land) and Aurora (atmosphere) built, filtered and split their pretraining data; the overlap check; when pretraining pays at all. <b>By the end:</b> open BASE_MODEL_AUDIT.md and fill its first five lines.</p></div>
@@ -199,7 +199,7 @@
 <!-- 9 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 2 · Example 1 · Prithvi-EO-2.0 §III-A · 2.5 min</p>
+  <p class="kicker">Part 2 · Example 1 · Prithvi-EO-2.0 §III-A</p>
   <h2>Prithvi-EO-2.0: a sampled, filtered and split corpus — read each step</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Every arrow is a choice that decides what the model knows. Your audit copies each one, with its section number.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
@@ -234,7 +234,7 @@
 <!-- 10 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 2 · Example 2 · Aurora, Supplementary §C · 2 min</p>
+  <p class="kicker">Part 2 · Example 2 · Aurora, Supplementary §C</p>
   <h2>Aurora: ten datasets, all ending in 2020 — so test on 2022 and later</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">For a weather model the clean split is by time. Read where the corpus ends before you choose your test years.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
@@ -253,7 +253,7 @@
 <!-- 11 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 2 · The overlap check · 2 min</p>
+  <p class="kicker">Part 2 · The overlap check</p>
   <h2>Did your base model already see your test data?</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">If it did, the frozen probe and the fine-tune look better than they would on new places or years. Decide now, before any run.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
@@ -281,7 +281,7 @@
 <!-- 12 -->
 
 <section class="slide xl">
-  <p class="kicker">Part 2 · When does pretraining pay? · 2 min</p>
+  <p class="kicker">Part 2 · When does pretraining pay?</p>
   <h2>With many labels a plain U-Net often wins; with few, pretraining starts to pay</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">That is why your contract has a supervised baseline that tries to win — and why your label count decides the result.</p>
   <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
@@ -316,7 +316,7 @@
 <!-- 13 -->
 
 <section class="slide xl">
-  <p class="kicker">Next Monday · 2.5 min</p>
+  <p class="kicker">Next Monday</p>
   <h2>16 Nov, Talk 2: data archaeology and model design</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Ten minutes + three of questions · slides (PDF) in the Talk 2 slot by Sun 15 Nov 23:59 · nothing is trained before it.</p>
   <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.2vw 1.6vw;flex:0 0 auto">
@@ -337,7 +337,7 @@
 <!-- 14 -->
 
 <section class="slide xl">
-  <p class="kicker">Project studio · 65 min · after the lecture</p>
+  <p class="kicker">Project studio · after the lecture</p>
   <h2>Studio: freeze your splits before you fit anything</h2>
   <div class="cols" style="grid-template-columns:1.1fr 1fr;gap:2vw;align-items:start;flex:0 0 auto">
     <div class="card small" style="min-width:0">
