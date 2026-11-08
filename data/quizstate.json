@@ -29,6 +29,10 @@
  },
  "w07": {
   "quiz": true,
+  "key": true
+ },
+ "w09": {
+  "quiz": false,
   "key": false
  }
 }
