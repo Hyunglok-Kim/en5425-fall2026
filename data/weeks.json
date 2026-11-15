@@ -1011,7 +1011,8 @@
     "GFM benchmarking (GEO-Bench/PANGAEA)",
     "frozen-embedding workflows",
     "HF checkpoint reuse"
-   ]
+   ],
+   "slides": true
   },
   {
    "n": 11,

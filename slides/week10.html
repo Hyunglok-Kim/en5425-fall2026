@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Week 10 · Earth Observation Foundation Models</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="deck.css">
+<script src="deck.js" defer></script>
+<script src="ink.js" defer></script>
+<script src="poll.js" defer></script>
+<style>
+/* compact video row (slide 3): small thumbnails; a playing video opens large over the slide,
+   and deck.js restores the thumbnail when the slide is left */
+.ytmini { display:flex; gap:1.4vw; margin-top:1.2vh; }
+.ytmini a.yt { flex:1; min-width:0; display:flex; gap:.8vw; align-items:center; text-decoration:none; color:inherit; }
+.ytmini .ytbox { position:relative; display:block; flex:0 0 9.5vw; }
+.ytmini .ytbox img { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:6px; display:block; }
+.ytmini .play { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.ytmini .play span { background:rgba(0,0,0,.62); color:#fff; border-radius:999px; padding:.6vh 1vh; font-size:1.7vh; line-height:1; }
+.ytmini .cap { font-size:clamp(12.5px,1.85vh,16px); line-height:1.35; color:var(--ink-2); min-width:0; }
+.ytmini .ytbox:has(iframe) { position:fixed; z-index:120; top:10vh; left:50%; transform:translateX(-50%);
+  width:min(80vw,140vh); flex:none; border-radius:10px; box-shadow:0 12px 48px rgba(0,0,0,.45); }
+</style>
+</head>
+<body>
+
+
+<!-- 1 -->
+
+<section class="slide title xl" style="background:linear-gradient(rgba(10,12,18,.30),rgba(10,12,18,.78)),url('img/fig-w10-title.jpg') center/cover no-repeat">
+  <p class="kicker" style="color:#e8a07a">EN5425 / EV4240 · Week 10 · Mon 16 Nov 2026</p>
+  <h1 style="color:#f4efe5;text-shadow:0 2px 24px rgba(0,0,0,.6)">Earth Observation Foundation Models</h1>
+  <p class="big" style="color:#e8e2d8;text-shadow:0 1px 16px rgba(0,0,0,.6)">Left, 64 Sentinel-2 chips as a camera sees them; right, the same chips as a 1.4 M-weight Earth model sees them — water, fields and towns take different colours, and no EuroSAT label was used. Today: three generations of such models, how to load one and probe it on your own split, and how to compare them honestly.</p>
+  <div class="foot" style="color:#cfc8bc"><span>Deep Learning Applications in Environmental Big Data · Prof. Hyunglok Kim · GIST</span><span>Image: 64 EuroSAT-MS test chips in true colour; beside them OlmoEarth-v1-Nano’s 128 numbers per patch, squeezed to three (principal components) and shown as red, green and blue; computed for this lecture.</span></div>
+  <aside class="notes">Timing for 16 Nov: quiz 10 at 0:00 (5 min), then Talk 2 by every student (10 min + 3 min of questions each, the drawn questioner asks first, ≈ 65 min). Then this lecture, about 27 min: roadmap 1.5 · Part 1 (three generations + your project) 9.5 · Part 2 (load, probe, our numbers, overfit, step time, resume) 10.5 · Part 3 (honest evaluation) 3 · next talk 2.5. Then the 65-minute studio (slide 17). Cut order if short: the project table (7) — say its one sentence — then the step-time slide (13), which the studio repeats. Open with the picture: on the left what a camera records; on the right what a 1.4-million-weight encoder makes of the same 64 chips, its 128 numbers per patch reduced to three principal components and shown as colours. Water, fields and towns come out in different colours — no label of these chips was used; the model was pretrained on images with map layers as its targets. That is what you download when you download a foundation model, and today is about checking whether it helps you.</aside>
+</section>
+
+<!-- 2 -->
+
+<section class="slide xl">
+  <p class="kicker">Week 10 · after the talks</p>
+  <h2>Today: know your model’s generation, then load it, probe it, pilot it</h2>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 104" role="img" aria-label="Eight boxes joined left to right by arrows. Part 1: masked pixels; any sensor; embedding fields; which one is yours. Part 2: load a checkpoint; frozen probe on validation; overfit, time, resume. Part 3: an honest comparison. Brackets under the boxes mark the three parts." style="width:min(98%,1150px)">
+      <g fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8">
+        <rect x="4" y="10" width="100" height="50" rx="8"/><rect x="116" y="10" width="100" height="50" rx="8"/><rect x="228" y="10" width="100" height="50" rx="8"/><rect x="340" y="10" width="100" height="50" rx="8"/>
+      </g>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.4">
+        <rect x="462" y="10" width="100" height="50" rx="8"/><rect x="574" y="10" width="100" height="50" rx="8"/><rect x="686" y="10" width="100" height="50" rx="8"/>
+      </g>
+      <rect x="808" y="10" width="88" height="50" rx="8" fill="var(--wash)" stroke="var(--muted)" stroke-width="1.4"/>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M104 35 H116 M216 35 H228 M328 35 H340 M440 35 H462 M562 35 H574 M674 35 H686 M786 35 H808"/></g>
+      <g fill="currentColor"><path d="M110 31 L116 35 L110 39 Z"/><path d="M222 31 L228 35 L222 39 Z"/><path d="M334 31 L340 35 L334 39 Z"/><path d="M456 31 L462 35 L456 39 Z"/><path d="M568 31 L574 35 L568 39 Z"/><path d="M680 31 L686 35 L680 39 Z"/><path d="M802 31 L808 35 L802 39 Z"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle">
+        <text x="54" y="31">1 · masked</text><text x="54" y="45">pixels</text>
+        <text x="166" y="31">2 · any</text><text x="166" y="45">sensor</text>
+        <text x="278" y="31">3 · embedding</text><text x="278" y="45">fields</text>
+        <text x="390" y="31" font-weight="700" fill="var(--accent)">which one</text><text x="390" y="45" font-weight="700" fill="var(--accent)">is yours?</text>
+        <text x="512" y="31">load a</text><text x="512" y="45">checkpoint</text>
+        <text x="624" y="31" font-weight="700" fill="var(--accent)">frozen probe</text><text x="624" y="45" font-weight="700" fill="var(--accent)">on validation</text>
+        <text x="736" y="31">overfit, time,</text><text x="736" y="45">resume</text>
+        <text x="852" y="31">an honest</text><text x="852" y="45">comparison</text>
+      </g>
+      <g fill="none" stroke="var(--muted)" stroke-width="1"><path d="M4 70 V76 H440 V70 M462 70 V76 H786 V70 M808 70 V76 H896 V70"/></g>
+      <g font-size="11.5" fill="var(--muted)" text-anchor="middle"><text x="222" y="93">Part 1 · three generations of Earth models</text><text x="624" y="93">Part 2 · code you run in the studio</text><text x="852" y="93">Part 3</text></g>
+    </svg>
+  </div>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.05vh,18.5px);line-height:1.34">
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">1 · Generations</td><td style="padding:.35vh .6vw"><b>EO</b> Earth observation, imaging the Earth from orbit · <b>MAE</b> masked autoencoder: hide most patches, rebuild them (Week 7) · <b>ViT</b> vision transformer, the encoder inside most of today’s models (Week 6) · <b>sensor-agnostic</b> one network that takes bands from any satellite · <b>wavelength</b> the colour of light a band records, in µm (micrometres) · <b>embedding</b> a vector of numbers that summarises an input · <b>embedding field</b> such a vector, precomputed for every 10 m pixel and year</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">2 · Code</td><td style="padding:.35vh .6vw"><b>GPU</b> graphics processor, the chip that trains the network · <b>checkpoint</b> saved weights (plus optimizer state, to resume) · <b>TerraTorch</b> IBM’s toolkit for fine-tuning Earth models · <b>HF Hub</b> Hugging Face Hub, where public weights live · <b>frozen probe</b> a small classifier fitted on a fixed encoder’s embeddings · <b>step time</b> seconds per training step · <b>peak memory</b> the most GPU memory a step used</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">3 · Evaluation</td><td style="padding:.35vh .6vw"><b>benchmark</b> fixed datasets and rules for comparing models · <b>GEO-Bench-2, PANGAEA</b> two 2025 benchmarks of Earth models (Week 9) · <b>U-Net</b> Week 4’s convolutional encoder–decoder, PANGAEA’s supervised baseline</td></tr>
+  </table>
+  <p class="small" style="margin:.8vh 0 0;padding:.5vh .8vw;border-left:3px solid var(--accent);background:var(--wash)"><b style="color:var(--accent)">Talk 3 · Mon 23 Nov</b> — pilot evidence and compute decision · slides by Sun 22 Nov 23:59 (slide 16)</p>
+  <div class="foot"><span>Studio straight after the lecture (slide 17) · reading: Szwarcman et al. 2024, Prithvi-EO-2.0 · model cards and full code in the Appendix</span></div>
+  <aside class="notes">1.5 min. Read the chain left to right. Part 1 sorts Earth foundation models into three generations by what they learn from and what you download; it ends with the question in orange — which generation is your base model, and what is the honest alternative. Part 2 is the code you run in the studio today: load, probe on validation, and three pilot checks. Part 3 is one slide: how to compare models without fooling yourself. Table: one breath per word.</aside>
+</section>
+
+<!-- 3 -->
+
+<section class="slide section xl">
+  <p class="kicker">Part 1 · this week’s paper</p>
+  <h2>Three Generations of Earth Foundation Models</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>One slide per generation: what the model learns from, what you download, what using it costs you. Then a table that places each class project. <b>By the end:</b> name your base model’s generation and the alternative you would test it against.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>The generation fixes your input contract and your compute: a pixel model needs your bands in its order and a GPU; an embedding field needs neither, but you cannot change what it computed.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>NASA–IBM’s Prithvi for floods, burn scars and crops; IBM–ESA’s TerraMind; Google DeepMind’s AlphaEarth embeddings in Earth Engine; Ai2’s OlmoEarth. All four have public weights or data.</p></div>
+  </div>
+  <aside class="notes">9.5 minutes for Part 1. Read the cards in thirty seconds. Three slides, one per generation, then the project table. The reading is Prithvi-EO-2.0 — generation one; SatMAE and OlmoEarth are optional.</aside>
+</section>
+
+<!-- 4 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Generation 1 · SatMAE 2022 → Prithvi-EO-2.0 2024</p>
+  <h2>Generation 1: hide three quarters of the patches, rebuild the pixels</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Your Week 7 mini-MAE, about 340 times larger and fed four dates; you download an encoder tied to one sensor.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 200" role="img" aria-label="Left: one training sample, a stack of four dates with six bands, cut into 16 by 16 pixel patches; three quarters of the patches are hidden at random. An arrow leads to the encoder, a ViT-L with 300 million parameters, which sees only the visible quarter of the tokens plus their position, date and latitude-longitude. Then a small decoder adds mask tokens, and the output rebuilds the hidden pixels; the loss is computed on hidden patches only. Right, highlighted: what you download, the encoder and its config: six bands in a fixed order, each band's mean and standard deviation, four dates of 224 by 224 pixels. The decoder is thrown away." style="width:min(98%,1150px)">
+      <g stroke="currentColor" stroke-width="1" fill="var(--wash)">
+        <rect x="56" y="24" width="88" height="88"/><rect x="44" y="36" width="88" height="88"/><rect x="32" y="48" width="88" height="88"/>
+      </g>
+      <g fill="var(--muted)" opacity=".38">
+        <rect x="20" y="60" width="22" height="22"/><rect x="64" y="60" width="22" height="22"/><rect x="86" y="60" width="22" height="22"/>
+        <rect x="20" y="82" width="22" height="22"/><rect x="42" y="82" width="22" height="22"/><rect x="64" y="82" width="22" height="22"/>
+        <rect x="42" y="104" width="22" height="22"/><rect x="64" y="104" width="22" height="22"/><rect x="86" y="104" width="22" height="22"/>
+        <rect x="20" y="126" width="22" height="22"/><rect x="42" y="126" width="22" height="22"/><rect x="86" y="126" width="22" height="22"/>
+      </g>
+      <g fill="var(--accent)" opacity=".85"><rect x="42" y="60" width="22" height="22"/><rect x="86" y="82" width="22" height="22"/><rect x="20" y="104" width="22" height="22"/><rect x="64" y="126" width="22" height="22"/></g>
+      <g fill="none" stroke="currentColor" stroke-width="1"><rect x="20" y="60" width="88" height="88"/><path d="M42 60 V148 M64 60 V148 M86 60 V148 M20 82 H108 M20 104 H108 M20 126 H108"/></g>
+      <text x="20" y="15" font-size="13" fill="currentColor" font-weight="700">one sample: 4 dates × 6 bands</text>
+      <g font-size="12.5" fill="var(--muted)"><text x="20" y="168">16 × 16-pixel patches,</text><text x="20" y="184">75% hidden at random</text></g>
+      <path d="M150 104 H184" stroke="currentColor" stroke-width="1.6"/><path d="M180 99 L188 104 L180 109 Z" fill="currentColor"/>
+      <rect x="190" y="56" width="164" height="96" rx="9" fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8"/>
+      <g font-size="13" fill="currentColor" text-anchor="middle"><text x="272" y="78" font-size="15" font-weight="700">encoder</text><text x="272" y="97">ViT-L, 300 M weights</text><text x="272" y="115">sees only the visible 25%</text><text x="272" y="133">+ where each patch is</text></g>
+      <text x="272" y="47" font-size="11.5" fill="var(--muted)" text-anchor="middle">-TL checkpoints add date and lat/lon</text>
+      <path d="M356 104 H384" stroke="currentColor" stroke-width="1.6"/><path d="M380 99 L388 104 L380 109 Z" fill="currentColor"/>
+      <rect x="388" y="72" width="122" height="64" rx="9" fill="var(--wash)" stroke="currentColor" stroke-width="1.3"/>
+      <g font-size="13" fill="currentColor" text-anchor="middle"><text x="449" y="97" font-weight="700">small decoder</text><text x="449" y="116">adds mask tokens</text></g>
+      <path d="M512 104 H530" stroke="currentColor" stroke-width="1.6"/><path d="M526 99 L534 104 L526 109 Z" fill="currentColor"/>
+      <g fill="var(--accent)" opacity=".3"><rect x="536" y="60" width="88" height="88"/></g>
+      <g fill="var(--accent)" opacity=".85"><rect x="558" y="60" width="22" height="22"/><rect x="602" y="82" width="22" height="22"/><rect x="536" y="104" width="22" height="22"/><rect x="580" y="126" width="22" height="22"/></g>
+      <g fill="none" stroke="currentColor" stroke-width="1"><rect x="536" y="60" width="88" height="88"/><path d="M558 60 V148 M580 60 V148 M602 60 V148 M536 82 H624 M536 104 H624 M536 126 H624"/></g>
+      <g font-size="12.5" fill="var(--muted)"><text x="536" y="168">hidden pixels rebuilt;</text><text x="536" y="184">loss on those only</text></g>
+      <rect x="664" y="30" width="232" height="152" rx="10" fill="var(--accent)" opacity=".12" stroke="var(--accent)" stroke-width="2"/>
+      <g font-size="13.5" fill="currentColor"><text x="678" y="54" font-size="15" font-weight="700" fill="var(--accent)">what you download</text><text x="678" y="78">the encoder and its config:</text><text x="678" y="98">6 bands, in this order,</text><text x="678" y="118">each band’s mean and std,</text><text x="678" y="138">4 dates × 224 × 224 pixels</text></g>
+      <text x="678" y="166" font-size="12.5" fill="var(--muted)">the decoder is thrown away</text>
+    </svg>
+  </div>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.1vh,19px);line-height:1.36">
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;white-space:nowrap"><b>SatMAE</b> · Stanford, 2022</td><td style="padding:.35vh .6vw">Sentinel-2, 10 of its 13 bands (the 60 m ones dropped) in 3 groups, each with its own patch embedding; the date encoded like a position; groups and dates masked independently</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .6vw;white-space:nowrap"><b class="accent">Prithvi-EO-2.0</b> · NASA–IBM, 2024</td><td style="padding:.35vh .6vw">HLS, 6 bands, 4 dates; 3-D patches; date and lat/lon added like positions in the -TL (temporal-location) checkpoints; 4.2 M global samples; 300 M and 600 M (5 M and 100 M since 2025)</td></tr>
+  </table>
+  <div class="gloss">
+    <span><b>3-D patch</b> — a patch with a time axis; Prithvi-EO-2.0 sets its depth to 1 date (× 16 × 16 pixels) · <b>HLS</b> — Harmonized Landsat Sentinel-2, NASA’s 30 m surface-reflectance product</span>
+  </div>
+  <div class="foot"><span>Cong et al. 2022, SatMAE §4, §5.4 · Szwarcman et al. 2024, Prithvi-EO-2.0, arXiv 2412.02732 §III-A–B · HF config ibm-nasa-geospatial/Prithvi-EO-2.0-300M</span></div>
+  <aside class="notes">2.5 min. This is the generation you built in Week 7. Walk the picture: one sample is four dates of six bands, one to six months apart; cut into 16-by-16 patches, one date per patch — the paper's reason: satellite dates are irregular and far apart, unlike video frames; three quarters hidden at random; the encoder sees only the visible quarter plus where each patch is — and, in the -TL checkpoints, which date it is and the latitude and longitude, both new in Prithvi-EO-2.0. The date and location are added like a positional encoding and dropped at random 10% of the time in pretraining, because downstream users often do not have them; the plain 300 M checkpoint we load on slide 9 has neither. A small decoder rebuilds the hidden pixels; the loss is on hidden patches only. Then the box on the right, the practical point: what you download is the encoder plus its config — six bands in a fixed order, each with its mean and standard deviation. Feed anything else and you are outside what it learned. SatMAE, two years earlier, did the same on ten of Sentinel-2's 13 bands, grouped by resolution and wavelength, each group with its own patch embedding, and found that masking groups and dates independently works best. Prithvi-EO-2.0 is today's reading: 4.2 million global HLS time series; 300 M and 600 M in the paper, and since 2025 a 100 M and a 5 M "tiny" checkpoint — cheap enough for quick pilots. Honest footnote, from our own averaging of the paper's appendix tables: the 8% gain over Prithvi 1.0 is the 600 M model's; averaged over GEO-Bench, the 300 M sits behind two 25 M ResNet-50s. The limit of this generation: one sensor, one band list.</aside>
+</section>
+
+<!-- 5 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Generation 2 · DOFA 2024 · TerraMind 2025</p>
+  <h2>Generation 2: one network for many sensors, keyed by wavelength or by modality</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Radar, optical or hyperspectral, three bands or two hundred: in DOFA, the band’s wavelength tells the network what it sees.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 214" role="img" aria-label="Left, DOFA. Three sensors: Sentinel-1 radar with VV and VH bands at 5.5 centimetres; Sentinel-2 with bands from 0.49 to 2.2 micrometres; aerial RGB with three bands. Every band's wavelength goes into a weight generator, which outputs that band's patch-embedding weights; the embedded patches go into one shared ViT encoder. Right, TerraMind: any-to-any. Inputs such as Sentinel-1, Sentinel-2, elevation, land cover, a vegetation index and coordinates go into one encoder-decoder, which can also generate a missing modality, for example Sentinel-2 under cloud from Sentinel-1." style="width:min(98%,1150px)">
+      <text x="10" y="16" font-size="13.5" font-weight="700" fill="var(--accent)">DOFA · any bands in, one encoder</text>
+      <g font-size="12.5" fill="currentColor">
+        <text x="10" y="44" font-weight="700">Sentinel-1 radar</text><text x="10" y="106" font-weight="700">Sentinel-2</text><text x="10" y="168" font-weight="700">aerial RGB</text>
+      </g>
+      <g stroke="currentColor" stroke-width="1">
+        <rect x="10" y="52" width="22" height="22" fill="#8a877d"/><rect x="36" y="52" width="22" height="22" fill="#57554c"/>
+        <rect x="10" y="114" width="22" height="22" fill="#2c6fb0"/><rect x="36" y="114" width="22" height="22" fill="#3f9d5a"/><rect x="62" y="114" width="22" height="22" fill="#c2453d"/><rect x="88" y="114" width="22" height="22" fill="#8c5a2b"/><rect x="114" y="114" width="22" height="22" fill="#5b3a1e"/>
+        <rect x="10" y="176" width="22" height="22" fill="#c2453d"/><rect x="36" y="176" width="22" height="22" fill="#3f9d5a"/><rect x="62" y="176" width="22" height="22" fill="#2c6fb0"/>
+      </g>
+      <g font-size="11.5" fill="var(--muted)"><text x="66" y="68">VV, VH (radar)</text><text x="10" y="152">9 bands, 0.49–2.2 µm</text><text x="92" y="192">0.47–0.66 µm</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.3"><path d="M168 63 C200 63 200 108 226 112 M176 187 C200 187 200 142 226 138"/><path d="M142 125 H226"/></g>
+      <path d="M222 120 L230 125 L222 130 Z" fill="currentColor"/>
+      <rect x="232" y="78" width="150" height="94" rx="9" fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8"/>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="307" y="100" font-size="14" font-weight="700">weight generator</text><text x="307" y="120">band wavelength λ →</text><text x="307" y="137">that band’s patch-</text><text x="307" y="154">embedding weights</text></g>
+      <path d="M384 125 H408" stroke="currentColor" stroke-width="1.6"/><path d="M404 120 L412 125 L404 130 Z" fill="currentColor"/>
+      <rect x="414" y="86" width="104" height="78" rx="9" fill="var(--wash)" stroke="currentColor" stroke-width="1.3"/>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="466" y="110" font-weight="700">one shared</text><text x="466" y="128" font-weight="700">ViT encoder</text><text x="466" y="148">for every sensor</text></g>
+      <line x1="548" y1="10" x2="548" y2="206" stroke="var(--hairline)" stroke-width="1.2"/>
+      <text x="566" y="16" font-size="13.5" font-weight="700" fill="var(--accent)">TerraMind · any to any</text>
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1">
+        <rect x="566" y="30" width="104" height="22" rx="5"/><rect x="566" y="56" width="104" height="22" rx="5"/><rect x="566" y="82" width="104" height="22" rx="5"/><rect x="566" y="108" width="104" height="22" rx="5"/><rect x="566" y="134" width="104" height="22" rx="5"/><rect x="566" y="160" width="104" height="22" rx="5"/>
+      </g>
+      <g font-size="12" fill="currentColor"><text x="574" y="46">Sentinel-1 radar</text><text x="574" y="72">Sentinel-2</text><text x="574" y="98">elevation</text><text x="574" y="124">land cover</text><text x="574" y="150">vegetation index</text><text x="574" y="176">coordinates</text></g>
+      <g fill="none" stroke="currentColor" stroke-width="1.1"><path d="M672 41 L706 98 M672 67 L706 102 M672 93 L706 106 M672 119 L706 110 M672 145 L706 114 M672 171 L706 118"/></g>
+      <rect x="708" y="76" width="82" height="64" rx="9" fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8"/>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="749" y="102" font-weight="700">encoder–</text><text x="749" y="120" font-weight="700">decoder</text></g>
+      <path d="M792 108 H808" stroke="var(--accent)" stroke-width="1.6"/><path d="M804 103 L812 108 L804 113 Z" fill="var(--accent)"/>
+      <g font-size="12.5" fill="var(--accent)"><text x="816" y="88" font-weight="700">generates</text><text x="816" y="105" font-weight="700">a missing</text><text x="816" y="122" font-weight="700">modality</text></g>
+      <g font-size="11.5" fill="var(--muted)"><text x="708" y="164">e.g. Sentinel-2 under cloud,</text><text x="708" y="180">generated from Sentinel-1</text></g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>Trained on: DOFA, five sensors from radar to 202-band hyperspectral (≈ 11.5 M images); TerraMind, ≈ 9 M radar–optical samples plus five other modalities.</li>
+    <li>Sentinel-1 is a native input here — <span class="accent">but radar alone is weaker: on Sen1Floods11 TerraMind scores 80.4 mIoU from radar, 89.6 from optical.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>hypernetwork</b> — a small network whose output is the weights of another layer (here, the weight generator) · <b>mIoU</b> — mean intersection over union, the overlap score of a predicted and a true map</span>
+  </div>
+  <div class="foot"><span>Xiong et al. 2024, DOFA, arXiv 2403.15356 §3.2–3.3, §4.5 · Jakubik et al. 2025, TerraMind, arXiv 2504.11171 §3–4, Table 7 · loaders and sizes: Appendix A1</span></div>
+  <aside class="notes">2.5 min. Generation one has a fixed band list; generation two removes it. DOFA, left: every band comes with its central wavelength — 0.49 micrometres for blue, 2.2 for the longest short-wave infrared. A small weight generator, a hypernetwork, turns that wavelength into the patch-embedding weights for that band, so any number of bands from any sensor become tokens for one shared encoder. It was trained on five sensors: Sentinel-1 radar, Sentinel-2, Gaofen, NAIP aerial photos and the 202-band EnMAP hyperspectral imager. One trap for radar: DOFA's own README passes 5.405 for VV and VH, TorchGeo's documentation says the weights expect the placeholder 3.75 — test both on a pilot. TerraMind, right, is trained on about nine million aligned Sentinel-1 and Sentinel-2 samples plus elevation, land cover, NDVI, captions and coordinates, and it can generate a missing modality — the authors call the outputs "mental images", not reconstructions. Its "thinking in modalities" first generates a land-cover map and then uses it as an extra input. For the river-stage project: radar is a native input here — Prithvi-EO-2.0's own paper found that adding SAR as extra bands did not help biomass estimation in their setting — but radar alone is weaker than optical: on Sen1Floods11 TerraMind gets 80.4 mIoU from radar and 89.6 from optical.</aside>
+</section>
+
+<!-- 6 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Generation 3 · AlphaEarth 2025 · TESSERA 2025</p>
+  <h2>Generation 3: download the embeddings, not the model</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">The provider ran the encoder on every 10 m pixel, year by year; you fetch the vectors and fit a small model.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 206" role="img" aria-label="Left: one 10 metre pixel over one year, observed on irregular dates by Sentinel-2, Sentinel-1 and Landsat. An arrow leads to an encoder that the provider ran once for every pixel and year. It outputs one vector per pixel per year, 64 numbers for AlphaEarth and 128 for TESSERA. Stacked over a region, the vectors form an embedding field, an image with 64 bands per year. Right, what you do: sample the field at your labelled points, fit a small model such as logistic regression, a random forest or k-nearest neighbours, and predict the map. No GPU and no weights are needed, but the resolution, the year and the inputs are fixed by the provider." style="width:min(98%,1150px)">
+      <text x="10" y="16" font-size="13.5" font-weight="700" fill="currentColor">one 10 m pixel, one year</text>
+      <g font-size="12" fill="currentColor"><text x="10" y="46">Sentinel-2</text><text x="10" y="76">Sentinel-1</text><text x="10" y="106">Landsat</text></g>
+      <g stroke="var(--hairline)" stroke-width="1"><path d="M84 40 H246 M84 70 H246 M84 100 H246"/></g>
+      <g stroke="#3f9d5a" stroke-width="3"><path d="M92 32 V48 M104 32 V48 M131 32 V48 M158 32 V48 M167 32 V48 M194 32 V48 M221 32 V48 M239 32 V48"/></g>
+      <g stroke="#57554c" stroke-width="3"><path d="M88 62 V78 M101 62 V78 M114 62 V78 M127 62 V78 M140 62 V78 M153 62 V78 M166 62 V78 M179 62 V78 M192 62 V78 M205 62 V78 M218 62 V78 M231 62 V78 M244 62 V78"/></g>
+      <g stroke="#2c6fb0" stroke-width="3"><path d="M97 92 V108 M138 92 V108 M178 92 V108 M222 92 V108"/></g>
+      <g font-size="11.5" fill="var(--muted)"><text x="84" y="126">Jan</text><text x="246" y="126" text-anchor="end">Dec</text><text x="10" y="148">gaps: clouds, revisit, sensor</text></g>
+      <path d="M252 72 H276" stroke="currentColor" stroke-width="1.6"/><path d="M272 67 L280 72 L272 77 Z" fill="currentColor"/>
+      <rect x="282" y="30" width="128" height="86" rx="9" fill="var(--wash)" stroke="currentColor" stroke-width="1.3"/>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="346" y="52" font-weight="700">encoder</text><text x="346" y="71">run once by the</text><text x="346" y="88">provider, for every</text><text x="346" y="105">pixel and year</text></g>
+      <path d="M412 72 H430" stroke="currentColor" stroke-width="1.6"/><path d="M426 67 L434 72 L426 77 Z" fill="currentColor"/>
+      <g stroke="currentColor" stroke-width=".8"><rect x="438" y="28" width="16" height="11" fill="#5b8c6a"/><rect x="438" y="39" width="16" height="11" fill="#c9b27c"/><rect x="438" y="50" width="16" height="11" fill="#7a8fb0"/><rect x="438" y="61" width="16" height="11" fill="#a07a5b"/><rect x="438" y="72" width="16" height="11" fill="#8fb07a"/><rect x="438" y="83" width="16" height="11" fill="#4f6f8f"/><rect x="438" y="94" width="16" height="11" fill="#c9b27c"/><rect x="438" y="105" width="16" height="11" fill="#5b8c6a"/></g>
+      <g font-size="12" fill="currentColor"><text x="460" y="62" font-weight="700">64 numbers</text><text x="460" y="78">AlphaEarth</text><text x="460" y="98" font-weight="700">128</text><text x="460" y="114">TESSERA</text></g>
+      <g stroke="var(--page)" stroke-width="1">
+        <rect x="540" y="22" width="18" height="18" fill="#5b8c6a"/><rect x="558" y="22" width="18" height="18" fill="#5b8c6a"/><rect x="576" y="22" width="18" height="18" fill="#8fb07a"/><rect x="594" y="22" width="18" height="18" fill="#c9b27c"/><rect x="612" y="22" width="18" height="18" fill="#c9b27c"/>
+        <rect x="540" y="40" width="18" height="18" fill="#5b8c6a"/><rect x="558" y="40" width="18" height="18" fill="#8fb07a"/><rect x="576" y="40" width="18" height="18" fill="#8fb07a"/><rect x="594" y="40" width="18" height="18" fill="#c9b27c"/><rect x="612" y="40" width="18" height="18" fill="#a07a5b"/>
+        <rect x="540" y="58" width="18" height="18" fill="#4f6f8f"/><rect x="558" y="58" width="18" height="18" fill="#4f6f8f"/><rect x="576" y="58" width="18" height="18" fill="#8fb07a"/><rect x="594" y="58" width="18" height="18" fill="#a07a5b"/><rect x="612" y="58" width="18" height="18" fill="#a07a5b"/>
+        <rect x="540" y="76" width="18" height="18" fill="#7a8fb0"/><rect x="558" y="76" width="18" height="18" fill="#4f6f8f"/><rect x="576" y="76" width="18" height="18" fill="#4f6f8f"/><rect x="594" y="76" width="18" height="18" fill="#8fb07a"/><rect x="612" y="76" width="18" height="18" fill="#a07a5b"/>
+        <rect x="540" y="94" width="18" height="18" fill="#7a8fb0"/><rect x="558" y="94" width="18" height="18" fill="#7a8fb0"/><rect x="576" y="94" width="18" height="18" fill="#4f6f8f"/><rect x="594" y="94" width="18" height="18" fill="#8fb07a"/><rect x="612" y="94" width="18" height="18" fill="#c9b27c"/>
+      </g>
+      <g font-size="12" fill="var(--muted)" text-anchor="middle"><text x="585" y="130">an embedding field:</text><text x="585" y="146">64 bands per year</text></g>
+      <line x1="648" y1="10" x2="648" y2="160" stroke="var(--hairline)" stroke-width="1.2"/>
+      <g font-size="13" fill="currentColor"><text x="664" y="20" font-size="13.5" font-weight="700" fill="var(--accent)">what you do</text><text x="664" y="46">1 · sample the field at</text><text x="682" y="63">your labelled points</text><text x="664" y="88">2 · fit a small model —</text><text x="682" y="105">logistic regression,</text><text x="682" y="122">random forest, k-NN</text><text x="664" y="147">3 · predict every pixel</text></g>
+      <g font-size="12.5" fill="var(--accent)" font-weight="700"><text x="10" y="184">No GPU and no model to run — and AlphaEarth’s weights are not public, so its 10 m grid, year and inputs are fixed.</text></g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>AlphaEarth: 64 numbers, 2017–2024 in Earth Engine · TESSERA: 128 numbers, Sentinel-1 + Sentinel-2, 2017–2025, open weights.</li>
+    <li>For a 9 km soil-moisture cell, average the 10 m vectors inside it: <span class="accent">a static descriptor, not the daily dynamics.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>Earth Engine</b> — Google’s cloud catalogue and compute for geodata; AlphaEarth’s field is published there · <b>k-NN</b> — label a pixel by its nearest labelled neighbours in embedding space (Week 7)</span>
+  </div>
+  <div class="foot"><span>Brown et al. 2025, AlphaEarth Foundations, arXiv 2507.22291 §3, Table S1 · Earth Engine catalog GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL · Feng et al. 2025, TESSERA, arXiv 2506.20380 · code: A5</span></div>
+  <aside class="notes">2.5 min. The third generation changes what is released. Instead of weights, the provider runs the encoder once over every 10-metre pixel of the land for every year and publishes the result: 64 numbers per pixel for AlphaEarth, 128 for TESSERA. The input is the year of observations — AlphaEarth reads Sentinel-2, Landsat 8 and 9 and Sentinel-1; TESSERA reads Sentinel-1 and Sentinel-2 — with their gaps from clouds and revisits, and the encoder turns that ragged series into one vector. A common misreading: AlphaEarth does not take GRACE, ERA5 or GEDI as inputs; those were training targets only. Stacked over a region the vectors form an image with 64 bands per year: an embedding field. What you do is small: sample it at your labelled points, fit logistic regression or a random forest, predict the map. No GPU. The price: AlphaEarth's weights are not public, so the grid, the year and the inputs are Google's choice; TESSERA's weights are open (CC0), but you use the same embeddings. The embeddings are unit vectors and, per the catalogue, can be averaged to a coarser grid — so for our soil-moisture projects at 9 to 36 km and daily steps they are a static description of each cell (land cover, terrain, irrigation), not the dynamics. AlphaEarth's headline: about 24% smaller error magnitude than the next-best method on its own suite of 15 evaluations, with hundreds of labels; about 10% with ten labels.</aside>
+</section>
+
+<!-- 7 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Your project</p>
+  <h2>Which generation does your project touch — and what is the gap?</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Earth models see 10–30 m; most of our projects live at 9–36 km and daily to monthly steps. Name the gap you cross.</p>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.15vh,19px);line-height:1.36">
+    <tr style="color:var(--muted)"><td style="padding:.4vh .6vw">project (from Talk 1)</td><td style="padding:.4vh .6vw">its input and scale</td><td style="padding:.4vh .6vw">nearest generation</td><td style="padding:.4vh .6vw">a first honest probe</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top"><b>River stage</b> from Sentinel-1 + SWOT</td><td style="padding:.4vh .6vw;vertical-align:top">radar, 10 m; SWOT every 21 days</td><td style="padding:.4vh .6vw;vertical-align:top"><b class="accent">2 · any sensor</b> (radar is native)</td><td style="padding:.4vh .6vw;vertical-align:top">frozen radar encoder vs your SWOT-pretrained model, same head</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top"><b>Soil moisture</b>: gap-filled SMAP (NASA’s soil-moisture satellite) and its errors</td><td style="padding:.4vh .6vw;vertical-align:top">9–36 km grids, daily</td><td style="padding:.4vh .6vw;vertical-align:top"><b class="accent">3 · embedding field</b> as a static covariate; weather models in Week 11</td><td style="padding:.4vh .6vw;vertical-align:top">with vs without cell-averaged embeddings (AlphaEarth’s are made to be averaged)</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top"><b>Soil-moisture forecast</b>: which inputs matter</td><td style="padding:.4vh .6vw;vertical-align:top">9–36 km, daily drivers (rain, radiation)</td><td style="padding:.4vh .6vw;vertical-align:top">pixel time series, <b class="accent">Presto’s design</b> (the only one with weather inputs); weather models in Week 11</td><td style="padding:.4vh .6vw;vertical-align:top">remove one input group, retrain, compare</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;vertical-align:top"><b>GRACE storage</b> → river flow</td><td style="padding:.4vh .6vw;vertical-align:top">monthly, basin to 300&nbsp;km</td><td style="padding:.4vh .6vw;vertical-align:top"><b class="accent">none fits directly</b> — say so</td><td style="padding:.4vh .6vw;vertical-align:top">embeddings only as basin descriptors (AlphaEarth used GRACE as a target, not an input)</td></tr>
+  </table>
+  <ul class="small" style="margin-top:1vh">
+    <li>“No Earth model fits my scale” is a finding, not a failure — <span class="accent">put it in Talk 3 with the alternative you will test instead.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>SWOT</b> — Surface Water and Ocean Topography, a NASA–CNES radar-altimetry satellite (2022) · <b>GRACE</b> — Gravity Recovery and Climate Experiment: monthly changes in water storage from gravity</span>
+  </div>
+  <div class="foot"><span>Rows from the 9 Nov Talk 1 slides · Presto: Tseng et al. 2023 (pixel time series with weather inputs) · Week 11: Pangu, GraphCast, Aurora and other weather models</span></div>
+  <aside class="notes">2 min. Adjust this table after today's Talk 2 if a student has changed base model. Read the header: projects, their scale, the nearest generation, the first experiment that would tell you whether the foundation model helps. The pattern: Earth-observation foundation models see 10 to 30 metres and single images or a year of images; most of our projects live at 9 to 36 kilometres and daily to monthly steps. The river-stage project is the closest fit, because Sentinel-1 is a native input for the second generation. The soil-moisture projects can use an embedding field only as a static description of each cell; their dynamics belong to the weather models of Week 11, and the forecasting project is shaped like Presto — one pixel, many time steps, weather drivers. GRACE is monthly and basin-scale; no Earth model fits, and saying so with a better alternative is a full-marks answer. The ask for Talk 3: one line per project saying which gap you cross and how you test it.</aside>
+</section>
+
+<!-- 8 -->
+
+<section class="slide section xl">
+  <p class="kicker">Part 2 · Code for the studio</p>
+  <h2>Load a Checkpoint, Probe It, Pilot It</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Three public models loaded in a few lines each; a frozen probe with its setting chosen on validation; three pilot checks — overfit 32 samples, time one step, kill and resume. All run on our EuroSAT chips this weekend. <b>By the end:</b> run each on your own validation split.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>Talk 3 asks for a probe number, a step time, a peak memory and a resume that works — before the big runs. A bug found on 32 samples costs a minute; found after ten GPU-hours, it costs a week.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>Large Earth models report these steps: OlmoEarth’s short pilot runs, Prithvi-WxC’s measured memory and throughput, Aurora’s checkpointing — steps 4–7 of the pipeline your talks follow.</p></div>
+  </div>
+  <aside class="notes">10.5 minutes for Part 2. Read the cards in thirty seconds. Every number in the next six slides was measured on this lab's 5,000 EuroSAT chips on an M2 Ultra; on a Colab T4 your times will differ, your conclusions should not.</aside>
+</section>
+
+<!-- 9 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Load · run on this Mac, 15 Nov</p>
+  <h2>Three checkpoints, three loaders — the real work is the input contract</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">Loading takes two lines; feeding each model the bands, scaling and size it was trained on is the job.</p>
+  <p class="small" style="margin:0 0 .3vh"><b class="accent">Prithvi-EO-2.0-300M</b> · TerraTorch · 304 M weights</p>
+<pre style="font-size:clamp(11.5px,1.75vh,15.5px);line-height:1.38;margin:0 0 .4vh;padding:.7vh 1vw;background:var(--surface);border-radius:8px"><code>enc = BACKBONE_REGISTRY.build("prithvi_eo_v2_300", pretrained=True).eval()   # from terratorch.registry
+out = enc(x)                     # x (B, 6, 224, 224) → 24 blocks, each (B, 197, 1024)
+emb = out[-1][:, 1:].mean(1)     # drop [CLS], the extra class token; average 196 patches → (B, 1024)</code></pre>
+  <p class="small muted" style="margin:0 0 1vh;font-size:clamp(13px,1.95vh,17px)">HLS B02–B07 = Sentinel-2 B02 B03 B04 B8A B11 B12 · (reflectance × 10⁴ − mean) / std from its config · 224 × 224 · up to 4 dates</p>
+  <p class="small" style="margin:0 0 .3vh"><b class="accent">OlmoEarth-v1-Nano</b> · olmoearth-pretrain · 1.4 M weights</p>
+<pre style="font-size:clamp(11.5px,1.75vh,15.5px);line-height:1.38;margin:0 0 .4vh;padding:.7vh 1vw;background:var(--surface);border-radius:8px"><code>enc = load_model_from_id(ModelID.OLMOEARTH_V1_NANO).encoder.eval()
+s = MaskedOlmoEarthSample(sentinel2_l2a=x, sentinel2_l2a_mask=m, timestamps=t)  # x (B, 64, 64, T, 12)
+tok = enc(s, fast_pass=True, patch_size=4)["tokens_and_masks"].sentinel2_l2a    # (B, 16, 16, T, 3, 128)
+emb = tok.mean(dim=[1, 2, 3, 4])                                                # → (B, 128)</code></pre>
+  <p class="small muted" style="margin:0 0 1vh;font-size:clamp(13px,1.95vh,17px)">12 Sentinel-2 L2A (surface-reflectance) bands in its order, its own normaliser · a date per time step · patch 1–8 (smaller is finer and slower)</p>
+  <p class="small" style="margin:0 0 .3vh"><b class="accent">Presto</b> · one file from GitHub · 0.4 M weights</p>
+<pre style="font-size:clamp(11.5px,1.75vh,15.5px);line-height:1.38;margin:0 0 .4vh;padding:.7vh 1vw;background:var(--surface);border-radius:8px"><code>p = Presto.construct(); p.load_state_dict(torch.load("default_model.pt", weights_only=True))
+e = p.encoder(x, dynamic_world=dw, latlons=ll, mask=m, month=1, eval_task=True)   # x (4096 pixels, T, 17)
+emb = torch.cat([e.mean(0), e.std(0)])        # one chip = mean and std over its pixels → (256,)</code></pre>
+  <p class="small muted" style="margin:0;font-size:clamp(13px,1.95vh,17px)">one pixel at a time · 17 channels: Sentinel-2 as reflectance, NDVI (a vegetation index); radar, weather and elevation masked when missing · 1–24 months</p>
+  <div class="foot"><span>Full, runnable versions and installs: Appendix A2–A3 · terratorch 1.2.14 · olmoearth-pretrain 0.1.2 · Presto repo 11e207a · all three loaded with weights_only=True</span></div>
+  <aside class="notes">2.5 min. Three models, three generations of tooling. Prithvi through TerraTorch's registry: one line to build, the output is a list with one tensor per transformer block; take the last, drop the class token, average the 196 patch tokens. OlmoEarth through Ai2's package: you wrap the image in a sample object with a mask and a date, choose a patch size, and average the tokens. Presto is a single Python file and a 3.3 MB weight file from GitHub; it works on one pixel's time series, so a 64-by-64 chip is 4,096 little series, and the chip vector is the mean and standard deviation over its pixels — the Presto paper's own EuroSAT recipe. The grey lines are the contracts, and that is where the work is. Our chips are EuroSAT: Sentinel-2 top-of-atmosphere, one date, 64 by 64. Prithvi was trained on HLS surface reflectance at 224; OlmoEarth on L2A; Presto on monthly series with radar and weather. We fed all three anyway — the next slide shows what that cost. On Colab: install olmoearth-pretrain with --no-deps, or it replaces Colab's torch (A3).</aside>
+</section>
+
+<!-- 10 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Probe · run on this Mac, 15 Nov</p>
+  <h2>A frozen probe: embed once, choose C on validation, open the test once</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">The cheapest honest number about a checkpoint — and card 1 of next Monday’s talk.</p>
+<pre style="font-size:clamp(12px,1.85vh,16.5px);line-height:1.42;margin:0 0 1.2vh;padding:1vh 1.2vw;background:var(--surface);border-radius:8px"><code># Ftr, Fte: frozen embeddings of every chip, computed once (no_grad) and saved to disk
+a, v = train_test_split(np.arange(len(ytr)), test_size=0.2, stratify=ytr, random_state=0)
+sc = StandardScaler().fit(Ftr[a])                       # statistics from the training part only
+fit = lambda C: LogisticRegression(C=C, max_iter=5000).fit(sc.transform(Ftr[a]), ytr[a])
+val = {C: fit(C).score(sc.transform(Ftr[v]), ytr[v]) for C in np.logspace(-3, 2, 6)}
+C = max(val, key=val.get)                               # chosen on validation only
+# in your project the next line stays commented out until Fri 4 Dec
+print("test accuracy, looked at once:", fit(C).score(sc.transform(Fte), yte))</code></pre>
+  <div class="cols" style="grid-template-columns:1.25fr 1fr;gap:1.6vw;align-items:stretch;flex:0 0 auto">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What it printed</b> · OlmoEarth-Nano features<br>validation accuracy for C = 0.001 … 100:<br>0.909 · 0.948 · 0.959 · <b>0.961</b> · 0.945 · 0.938 → C = 1<br>test, looked at once: <b>94.3%</b></p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What embedding cost</b> · 5,000 chips<br>OlmoEarth-Nano 8 s · Prithvi-300M 43 s · Presto 48 s on the M2 Ultra GPU — then every probe refit takes seconds.</p></div>
+  </div>
+  <div class="gloss">
+    <span><b>C</b> — the inverse strength of the regulariser in logistic regression: small C, simpler boundary · <b>frozen</b> — the encoder’s weights stay fixed; only the small head is fitted</span>
+  </div>
+  <div class="foot"><span>scikit-learn 1.9.1 · 4,000 training chips → 3,200 fit + 800 validation, stratified, seed 0; 1,000 test chips · tools/week10_figs/snippets/s7_valsplit.py</span></div>
+  <aside class="notes">2 min. Read the code top to bottom. First, embed every chip once with the encoder frozen and save the features — that is the expensive part, seconds to a minute here. Then everything is cheap: cut a validation set out of the training split, stratified; fit the scaler on the training part only; try six values of C; choose the one with the best validation accuracy; and only then score the test set, once. The left card is what it printed on OlmoEarth-Nano's features: validation peaks at C = 1, and the test accuracy is 94.3. Notice what you did not do: you never looked at the test set to choose anything. In your project the "test" line stays commented out until 4 December — Talk 3 reports the validation number.</aside>
+</section>
+
+<!-- 11 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Our numbers · measured 15 Nov</p>
+  <h2>Two public encoders tie the supervised network on our chips — and the readouts disagree</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">Week 7’s 4,000 training and 1,000 test chips, every encoder frozen; ±0.7 points is test-sampling noise alone.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh"><img src="img/fig-w10-probe.png" alt="Bar chart of test accuracy on 1,000 EuroSAT chips with a frozen encoder. Linear probe and k-nearest-neighbour accuracy: tiny ViT with random weights, 0.90 M, 85.1 and 74.5; tiny masked autoencoder from Week 7, 0.90 M, 91.9 and 83.5; Prithvi-EO-2.0-300M, 304 M, 95.9 and 82.8; OlmoEarth-v1-Nano, 1.4 M, 95.0 and 93.1; Presto, 0.40 M, 92.5 and 85.1. A dashed line marks the supervised network trained from scratch, end to end: 95.4." style="width:min(100%,1180px);max-height:38vh;object-fit:contain"></div>
+  <ul class="small">
+    <li>Prithvi 95.9 and OlmoEarth-Nano 95.0 are each within one standard error of supervised 95.4 — <span class="accent">and Nano has about 1/220 of Prithvi’s weights.</span></li>
+    <li>By kNN Prithvi falls to fourth; fed our 64 × 64 chips at their own size instead of its 224, it drops to 93.7.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>standard error</b> — the spread from test-set sampling alone: √(0.95 × 0.05 / 1000) ≈ 0.7 points here</span>
+  </div>
+  <div class="foot"><span>Not corrected: EuroSAT is top-of-atmosphere; Prithvi and OlmoEarth were trained on surface reflectance · tools/week10_figs/out/summary.md</span></div>
+  <aside class="notes">1.5 min. Same chips, same split and same two readouts as Week 7, so the two light bars are last month's numbers reproduced. Three things. One: by linear probe all three public models beat our eight-minute tiny MAE, and the two best are each within one standard error of the supervised network trained from scratch with all 4,000 labels. Two: OlmoEarth-Nano gets there with 1.4 million weights, about 220 times fewer than Prithvi; size is not fit. Three, the honest-evaluation preview: change the readout to k-nearest neighbours and Prithvi drops to fourth while Nano moves up to first; feed Prithvi our 64-pixel chips instead of the 224 it was trained on and it loses two points. The protocol and the contract pick the winner. Caveat in the foot: we fed top-of-atmosphere chips to models trained on corrected reflectance, one seed, no dates — a pilot, not a benchmark.</aside>
+</section>
+
+<!-- 12 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Pilot check 1 · run on this Mac</p>
+  <h2>Before any long run, overfit 32 samples</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">If a network cannot memorise one small batch, a long run will not fix it: the bug is in the loop.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh"><img src="img/fig-w10-overfit.png" alt="Training loss on a log scale over 150 steps on one fixed batch of 32 EuroSAT chips, all weights of OlmoEarth-Nano plus a linear head trained. The correct loop falls from 2.4 to about 0.02 at step 150 and gets all 32 right at step 27. With shuffled labels the loss also falls and the batch is still memorised, 32 of 32. Two bugs, zero_grad called between backward and step, or a learning rate of 0, give identical flat lines at 2.4." style="width:min(100%,1180px);max-height:37vh;object-fit:contain"></div>
+<pre style="font-size:clamp(12px,1.85vh,16.5px);line-height:1.42;margin:0 0 .8vh;padding:.8vh 1.2vw;background:var(--surface);border-radius:8px"><code>for step in range(150):                          # ONE fixed batch of 32 training chips, all weights trained
+    loss = F.cross_entropy(head(pool(enc(batch))), y32)
+    opt.zero_grad(); loss.backward(); opt.step()  # zero_grad between backward and step = the flat line</code></pre>
+  <ul class="small">
+    <li>Shuffled labels also reach 32 of 32: <span class="accent">the check finds bugs in the loop, not wrong labels.</span></li>
+  </ul>
+  <div class="foot"><span>OlmoEarth-v1-Nano + linear head, AdamW, learning rate 10⁻³, 32 EuroSAT chips; 150 steps in 18 s on the M2 Ultra · full code: tools/week10_figs/snippets/s4_overfit.py</span></div>
+  <aside class="notes">1.5 min. One fixed batch of 32 training chips, every weight trainable, 150 steps. The orange line is the correct loop: all 32 right by step 27, loss near zero by the end — the wiggles are the checkpoint's drop-path, which stays on in training mode. The two flat lines at the top are two different bugs with the same symptom: zero_grad called after backward, which wipes the gradients before the step, and a learning rate of zero. Both are one-character mistakes and both look exactly like "the model is not learning". The blue line is the warning: with the labels shuffled, the network still memorises all 32 — so this check finds plumbing bugs, not label bugs; label bugs need the gallery from Week 9. It took 18 seconds here; do it first, every time you change the loop.</aside>
+</section>
+
+<!-- 13 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Pilot check 2 · step time and memory</p>
+  <h2>Time one step and read the peak memory — at your batch size, on your GPU</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">These two numbers turn your planned runs into GPU-hours: the go-or-shrink decision of Talk 3.</p>
+  <div class="cols" style="grid-template-columns:1.15fr 1fr;gap:1.6vw;align-items:start;flex:0 0 auto">
+<pre style="font-size:clamp(11.5px,1.75vh,15.5px);line-height:1.42;margin:0;padding:1vh 1vw;background:var(--surface);border-radius:8px"><code>def measure(step, n=25, warm=5):        # step() = forward + loss
+    torch.cuda.reset_peak_memory_stats()  #   + backward + opt.step()
+    ts = []
+    for i in range(warm + n):
+        torch.cuda.synchronize(); t = time.perf_counter()
+        step()
+        torch.cuda.synchronize(); ts.append(time.perf_counter() - t)
+    ms = 1000 * sorted(ts[warm:])[n // 2]           # the median
+    gib = torch.cuda.max_memory_allocated() / 2**30
+    print(f"median {ms:.0f} ms/step, peak {gib:.2f} GiB")</code></pre>
+    <table class="small" style="border-collapse:collapse;font-size:clamp(13px,2vh,17.5px);line-height:1.35">
+      <tr style="color:var(--muted)"><td style="padding:.35vh .5vw">batch 16, Apple M2 Ultra</td><td style="padding:.35vh .5vw">ms / step</td><td style="padding:.35vh .5vw">memory, GiB</td></tr>
+      <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .5vw">Prithvi-300M, frozen + head</td><td style="padding:.35vh .5vw">150</td><td style="padding:.35vh .5vw">1.6–2.0</td></tr>
+      <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .5vw"><b>Prithvi-300M, all weights</b></td><td style="padding:.35vh .5vw"><b class="accent">531</b></td><td style="padding:.35vh .5vw"><b class="accent">10.5–11.1</b></td></tr>
+      <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .5vw">OlmoEarth-Nano, frozen + head</td><td style="padding:.35vh .5vw">24</td><td style="padding:.35vh .5vw">0.1–1.7</td></tr>
+      <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .5vw">OlmoEarth-Nano, all weights</td><td style="padding:.35vh .5vw">64</td><td style="padding:.35vh .5vw">1.6–3.2</td></tr>
+    </table>
+  </div>
+  <ul class="small" style="margin-top:1.2vh">
+    <li>Check one batch against the CPU: <span class="accent">here a 64-chip batch at 3,072 tokens per chip came back wrong for 7 chips — and raised no error.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>synchronize</b> — wait for the GPU to finish; without it you time the queueing, not the work · <b>memory</b> — GiB = 2³⁰ bytes; low: sampled during the step, high: what Apple’s GPU driver held</span>
+  </div>
+  <div class="foot"><span>CUDA code: written for your T4, not run here; the same function with torch.mps.synchronize() ran on the M2 Ultra (fp32, median of 25 steps after 5 warm-up) · tools/week10_figs/out/summary.md</span></div>
+  <aside class="notes">1.5 min. The function on the left is what you run on your T4: warm up five steps, then time twenty-five with synchronize around each, take the median, and read the peak memory PyTorch allocated. The table is what the same function measured here, at batch 16. Fine-tuning all of Prithvi-300M costs three and a half times the step time and five to seven times the memory of training only a head on the frozen encoder; fine-tuning all of OlmoEarth-Nano is eight times faster than fine-tuning Prithvi. Multiply ms per step by your steps, rows and seeds and you have the GPU-hours for card 6 of Talk 3. The bullet is a real accident from this weekend: on Apple's GPU, a batch whose attention tensor had more than 2 to the 32 entries silently returned wrong embeddings for the last seven chips; it was caught only because a picture looked wrong. Recompute one batch on the CPU and compare — it takes a minute.</aside>
+</section>
+
+<!-- 14 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Pilot check 3 · kill it on purpose</p>
+  <h2>A resumed run must retrace the uninterrupted one — bit for bit</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">Colab and Kaggle end sessions without asking; a complete checkpoint turns that into a pause.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh"><img src="img/fig-w10-resume.png" alt="Training loss of the Week 7 tiny masked autoencoder over 600 steps. The uninterrupted run and a run killed at step 350 and resumed from the step-300 checkpoint lie exactly on top of each other. A run resumed without the optimizer state spikes from about 0.32 to 0.44 right after step 300. A run resumed without the random-number and data-order state wanders around the original. Largest loss difference from the uninterrupted run over steps 301 to 600: resumed 0, bit-identical; without optimizer state 0.120; without random and data-order state 0.058." style="width:min(100%,1180px);max-height:40vh;object-fit:contain"></div>
+<pre style="font-size:clamp(11.5px,1.75vh,15.5px);line-height:1.4;margin:0 0 .8vh;padding:.8vh 1.2vw;background:var(--surface);border-radius:8px"><code>state = dict(step=step, model=model.state_dict(), opt=opt.state_dict(), sched=sched.state_dict(),
+             rng=dict(py=random.getstate(), torch=torch.get_rng_state(), np=..., cuda=...),
+             data=dict(gen=gen.get_state(), perm=perm, pos=pos))       # the sampler: order and position
+torch.save(state, path + ".tmp"); os.replace(path + ".tmp", path)    # atomic: a kill mid-save is harmless</code></pre>
+  <ul class="small">
+    <li>Forget the optimizer and Adam restarts from zero: <span class="accent">a spike</span>. Forget the random state and every later batch differs.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>RNG</b> — random-number generator; its state fixes dropout, random crops and the shuffle order</span>
+  </div>
+  <div class="foot"><span>Week 7 tiny MAE, 600 steps at batch 256; a real kill (SIGKILL) at step 350, resumed from the step-300 checkpoint · full save and load: Appendix A4</span></div>
+  <aside class="notes">1.5 min. The experiment: train the Week 7 tiny MAE for 600 steps; in a second run, kill the process for real at step 350 and restart from the checkpoint saved at step 300. With everything saved — weights, optimizer, scheduler, step counter, every random-number state and where the sampler was in its shuffled order — the resumed curve is the uninterrupted one, to the last bit. Leave out the optimizer state and Adam's running averages restart from zero: the loss spikes from 0.32 to 0.44 and takes a while to recover. Leave out the random and data-order state and the run is still fine, but it is a different run — every later batch differs, so you can no longer say which change caused which result. The save is atomic: write to a temporary file and rename, so a kill during the save cannot leave you with a corrupt checkpoint. In the studio, kill your continuation run once on purpose and show these two curves.</aside>
+</section>
+
+<!-- 15 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 3 · Honest evaluation</p>
+  <h2>No model dominates, so the table decides — four rules for yours</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">You met both benchmarks in Week 9. Today they become the rules for the table you show on 30 Nov.</p>
+  <div class="cols" style="grid-template-columns:1fr 1fr;gap:1.2vw 1.6vw;flex:0 0 auto">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">1 · Same head, same budget</b><br>Prithvi-EO-2.0 gave every model ten tuning trials on validation, then ten seeds; PANGAEA froze every encoder under one decoder.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">2 · A U-Net row, tuned to win</b><br>With all labels, PANGAEA’s U-Net beats every foundation model on 5 of 11 datasets — and on Sen1Floods11 at every label fraction.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">3 · Say frozen or fine-tuned</b><br>In GEO-Bench-2, freezing the encoder changed the order of “over 20% of model pairs”: a ranking holds only for its protocol.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">4 · Several tasks, with intervals</b><br>Five different models rank first on at least one of GEO-Bench-2’s nine capabilities. You report block-bootstrap intervals (Week 11).</p></div>
+  </div>
+  <ul class="small" style="margin-top:1vh">
+    <li>Today’s paper, averaged by us: on GEO-Bench the 300 M Prithvi-EO-2.0 sits below two 25 M ResNet-50s; <span class="accent">only the 600 M beats every other model.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>label fraction</b> — the share of training labels used: 10%, 50% or 100% · <b>block bootstrap</b> — resample whole blocks of space or time, recompute the score, read an interval from the spread</span>
+  </div>
+  <div class="foot"><span>Szwarcman et al. 2024 §III-C1, Tables A1–A4 (our averages) · PANGAEA, Tables 5–7 · GEO-Bench-2 v2, Table 1, §4.6 · Week 9, slide 12</span></div>
+  <aside class="notes">3 min. Week 9 showed the two benchmarks' headlines; this slide turns them into rules. One, same head and same budget for every model — the paper you read did this properly: ten hyperparameter trials per model on validation, then the best setting repeated with ten seeds; PANGAEA froze every encoder under the same UPerNet decoder. Two, a supervised U-Net trained from scratch, tuned as hard as your model: with all labels it beats every foundation model on five of PANGAEA's eleven datasets, and on Sen1Floods11 — the flood task closest to our projects — at 100, 50 and 10 percent of the labels (91.4, 90.9, 88.6 against the best foundation model's 90.9, 90.6, 87.2). Three, state the protocol: GEO-Bench-2 found that freezing the encoder reorders more than a fifth of model pairs, so a frozen-probe ranking is not a fine-tuning ranking. Four, more than one task, with intervals: five different models rank first somewhere in GEO-Bench-2's nine capability groups. Then the bullet, which is the honest-evaluation lesson inside today's reading: averaging the paper's own appendix tables, the 300 M model — the one most people load — is behind two 25-million-parameter ResNet-50s on GEO-Bench; the headline 8% is the 600 M model's. That is our arithmetic, not a sentence in the paper. Our own EuroSAT pilot (slide 11) told the same story in miniature: probe and kNN rank the models differently, and a small supervised network trained from scratch ties the best frozen encoders.</aside>
+</section>
+
+<!-- 16 -->
+
+<section class="slide xl">
+  <p class="kicker">Next Monday</p>
+  <h2>23 Nov, Talk 3: pilot evidence and the compute decision</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Ten minutes + three of questions · slides (PDF) in the Talk 3 slot by Sun 22 Nov 23:59 · the test split stays sealed.</p>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.2vw 1.6vw;flex:0 0 auto">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">1 · Checkpoint diagnostic</b><br>Frozen probe of the public model on your validation split, and one failure example — before any real fine-tuning.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">2 · Toy scaling evidence</b><br>Two mini-MAE sizes at the same time budget → the one you chose → a ten-minute continuation with an interruption and resume → its probe. Tokens seen, quality, memory, throughput.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">3 · Adaptation pilot</b><br>The 32-sample overfit, a short learning curve, what you train (head, LoRA rank, or all weights) → your optimiser, learning rate and epochs.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">4 · Engineering numbers</b><br>Data-loading and step time, precision, peak memory, and a checkpoint resume that retraces the curve.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">5 · Four rows ready?</b><br>Status and tuning budget for each row; random-init uses the same architecture and recipe; the supervised competitor is tuned to win.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">6 · Go or shrink</b><br>Projected GPU-hours: tuning, ≥ 3 seeds per row, one ablation with two settings, evaluation, a restart reserve. Commit the run matrix.</p></div>
+  </div>
+  <div class="gloss">
+    <span><b>LoRA</b> — low-rank adaptation: train two thin matrices beside each frozen weight instead of the weight itself · <b>run matrix</b> — the table of every run you will launch: row, seed, setting, budget</span>
+  </div>
+  <div class="foot"><span>Repo by Sunday: eval/ · pilot logs · resume evidence · run matrix · dated amendments · then 30 Nov controlled runs (validation) · 7 Dec held-out results · 14 Dec final</span></div>
+  <aside class="notes">2.5 min. Read the six cards once; they are next Monday's slide order. Card 1 is today's probe slide turned into a deliverable — on your validation split, with one example where it fails. Card 2 is today's studio: two sizes at the same time budget, choose one, continue it for ten minutes with a deliberate interruption and resume, probe it. Card 3 starts with the 32-sample overfit. Card 4 is the numbers from the step-time and resume slides, on your hardware. Card 5: the four rows of the contract — adapted foundation model, frozen probe, random-init with the same architecture, and the supervised competitor tuned to win. Card 6 is the decision: does the matrix fit the budget; if not, shrink it now and say what you dropped. Logistics: PDF in the Talk 3 slot by Sunday 22 November, 23:59; the test split is still sealed until Friday 4 December.</aside>
+</section>
+
+<!-- 17 -->
+
+<section class="slide xl">
+  <p class="kicker">Project studio · after the lecture</p>
+  <h2>Studio: two pilots, one interruption, two probes — measured, not guessed</h2>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr;gap:2vw;align-items:start;flex:0 0 auto">
+    <div class="card small" style="min-width:0">
+      <p><b>1 · Two mini-MAE pilots</b> on the Week 7 corpus, two sizes, the same time budget each.</p>
+      <p><b>2 · Choose one</b> by its validation probe; continue it ten minutes — <b>kill it once</b> and resume from the checkpoint.</p>
+      <p><b>3 · Frozen probe of your public base model</b> on your own validation split: embed once, cache, fit.</p>
+      <p><b>4 · Adaptation pilot</b>: overfit 32 samples; step time and peak memory at your batch size.</p>
+    </div>
+    <div class="card small" style="min-width:0">
+      <p style="margin:0 0 .6vh"><b class="accent">Check before you leave</b></p>
+      <p style="margin:0">One row per run in <code>eval/pilots.csv</code>: size · minutes · tokens seen · validation probe · step time · peak memory · resumed at step.</p>
+      <p style="margin:1vh 0 0">The resumed curve sits on the uninterrupted one — plot both.</p>
+    </div>
+  </div>
+  <div class="gloss">
+    <span><b>tokens seen</b> — patches processed by the encoder in training: steps × batch × visible tokens per sample; the fair x-axis for comparing two sizes</span>
+  </div>
+  <div class="foot"><span>Note 10 (pilot table, probe results, memory/throughput/resume evidence, run matrix), video summary 10 and Talk 3 slides — Sun 22 Nov 23:59 · optional: a dense Sen1Floods11 probe, or AlphaEarth / TESSERA embeddings (A5)</span></div>
+  <aside class="notes">1 min, then dismiss to the studio. The order matters: the two pilots first, because they run while you do the rest; choose by validation probe, not by training loss — TESSERA's 395 runs showed pretraining loss barely predicts downstream skill; then the deliberate interruption: in Colab use Runtime, Interrupt, or kill the process, and resume. Meanwhile embed your validation split with your public base model and fit the probe. Walk round and ask each student for the CSV row and the two overlapping curves. Anyone whose base model will not load by the end of the studio tells me today.</aside>
+</section>
+
+<!-- 18 -->
+
+<section class="slide section xl">
+  <p class="kicker">Appendix</p>
+  <h2>Reference cards</h2>
+  <ul class="small">
+    <li><b>A1</b> eight Earth models in one table: inputs, sizes, data, licence, how to get them · <b>A2–A3</b> the three loaders in full, and the installs</li>
+    <li><b>A4</b> checkpoint-and-resume template · <b>A5</b> embedding fields: AlphaEarth from Earth Engine, TESSERA from Python · <b>A6–A7</b> reading and videos</li>
+  </ul>
+  <div class="foot"><span>The studio starts after slide 17.</span></div>
+  <aside class="notes">Not presented. Point students here for the model table, the full loaders and the resume template.</aside>
+</section>
+
+<!-- 19 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A1 · Model cards</p>
+  <h2>A1 · Eight Earth models in one table</h2>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(12px,1.8vh,16px);line-height:1.28;border-bottom:1px solid var(--hairline)">
+    <tr style="color:var(--muted)"><td style="padding:.3vh .45vw">model · gen.</td><td style="padding:.3vh .45vw">input</td><td style="padding:.3vh .45vw">size</td><td style="padding:.3vh .45vw">pretraining data</td><td style="padding:.3vh .45vw">licence · how to get it</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .45vw;vertical-align:top;white-space:nowrap"><b>SatMAE</b> · 1<br><span class="muted">Stanford 2022</span></td><td style="padding:.3vh .45vw;vertical-align:top">Sentinel-2, 10 of 13 bands in 3 groups; or RGB time series</td><td style="padding:.3vh .45vw;vertical-align:top">ViT-L, 306&nbsp;M</td><td style="padding:.3vh .45vw;vertical-align:top">fMoW-Sentinel, 713&nbsp;k images</td><td style="padding:.3vh .45vw;vertical-align:top">CC BY-NC 4.0 · GitHub sustainlab-group/SatMAE</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .45vw;vertical-align:top;white-space:nowrap"><b>Prithvi-EO-2.0</b> · 1<br><span class="muted">NASA–IBM 2024</span></td><td style="padding:.3vh .45vw;vertical-align:top">HLS, 6 bands × 4 dates, 30&nbsp;m</td><td style="padding:.3vh .45vw;vertical-align:top">5&nbsp;M · 100&nbsp;M · 300&nbsp;M · 600&nbsp;M</td><td style="padding:.3vh .45vw;vertical-align:top">4.2&nbsp;M global samples, <span style="white-space:nowrap">2014–2023</span></td><td style="padding:.3vh .45vw;vertical-align:top">Apache-2.0 · TerraTorch <code>prithvi_eo_v2_300</code></td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .45vw;vertical-align:top;white-space:nowrap"><b>DOFA</b> · 2<br><span class="muted">TU Munich 2024</span></td><td style="padding:.3vh .45vw;vertical-align:top">any bands, each with its wavelength; one date</td><td style="padding:.3vh .45vw;vertical-align:top">ViT-B, ViT-L</td><td style="padding:.3vh .45vw;vertical-align:top">≈ 11.5&nbsp;M images from 5 sensors (S1, S2, Gaofen, NAIP, EnMAP)</td><td style="padding:.3vh .45vw;vertical-align:top">weights CC BY 4.0 · TorchGeo <code>dofa_base_patch16_224</code></td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .45vw;vertical-align:top;white-space:nowrap"><b>TerraMind</b> · 2<br><span class="muted">IBM–ESA 2025</span></td><td style="padding:.3vh .45vw;vertical-align:top">S2 L1C/L2A, S1 GRD/RTC, elevation, RGB; one date</td><td style="padding:.3vh .45vw;vertical-align:top">tiny → large; base 86&nbsp;M, large 300&nbsp;M</td><td style="padding:.3vh .45vw;vertical-align:top">TerraMesh, ≈ 9&nbsp;M samples, 9 modalities</td><td style="padding:.3vh .45vw;vertical-align:top">Apache-2.0 · TerraTorch <code>terramind_v1_base</code></td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .45vw;vertical-align:top;white-space:nowrap"><b>OlmoEarth</b> · 2<br><span class="muted">Ai2 2025</span></td><td style="padding:.3vh .45vw;vertical-align:top">S2 L2A, S1, Landsat; up to 12 months; 10&nbsp;m</td><td style="padding:.3vh .45vw;vertical-align:top">Nano 1.4&nbsp;M · Tiny 6.2&nbsp;M · Base 89&nbsp;M · Large 308&nbsp;M</td><td style="padding:.3vh .45vw;vertical-align:top">285,288 one-year samples, <span style="white-space:nowrap">2016–2024</span></td><td style="padding:.3vh .45vw;vertical-align:top">OlmoEarth Artifact License (no military, surveillance or extractive use) · <code>olmoearth-pretrain</code></td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .45vw;vertical-align:top;white-space:nowrap"><b>Presto</b> · pixel series<br><span class="muted">NASA Harvest 2023</span></td><td style="padding:.3vh .45vw;vertical-align:top">one pixel: S1, S2, ERA5 rain and temperature, vegetation index, land cover, elevation, location; 1–24 months</td><td style="padding:.3vh .45vw;vertical-align:top">0.4&nbsp;M</td><td style="padding:.3vh .45vw;vertical-align:top">21.5&nbsp;M pixel samples, <span style="white-space:nowrap">2020–2021</span></td><td style="padding:.3vh .45vw;vertical-align:top">MIT · GitHub nasaharvest/presto</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .45vw;vertical-align:top;white-space:nowrap"><b>AlphaEarth</b> · 3<br><span class="muted">DeepMind 2025</span></td><td style="padding:.3vh .45vw;vertical-align:top">you get 64 numbers per 10&nbsp;m pixel per year (from S2, Landsat 8/9, S1)</td><td style="padding:.3vh .45vw;vertical-align:top">≈ 480&nbsp;M, weights not public</td><td style="padding:.3vh .45vw;vertical-align:top">3&nbsp;B observations at 5.1&nbsp;M sites</td><td style="padding:.3vh .45vw;vertical-align:top">embeddings CC BY 4.0 · Earth Engine, <span style="white-space:nowrap">2017–2024</span></td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .45vw;vertical-align:top;white-space:nowrap"><b>TESSERA</b> · 3<br><span class="muted">Cambridge 2025</span></td><td style="padding:.3vh .45vw;vertical-align:top">you get 128 numbers per 10&nbsp;m pixel per year (from S1 + S2)</td><td style="padding:.3vh .45vw;vertical-align:top">encoder 45.7&nbsp;M</td><td style="padding:.3vh .45vw;vertical-align:top">≈ 800&nbsp;M pixel series, <span style="white-space:nowrap">2017–2024</span></td><td style="padding:.3vh .45vw;vertical-align:top">embeddings and weights CC0 · <code>pip install geotessera</code></td></tr>
+  </table>
+  <div class="foot"><span>S1/S2 Sentinel-1/-2 · L1C top-of-atmosphere, L2A surface reflectance · GRD/RTC radar, ground-range detected / terrain-corrected · gen. = generation (slides 4–6) · sizes are encoders · sources: wf_week10-facts.md §1–7, §11</span></div>
+  <aside class="notes">Reference only. Every row is cited in course-design/wf_week10-facts.md.</aside>
+</section>
+
+<!-- 20 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A2 · Run on this Mac, 15 Nov · prints shown</p>
+  <h2>A2 · Prithvi-EO-2.0 and OlmoEarth-Nano, loaded in full</h2>
+<pre style="font-size:clamp(11px,1.65vh,14.5px);line-height:1.36;margin:0 0 .8vh;padding:.8vh 1vw;background:var(--surface);border-radius:8px"><code>import torch
+from terratorch.registry import BACKBONE_REGISTRY
+dev = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+model = BACKBONE_REGISTRY.build('prithvi_eo_v2_300', pretrained=True).to(dev).eval()
+print(sum(p.numel() for p in model.parameters()) / 1e6, 'M parameters')       # 303.886336 M parameters
+x = torch.randn(8, 6, 224, 224, device=dev)   # B02 B03 B04 B8A B11 B12, (DN - mean) / std
+with torch.no_grad():
+    out = model(x)                            # list: one (8, 197, 1024) tensor per block
+emb = out[-1][:, 1:].mean(1)                  # drop [CLS], mean of 196 patch tokens
+print(len(out), tuple(out[-1].shape), tuple(emb.shape))                       # 24 (8, 197, 1024) (8, 1024)</code></pre>
+<pre style="font-size:clamp(11px,1.65vh,14.5px);line-height:1.36;margin:0;padding:.8vh 1vw;background:var(--surface);border-radius:8px"><code>import torch
+from olmoearth_pretrain.model_loader import ModelID, load_model_from_id
+from olmoearth_pretrain.datatypes import MaskedOlmoEarthSample, MaskValue
+dev = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+enc = load_model_from_id(ModelID.OLMOEARTH_V1_NANO).encoder.to(dev).eval()
+B = 8
+s = MaskedOlmoEarthSample(
+    sentinel2_l2a=torch.randn(B, 64, 64, 1, 12, device=dev),   # B,H,W,T,C after Normalizer(COMPUTED)
+    sentinel2_l2a_mask=torch.full((B, 64, 64, 1, 3), float(MaskValue.ONLINE_ENCODER.value), device=dev),
+    timestamps=torch.tensor([[[1, 6, 2020]]], device=dev).repeat(B, 1, 1))   # day, month 0-11, year
+with torch.no_grad():
+    tok = enc(s, fast_pass=True, patch_size=4)['tokens_and_masks'].sentinel2_l2a
+emb = tok.mean(dim=[1, 2, 3, 4])              # (8,16,16,1,3,128) -> (8,128)
+print(tuple(tok.shape), tuple(emb.shape))                                     # (8, 16, 16, 1, 3, 128) (8, 128)</code></pre>
+  <div class="foot"><span>Prithvi-EO-2.0-300M @ 9eb1b11 · smaller: prithvi_eo_v2_100_tl, prithvi_eo_v2_tiny_tl (terratorch ≥ 1.1) · OlmoEarth-v1-Nano @ 529248a · tools/week10_figs/snippets/s1, s2</span></div>
+  <aside class="notes">Reference only. Random inputs here; for real chips, follow the input contracts on slide 9. The Prithvi-EO-2.0-300M model card's own snippet builds "prithvi_eo_v2_tiny_tl" by mistake — that loads the 5 M model; use the name above.</aside>
+</section>
+
+<!-- 21 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A3 · Run on this Mac, 15 Nov · installs for Colab</p>
+  <h2>A3 · Presto in full, and the three installs</h2>
+<pre style="font-size:clamp(11px,1.65vh,14.5px);line-height:1.36;margin:0 0 .8vh;padding:.8vh 1vw;background:var(--surface);border-radius:8px"><code># wget -q https://raw.githubusercontent.com/nasaharvest/presto/main/single_file_presto.py
+# wget -q https://github.com/nasaharvest/presto/raw/main/data/default_model.pt
+import torch
+from single_file_presto import Presto
+dev = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+presto = Presto.construct()
+presto.load_state_dict(torch.load('default_model.pt', map_location='cpu', weights_only=True))
+enc = presto.encoder.to(dev).eval()
+n = 64 * 64                                   # every pixel of one chip is a 1-step time series
+x = torch.rand(n, 1, 17, device=dev) * 0.3    # 17 channels: S2 = DN/1e4 at 2..11, NDVI at 16
+mask = torch.ones_like(x); mask[..., 2:12] = 0; mask[..., 16] = 0   # hide S1, ERA5, SRTM
+dw = torch.full((n, 1), 9, device=dev)        # 9 = no Dynamic World label
+ll = torch.tensor([[48.1, 11.6]], device=dev).expand(n, 2)          # lat, lon
+with torch.no_grad():
+    e = enc(x, dynamic_world=dw, latlons=ll, mask=mask, month=1, eval_task=True)   # (4096, 128)
+print(tuple(e.shape), tuple(torch.cat([e.mean(0), e.std(0)]).shape))   # (4096, 128) (256,)</code></pre>
+<pre style="font-size:clamp(11px,1.65vh,14.5px);line-height:1.36;margin:0;padding:.8vh 1vw;background:var(--surface);border-radius:8px"><code>pip install terratorch                                           # 1.2.14 here
+pip install --no-deps olmoearth-pretrain==0.1.2                  # --no-deps keeps your torch
+pip install "universal-pathlib&gt;=0.2.5"                          # needed by olmoearth-pretrain</code></pre>
+  <ul class="small">
+    <li>Without <code>--no-deps</code>, olmoearth-pretrain pins torch below 2.10 and replaces the one Colab gave you.</li>
+  </ul>
+  <div class="foot"><span>Presto repo @ 11e207a; default_model.pt (3.3 MB) is the same file as Hugging Face nasaharvest/presto · installs tested on this Mac, not yet on Colab · tools/week10_figs/snippets/s3</span></div>
+  <aside class="notes">Reference only. The Presto mask is 1 where a value is missing: here radar, weather and elevation are hidden and Sentinel-2 plus NDVI are visible. The chip vector is the mean and standard deviation over its pixels, as in the Presto paper's EuroSAT protocol (v4).</aside>
+</section>
+
+<!-- 22 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A4 · Template · round-trip tested</p>
+  <h2>A4 · Save and load everything a resume needs</h2>
+<pre style="font-size:clamp(11px,1.65vh,14.5px);line-height:1.4;margin:0;padding:.8vh 1vw;background:var(--surface);border-radius:8px"><code>import os, random, numpy as np, torch
+def save(path, step, model, opt, sched, gen, perm, pos):
+    npst = np.random.get_state()
+    state = dict(step=step, model=model.state_dict(), opt=opt.state_dict(), sched=sched.state_dict(),
+                 rng=dict(py=random.getstate(), torch=torch.get_rng_state(),
+                          np=(npst[0], torch.from_numpy(npst[1].astype(np.int64)), *npst[2:]),
+                          cuda=torch.cuda.get_rng_state_all() if torch.cuda.is_available() else []),
+                 data=dict(gen=gen.get_state(), perm=perm, pos=pos))       # sampler: order + position
+    torch.save(state, path + '.tmp'); os.replace(path + '.tmp', path)     # atomic: a kill mid-save is harmless
+
+def load(path, model, opt, sched, gen):
+    c = torch.load(path, map_location='cpu', weights_only=True)
+    model.load_state_dict(c['model']); opt.load_state_dict(c['opt']); sched.load_state_dict(c['sched'])
+    random.setstate(c['rng']['py']); torch.set_rng_state(c['rng']['torch']); gen.set_state(c['data']['gen'])
+    r = c['rng']['np']; np.random.set_state((r[0], r[1].numpy().astype(np.uint32), *r[2:]))
+    if c['rng']['cuda']: torch.cuda.set_rng_state_all(c['rng']['cuda'])
+    return c['step'], c['data']['perm'], c['data']['pos']</code></pre>
+  <ul class="small">
+    <li>Draw batches from your own permutation <code>perm</code> with a <code>torch.Generator</code> <code>gen</code>, so the data order can be saved too.</li>
+  </ul>
+  <div class="foot"><span>Round trip on a small model: 40 steps straight vs 20 + save + rebuild + load + 20, max |Δloss| = 0 · the CUDA RNG lines were not exercised here · tools/week10_figs/snippets/s6</span></div>
+  <aside class="notes">Reference only. The numpy state is stored as a tensor so that torch.load can run with weights_only=True, the safe loader. If you use mixed precision on a T4, also save and load the GradScaler's state_dict.</aside>
+</section>
+
+<!-- 23 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A5 · Optional extension · TESSERA run here, Earth Engine not</p>
+  <h2>A5 · Embedding fields over a Korean area: AlphaEarth (Earth Engine) or TESSERA</h2>
+<pre style="font-size:clamp(12px,1.85vh,16.5px);line-height:1.4;margin:0;padding:1vh 1.2vw;background:var(--surface);border-radius:8px"><code>import ee                                                   # AlphaEarth, from Earth Engine
+ee.Authenticate(); ee.Initialize(project="my-ee-project")    # free for research and education
+aoi = ee.Geometry.Rectangle([126.6, 35.0, 127.1, 35.4])     # lon/lat box around Gwangju
+emb = (ee.ImageCollection("GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL")
+       .filterDate("2024-01-01", "2025-01-01").filterBounds(aoi)
+       .mosaic())                                           # 64 bands A00 … A63, 10 m, unit length
+pts = ee.FeatureCollection("projects/my-ee-project/assets/labels")    # your points, property 'label'
+table = emb.sampleRegions(collection=pts, properties=["label"], scale=10)
+clf = ee.Classifier.smileRandomForest(100).train(table, "label", emb.bandNames())
+pred = emb.classify(clf).clip(aoi)                          # a map from a few hundred points
+cells = emb.reduceRegions(collection=my_9km_cells, reducer=ee.Reducer.mean(), scale=100)
+
+from geotessera import GeoTesseraZarr                       # TESSERA: pip install geotessera
+X = GeoTesseraZarr().sample_points([(126.84, 35.23)], year=2024)   # (N, 128); two points took 58 s at GIST</code></pre>
+  <ul class="small">
+    <li>An extra column for your table: same labels, same split, a random forest on the embeddings — <span class="accent">no GPU, and a strong baseline to beat.</span></li>
+  </ul>
+  <div class="foot"><span>Earth Engine catalog GOOGLE/SATELLITE_EMBEDDING/V1/ANNUAL (2017–2024; CC BY 4.0; “produced by Google and Google DeepMind”) · geotessera 0.11.0 (2017–2025, CC0), run 15 Nov · Earth Engine needs your own project</span></div>
+  <aside class="notes">Reference only. The GeoTessera call ran on 15 Nov 2026 (geotessera 0.11.0): two points near GIST for 2024 returned a (2, 128) float array in 58 s. The Earth Engine calls are written against the catalogue page and the Python API; they need the student's own Earth Engine project, so they were not run here. The catalogue says the AlphaEarth vectors are unit length and can be averaged to coarser grids — that is the reduceRegions line for 9 km cells. Attribution is required for AlphaEarth: "The AlphaEarth Foundations Satellite Embedding dataset is produced by Google and Google DeepMind."</aside>
+</section>
+
+<!-- 24 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A6 · Read and watch</p>
+  <h2>A6 · The reading, the week’s video, three short ones</h2>
+  <ul class="small">
+    <li><b>Read:</b> Szwarcman et al. 2024, Prithvi-EO-2.0 (arXiv 2412.02732) · optional: Cong et al. 2022, SatMAE · Herzog et al. 2025, OlmoEarth (arXiv 2511.13655)</li>
+  </ul>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=H8zAOMpA_-c" class="yt" data-id="H8zAOMpA_-c" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w10-fibaek.jpg" alt="SFI Visual Intelligence video: Earth Observation Foundation Models and their Applications: Casper Fibæk (The ESA Phi-Lab)" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>The week’s video</b> — Earth foundation models at ESA’s Φ-lab · Casper Fibæk · 34 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=nrpYwbG6l-4" class="yt" data-id="nrpYwbG6l-4" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w10-terramind.jpg" alt="ESA Extras video: TerraMind, a next-generation AI model" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>TerraMind</b>, generation 2 · ESA · 5 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=56p_YHC-YtE" class="yt" data-id="56p_YHC-YtE" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w10-tessera.jpg" alt="Cambridge Energy and Environment Group video: [CVPR26 Poster]TESSERA: Temporal Embeddings of Surface Spectra for Earth Representation and Analysis" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>TESSERA</b>, generation 3 · Cambridge · 5 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=KNvgMFecJ2k" class="yt" data-id="KNvgMFecJ2k" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w10-olmoearth-ai2.jpg" alt="Ai2 video: OlmoEarth: Powerful new foundation models and open infrastructure for planetary insights" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>OlmoEarth</b>, models and platform · Ai2 · 4 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <div class="foot"><span>All embed (checked 15 Nov 2026) · the week’s video is 34 min — watch at home; video summary 10 due Sun 22 Nov 23:59 · longer talks from the authors: A7</span></div>
+  <aside class="notes">Reference only. The Fibæk talk is next week's quiz video.</aside>
+</section>
+
+<!-- 25 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A7 · From the authors</p>
+  <h2>A7 · Four longer talks, one per model you met today</h2>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=rsM1mMp8rh4" class="yt" data-id="rsM1mMp8rh4" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w10-dofa-xiong.jpg" alt="Nico Lang video: SSL4EO-2024 - Multimodal Foundation Models for Earth Observation - Zhitong Xiong" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>DOFA</b> — one model for any sensor · Zhitong Xiong · 34 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=yg5l9ED05-s" class="yt" data-id="yg5l9ED05-s" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w10-alphaearth.jpg" alt="IEEE GRSS video: AlphaEarth Foundations and the Satellite Embedding Dataset: A New Foundation for Geospatial Analysis" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>AlphaEarth</b> and the Satellite Embedding dataset · IEEE GRSS · 74 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=H2mHNaI3oNQ" class="yt" data-id="H2mHNaI3oNQ" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w10-presto-tseng.jpg" alt="TheGeoICT video: Presto: Lightweight, Pretrained Transformers for Remote Sensing Timeseries | Gabriel Tseng | Harvest" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>Presto</b> — pixel time series · Gabriel Tseng · 48 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=CB3FKtmuPI8" class="yt" data-id="CB3FKtmuPI8" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w10-prithvi-workshop.jpg" alt="AI for Good video: Workshop: Earth observation foundation models with Prithvi-EO-2.0 and TerraTorch" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>Prithvi-EO-2.0 + TerraTorch</b> workshop · AI for Good · 115 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <div class="foot"><span>All embed (checked 15 Nov 2026) · the benchmarks from their authors: GEO-Bench-2, ServiceNow (18 min, youtu.be/75xclLXkFzI) · PANGAEA, GEO AI4EO webinar (54 min, youtu.be/w-M76Lq7sYg)</span></div>
+  <aside class="notes">Reference only. The workshop is the hands-on route for anyone fine-tuning Prithvi with TerraTorch.</aside>
+</section>
+
+
+</body>
+</html>
