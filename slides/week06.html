@@ -88,7 +88,7 @@
     <tr style="border-top:1px solid var(--hairline)"><td style="padding:.45vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">2 · Tokens</td><td style="padding:.45vh .6vw"><b>patchify</b> cut the image into squares, one token each · <b>ViT</b> Vision Transformer, a Transformer that reads images · <b>0.25°</b> the ≈ 28-km grid of ERA5 weather data</td></tr>
     <tr style="border-top:1px solid var(--hairline)"><td style="padding:.45vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">3 · Position</td><td style="padding:.45vh .6vw"><b>positional encoding</b> numbers that tell a token where it is: <b>sin-cos</b> (made of waves) or <b>RoPE</b> (rotary position embedding: q and k rotated by position) · <b>SatMAE, Scale-MAE, ClimaX, Prithvi</b> Earth models that also encode band, metres per pixel, variable, date</td></tr>
     <tr style="border-top:1px solid var(--hairline)"><td style="padding:.45vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">4 · Windows</td><td style="padding:.45vh .6vw"><b>Swin</b> shifted-window Transformer — attention only inside small windows that shift every layer (this week’s paper) · <b>Pangu, FuXi, Aurora</b> AI weather-forecast models built on such windows</td></tr>
-    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.45vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">5 · Fit</td><td style="padding:.45vh .6vw"><b>fp16 / bf16</b> 16-bit numbers: half the memory, much faster on a GPU · <b>FlashAttention</b> attention computed without storing the N × N table · <b>contract</b> the five sentences Note 06 opens with · <b>FLEX</b> optional board exercise</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.45vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">5 · Fit</td><td style="padding:.45vh .6vw"><b>fp16 / bf16</b> 16-bit numbers: half the bytes per number, much faster on a GPU · <b>FlashAttention</b> attention computed without storing the N × N table · <b>contract</b> the five sentences Note 06 opens with · <b>FLEX</b> optional board exercise</td></tr>
   </table>
   <div class="ytmini">
     <a href="https://www.youtube.com/watch?v=eMlx5fFNoYc" class="yt" data-id="eMlx5fFNoYc">
@@ -543,14 +543,14 @@
   </div>
   <p class="small" style="margin:.8vh 0 0;padding:.5vh 1vw;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0">① patch: 8 × 8 px × 13 bands = <b>832 numbers</b> → ② × W<sub>embed</sub> (832 × 128) → ③ token x: <b>128 numbers</b>, + position<br>→ ④ q, k, v = x W<sub>Q</sub>, x W<sub>K</sub>, x W<sub>V</sub> (slide 9)</p>
   <ul class="small">
-    <li>Every pixel kept. <b>d is the model’s width, not the patch’s:</b> 4 × 4 px × 2 bands = 32 → 128 expands, 832 → 128 compresses; attention fills the room with context.</li>
+    <li>Every pixel kept. <b>d is the model’s width, not the patch’s:</b> 4 × 4 px × 13 bands = 208 and 8 × 8 px = 832 numbers both become 128; attention fills the room with context.</li>
     <li>ViT: (224/16)² = 196 tokens; here (64/8)² = 64. <span class="accent">The lab: one embedding per band group → 3 × 64 tokens (Part 3).</span></li>
   </ul>
   <div class="gloss">
     <span><b>patchify</b> — in code one <code>Conv2d(13, d, kernel_size=8, stride=8)</code> cuts and projects at once. <b>raster order</b> — row by row.</span>
   </div>
   <div class="foot"><span>EuroSAT-MS Highway_1 · Dosovitskiy et al. 2020, §3.1 · the band order in the file (B8A last) is a trap: Appendix A9</span></div>
-  <aside class="notes">2 min. Say it as an analogy and then as code: a tokenizer cuts a sentence into words and looks each up in a table; patchify cuts the chip into 8-pixel squares and multiplies each by one matrix — and the two together are a single strided convolution, which is how every implementation writes it. Point at the strip: raster order is arbitrary, and the model will not know it is an image until Part 3 puts the position back. Then walk the boxed chain left to right — 832 numbers, one learned matrix, 128 numbers, + position, then q, k, v — and stress that 128 is the model's width: a smaller patch is expanded to it, a bigger one compressed, nothing is averaged. Plant the lab's twist now — one patch embedding per band group — and say why it will make sense after SatMAE.</aside>
+  <aside class="notes">2 min. Say it as an analogy and then as code: a tokenizer cuts a sentence into words and looks each up in a table; patchify cuts the chip into 8-pixel squares and multiplies each by one matrix — and the two together are a single strided convolution, which is how every implementation writes it. Point at the strip: raster order is arbitrary, and the model will not know it is an image until Part 3 puts the position back. Then walk the boxed chain left to right — 832 numbers, one learned matrix, 128 numbers, + position, then q, k, v — and stress that 128 is the model's width: every patch size is mapped to it — 208, 832 or 3,328 numbers in, 128 out — and nothing is averaged. Plant the lab's twist now — one patch embedding per band group — and say why it will make sense after SatMAE.</aside>
 </section>
 
 <!-- 19 -->
@@ -1708,7 +1708,7 @@ def test_equivalence():                       # the same thing as torch
     </div>
   </div>
   <div class="foot"><span>Helber et al. 2019, IEEE JSTARS (arXiv 1709.00029), Tables I, III–IV · nominal wavelengths from Helber Table I (ESA lists S2A B8 at 832.8 nm) · band order verified for this lecture on 9 October 2026</span></div>
-  <aside class="notes">Not taught in class. The band-order trap is the one thing on this card that will silently ruin a lab: the agent will write the group embedding assuming ESA's order, the model will train, and the "red edge" group will contain SWIR2. Make them check B8A against B8 on one chip before training.</aside>
+  <aside class="notes">Not taught in class. The band-order trap is the one thing on this card that will silently ruin a lab: the agent will write the group embedding assuming ESA's order, the model will train, and the "red edge" group will hold B9, water vapour, where B8A belongs, while the SWIR group reads B12 and B8A instead of B11 and B12. Make them check B8A against B8 on one chip before training.</aside>
 </section>
 
 <!-- 58 -->

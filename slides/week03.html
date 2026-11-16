@@ -758,8 +758,8 @@ items = cat.search(
     <span><b>ACC</b> &mdash; anomaly correlation coefficient: how well the forecast anomaly lines up with the observed one, with the same cos &phi; weights. Derived in W11.</span>
     <span><b>x&prime;<sub>f</sub>, x&prime;<sub>o</sub></b> &mdash; forecast anomaly and observed anomaly; the square root underneath just rescales the score to sit between &minus;1 and 1.</span>
   </div>
-  <div class="foot"><span>ACC compares forecast anomaly x′f with observed anomaly x′o — climatology scores exactly 0</span></div>
-  <aside class="notes">2 min. Do not write the ACC formula out — one forward pointer only ("this is W11’s metric; the full form is Appendix A8"), because W11 budgets a 15-minute block to derive it. The rhetorical move: a model that memorizes the seasonal cycle looks great on raw RMSE at long leads. Anomaly space is where skill claims become honest — climatology itself scores zero ACC by construction. Lab pipe (a) builds a Z500 climatology and anomaly field, so this slide becomes muscle memory today. Note normalization parallel: climatology is also computed on reference years only — same train-only discipline as normalization stats, coming in Part 4.</aside>
+  <div class="foot"><span>ACC compares forecast anomaly x′f with observed anomaly x′o — a climatology forecast has zero anomaly: ACC is 0/0, credited with no skill by convention</span></div>
+  <aside class="notes">2 min. Do not write the ACC formula out — one forward pointer only ("this is W11’s metric; the full form is Appendix A8"), because W11 budgets a 15-minute block to derive it. The rhetorical move: a model that memorizes the seasonal cycle looks great on raw RMSE at long leads. Anomaly space is where skill claims become honest — climatology itself has zero forecast anomaly, so its ACC is 0/0 and, by convention, it is credited with no skill. Lab pipe (a) builds a Z500 climatology and anomaly field, so this slide becomes muscle memory today. Note normalization parallel: climatology is also computed on reference years only — same train-only discipline as normalization stats, coming in Part 4.</aside>
 </section>
 <!-- 23 -->
 <section class="slide">
@@ -776,7 +776,7 @@ items = cat.search(
     </div>
     <div>
       <h3>Nearest-neighbor</h3>
-      <ul class="small"><li>Copies one cell, never averages. The only legal choice for <b>class labels</b>: land cover, SCL (scene classification layer).</li></ul>
+      <ul class="small"><li>Copies one cell, never averages. Legal for <b>class labels</b> (land cover, SCL, the scene classification layer), as is the majority class when coarsening.</li></ul>
     </div>
   </div>
   <div class="figure" style="flex:0 0 auto;display:block;margin:.2em 0 0">
@@ -854,14 +854,14 @@ items = cat.search(
   <p class="kicker">Part 4 · Statistics are parameters</p>
   <h2>Normalization statistics are model parameters</h2>
   <ul>
-    <li><b>Per-band</b> μ and σ — band B02 and band B08 live on different scales; SAR is already log (dB); one global μ/σ across bands destroys spectral structure.</li>
+    <li><b>Per-band</b> μ and σ — band B02 and band B08 live on different scales; SAR is already log (dB); with one global μ/σ a band of small range fills only a sliver of the input scale.</li>
     <li><b>Train-set-only</b>: stats computed over test years/regions are leakage — the W2 lesson, now in the corpus itself.</li>
     <li>Compute once, streaming (Welford / chunked accumulation), and <span class="accent">version the stats file with the corpus</span> — fine-tuning must reuse pretraining stats, not recompute.</li>
     <li class="muted">Per-chip min–max normalization erases absolute brightness — a real signal (albedo, backscatter level), not noise.</li>
   </ul>
   <div class="gloss">
     <span><b>&mu;, &sigma;</b> "mu, sigma" &mdash; a band's average value and how much it varies; standardization subtracts &mu; and divides by &sigma; so every band arrives near zero with spread one.</span>
-    <span><b>per-band</b> &mdash; one &mu; and one &sigma; for each band on its own; blue and near-infrared live on different scales, so a single pair for all bands flattens the spectrum.</span>
+    <span><b>per-band</b> &mdash; one &mu; and one &sigma; for each band on its own; blue and near-infrared live on different scales, so with a single pair for all bands a narrow band uses only a small part of the input range.</span>
     <span><b>train-only</b> &mdash; compute the stats over training years and regions alone; folding in test data leaks the answer, the W2 lesson moved into the corpus itself.</span>
     <span><b>Welford</b> &mdash; a streaming formula that updates a mean and a variance chunk by chunk, so you never hold the whole corpus in memory.</span>
   </div>
@@ -885,7 +885,7 @@ items = cat.search(
     <span><b>RFI</b> "radio-frequency interference" &mdash; ground transmitters shouting in SMAP's microwave band; the quality flag marks those retrievals as untrustworthy.</span>
   </div>
   <div class="foot"><span>Full class table: Appendix A9 · <a href="https://sentiwiki.copernicus.eu/web/s2-processing">Sen2Cor scene classification</a> · <a href="https://nsidc.org/data/spl3smp">SMAP L3 product guide</a></span></div>
-  <aside class="notes">2 min. The SCL reject classes and the bad-fraction threshold stay on screen — students transcribe them into pipe (b) within the hour; only the full 0–11 class table moved to Appendix A9. The last bullet is the message: curation failures are silent. Show of hands — who has trained on an image dataset without looking at 100 random samples? The chip gallery in the lab deliverable exists to force that look. Also note masks are categorical: if you ever regrid SCL, nearest-neighbor only (callback to regridding). Transition: everything today was one pipeline — one slide to close the loop.</aside>
+  <aside class="notes">2 min. The SCL reject classes and the bad-fraction threshold stay on screen — students transcribe them into pipe (b) within the hour; only the full 0–11 class table moved to Appendix A9. The last bullet is the message: curation failures are silent. Show of hands — who has trained on an image dataset without looking at 100 random samples? The chip gallery in the lab deliverable exists to force that look. Also note masks are categorical: if you ever regrid SCL, nearest-neighbour or, when coarsening, the majority class (callback to regridding). Transition: everything today was one pipeline — one slide to close the loop.</aside>
 </section>
 <!-- 28 -->
 <section class="slide">
@@ -1049,7 +1049,7 @@ items = cat.search(
     <li class="muted">One object, many concurrent windowed readers; no server-side code — plain object storage.</li>
   </ul>
   <div class="foot"><span>Sentinel-2 L2A on AWS Earth Search is distributed as COGs · readers: rasterio/GDAL (Geospatial Data Abstraction Library), rioxarray, stackstac</span></div>
-  <aside class="notes">2 min. Key mental model: COG turns "an image file" into "a byte-addressable tile database." Reading a 64×64 chip from an 11,000×11,000-pixel scene costs a header read plus one or two tile reads per band. Earth Search’s Sentinel-2 files use 1,024×1,024-pixel internal tiles of about 1.1 MB, so that is about 1 MB per band (a few hundred KB would hold for 512-pixel tiles) — not the ~1 GB scene. This is exactly what stackstac does under the hood in today's lab.</aside>
+  <aside class="notes">2 min. Key mental model: COG turns "an image file" into "a byte-addressable tile database." Reading a 64×64 chip from an 11,000×11,000-pixel scene costs a header read plus usually one tile read per band (at most four). Earth Search’s Sentinel-2 files use 1,024×1,024-pixel internal tiles of about 1.1 MB, so that is about 1 MB per band (a few hundred KB would hold for 512-pixel tiles) — not the ~1 GB scene. This is exactly what stackstac does under the hood in today's lab.</aside>
 </section>
 <!-- 37 -->
 <section class="slide">
@@ -1126,7 +1126,7 @@ items = cat.search(
     <span class="muted">A weighted correlation between the forecast anomaly and the observed anomaly &mdash; f = forecast, o = observed (ERA5).</span>
   </div>
   <ul class="small">
-    <li>Predicting the climatology gives x&prime;<sub>f</sub> = 0, so the numerator is 0 and <b>ACC = 0</b>. That is the point: "it is cold in January" earns no credit.</li>
+    <li>Predicting the climatology gives x&prime;<sub>f</sub> = 0, so numerator and denominator are both 0: <b>ACC = 0/0</b>, credited with no skill by convention. That is the point: "it is cold in January" earns no credit.</li>
     <li>ACC is scale-free, so it does not reward a model for getting the seasonal cycle right &mdash; unlike raw RMSE, which does.</li>
     <li><b>ACC &asymp; 0.6</b> on Z500 is the conventional edge of useful deterministic skill; the forecast-range at which a model crosses it is how lead times get compared.</li>
     <li class="muted">Same cos &phi; weight as the live derivation, same anomaly definition as the live anomaly slide. W11 budgets a full 15-minute block to this.</li>
@@ -1152,7 +1152,7 @@ items = cat.search(
   <ul class="small">
     <li>Chip rule: keep a chip only if its <b>bad-class fraction is under the threshold</b> you chose (5&ndash;10% is the usual band). Write the threshold into the stats JSON &mdash; it is part of the corpus definition.</li>
     <li>Classes 2, 7 and 11 are genuinely ambiguous. Snow matters if you care about winter; cast shadow matters in mountains. <span class="accent">Decide once, record the decision.</span></li>
-    <li class="muted">SCL is categorical: if you ever regrid it, nearest-neighbour only.</li>
+    <li class="muted">SCL is categorical: if you ever regrid it, nearest-neighbour, or the majority class when coarsening.</li>
   </ul>
   <div class="foot"><span><a href="https://sentiwiki.copernicus.eu/web/s2-processing">Copernicus SentiWiki &mdash; S2 scene classification</a></span><span>SMAP: <a href="https://nsidc.org/data/spl3smp">retrieval_qual_flag, bit 0 = recommended</a></span></div>
   <aside class="notes">Not taught in class. The reject list and the threshold are already on the live quality-assurance slide because students transcribe them into pipe (b) within the hour; this card is the full table to keep open in a second tab during lab.</aside>

@@ -312,9 +312,9 @@
           <text x="118" y="185" opacity="0.6">~10⁹× … one pass per parameter</text>
         </g>
       </svg>
-      <svg viewBox="0 0 360 210" role="img" aria-label="Memory bars: weights plus optimizer under four gigabytes; activations tens of gigabytes; checkpointing shrinks activations five to ten times" style="width:min(100%,320px)">
+      <svg viewBox="0 0 360 210" role="img" aria-label="Memory bars: weights, gradients and optimizer about five gigabytes; activations tens of gigabytes; checkpointing shrinks activations five to ten times" style="width:min(100%,320px)">
         <g font-family="var(--sans)" font-size="12.5" fill="currentColor">
-          <text x="14" y="36">weights + Adam</text>
+          <text x="14" y="36">weights, grads, Adam</text>
           <text x="14" y="96">activations</text>
           <text x="14" y="166">+ checkpointing</text>
         </g>
@@ -323,7 +323,7 @@
         <rect x="150" y="152" width="30" height="22" rx="5" fill="var(--accent)" opacity="0.8"/>
         <rect x="180" y="152" width="16" height="22" rx="4" fill="none" stroke="currentColor" stroke-dasharray="3 3" opacity="0.5"/>
         <g font-family="var(--sans)" font-size="12" fill="currentColor">
-          <text x="192" y="38">≈ 3.6 GB (ViT-L)</text>
+          <text x="192" y="38">≈ 4.8 GB (ViT-L)</text>
           <text x="190" y="76" fill="var(--accent)">tens of GB — the real ceiling</text>
           <text x="204" y="167">÷ 5–10&ensp;<tspan opacity="0.6">(+33% compute)</tspan></text>
         </g>
@@ -333,11 +333,11 @@
   <div class="gloss">
     <span><b>activations</b> — the tensors each layer outputs (and must keep) during the forward pass.</span>
     <span><b>∝</b> “proportional to” — grows in step with.</span>
-    <span><b>weights + Adam</b> — Adam carries <i>two ledgers per weight</i>, running averages of g and g², each weight-sized, so the model side of memory ≈ 3× the weights. What m and v do: Part 2.</span>
+    <span><b>weights, grads, Adam</b> — the gradients plus Adam’s <i>two ledgers per weight</i>, running averages of g and g², each weight-sized, so the model side of memory = 4× the weights (16 bytes per parameter in fp32). What m and v do: Part 2.</span>
     <span><b>finite differences</b> — the naive alternative: wiggle one weight, rerun the whole network, read off the change; repeat per weight.</span>
   </div>
   <div class="foot"><span><a href="https://arxiv.org/abs/1604.06174">Chen et al. 2016 (checkpointing)</a> · same op count in <a href="https://www.cs.toronto.edu/~rgrosse/courses/csc321_2017/readings/L06%20Backpropagation.pdf">Grosse’s U. Toronto backpropagation notes</a> · callback target: Week 12 fine-tuning lab</span></div>
-  <aside class="notes">~2 min. The 3× rule is worth committing to memory — it converts inference cost into training cost for any model, and it is the same bookkeeping behind the 6·N·D FLOPs rule in the scaling-law weeks. For memory, do the quick arithmetic aloud: ViT-Large 0.3B params × 4 bytes ≈ 1.2 GB, Adam triples it to ~3.6 — then batch × tokens × width × depth buries that. The fix hierarchy (checkpoint / batch / precision) returns verbatim in Week 12.</aside>
+  <aside class="notes">~2 min. The 3× rule is worth committing to memory — it converts inference cost into training cost for any model, and it is the same bookkeeping behind the 6·N·D FLOPs rule in the scaling-law weeks. For memory, do the quick arithmetic aloud: ViT-Large 0.3B params × 4 bytes ≈ 1.2 GB; gradients and Adam’s two states make it 4×, ~4.8 GB (16 bytes per parameter) — then batch × tokens × width × depth buries that. The fix hierarchy (checkpoint / batch / precision) returns verbatim in Week 12.</aside>
 </section>
 
 <section class="slide">

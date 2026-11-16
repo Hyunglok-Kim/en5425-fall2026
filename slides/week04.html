@@ -399,7 +399,7 @@
   <div class="gloss">
     <span><b>decomposable</b> — a sum over pixels, so a batch's gradient is the average of per-pixel gradients. Dice is not: its value depends on every pixel in the chip at once, which is why an all-dry chip makes it wobble.</span>
     <span><b>soft Dice</b> — computed on probabilities rather than hard labels, so it is differentiable; add a small ε to numerator and denominator or an empty chip divides by zero.</span>
-    <span><b>γ</b> “gamma” — the focusing exponent in focal loss. γ = 0 is plain cross-entropy; γ = 2 means a pixel already predicted at p = 0.9 keeps 1% of its cross-entropy loss and 2.9% of its gradient.</span>
+    <span><b>γ</b> “gamma” — the focusing exponent in focal loss. γ = 0 (no α weight) is plain cross-entropy; γ = 2 means a pixel already predicted at p = 0.9 keeps 1% of its cross-entropy loss and 2.9% of its gradient.</span>
     <span><b>class weight w</b> — how much one water pixel counts against one dry pixel. Setting it to the inverse frequency (≈ 8.4 here) is the usual first guess, not a law.</span>
   </div>
   <div class="foot"><span>Milletari et al. 2016 (V-Net, Dice) · Lin et al. 2017 (focal loss) · full loss zoo with gradients: Appendix</span></div>
@@ -802,7 +802,7 @@
     </ol>
   </div>
   <ul class="small">
-    <li>Sen1Floods11 hands you both splits: the official <b>IID split</b> (252 / 89 / 90 chips), and <b>Bolivia — 15 chips of a flood held out entirely</b>. <span class="accent">Report both numbers.</span> The gap between them is the only honest estimate of how your model travels.</li>
+    <li>Sen1Floods11 hands you both splits: the official <b>IID split</b> (252 / 89 / 90 chips), and <b>Bolivia — 15 chips of a flood held out entirely</b>. <span class="accent">Report both numbers.</span> The gap estimates how your model travels — but Bolivia is easy for the Otsu baseline too (0.70 vs 0.49), so report the baseline on both as the control.</li>
   </ul>
   <div class="gloss">
     <span><b>IID split</b> — independent and identically distributed: chips shuffled at random, so the same flood appears in train and test. Comfortable, and optimistic — the Week 2 lesson, in this dataset's own file names.</span>
@@ -810,7 +810,7 @@
     <span><b>the threshold</b> — a segmentation model outputs a probability per pixel; 0.5 is a convention, not a result. Sweeping it on the test set is leakage wearing a lab coat.</span>
   </div>
   <div class="foot"><span>Bonafilia et al. 2020 · splits shipped with the dataset · the same discipline as Week 2's leakage checklist, applied to a map</span></div>
-  <aside class="notes">2 min. Deliver this as a contract, not advice — it is graded. The killer detail is that Sen1Floods11 ships both splits, so nobody has to construct the honest experiment: refusing to report the Bolivia number is now a choice, and it is the choice reviewers look for. Tell them what they will most likely see — the held-out event score lower, sometimes much lower — and that reporting that gap is the strongest thing in their note, not the weakest. End of the live budget: ~0:49:30. Read the clock here: ≤ 0:50 → run the FLEX board exercise; past it → hand the board to the journal-club leader and go to break.</aside>
+  <aside class="notes">2 min. Deliver this as a contract, not advice — it is graded. The killer detail is that Sen1Floods11 ships both splits, so nobody has to construct the honest experiment: refusing to report the Bolivia number is now a choice, and it is the choice reviewers look for. Tell them the gap mixes two things: how the model travels, and how hard the held-out event is — for the Otsu baseline Bolivia is the second-easiest event (0.697 against 0.493 overall), so the baseline scored on the same two test sets is the control. Reporting that gap with its control is the strongest thing in their note, not the weakest. End of the live budget: ~0:49:30. Read the clock here: ≤ 0:50 → run the FLEX board exercise; past it → hand the board to the journal-club leader and go to break.</aside>
 </section>
 
 <!-- 27 -->
@@ -827,7 +827,7 @@
     <span><b>why five</b> — you have already seen four on today's slides, measured. The fifth is the one your own pipeline will invent.</span>
   </div>
   <div class="foot"><span>Rule: every proposal must be defensible in public — these are choices honest people make differently, not frauds</span></div>
-  <aside class="notes">5 min, FLEX — teach or skip per the clock rule on the previous slide. If skipped, the fallback is MANDATORY: say out loud "leader, the five-ways board is your journal-club opener." Target list to steer toward, do not reveal upfront: (1) pooled versus per-chip averaging — we measured 0.493 against 0.217; (2) what you do with the 25 empty chips; (3) the probability threshold, swept after seeing the test set; (4) which events land in test — 0.78 on the Mekong, 0.15 on Somalia; (5) quietly dropping no-data pixels, or tile borders, or chips with less than 1% water. If the room is quick, add the two subtler ones: selecting the best epoch on test, and reporting the fused configuration only because it happened to win. Close by naming the pattern: none of these is fraud, all of them are a missing sentence.</aside>
+  <aside class="notes">5 min, FLEX — teach or skip per the clock rule on the previous slide. If skipped, the fallback is MANDATORY: say out loud "leader, the five-ways board is your journal-club opener." Target list to steer toward, do not reveal upfront: (1) pooled versus per-chip averaging — we measured 0.493 pooled against 0.311 for the per-chip mean and 0.217 for the per-chip median; (2) what you do with the 25 empty chips; (3) the probability threshold, swept after seeing the test set; (4) which events land in test — 0.78 on the Mekong, 0.15 on Somalia; (5) quietly dropping no-data pixels, or tile borders, or chips with less than 1% water. If the room is quick, add the two subtler ones: selecting the best epoch on test, and reporting the fused configuration only because it happened to win. Close by naming the pattern: none of these is fraud, all of them are a missing sentence.</aside>
 </section>
 
 <!-- 28 -->
@@ -887,7 +887,7 @@
   <ul class="small">
     <li><b>Transposed convolution vs upsample-then-convolve.</b> A stride-2 transposed convolution with k = 3 covers output pixels unevenly and prints a checkerboard; nearest or bilinear upsampling followed by a 3 × 3 convolution avoids it and costs about the same. Use k divisible by s if you do use transposed convolutions.</li>
     <li><b>Dilation as a pooling substitute.</b> Stacking 3 × 3 convolutions with dilations 1, 2, 4, 8 reaches a receptive field of <b>31 px</b> with no downsampling at all — full resolution kept, at the price of gridding artifacts if you never mix scales.</li>
-    <li><b>Depthwise separable.</b> k²·C + C·C′ instead of k²·C·C′ — at k = 3 a 7.9× saving with 64 output channels, approaching 9× as channels grow, and the standard trick when the chip count is small.</li>
+    <li><b>Depthwise separable.</b> k²·C + C·C′ instead of k²·C·C′ — at k = 3 a 7.9× saving with 64 output channels, approaching 9× as channels grow — an efficiency choice: fewer weights and multiply–accumulates.</li>
     <li class="muted">Receipt for Part 1's headline: 3 · 3 · 4 · 64 = <b>2,304</b> weights, against (64·64·4) · (64·64·64) ≈ <b>4.3 × 10⁹</b> for the fully connected equivalent.</li>
   </ul>
   <div class="foot"><span>Odena et al. 2016, <i>Deconvolution and checkerboard artifacts</i> (Distill) · Yu &amp; Koltun 2016 (dilated convolutions)</span></div>
@@ -1061,7 +1061,7 @@
   <p class="kicker">Appendix A9 · Inference</p>
   <h2>The tiling recipe, with numbers</h2>
   <div class="card small">
-    1 · Find how far the receptive field of an output pixel reaches to one side (r / 2 if it is symmetric): that is the <b>halo h</b> — 92 px for the valid-padded original U-Net, <b>107 px</b> for the same depth with “same” padding.<br>
+    1 · Find how far the receptive field of an output pixel reaches to one side ((r − 1) / 2 if it is symmetric): that is the <b>halo h</b> — 92 px for the valid-padded original U-Net, <b>107 px</b> for the same depth with “same” padding.<br>
     2 · Read tiles of size <b>t + 2h</b>, write only the central <b>t × t</b>. Step the window by exactly t, so writes tile the scene with no gaps and no double-writes.<br>
     3 · At the true edge of the scene, <b>mirror</b> the image outward by h. Never zero-pad at the edge of real data.<br>
     4 · If you do blend overlapping predictions, weight with a raised-cosine taper rather than averaging equally — the rim pixels are the weak ones.<br>

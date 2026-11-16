@@ -195,7 +195,7 @@
     <li>Along the lane the derivative is just <b>f<sub>t</sub></b> (gates held fixed) — a gate the network sets, not W through tanh. <span class="accent">When f ≈ 1, December’s signal reaches April.</span></li>
   </ul>
   <div class="gloss">
-    <span><b>LSTM</b> “long short-term memory” (Hochreiter &amp; Schmidhuber 1997). <b>f, i, o</b> — forget, input, output gates, each σ(·) in (0, 1) per cell; <b>g</b> — candidate content; <b>⊙</b> — elementwise product.</span>
+    <span><b>LSTM</b> “long short-term memory” (Hochreiter &amp; Schmidhuber 1997; forget gate: Gers et al. 2000). <b>f, i, o</b> — forget, input, output gates, each σ(·) in (0, 1) per cell; <b>g</b> — candidate content; <b>⊙</b> — elementwise product.</span>
     <span><b>in the figure</b> — only gate products and additions touch the orange lane. GRU “gated recurrent unit” — two gates, same idea (A2).</span>
   </div>
   <aside class="notes">2.5 min. Draw only the orange lane on the board, then the two operations on it: times f, plus i·g. The one line to land: backward along the lane the factor is f, which the network learns to hold near 1 for as long as it needs the memory — Hochreiter and Schmidhuber called it the constant error carrousel (their spelling). Contrast with the previous slide: there the factor was W times tanh's slope at every step, not under anyone's control. GRU in one sentence, no equations (Appendix A2). The hydrologist's reading, which sets up the next slide: the lane is a storage — snowpack, soil water — the input gate is accumulation, the forget gate is loss, the output gate is release. That is a bucket model, learned.</aside>
@@ -696,7 +696,7 @@
         </svg>
   </div>
   <table class="small" style="width:100%;border-collapse:collapse;margin:.4vh 0 0">
-    <tr><th style="text-align:left">same one-step NSE 0.90; then a =</th><th style="text-align:center">0.5</th><th style="text-align:center">0.9</th><th style="text-align:center;color:var(--accent)">0.911 (river)</th><th style="text-align:center">0.95</th><th style="text-align:center">1</th><th style="text-align:center">1.05</th></tr>
+    <tr><th style="text-align:left">same one-step NSE 0.897; then a =</th><th style="text-align:center">0.5</th><th style="text-align:center">0.9</th><th style="text-align:center;color:var(--accent)">0.911 (river)</th><th style="text-align:center">0.95</th><th style="text-align:center">1</th><th style="text-align:center">1.05</th></tr>
     <tr><td style="text-align:left">error variance at day 15, ÷ σ²</td><td style="text-align:center">1.3</td><td style="text-align:center">5.0</td><td style="text-align:center">5.5</td><td style="text-align:center">8.1</td><td style="text-align:center">15</td><td style="text-align:center">32</td></tr>
     <tr><td style="text-align:left">NSE at day 15</td><td style="text-align:center;font-weight:700">0.86</td><td style="text-align:center;font-weight:700">0.48</td><td style="text-align:center;font-weight:700">0.43</td><td style="text-align:center;font-weight:700">0.17</td><td style="text-align:center;font-weight:700">−0.55</td><td style="text-align:center;font-weight:700">−2.3</td></tr>
   </table>
@@ -705,7 +705,7 @@
     <span><b>in runs</b> — one-step misses are correlated day to day (lag-1 correlation 0.33), so the river climbs faster than the formula.</span>
   </div>
   <div class="foot"><span>USGS 01022500, test 1989–1999 · estimate a for any model: nudge yesterday’s input by ε, read today’s change ÷ ε · Appendix A6</span></div>
-  <aside class="notes">2.5 min. Left panel first: three curves, one σ², and only a differs — below one the error settles, at one it drifts like a random walk, above one it explodes; chaos is the atmosphere itself having |a| > 1, which is why weather has a predictability limit no model removes. Right panel: slide 14's receipt re-plotted in variance units — the formula with the river's own a settles near 5.9 σ² and predicts an NSE of about 0.43 at day 15; the measured curve reaches 6.3 σ² and 0.35, faster because the misses come in runs (a storm under-predicted today is under-predicted tomorrow). Then the table, which is the point of the whole block: read the conversion once — NSE is one minus the error as a fraction of the mean forecast's error, and the one-step score says that fraction is 0.10; multiply by the variance ratio and the fraction becomes 0.5, or 1.5, or 3 — so six models with the same 0.90 land anywhere from 0.86 to minus 2 at day 15. The one-step scoreboard cannot tell them apart; only a lead-time curve can. The "do" for the lab, said once: for an LSTM you cannot read a off a coefficient — nudge yesterday's flow by a small ε, run one step, and divide the change by ε. Time check: ~0:30.</aside>
+  <aside class="notes">2.5 min. Left panel first: three curves, one σ², and only a differs — below one the error settles, at one it drifts like a random walk, above one it explodes; chaos is the atmosphere itself having |a| > 1, which is why weather has a predictability limit no model removes. Right panel: slide 14's receipt re-plotted in variance units — the formula with the river's own a settles near 5.9 σ² and predicts an NSE of about 0.43 at day 15; the measured curve reaches 6.3 σ² and 0.35, faster because the misses come in runs (a storm under-predicted today is under-predicted tomorrow). Then the table, which is the point of the whole block: read the conversion once — NSE is one minus the error as a fraction of the mean forecast's error, and the one-step score says that fraction is 0.103 (one-step NSE 0.897); multiply by the variance ratio and the fraction becomes 0.5, or 1.5, or 3 — so six models with the same 0.897 land anywhere from 0.86 to minus 2 at day 15. The one-step scoreboard cannot tell them apart; only a lead-time curve can. The "do" for the lab, said once: for an LSTM you cannot read a off a coefficient — nudge yesterday's flow by a small ε, run one step, and divide the change by ε. Time check: ~0:30.</aside>
 </section>
 <!-- 19 -->
 <section class="slide xl">
@@ -1026,14 +1026,14 @@ for k in range(1, K+1):  # K = 3 in lab
   <h2>Squared error asks for the average of every possible future</h2>
   <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Blur is not a bug in the architecture; it is the correct answer to the question squared error asks.</p>
   <div class="figure" style="flex:0 0 auto;display:block;margin:.2em 0 0">
-    <img src="img/fig-w5-lorenz-blur.png" data-zoom alt="Left: 200 runs of the Lorenz-63 system started 0.001 apart. They agree until about 6.5 time units, then fan out; every run keeps sharp oscillations, while their mean, drawn thick orange, flattens toward zero. Right: mean squared error against lead time. A single run's error rises to about twice the climate variance, the mean's to about once." title="Click to enlarge" style="display:block;margin:0 auto;height:34vh;width:auto;max-width:100%">
+    <img src="img/fig-w5-lorenz-blur.png" data-zoom alt="Left: 200 runs of the Lorenz-63 system whose starts differ by random perturbations of standard deviation 0.001. They agree until about 6.5 time units, then fan out; every run keeps sharp oscillations, while their mean, drawn thick orange, flattens toward zero. Right: mean squared error against lead time. A single run's error rises to about twice the climate variance, the mean's to about once." title="Click to enlarge" style="display:block;margin:0 auto;height:34vh;width:auto;max-width:100%">
   </div>
   <ul class="small">
     <li>The minimizer of E[(Y − c)²] is <b>c = E[Y | what you know]</b>: <span class="accent">MSE training pulls a forecast toward the conditional mean</span>, which flattens once futures fan out — a sharp run scores <b>1.96×</b> its error.</li>
   </ul>
   <div class="gloss">
     <span><b>conditional mean</b> — the average over every future consistent with the inputs; when they disagree it is smoother than any one of them.</span>
-    <span><b>Lorenz-63</b> — three equations standing in for an atmosphere; runs started 0.001 apart separate after ~6.5 time units.</span>
+    <span><b>Lorenz-63</b> — three equations standing in for an atmosphere; runs whose starts differ by perturbations of standard deviation 0.001 separate after ~6.5 time units.</span>
   </div>
   <div class="foot"><span>GraphCast’s own words: a longer rollout in the MSE loss “encourages it to express its uncertainty by predicting spatially smoothed outputs” (Lam et al. 2023)</span></div>
   <aside class="notes">1.5 min. Do the two-line proof on the board: d/dc E[(Y−c)²] = −2E[Y−c] = 0, so c = E[Y]. Then point at the figure: until 6.5 time units all 200 runs agree and the orange mean is as sharp as any of them; after that the runs split into the two lobes of the attractor and the mean slides to zero. The sentence to land: blurring is not a bug in the network, it is the correct answer to the question the loss asked — "what single number minimizes squared error when you do not know which future happens?". The factor 1.96 is our measurement of the textbook factor two. Read the GraphCast quote in the foot aloud: the remedy of Part 2 — a longer rollout in an MSE loss — is exactly what makes a model blur more, so stability and sharpness pull against each other. Callback: Week 4's nowcasting slide said this about radar U-Nets; Week 11 gives the probabilistic fix a score.</aside>
@@ -1162,7 +1162,7 @@ for k in range(1, K+1):  # K = 3 in lab
           <span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span>
         </span>
       </span>
-      <p class="small muted" style="margin:.5vh 0 0">Veritasium · <i>Chaos: The Science of the Butterfly Effect</i> · 13 min — <span class="accent">click to play here</span> · why runs 0.001 apart diverge.</p>
+      <p class="small muted" style="margin:.5vh 0 0">Veritasium · <i>Chaos: The Science of the Butterfly Effect</i> · 13 min — <span class="accent">click to play here</span> · why runs that start almost together diverge.</p>
     </a>
     <a href="https://www.youtube.com/watch?v=Q_f1vRLAENA" class="yt" data-id="Q_f1vRLAENA" style="flex:1;max-width:31%;text-decoration:none;color:inherit">
       <span class="ytbox" style="position:relative;display:block">
@@ -1390,7 +1390,7 @@ for k in range(1, K+1):  # K = 3 in lab
     <span><b>hindcast</b> — a forecast re-run for the past; if it uses information unavailable at issue time (here, the observed rain), its score is a diagnosis, not forecast skill. <b>in the figure</b> — nothing right of the orange line may enter the model except forecast weather.</span>
   </div>
   <div class="foot"><span>Kratzert et al. 2019 train on Oct 1999 – Sep 2008 and test on Oct 1989 – Sep 1999 — the lab and this deck’s CAMELS scores use the same split</span></div>
-  <aside class="notes">2 min. Deliver it as a contract, the same shape as last week's five sentences, because it is graded the same way. The killer sentence is number 2: almost every "streamflow forecast" skill in a student report is a hindcast with observed rain, and it must say so — our 0.35 at 15 days is exactly such a number. Number 3 is the lesson of Part 1: a model that does not beat persistence at every lead has not earned its parameters. End of the live budget: ~0:52. Read the clock here: ≤ 0:52 → run the FLEX board exercise; past it → hand the board to the journal-club leader and go to break.</aside>
+  <aside class="notes">2 min. Deliver it as a contract, the same shape as last week's five sentences, because it is graded the same way. The killer sentence is number 2: almost every "streamflow forecast" skill in a student report is a hindcast with observed rain, and it must say so — our 0.35 at 15 days is exactly such a number. Number 3 is the lesson of Part 1: a model that does not beat persistence at a given lead time has not earned its parameters at that lead time. End of the live budget: ~0:52. Read the clock here: ≤ 0:52 → run the FLEX board exercise; past it → hand the board to the journal-club leader and go to break.</aside>
 </section>
 
 <!-- 37 -->
