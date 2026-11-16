@@ -135,32 +135,37 @@
         <li><b>r<sub>ℓ</sub> = r<sub>ℓ−1</sub> + (k<sub>ℓ</sub> − 1) · j<sub>ℓ−1</sub></b> &nbsp;·&nbsp; <b>j<sub>ℓ</sub> = j<sub>ℓ−1</sub> · s<sub>ℓ</sub></b> &nbsp;<span class="muted">(r₀ = 1, j₀ = 1)</span></li>
         <li>Five stacked 3 × 3 convolutions, stride 1: r = 1 + 5·2 = <b>11 px</b> — at 10 m ground sample distance that is <span class="accent">110 m</span>.</li>
         <li>Stride and pooling are what make it grow fast: each 2 × 2 pool doubles j, so the <i>next</i> 3 × 3 convolution adds twice as much as the last one.</li>
-        <li class="muted">The original U-Net, four poolings deep, reaches <b>185 px</b> — 1.85 km at Sentinel-1 resolution.</li>
+        <li class="muted">The original U-Net, four poolings deep: <b>140 px</b> at the bottleneck, <b>204 px</b> at the output — about 2 km at Sentinel-1 resolution.</li>
       </ul>
     </div>
     <div class="figure" style="min-width:0">
-      <svg viewBox="0 0 396 250" role="img" aria-label="A stack of four layers drawn as rows. From one unit at the top, a cone widens downward to the input row. Without pooling the cone widens by two pixels per layer; after a pooling step the jump doubles and the cone widens by four, then eight." style="width:min(100%,400px)">
+      <svg viewBox="0 0 396 250" role="img" aria-label="Six rows, read from the input at the bottom: two 3×3 convolutions, a 2×2 max-pool and two more 3×3 convolutions, whose top row holds one output unit. A shaded cone hangs from that unit down to the input, where it is 14 pixels wide. Each row is labelled with its receptive field r and jump j: r = 1, 3, 5, 6, 10, 14 and j = 1, 1, 1, 2, 2, 2 from the input up. Each 3×3 convolution adds 2 pixels before the pool and 4 after it." style="width:min(100%,400px)">
         <g font-size="9.5" fill="var(--muted)" text-anchor="end">
-          <text x="60" y="34">output unit</text>
-          <text x="60" y="88">conv 3×3</text>
-          <text x="60" y="142">pool 2×2</text>
-          <text x="60" y="196">conv 3×3</text>
+          <text x="60" y="34">conv 3×3</text>
+          <text x="60" y="74">conv 3×3</text>
+          <text x="60" y="114">pool 2×2</text>
+          <text x="60" y="154">conv 3×3</text>
+          <text x="60" y="194">conv 3×3</text>
           <text x="60" y="234">input</text>
         </g>
         <g stroke="var(--hairline)" stroke-width="1">
-          <path d="M70 30 H318 M70 84 H318 M70 138 H318 M70 192 H318 M70 230 H318"/>
+          <path d="M70 30 H318 M70 70 H318 M70 110 H318 M70 150 H318 M70 190 H318 M70 230 H318"/>
         </g>
-        <path d="M195 30 L163 84 L142 138 L100 192 L84 230 L306 230 L290 192 L248 138 L227 84 L195 30 Z"
+        <path d="M180 30 L150 70 L120 110 L120 150 L105 190 L90 230 L300 230 L285 190 L270 150 L270 110 L240 70 L210 30 Z"
               fill="var(--accent)" opacity=".13" stroke="none"/>
-        <path d="M195 30 L163 84 L142 138 L100 192 L84 230 M195 30 L227 84 L248 138 L290 192 L306 230"
+        <path d="M180 30 L150 70 L120 110 L120 150 L105 190 L90 230 M210 30 L240 70 L270 110 L270 150 L285 190 L300 230 M180 30 H210"
               fill="none" stroke="var(--accent)" stroke-width="1.4"/>
         <g fill="var(--accent)"><circle cx="195" cy="30" r="3.4"/></g>
-        <g font-size="9" fill="currentColor" text-anchor="start">
-          <text x="392" y="88" text-anchor="end">r = 3, j = 1</text>
-          <text x="392" y="142" text-anchor="end">r = 5, j = 2</text>
-          <text x="392" y="196" text-anchor="end">r = 9, j = 2</text>
+        <text x="216" y="24" font-size="9" fill="var(--accent)" font-weight="700">output unit</text>
+        <g font-size="9" fill="currentColor" text-anchor="end">
+          <text x="392" y="34">r = 14, j = 2</text>
+          <text x="392" y="74">r = 10, j = 2</text>
+          <text x="392" y="114">r = 6, j = 2</text>
+          <text x="392" y="154">r = 5, j = 1</text>
+          <text x="392" y="194">r = 3, j = 1</text>
+          <text x="392" y="234">r = 1, j = 1</text>
         </g>
-        <text x="195" y="248" text-anchor="middle" font-size="9.5" fill="var(--accent)" font-weight="700">the cone on the input is the receptive field</text>
+        <text x="195" y="248" text-anchor="middle" font-size="9.5" fill="var(--accent)" font-weight="700">the cone on the input is the receptive field: 14 px</text>
       </svg>
     </div>
   </div>
@@ -168,8 +173,8 @@
     <span><b>receptive field</b> — the window of input pixels that can change one output value. Everything outside it is invisible to that prediction, no matter how deep the network is.</span>
     <span><b>jump</b> j — the input-pixel spacing between neighboring units at this layer; it is the running product of all strides so far, and it is why pooling is the cheap way to buy context.</span>
     <span><b>k, s</b> — kernel size and stride of layer ℓ. A 2 × 2 max-pool is just k = 2, s = 2.</span>
-    <span><b>GSD</b> “ground sample distance” — metres covered by one pixel; 10 m for Sentinel-1 and Sentinel-2. It is the exchange rate between pixels and the world, and it is the only reason 185 px means anything.</span>
-    <span><b>in the figure</b> — read bottom-up: one unit at the top, widening down to the input. The cone widens by 2 px per 3 × 3 convolution until the pool doubles j; after that the same convolution widens it by 4.</span>
+    <span><b>GSD</b> “ground sample distance” — metres covered by one pixel; 10 m for Sentinel-1 and Sentinel-2. It is the exchange rate between pixels and the world, and it is the only reason 204 px means anything.</span>
+    <span><b>in the figure</b> — read bottom-up: r grows from 1 at the input to 14 at the output unit, whose cone covers those 14 input pixels. Each 3 × 3 convolution adds 2 px until the pool doubles j; after that the same convolution adds 4.</span>
   </div>
   <div class="foot"><span>Same recursion for dilated convolutions with k<sub>eff</sub> = d·(k − 1) + 1 — full layer-by-layer table in the Appendix</span></div>
   <aside class="notes">3 min, and this is the board derivation of the deck — the Week 4 equivalent of last week's cos-latitude weight. Write the two recursions on the board and walk three layers by hand; do not read them off the slide. The rhetorical arc: ask first "how big is a flood?" (kilometres), then "how big is a 3 × 3 filter?" (30 m), and let the gap sit for two seconds before the recursion resolves it. The honest caveat to state once: this is the theoretical receptive field; the <i>effective</i> one is smaller, because contributions at the rim are weak — cite Luo et al. 2016 if someone asks, do not teach it. Every student should leave able to compute the receptive field of any architecture they are handed, including their capstone's. Transition: so the answer is pooling — and pooling is also what breaks segmentation.</aside>
@@ -180,20 +185,20 @@
   <p class="kicker">Part 1 · Context vs location</p>
   <h2>Pooling buys context and spends your boundary</h2>
   <div class="figure" style="flex:0 0 auto;display:block;margin:.2em 0 0">
-    <img src="img/fig-w4-receptive-field.png" data-zoom alt="Left: a 512 by 512 Sentinel-1 chip, 5.12 kilometres across, with the flood label outlined in blue, an 11-pixel white box and a 185-pixel orange box drawn on the same boundary. Right: the 185 by 185 pixel crop, showing the single pixel being labelled at its centre and the 11-pixel box inside it." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
+    <img src="img/fig-w4-receptive-field.png" data-zoom alt="Left: a 512 by 512 Sentinel-1 chip, 5.12 kilometres across, with the flood label outlined in blue, an 11-pixel white box and a 204-pixel orange box drawn on the same boundary. Right: the 204 by 204 pixel crop, showing the single pixel being labelled at its centre and the 11-pixel box inside it." title="Click to enlarge" style="display:block;margin:0 auto;height:36vh;width:auto;max-width:100%">
   </div>
   <ul class="small">
-    <li>Deep enough to see the floodplain, sharp enough to place the waterline — <span class="accent">a plain encoder cannot do both</span>: by the bottleneck, that 185 px window has been reduced to a handful of cells.</li>
+    <li>Deep enough to see the floodplain, sharp enough to place the waterline — <span class="accent">a plain encoder cannot do both</span>: by the bottleneck, that 204 px window has been reduced to a handful of cells.</li>
     <li>The bottleneck knows <b>what</b> is here; it has thrown away <b>where</b> the edge was.</li>
   </ul>
   <div class="gloss">
     <span><b>the 11 px box</b> — everything five stacked 3 × 3 convolutions can use. At 10 m that is 110 m: enough to see that a pixel is dark, not enough to know whether it is a flood, a fish pond or a road.</span>
-    <span><b>the 185 px box</b> — the original U-Net's receptive field, 1.85 km. It contains the river, the levee and the dry fields, which is what makes the centre pixel decidable.</span>
+    <span><b>the 204 px box</b> — the original U-Net's receptive field at that pixel, 2.04 km. It contains the river, the levee and the dry fields, which is what makes the centre pixel decidable.</span>
     <span><b>downsampling</b> — each pool halves the grid, so after four pools a 512 px chip is 32 px across and one cell stands for 160 m of ground. That is the resolution the bottleneck thinks in.</span>
-    <span><b>in the figure</b> — the flood is wider than the whole chip, and even the U-Net's window covers about a seventh of it. Context is not a luxury here; it is the task.</span>
+    <span><b>in the figure</b> — the flood is wider than the whole chip, and even the U-Net's window covers about a sixth of it. Context is not a luxury here; it is the task.</span>
   </div>
   <div class="foot"><span>Sen1Floods11 v1.1, Ghana chip 141910 · Sentinel-1 VV, 10 m · boxes drawn at true pixel scale</span></div>
-  <aside class="notes">1.5 min. Put the figure up and ask the room to decide the centre pixel from the 11 px box alone — they cannot, and someone will say so. Then show the 185 px crop: now it is obvious, because the river and the dry field are both inside the window. Name the trade in one sentence and write the two words on the board: pooling buys WHAT and spends WHERE. That framing is exactly discussion question 1 this afternoon, so plant it cleanly. Click the figure to enlarge if the back row complains.</aside>
+  <aside class="notes">1.5 min. Put the figure up and ask the room to decide the centre pixel from the 11 px box alone — they cannot, and someone will say so. Then show the 204 px crop: now it is obvious, because the river and the dry field are both inside the window. Name the trade in one sentence and write the two words on the board: pooling buys WHAT and spends WHERE. That framing is exactly discussion question 1 this afternoon, so plant it cleanly. Click the figure to enlarge if the back row complains.</aside>
 </section>
 
 <!-- 8 -->
@@ -214,7 +219,7 @@
       </g>
       <rect x="290" y="240" width="100" height="36" rx="6" fill="var(--wash)" stroke="var(--accent)" stroke-width="1.6"/>
       <text x="340" y="263" text-anchor="middle" font-size="11.5" fill="var(--accent)" font-weight="700">bottleneck</text>
-      <text x="340" y="291" text-anchor="middle" font-size="9" fill="var(--muted)">32² grid · 1024 ch · r = 185 px</text>
+      <text x="340" y="291" text-anchor="middle" font-size="9" fill="var(--muted)">32² grid · 1024 ch · r = 140 px</text>
       <g fill="none" stroke="currentColor" stroke-width="1.1">
         <path d="M142 82 L173 94 M173 134 L204 142 M204 188 L235 192 M235 244 L290 254"/>
         <path d="M390 254 L445 244 M445 192 L476 188 M476 142 L507 134 M507 94 L538 82"/>
@@ -269,9 +274,9 @@
   </ul>
   <div class="gloss">
     <span><b>valid vs same padding</b> — “valid” computes only where the filter fits entirely inside, so the output shrinks; “same” pads the border with zeros to keep the size, and quietly tells the network that the world outside the chip is zero.</span>
-    <span><b>572 → 388</b> — the U-Net paper's own numbers: 184 pixels lost, 92 on each side, which equals its receptive-field radius. The architecture refuses to answer where it cannot see.</span>
+    <span><b>572 → 388</b> — the U-Net paper's own numbers: 184 pixels lost, 92 on each side — the context every output pixel is guaranteed, not its receptive field (204 px). The architecture refuses to answer where it cannot see.</span>
     <span><b>high-frequency information</b> — edges and texture, the first thing downsampling destroys and the last thing a boundary metric forgives.</span>
-    <span><b>why 10 m matters</b> — the same pixel error means a different thing per sensor: 3 px is 30 m on Sentinel-2 and about 100 km on ERA5. Always quote errors in metres, not pixels.</span>
+    <span><b>why 10 m matters</b> — the same pixel error means a different thing per sensor: 3 px is 30 m on Sentinel-2 and about 83 km on ERA5's 0.25° grid. Always quote errors in metres, not pixels.</span>
   </div>
   <div class="foot"><span>Discussion question 1 this afternoon: what exactly do the skips carry, and why does it matter more at 10 m than on ImageNet?</span></div>
   <aside class="notes">2 min, and it is the live seed for discussion question 1 — do not answer the question, sharpen it. Best version of the argument: information destroyed by downsampling is not recoverable by a deeper decoder, because it was never encoded; the skip is a bypass around a lossy channel, and the loss is specifically positional. Ask the room the ImageNet contrast directly: why does a classifier not care? Because it pools everything to one vector on purpose — position is noise for that task and signal for ours. If someone asks about residual connections, be precise: ResNet adds to fix gradient flow within a stage; U-Net concatenates across stages to restore resolution. Same picture, different problem. Transition: hand off the rest to the videos, then to the part where the numbers live.</aside>
@@ -344,12 +349,12 @@
   <p class="kicker">Part 2 · The imbalance arithmetic</p>
   <h2>Accuracy is a lie on this dataset — here is the receipt</h2>
   <div class="card small">
-    <p style="margin:.2em 0"><b>All 446 hand-labeled Sen1Floods11 chips, 101.0 M valid pixels.</b> Water is <b>10.6%</b> of them. Per chip the median is <b>2.5%</b>, and <b>52 chips contain no water at all</b>.</p>
+    <p style="margin:.2em 0"><b>All 446 hand-labeled Sen1Floods11 chips, 101.0 M valid pixels.</b> Water is <b>10.6%</b> of them. Per chip the median is <b>2.6%</b>, and <b>52 chips contain no water at all</b>.</p>
     <table class="small" style="width:100%;margin-top:.8vh">
       <thead><tr><th>Predictor</th><th class="num">Accuracy</th><th class="num">IoU (water)</th><th class="num">Precision</th><th class="num">Recall</th></tr></thead>
       <tbody>
         <tr><td><b>“always dry”</b> — predict zero everywhere, no model, no data</td><td class="num">89.4%</td><td class="num"><b>0.000</b></td><td class="num">—</td><td class="num">0.000</td></tr>
-        <tr><td><b>Otsu threshold on VV</b> — the classical method, shipped with the dataset</td><td class="num">92.2%</td><td class="num"><b class="accent">0.493</b></td><td class="num">0.616</td><td class="num">0.711</td></tr>
+        <tr><td><b>Otsu threshold on VH</b> — the classical method, shipped with the dataset</td><td class="num">92.2%</td><td class="num"><b class="accent">0.493</b></td><td class="num">0.616</td><td class="num">0.711</td></tr>
       </tbody>
     </table>
     <p style="margin:.6em 0 .1em" class="muted">Accuracy separates a real method from doing nothing by <b>2.8 points</b>. Intersection over Union separates them by <b class="accent">everything</b>.</p>
@@ -360,8 +365,8 @@
   </ul>
   <div class="gloss">
     <span><b>IoU</b> “intersection over union”, also called the Jaccard index — the overlap between predicted water and true water, divided by their union. 1.0 is perfect, 0 means you and the truth share no pixel.</span>
-    <span><b>TP, FP, FN, TN</b> — true positive, false positive, false negative, true negative. Accuracy is (TP + TN) / everything, which is why a rare-class problem hands it away for free.</span>
-    <span><b>Otsu's method</b> — a 1979 algorithm that picks the threshold splitting a histogram into two clumps. Sen1Floods11 ships it as a layer, so it is a free, honest, non-neural baseline.</span>
+    <span><b>TP, FP, FN, TN</b> — true/false positive, true/false negative. Accuracy is (TP + TN) / everything, which is why a rare-class problem hands it away for free.</span>
+    <span><b>Otsu's method</b> — a 1979 algorithm that picks the threshold splitting a histogram into two clumps. Sen1Floods11 ships it as a layer: a free, honest, non-neural baseline.</span>
     <span><b>precision, recall</b> — of the pixels you called water, how many were (precision); of the water that was there, how many you found (recall). The threshold you pick after training trades one for the other.</span>
     <span><b>where these numbers come from</b> — computed for this lecture: <code>LabelHand</code> against <code>S1OtsuLabelHand</code>, all 446 chips, pixels valid in both. Nothing here is quoted from a paper; the lab recomputes it.</span>
   </div>
@@ -394,7 +399,7 @@
   <div class="gloss">
     <span><b>decomposable</b> — a sum over pixels, so a batch's gradient is the average of per-pixel gradients. Dice is not: its value depends on every pixel in the chip at once, which is why an all-dry chip makes it wobble.</span>
     <span><b>soft Dice</b> — computed on probabilities rather than hard labels, so it is differentiable; add a small ε to numerator and denominator or an empty chip divides by zero.</span>
-    <span><b>γ</b> “gamma” — the focusing exponent in focal loss. γ = 0 is plain cross-entropy; γ = 2 means a pixel already predicted at p = 0.9 contributes 1% of its usual gradient.</span>
+    <span><b>γ</b> “gamma” — the focusing exponent in focal loss. γ = 0 is plain cross-entropy; γ = 2 means a pixel already predicted at p = 0.9 keeps 1% of its cross-entropy loss and 2.9% of its gradient.</span>
     <span><b>class weight w</b> — how much one water pixel counts against one dry pixel. Setting it to the inverse frequency (≈ 8.4 here) is the usual first guess, not a law.</span>
   </div>
   <div class="foot"><span>Milletari et al. 2016 (V-Net, Dice) · Lin et al. 2017 (focal loss) · full loss zoo with gradients: Appendix</span></div>
@@ -415,7 +420,7 @@
         <tr><td><b>25 chips have no water in the truth and none predicted</b> — IoU is 0/0 there</td><td class="num"><b>undefined</b></td></tr>
       </tbody>
     </table>
-    <p style="margin:.6em 0 .1em" class="muted">Call those 25 chips 1.0 and the macro score jumps; call them 0.0 and it collapses. Nobody is cheating, and the headline moves by <b class="accent">more than a good architecture change</b>.</p>
+    <p style="margin:.6em 0 .1em" class="muted">Call those 25 chips 1.0 and the macro mean is 0.350; call them 0.0 and it is 0.294. Across these choices the same predictions score 0.19 to 0.49 — nobody is cheating, and the headline moves by <b class="accent">more than a good architecture change</b>.</p>
   </div>
   <ul class="small">
     <li>And it is not stable across space: the same method scores <b>0.78</b> on the Mekong chips and <b>0.15</b> on the Somalia ones.</li>
@@ -424,8 +429,8 @@
   <div class="gloss">
     <span><b>micro vs macro</b> — micro pools all pixels then divides once, so big floods dominate; macro averages per-chip scores, so a 40-pixel pond counts as much as a city under water.</span>
     <span><b>the empty-chip problem</b> — IoU of an empty truth with an empty prediction is 0/0. Every library picks a convention; almost none of them document it on the plot.</span>
-    <span><b>per-event spread</b> — the same algorithm, eleven floods: Mekong 0.78, Bolivia 0.70, Spain 0.67, India 0.53, Ghana 0.41, Pakistan 0.15, Somalia 0.15. The method did not change; the landscape did.</span>
-    <span><b>why it is a W2 problem</b> — a random split mixes chips of one flood across train and test, so the easy events prop up the score. The Bolivia hold-out exists to stop that.</span>
+    <span><b>per-event spread</b> — Mekong 0.78, Bolivia 0.70, Spain 0.67, India 0.53, Ghana 0.41, Pakistan 0.15, Somalia 0.15. The method did not change; the landscape did.</span>
+    <span><b>why it is a W2 problem</b> — a random split mixes chips of one flood across train and test, so the easy events prop up the score. The Bolivia hold-out stops that.</span>
   </div>
   <div class="foot"><span>All four numbers computed for this lecture from the same predictions · per-event table: Appendix</span></div>
   <aside class="notes">1.5 min and no more, but do not cut it — this is the slide students quote back in their capstone. The move: show that four honest people, using the same predictions, publish four different headline numbers. Then the spatial version: 0.78 versus 0.15 across events is bigger than any architecture gap they will produce this semester, which is why the split is a scientific choice, not a formality — straight back to Week 2. Make the contract concrete: three sentences in Note 04, written BEFORE the model runs. If the clock is behind, cut the per-event line and keep the table.</aside>
@@ -440,7 +445,7 @@
       <ul class="small">
         <li>A scene is bigger than a chip, so inference is tiled — and at a tile's edge, half the receptive field is off the image.</li>
         <li>Zero-padding tells the network the world ends in black; the visible result is a <b>seam</b> of wrong pixels on every tile boundary.</li>
-        <li>The fix is the U-Net paper's own: predict on <b>overlapping</b> tiles, keep only the middle, and mirror the image at the true scene edge. <span class="accent">Halo ≈ half the receptive field</span> — today that is ~92 px.</li>
+        <li>The fix is the U-Net paper's own: predict on <b>overlapping</b> tiles, keep only the middle, and mirror the image at the true scene edge. <span class="accent">Halo = the receptive field's reach to one side</span> — for today's U-Net, 107 px.</li>
         <li class="muted">Same discipline when you cut training chips: a chip whose label touches the border teaches the model that floods stop at chip edges.</li>
       </ul>
     </div>
@@ -475,12 +480,12 @@
   </div>
   <div class="gloss">
     <span><b>overlap-tile strategy</b> — the U-Net paper's name for it: read a tile with a margin, write only the interior. Standard in every production segmentation pipeline; absent from most tutorials.</span>
-    <span><b>halo, margin</b> — the extra border read but not written. Half the receptive field is the honest size; less is a choice to accept some seam.</span>
+    <span><b>halo, margin</b> — the extra border read but not written. The receptive field's reach to one side, about half of it, is the honest size; less is a choice to accept some seam.</span>
     <span><b>mirror padding</b> — at the true edge of a scene there is no context to read, so the image is reflected outward. It is a lie, but a locally plausible one, unlike zeros.</span>
     <span><b>in the figure</b> — left, four tiles meeting edge to edge and the seam that follows; right, each tile read wide (dashed) and written narrow (solid), so every written pixel had full context.</span>
   </div>
   <div class="foot"><span>Ronneberger et al. 2015, §2 — the overlap-tile strategy and mirroring · full recipe with numbers: Appendix</span></div>
-  <aside class="notes">2 min. Everyone who deploys a segmentation model meets the seam, usually in a figure a supervisor points at. Make it a rule with a number in it: halo equals half the receptive field, which you can now compute — that is the payoff for Part 1's recursion arriving eight minutes later. Two extras worth saying: (1) averaging overlapping predictions with a cosine or tapered weight is smoother than hard-cropping and costs nothing; (2) the training-time version is subtler — chips cut so that labels touch borders teach the network that objects stop at borders. Time check: ~0:29 in — HARD CHECK. If you are past 0:30, Part 3 loses the ConvLSTM equations slide, not the cost slide.</aside>
+  <aside class="notes">2 min. Everyone who deploys a segmentation model meets the seam, usually in a figure a supervisor points at. Make it a rule with a number in it: halo equals the receptive field's reach to one side, about half of it — 107 px for the lab's U-Net with "same" padding, 92 px for the paper's valid-padded original — which you can now compute; that is the payoff for Part 1's recursion arriving eight minutes later. Two extras worth saying: (1) averaging overlapping predictions with a cosine or tapered weight is smoother than hard-cropping and costs nothing; (2) the training-time version is subtler — chips cut so that labels touch borders teach the network that objects stop at borders. Time check: ~0:29 in — HARD CHECK. If you are past 0:30, Part 3 loses the ConvLSTM equations slide, not the cost slide.</aside>
 </section>
 
 <!-- ============ PART 3 · SPATIOTEMPORAL ============ -->
@@ -639,7 +644,7 @@
       <ul class="small">
         <li><b>PANGAEA</b> (2024) evaluated the popular open geospatial foundation models on one standardized protocol — many datasets, several sensors, resolutions and tasks, deliberately not only North America and Europe.</li>
         <li>The finding, in the authors' own words: geospatial foundation models <span class="accent">“do not consistently outperform supervised baselines”</span> — a plain U-Net and a vanilla Vision Transformer, trained from scratch.</li>
-        <li>They struggle most where the task is furthest from the pretraining corpus — SAR, unusual bands, regions and seasons the corpus under-sampled — and in the limited-label settings they were supposed to rescue.</li>
+        <li>They struggle most where the task is furthest from the pretraining corpus — SAR, unusual bands, regions and seasons the corpus under-sampled. Fewer labels tip the balance their way, yet on Sen1Floods11 the U-Net leads at every label fraction.</li>
         <li class="muted">GEO-Bench-2 finds the mirror image on high-resolution optical data, where general vision backbones sometimes win. Neither result says foundation models are useless; both say <b>the comparison is empirical</b>.</li>
       </ul>
     </div>
@@ -677,7 +682,7 @@
     <span><b>in the figure</b> — the horizontal axis is how many labels you have, the vertical is how unlike the pretraining corpus your data is. The dashed upper band is where published results stop agreeing.</span>
   </div>
   <div class="foot"><span>Marsocci et al. 2024, <i>PANGAEA: a global and inclusive benchmark for geospatial foundation models</i>, <a href="https://arxiv.org/abs/2412.04204">arXiv:2412.04204</a> · GEO-Bench-2, arXiv:2511.15658</span></div>
-  <aside class="notes">3 min, and set the tone carefully — this is not cynicism about foundation models, it is the reason this course spends a week on U-Nets before spending eight on transformers. Read the quoted finding verbatim so nobody thinks it is my opinion. The argument to make: a benchmark is only interesting if the baseline is strong, and most GFM papers before PANGAEA compared against baselines they had not tuned. Be explicit about the figure's status — a heuristic, drawn from the benchmark's qualitative findings, not a measured boundary; it is there to tell them where to spend a week of compute. If someone asks which is better, refuse the question and give them the correct one: better for which task, with how many labels, how far from which corpus?</aside>
+  <aside class="notes">3 min, and set the tone carefully — this is not cynicism about foundation models, it is the reason this course spends a week on U-Nets before spending eight on transformers. Read the quoted finding verbatim so nobody thinks it is my opinion. On labels, be precise: counting top-two finishes over the 11 datasets (#Top2, Tables 5–7), the U-Net has 6, 4 and 2 at 100%, 50% and 10% of the labels, CROMA 2, 4 and 6 — §5.2 says the balance shifts towards the foundation models as labels decrease. Our dataset is the exception: on Sen1Floods11 the U-Net beats CROMA at all three fractions (91.42 / 90.91 / 88.55 against 90.89 / 90.57 / 87.22 mIoU). The argument to make: a benchmark is only interesting if the baseline is strong, and most GFM papers before PANGAEA compared against baselines they had not tuned. Be explicit about the figure's status — a heuristic, drawn from the benchmark's qualitative findings, not a measured boundary; it is there to tell them where to spend a week of compute. If someone asks which is better, refuse the question and give them the correct one: better for which task, with how many labels, how far from which corpus?</aside>
 </section>
 
 <!-- 23 -->
@@ -882,7 +887,7 @@
   <ul class="small">
     <li><b>Transposed convolution vs upsample-then-convolve.</b> A stride-2 transposed convolution with k = 3 covers output pixels unevenly and prints a checkerboard; nearest or bilinear upsampling followed by a 3 × 3 convolution avoids it and costs about the same. Use k divisible by s if you do use transposed convolutions.</li>
     <li><b>Dilation as a pooling substitute.</b> Stacking 3 × 3 convolutions with dilations 1, 2, 4, 8 reaches a receptive field of <b>31 px</b> with no downsampling at all — full resolution kept, at the price of gridding artifacts if you never mix scales.</li>
-    <li><b>Depthwise separable.</b> k²·C + C·C′ instead of k²·C·C′ — about a 9× saving at k = 3, and the standard trick when the chip count is small.</li>
+    <li><b>Depthwise separable.</b> k²·C + C·C′ instead of k²·C·C′ — at k = 3 a 7.9× saving with 64 output channels, approaching 9× as channels grow, and the standard trick when the chip count is small.</li>
     <li class="muted">Receipt for Part 1's headline: 3 · 3 · 4 · 64 = <b>2,304</b> weights, against (64·64·4) · (64·64·64) ≈ <b>4.3 × 10⁹</b> for the fully connected equivalent.</li>
   </ul>
   <div class="foot"><span>Odena et al. 2016, <i>Deconvolution and checkerboard artifacts</i> (Distill) · Yu &amp; Koltun 2016 (dilated convolutions)</span></div>
@@ -910,7 +915,7 @@
   </table></div>
   <ul class="small">
     <li>Recursion used: <b>r<sub>ℓ</sub> = r<sub>ℓ−1</sub> + (k<sub>ℓ</sub> − 1)·j<sub>ℓ−1</sub></b>, <b>j<sub>ℓ</sub> = j<sub>ℓ−1</sub>·s<sub>ℓ</sub></b>, starting from r = j = 1.</li>
-    <li>The decoder adds more: the paper's own size relation is the number to quote — a <b>572 px input yields a 388 px output</b>, so one output pixel is decided by a <b class="accent">185 px window</b> and every prediction carries a 92 px context margin. Exact counts through up-convolutions depend on the upsampling operator, which is why the size relation is the honest statement.</li>
+    <li>The decoder adds more. Traced exactly through the original network (<b>572 px input → 388 px output</b>), one output pixel depends on a <b class="accent">204 px window</b> for 288 of the 388 positions along an axis and 188 px for the other 100; the width repeats every 16 px, the bottleneck's jump. The 572 − 388 = 184 px the network loses is not that window: it is twice the 92 px context margin every prediction carries.</li>
     <li class="muted">The <b>effective</b> receptive field is smaller than the theoretical one — contributions fall off toward the rim, roughly Gaussian (Luo et al. 2016). Never assume the last few pixels of the cone matter.</li>
   </ul>
   <div class="foot"><span>Computed for this lecture from the original U-Net configuration · Luo et al. 2016, <i>Understanding the effective receptive field</i></span></div>
@@ -943,7 +948,7 @@
     <b>Weighted CE</b> &nbsp; L = −[ w · y log p + (1 − y) log(1 − p) ], w often set to the inverse class frequency (<b>≈ 8.4</b> on Sen1Floods11)<br>
     <b>Soft Dice</b> &nbsp; L = 1 − (2 Σ p y + ε) / (Σ p + Σ y + ε) &nbsp;·&nbsp; ε guards the empty chip<br>
     <b>Tversky</b> &nbsp; TP / (TP + α FN + β FP) — α = β = 0.5 gives Dice, α = β = 1 gives IoU; raise α to buy recall<br>
-    <b>Focal</b> &nbsp; L = −α (1 − p)<sup>γ</sup> log p, γ ≈ 2 &nbsp;·&nbsp; a pixel already at p = 0.9 keeps 1% of its gradient
+    <b>Focal</b> &nbsp; L = −α (1 − p)<sup>γ</sup> log p, γ ≈ 2 &nbsp;·&nbsp; a pixel already at p = 0.9 keeps 1% of its loss and 2.9% of its gradient
   </div>
   <ul class="small">
     <li><b>Why combine.</b> Cross-entropy has a well-conditioned, per-pixel gradient and trains stably from random weights; Dice optimizes the overlap you report but is noisy on nearly-empty chips. CE + Dice is the default for a reason.</li>
@@ -980,7 +985,7 @@
   <ul class="small" style="margin:.6vh 0 0">
     <li><b>4,831 chips</b> of 512 × 512 at 10 m over 11 flood events, ~120,000 km²; <b>446 hand-labeled</b>, the rest weak labels (814 permanent-water chips from the Landsat-derived JRC product; 4,385 classified from Sentinel-2 and 4,385 from Sentinel-1).</li>
     <li><b>Layers</b>: <code>S1Hand</code> (VV, VH in dB) · <code>S2Hand</code> (13 bands, top-of-atmosphere reflectance × 10,000) · <code>LabelHand</code> (−1 no-data, 0 dry, 1 water) · <code>S1OtsuLabelHand</code> (the classical baseline).</li>
-    <li><b>Access</b>: <code>gs://sen1floods11</code>, ~14 GB, cloud-optimized GeoTIFFs with a STAC catalog. Splits ship with it: <b>IID 252/89/90</b>, plus <b>Bolivia (15 chips) held out</b> as an unseen event.</li>
+    <li><b>Access</b>: <code>gs://sen1floods11</code>, ~37 GB (the hand-labeled layers: 1.8 GB), cloud-optimized GeoTIFFs with a STAC catalog. Splits ship with it: <b>IID 252/89/90</b>, plus <b>Bolivia (15 chips) held out</b> as an unseen event.</li>
   </ul>
   <div class="cols" style="gap:2vw;margin-top:.8vh;flex:0 0 auto">
     <div class="scroll" style="min-width:0"><table class="small">
@@ -1056,18 +1061,18 @@
   <p class="kicker">Appendix A9 · Inference</p>
   <h2>The tiling recipe, with numbers</h2>
   <div class="card small">
-    1 · Compute the receptive field r of your network. Set the <b>halo h = ⌈r / 2⌉</b> — for the original U-Net, 92 px.<br>
+    1 · Find how far the receptive field of an output pixel reaches to one side (r / 2 if it is symmetric): that is the <b>halo h</b> — 92 px for the valid-padded original U-Net, <b>107 px</b> for the same depth with “same” padding.<br>
     2 · Read tiles of size <b>t + 2h</b>, write only the central <b>t × t</b>. Step the window by exactly t, so writes tile the scene with no gaps and no double-writes.<br>
     3 · At the true edge of the scene, <b>mirror</b> the image outward by h. Never zero-pad at the edge of real data.<br>
     4 · If you do blend overlapping predictions, weight with a raised-cosine taper rather than averaging equally — the rim pixels are the weak ones.<br>
     5 · Compute metrics on the <b>written</b> pixels only, and say so in the note.
   </div>
   <ul class="small">
-    <li>Cost of the halo: reading 512 + 184 = 696 px tiles instead of 512 px ones is about <b>1.85×</b> the compute, once, at inference. The seam it removes would be in every figure you ever publish from that model.</li>
+    <li>Cost of the halo: reading 512 + 2·107 = 726 px tiles instead of 512 px ones is about <b>2×</b> the compute ((726 / 512)² ≈ 2.0; 1.85× with a 92 px halo), once, at inference. The seam it removes would be in every figure you ever publish from that model.</li>
     <li class="muted">Training-time mirror image of the same idea: if a training chip's label touches its border, the network learns that objects end at borders. Crop labels with a margin, or sample chips centred on objects.</li>
   </ul>
   <div class="foot"><span>Ronneberger et al. 2015 §2 (overlap-tile) · the halo number follows from the Appendix A2 receptive field</span></div>
-  <aside class="notes">Not taught in class beyond the live figure. The 1.85× is the number that ends the argument when someone objects to the cost: it is a one-off inference expense, paid once per map, against an artifact that is permanent and visible.</aside>
+  <aside class="notes">Not taught in class beyond the live figure. The 2× is the number that ends the argument when someone objects to the cost: it is a one-off inference expense, paid once per map, against an artifact that is permanent and visible.</aside>
 </section>
 
 <!-- 40 -->
