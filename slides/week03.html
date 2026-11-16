@@ -594,7 +594,7 @@
     <span><b>the accent stripe</b> &mdash; the query itself: one pixel, all times. The shaded chunks are what the store must fetch and decompress to answer it &mdash; all eight on the left, exactly one on the right.</span>
     <span><b>chunks touched &times; chunk size</b> &mdash; you pay per chunk, never per value; so chunk along your <b>dominant access pattern</b> &mdash; for training, the sample shape &mdash; and it is fixed at write time.</span>
   </div>
-  <aside class="notes">3 min, the mechanism slide of Part 2 and the one slide here that is never cut — it is discussion question 3 this afternoon and the only precursor to W12’s streaming-Zarr block. Quantify: ERA5 T2m is 721×1440 float32 ≈ 4 MB per hourly step. In layout A, a 40-year hourly point time series touches ~350,000 chunks — you move ~1.4 TB to keep 1.4 MB: efficiency 10⁻⁶. Same data, same store tech, only the chunk map changed. This is DQ3 — chunking as a scientific issue: whether a climatology, a time-series analysis, or a training epoch is feasible is decided at write time by whoever chunked the archive. WB2 publishes multiple chunkings of the same ERA5 for exactly this reason.</aside>
+  <aside class="notes">3 min, the mechanism slide of Part 2 and the one slide here that is never cut — it is discussion question 3 this afternoon and the only precursor to W12’s streaming-Zarr block. Quantify: ERA5 T2m is 721×1440 float32 ≈ 4 MB per hourly step. In layout A, a 40-year hourly point time series touches ~350,000 chunks — you move ~1.4 TB to keep 1.4 MB: efficiency 10⁻⁶. Same data, same store tech, only the chunk map changed. This is DQ3 — chunking as a scientific issue: whether a climatology, a time-series analysis, or a training epoch is feasible is decided at write time by whoever chunked the archive. A real case: each WeatherBench 2 store has one chunking — the 0.25° stores one time step per chunk, the coarse ones 8, 48 or 100 — and reading one grid point for January 2020 from a 0.25° store touched 744 chunks and moved 1.74 GB (compressed) to keep 2,976 bytes, in 39 s.</aside>
 </section>
 <!-- 18 -->
 <section class="slide">
@@ -1002,7 +1002,7 @@ items = cat.search(
       <tr><td><b>MERRA-2</b></td><td>Atmospheric state + aerosols (reanalysis)</td><td class="num">0.5° × 0.625°</td><td>Hourly, 1980–present</td><td class="num">~2–3 wk</td></tr>
       <tr><td><b>MODIS</b></td><td>36-band optical/infrared → LST, NDVI, snow, fire…</td><td class="num">250 m – 1 km</td><td>1–2 d per satellite</td><td class="num">NRT ~3 h</td></tr>
       <tr><td><b>GPM IMERG</b></td><td>Merged multi-satellite precipitation (Global Precipitation Measurement)</td><td class="num">0.1°</td><td>30-min</td><td class="num">4 h / 14 h / ~3.5 mo</td></tr>
-      <tr><td><b>HLS</b></td><td>Harmonized Landsat 8/9 + S2 surface reflectance</td><td class="num">30 m</td><td>~2–3 d combined</td><td class="num">~2–4 d</td></tr>
+      <tr><td><b>HLS</b></td><td>Harmonized Landsat 8/9 + S2 surface reflectance</td><td class="num">30 m</td><td>~1.6 d on average, combined</td><td class="num">~2–4 d</td></tr>
       <tr><td><b>Sentinel-1</b></td><td>C-band SAR backscatter (VV/VH) — all-weather</td><td class="num">10 m (IW GRD)</td><td>6–12 d repeat</td><td class="num">hours–1 d</td></tr>
       <tr><td><b>Sentinel-2</b></td><td>13-band reflectance (MultiSpectral Instrument)</td><td class="num">10/20/60 m</td><td>~5 d</td><td class="num">hours–2 d</td></tr>
     </tbody>
@@ -1049,7 +1049,7 @@ items = cat.search(
     <li class="muted">One object, many concurrent windowed readers; no server-side code — plain object storage.</li>
   </ul>
   <div class="foot"><span>Sentinel-2 L2A on AWS Earth Search is distributed as COGs · readers: rasterio/GDAL (Geospatial Data Abstraction Library), rioxarray, stackstac</span></div>
-  <aside class="notes">2 min. Key mental model: COG turns "an image file" into "a byte-addressable tile database." Reading a 64×64 chip from an 11,000×11,000-pixel scene costs a header read plus one or two tile reads — a few hundred KB, not the ~1 GB scene. This is exactly what stackstac does under the hood in today's lab.</aside>
+  <aside class="notes">2 min. Key mental model: COG turns "an image file" into "a byte-addressable tile database." Reading a 64×64 chip from an 11,000×11,000-pixel scene costs a header read plus one or two tile reads per band. Earth Search’s Sentinel-2 files use 1,024×1,024-pixel internal tiles of about 1.1 MB, so that is about 1 MB per band (a few hundred KB would hold for 512-pixel tiles) — not the ~1 GB scene. This is exactly what stackstac does under the hood in today's lab.</aside>
 </section>
 <!-- 37 -->
 <section class="slide">
@@ -1090,7 +1090,7 @@ items = cat.search(
   <h2>ERA5 is the ImageNet of weather</h2>
   <ul>
     <li>FourCastNet, Pangu-Weather, GraphCast, GenCast: all trained on <span class="accent">ERA5 at 0.25°</span> — one corpus, one field's worth of models.</li>
-    <li>WeatherBench 2 fixes the protocol: train ≤ 2018, test 2020 — temporal holdout, exactly the W2 leakage lesson.</li>
+    <li>WeatherBench 2 fixes the test — every 00 and 12 UTC start of 2020, scored against ERA5 — and leaves the training years to the modeller (most stop at 2018): temporal holdout, exactly the W2 leakage lesson.</li>
     <li>State vector: surface (T2m, U10/V10, MSLP) + upper-air variables on 13 pressure levels (50 → 1000 hPa); <b>Z500</b> is the headline — geopotential height at 500 hPa tracks the midlatitude synoptic pattern.</li>
     <li class="muted">"Beats IFS" always means: beats IFS at reproducing ERA5's version of the atmosphere.</li>
   </ul>
@@ -1143,7 +1143,7 @@ items = cat.search(
       <tr><th>SCL</th><th>Class</th><th>In today&#39;s lab</th><th>SCL</th><th>Class</th><th>In today&#39;s lab</th></tr>
       <tr><td>0</td><td>No data</td><td>reject</td><td>6</td><td>Water</td><td>keep</td></tr>
       <tr><td>1</td><td>Saturated / defective</td><td>reject</td><td>7</td><td>Unclassified</td><td>your call</td></tr>
-      <tr><td>2</td><td>Dark area / cast shadow</td><td>your call</td><td>8</td><td>Cloud, medium probability</td><td>reject</td></tr>
+      <tr><td>2</td><td>Cast shadows</td><td>your call</td><td>8</td><td>Cloud, medium probability</td><td>reject</td></tr>
       <tr><td>3</td><td>Cloud shadow</td><td>reject</td><td>9</td><td>Cloud, high probability</td><td>reject</td></tr>
       <tr><td>4</td><td>Vegetation</td><td>keep</td><td>10</td><td>Thin cirrus</td><td>reject</td></tr>
       <tr><td>5</td><td>Not vegetated (bare)</td><td>keep</td><td>11</td><td>Snow / ice</td><td>your call</td></tr>

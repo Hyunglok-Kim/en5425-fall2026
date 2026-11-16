@@ -842,7 +842,7 @@
     <span><b>how far must the split separate points?</b> — measure it, don't guess: the <b>range</b> of the <i>residual</i> variogram (the distance where correlation dies) — full picture three slides on.</span>
     <span><b>modern rule (kNNDM)</b> — match the test-to-train distance distribution to the distances you will predict at in deployment; too-large blocks make the test needlessly pessimistic, not honest.</span>
   </div>
-  <div class="foot"><span>Live example: <a href="https://hydroai.net/data" target="_blank" rel="noopener">hydroai.net/data</a> (Hampyeong 47-station network) · criterion: <a href="https://doi.org/10.1111/2041-210X.13851">Milà et al. 2022 (kNNDM)</a> · <a href="https://doi.org/10.1111/2041-210X.13650">Meyer &amp; Pebesma 2021 (Area of Applicability)</a></span></div>
+  <div class="foot"><span>Live example: <a href="https://hydroai.net/data" target="_blank" rel="noopener">hydroai.net/data</a> (Hampyeong 47-station network) · criterion: <a href="https://doi.org/10.1111/2041-210X.13851">Milà et al. 2022 (NNDM)</a> · <a href="https://doi.org/10.5194/gmd-17-5897-2024">Linnenbrink et al. 2024 (kNNDM)</a> · <a href="https://doi.org/10.1111/2041-210X.13650">Meyer &amp; Pebesma 2021 (Area of Applicability)</a></span></div>
   <aside class="notes">~3 min on this figure — the core picture of the week. Left cartoon: every accent (test) dot has a training neighbor within the correlation range; the dashed 5-km pair is the leak. Right — pull up hydroai.net/data live: our real Hampyeong network, 47 probes packed into a few km. Ask: "shuffle these into 80/20 and what is the nearest training probe to each test probe? A few hundred metres. That is not a test set." Then the two gloss criteria: residual-variogram range sets the floor; kNNDM matches test difficulty to deployment. Same data, same model, two different questions.</aside>
 </section>
 
@@ -913,7 +913,7 @@
       <ul>
         <li>Ploton et al. 2020 — tropical forest biomass from satellite features. <b>Same model, same data</b>; only the split changed.</li>
         <li><b>Optimism gap</b> ≔ score(random split) − score(blocked split). Report it; don’t hide it.</li>
-        <li class="muted">The pattern replicates across species distribution, air quality, hydrology (basin models collapse on ungauged basins). A high random-split score is a claim about interpolation near your stations — nothing more.</li>
+        <li class="muted">The same bias appears wherever reference samples are clustered — Meyer &amp; Pebesma (2022) make the case for global maps of ecological variables. A high random-split score is a claim about interpolation near your stations — nothing more.</li>
       </ul>
     </div>
     <div class="figure" style="margin:0">
@@ -1094,9 +1094,9 @@
 
 <section class="slide">
   <p class="kicker">Part 3 · The standard</p>
-  <h2>WeatherBench2: year separation as the professional standard</h2>
+  <h2>WeatherBench2: one fixed test year as the professional standard</h2>
   <div class="figure">
-    <svg viewBox="0 0 720 150" role="img" aria-label="Timeline of the WeatherBench2 protocol: training years through 2017, validation 2018 to 2019, test on 2020" style="width:min(90%,760px)">
+    <svg viewBox="0 0 720 150" role="img" aria-label="Timeline: the training years are each modeller’s choice, for most models up to 2018; WeatherBench2 fixes the test, every 00 and 12 UTC start of 2020" style="width:min(90%,760px)">
       <g stroke="currentColor" stroke-width="1.3" fill="none">
         <rect x="40"  y="46" width="430" height="40" rx="6" fill="var(--hairline)"/>
         <rect x="470" y="46" width="105" height="40" rx="0" fill="currentColor" opacity="0.18"/>
@@ -1104,28 +1104,28 @@
       </g>
       <path d="M575 26 V106" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
       <g font-family="var(--sans)" font-size="14" fill="currentColor" text-anchor="middle">
-        <text x="255" y="71">train · 1979–2017</text>
-        <text x="522" y="71">val · 2018–19</text>
+        <text x="255" y="71">train · the modeller’s choice (most: to 2018)</text>
+        <text x="522" y="71">2019</text>
         <text x="627" y="71" fill="var(--accent-ink)">test · 2020</text>
       </g>
       <g font-family="var(--sans)" font-size="12" fill="currentColor" opacity="0.7">
         <text x="40" y="106">1979</text>
-        <text x="452" y="106">2017</text>
+        <text x="452" y="106">2018</text>
         <text x="680" y="106" text-anchor="end">2020</text>
         <text x="575" y="128" text-anchor="middle">no gradient, no tuning decision crosses this line</text>
       </g>
     </svg>
   </div>
   <ul class="small">
-    <li>Common ERA5 ground truth, fixed metrics (root-mean-square error and anomaly correlation on standard fields), strict train/validation/test year separation — every model on the leaderboard obeys it.</li>
-    <li>GraphCast, Pangu-Weather, NeuralGCM, and the European operational forecast are all scored on the same held-out year: <b>that</b> is why the comparison is believable.</li>
+    <li>The paper fixes the test (every 00 and 12 UTC start of 2020), the truth (ERA5; operational forecasts also against their own analyses) and the metrics (root-mean-square error, anomaly correlation). Training years are the modeller’s choice — mostly up to 2018.</li>
+    <li>GraphCast, Pangu-Weather, NeuralGCM, and the European operational forecast are all scored on the same test year: <b>that</b> is why the comparison is believable.</li>
   </ul>
   <div class="gloss">
     <span><b>ERA5</b> — the standard reconstruction of past weather (a “reanalysis”), used here as ground truth.</span>
     <span><b>RMSE</b> — root-mean-square error; <b>anomaly correlation</b> — correlate forecast vs truth after subtracting climatology, so you score the weather, not the season.</span>
   </div>
   <div class="foot"><span><a href="https://arxiv.org/abs/2308.15560">Rasp et al. 2024, arXiv:2308.15560</a> · <a href="https://weatherbench2.readthedocs.io">weatherbench2.readthedocs.io</a></span></div>
-  <aside class="notes">~2.5 min. This is the aspirational example: an entire subfield agreed on one leakage-safe protocol, and suddenly cross-paper comparison works. The dashed line is the discipline: no tuning decision — not even "which checkpoint to submit" — may look at 2020.</aside>
+  <aside class="notes">~2.5 min. This is the aspirational example: an entire subfield agreed on one evaluation protocol — the 2020 test year, ERA5 as truth, fixed metrics — and suddenly cross-paper comparison works. Be precise about what it fixes: the benchmark does not prescribe the training years; most models stopped at 2018 (Rasp et al. 2024). The dashed line is the discipline: no tuning decision — not even "which checkpoint to submit" — may look at 2020.</aside>
 </section>
 
 <section class="slide">
