@@ -43,8 +43,8 @@
   <p class="kicker">Part 1 · Welcome · 0:00–0:08</p>
   <h2>The biggest labs on Earth are racing to build exactly this</h2>
   <ul class="small">
-    <li><b>Google DeepMind</b> — GraphCast (<i>Science</i> 2023) beat the world's best physics forecast on <b>90% of 1,380 targets</b>, producing a 10-day global forecast in under a minute on a single chip; GenCast (<i>Nature</i> 2024) then beat the European ensemble on 97% of targets.</li>
-    <li><b>Microsoft Research</b> — Aurora (<i>Nature</i> 2025): <b>one</b> pretrained model of the atmosphere, cheaply fine-tuned, out-forecasts the specialist systems for weather, air pollution, and ocean waves — thousands of times faster than physics pipelines.</li>
+    <li><b>Google DeepMind</b> — GraphCast (<i>Science</i> 2023) beat the world's best physics forecast on <b>90% of 1,380 targets</b>, producing a 10-day global forecast in under a minute on a single chip; GenCast (<i>Nature</i> 2024) then beat the European ensemble on 97.2% of 1,320 targets.</li>
+    <li><b>Microsoft Research</b> — Aurora (<i>Nature</i> 2025): <b>one</b> pretrained model of the atmosphere, cheaply fine-tuned, out-forecasts the specialist systems for weather, air pollution, and ocean waves — at orders of magnitude lower computational cost.</li>
     <li><b>IBM + NASA</b> — Prithvi: NASA's first open-source foundation model, trained on NASA's own satellite archive and given away on Hugging Face — <b>anyone in this room can fine-tune it</b> for floods, wildfires, or crops.</li>
     <li class="muted">Also racing: Huawei (Pangu-Weather, <i>Nature</i> 2023) · NVIDIA (Earth-2, a "digital twin" of the planet) · and Europe's own weather agency, whose machine-learning forecast has been fully operational since February 2025.</li>
   </ul>
@@ -74,7 +74,7 @@
 <!-- 2c ▸ Why it matters -->
 <section class="slide">
   <p class="kicker">Part 1 · Welcome · 0:00–0:08</p>
-  <h2>They are replacing weather models — and predicting disasters</h2>
+  <h2>They now run alongside the weather models — and predict disasters</h2>
   <div class="cols" style="grid-template-columns:1.15fr 1fr">
     <div class="figure"><img src="img/fig-gencast.png" alt="GenCast ensemble cyclone track forecasts for Typhoon Hagibis at decreasing lead times" style="max-width:100%;max-height:100%;background:#fff;padding:1vh;border-radius:10px;object-fit:contain"></div>
     <div>
@@ -820,9 +820,9 @@
   <h2>In weather, the flip already happened</h2>
   <div class="figure" style="flex:0 0 auto;max-height:26vh"><img src="img/fig-graphcast.png" alt="GraphCast: input weather state, one-step prediction, autoregressive rollout of a global forecast" style="max-width:100%;max-height:100%;background:#fff;padding:1vh;border-radius:10px;object-fit:contain"></div>
   <ul class="small" style="margin-top:1.4vh">
-    <li><b>2022</b> — FourCastNet (NVIDIA): first neural network at physics-model resolution; a week's forecast in <b>2 seconds</b>. · <b>2023</b> — Pangu-Weather (<i>Nature</i>) and GraphCast (<i>Science</i>, above): <b>more accurate</b> than the best physics forecasts, at 10,000× the speed.</li>
-    <li><b>2024</b> — GenCast (<i>Nature</i>): beats the European <i>ensemble</i> on 97% of targets — probabilistic forecasting conquered. · <b>Feb 2025</b> — Europe's weather centre puts <b>its own machine-learning forecast into daily operations</b>. · <b>2025</b> — Aurora (<i>Nature</i>): one pretrained atmosphere model, fine-tuned for weather, waves, and air quality.</li>
-    <li><b>2026</b> — the United States deploys a machine-learning global forecast; Google open-sources WeatherNext 2, whose cyclone-track forecasts see <b>about one day further ahead</b> than leading operational systems.</li>
+    <li><b>2022</b> — FourCastNet (NVIDIA): first neural network on ERA5's 0.25° grid; a week's forecast in <b>under 2 seconds</b>. · <b>2023</b> — Pangu-Weather (<i>Nature</i>) and GraphCast (<i>Science</i>, above): <b>more accurate</b> than ECMWF's control forecast (Pangu) and its HRES (GraphCast, 90% of targets), in under a minute.</li>
+    <li><b>2024</b> — GenCast (<i>Nature</i>): beats the European <i>ensemble</i> on 97.2% of 1,320 targets — probabilistic forecasting conquered. · <b>Feb 2025</b> — Europe's weather centre puts <b>its own machine-learning forecast into daily operations</b> (its ensemble follows in July). · <b>2025</b> — Aurora (<i>Nature</i>): one pretrained atmosphere model, fine-tuned for weather, waves, and air quality.</li>
+    <li><b>Late 2025</b> — Google's WeatherNext 2 (November) tracks cyclones <b>about a day better</b> than GenCast; the United States puts GraphCast-based forecasts into operations (17 December). · <b>Mar 2026</b> — Germany's weather service follows with AICON.</li>
   </ul>
   <div class="foot"><span>Figure: Google DeepMind, GraphCast — one learned step, rolled out into a 10-day global forecast · “can machine learning forecast?” is settled; the frontier is probabilistic skill and honest evaluation</span></div>
   <aside class="notes">Read the timeline as one story: faster (2022) → more accurate (2023) → better ensembles (2024) → adopted by the agencies themselves (2025–26). The debate closed while this room's seniors were sophomores. Transition: "You might think this is only for trillion-dollar labs. The opposite is true."</aside>

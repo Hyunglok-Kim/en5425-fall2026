@@ -1641,12 +1641,12 @@ loss = mse(model(y1, x[t + 2]), y[t + 2])</code></pre>
   <ul class="small">
     <li><b>GraphCast</b> (Lam et al. 2023) — 6-hour step, ERA5 1979–2017. Phase 1: 1,000 updates at 1 step, learning rate 0 → 10⁻³. Phase 2: 299,000 updates at 1 step, half-cosine decay to 0. Phase 3: 11,000 updates, rollout 2 → 12 steps (+1 every 1,000), learning rate fixed at 3 × 10⁻⁷. Loss: MSE weighted by latitude-cell area and by pressure level (weights ∝ pressure); at the surface, 2-m temperature 1.0 and the others 0.1.</li>
     <li><b>Pangu-Weather</b> (Bi et al. 2023) — four models with 1-, 3-, 6- and 24-hour steps; a greedy rule “always calls for the deep network with the largest affordable lead time” — 56 h = 24 × 2 + 6 + 1 × 2 — “to reduce the cumulative forecast errors”. Mean-absolute-error loss; train 1979–2017, validate 2019, test 2018.</li>
-    <li><b>FuXi</b> (Chen et al. 2023) — a cascade of three fine-tuned copies: FuXi-Short for 0–5 days, FuXi-Medium for 5–10, FuXi-Long for 10–15, handing over at steps 20 and 40.</li>
-    <li><b>FourCastNet</b> (Pathak et al. 2022) — 80 epochs of one-step pretraining, then 50 epochs fine-tuning on a second, self-fed step with both losses summed.</li>
+    <li><b>FuXi</b> (Chen et al. 2023) — a 6-hour step throughout (60 steps to 15 days); three fine-tuned copies — Short for 0–5 days, Medium for 5–10, Long for 10–15, handing over at steps 20 and 40. Short is tuned on rollouts growing from 2 to 12 steps, Medium and Long on their predecessor’s output.</li>
+    <li><b>FourCastNet</b> (Pathak et al. 2022) — 80 epochs of one-step training, then 50 epochs on two-step rollouts in which only the second step is fed the model’s own output; both losses summed.</li>
     <li class="muted">An absolute-error loss is minimized by the conditional median rather than the mean — still one number, still a hedge between futures.</li>
   </ul>
   <div class="foot"><span>Lam et al. 2023, Science 382 (arXiv:2212.12794, Supp. 4.2 and 4.5) · Bi et al. 2023, Nature 619 · Chen et al. 2023, npj Clim. Atmos. Sci. · Pathak et al. 2022, arXiv:2202.11214</span></div>
-  <aside class="notes">Not taught in class. Read it as four placements on the recursion of slide 16: GraphCast and FourCastNet shape a by training on the rollout; Pangu and FuXi reduce k or give each lead-time range its own model. None of them removes the blur — that needs Part 4's move to distributions.</aside>
+  <aside class="notes">Not taught in class. Read it as four placements on the recursion of slide 16: GraphCast, FourCastNet and FuXi shape a by training on rollouts — FuXi keeps its 6-hour step, so all 60 calls remain, and gives each lead-time range its own fine-tuned copy; only Pangu reduces k. None of them removes the blur — that needs Part 4's move to distributions.</aside>
 </section>
 
 <!-- 49 -->

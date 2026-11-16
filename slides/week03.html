@@ -814,7 +814,7 @@ items = cat.search(
     </a>
   </div>
   <div class="gloss">
-    <span><b>AIFS</b> (Artificial Intelligence Forecasting System) <b>· GraphCast · GenCast</b> &mdash; the current machine-learning forecast models; all three are scored against ERA5, so every number they report carries today&rsquo;s weight inside it.</span>
+    <span><b>AIFS</b> (Artificial Intelligence Forecasting System) <b>· GraphCast · GenCast</b> &mdash; the current machine-learning forecast models; all three are scored with latitude-weighted errors (against ERA5 or an operational analysis), so every number they report carries today&rsquo;s weight inside it.</span>
     <span><b>layer swipe</b> &mdash; the before/after slider in the second video; the honest way to show change, because both scenes stay visible and the viewer moves the boundary.</span>
     <span><b>in the thumbnails</b> &mdash; left, the evaluation side of this course (returns in W9&ndash;W11); right, the acquisition side, on the flood from slide 1.</span>
   </div>
@@ -1092,7 +1092,7 @@ items = cat.search(
     <li>FourCastNet, Pangu-Weather, GraphCast, GenCast: all trained on <span class="accent">ERA5 at 0.25°</span> — one corpus, one field's worth of models.</li>
     <li>WeatherBench 2 fixes the test — every 00 and 12 UTC start of 2020, scored against ERA5 — and leaves the training years to the modeller (most stop at 2018): temporal holdout, exactly the W2 leakage lesson.</li>
     <li>State vector: surface (T2m, U10/V10, MSLP) + upper-air variables on 13 pressure levels (50 → 1000 hPa); <b>Z500</b> is the headline — geopotential height at 500 hPa tracks the midlatitude synoptic pattern.</li>
-    <li class="muted">"Beats IFS" always means: beats IFS at reproducing ERA5's version of the atmosphere.</li>
+    <li class="muted">"Beats IFS" means: an ERA5-trained model, scored against ERA5, beat an IFS scored against ERA5 or its own analysis — ERA5's atmosphere is the target.</li>
   </ul>
   <div class="foot"><span>Bi et al. 2023 (Pangu) · Lam et al. 2023 (GraphCast) · Rasp et al. 2024 (WB2)</span></div>
   <aside class="notes">3 min. Explain why Z500 of all things: it's smooth, dynamically central (ridges/troughs = weather regimes), and the historical NWP skill metric — continuity back to Bauer et al.'s "quiet revolution." The last bullet plants DQ2 again: the ceiling of this whole enterprise is ERA5's own fidelity. Lab pipe (a) computes a Z500 climatology — today they touch the exact variable the field scores itself on.</aside>
