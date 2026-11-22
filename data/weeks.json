@@ -1018,9 +1018,9 @@
    "n": 11,
    "phase": "Foundation Models",
    "title": "Weather and Climate Foundation Models (Weather-FM Week)",
-   "goal": "The full ML-weather stack: paradigms, spherical geometry, rollout stability, and WeatherBench2-grade evaluation — then train your own tiny forecaster.",
+   "goal": "How data-driven weather models work, what a small ERA5 emulator trained for this course shows about skill, blur and ensembles, and how to state a claim you can defend — with a paired block-bootstrap interval on every difference.",
    "title_ko": "기상·기후 Foundation Model (Weather-FM 주간)",
-   "goal_ko": "ML 기상의 전체 스택 — 패러다임, 구면 기하, rollout 안정성, WeatherBench2급 평가 — 을 다룬 뒤, 직접 작은 forecaster를 학습합니다.",
+   "goal_ko": "데이터 기반 기상 모델의 작동 원리, 이 수업을 위해 학습한 작은 ERA5 emulator가 보여 주는 skill·blur·ensemble, 그리고 방어할 수 있는 주장을 쓰는 법 — 모든 차이에 paired block-bootstrap 구간을 붙입니다.",
    "date": "2026-11-23",
    "concept": [
     {
@@ -1029,14 +1029,19 @@
      "topic_ko": "프로젝트 발표 3 — 파일럿 증거와 compute 결정(1인 10분 + 질의 3분; 추첨된 질문자가 첫 질문). 준비 내용은 발표 페이지."
     },
     {
-     "min": 10,
-     "topic": "Evaluation you can defend, for every track: metric definitions, paired block bootstrap over blocks of time and space, validation vs the sealed test, what a “win” means.",
-     "topic_ko": "어느 트랙이든 방어할 수 있는 평가: 지표 정의, 시간·공간 블록의 paired block bootstrap, validation과 봉인된 test, ‘이김’의 정의"
+     "min": 5,
+     "topic": "How a data-driven weather model works, in three slides: one learned six-hour step fed back into itself (GraphCast), three ways to put a sphere into a network (windows, a mesh, harmonics), three ways to get fifty forecasts instead of one (GenCast, AIFS-CRPS and FGN, perturbed starts).",
+     "topic_ko": "데이터 기반 기상 모델의 작동 원리를 세 장으로: 학습한 6시간 스텝 하나를 되먹여 만드는 예보(GraphCast), 구(球)를 네트워크에 넣는 세 가지 방법(window, mesh, harmonics), 예보 하나 대신 쉰 개를 얻는 세 가지 방법(GenCast, AIFS-CRPS·FGN, 초기장 섭동)."
     },
     {
-     "min": 10,
-     "topic": "Weather track: the state tensor and ERA5, one slide per paradigm (Pangu, GraphCast, Aurora/Stormer), lat-weighted RMSE, ACC, CRPS, rollout stability. If no weather-track project exists, this time goes to the studio.",
-     "topic_ko": "기상 트랙: 상태 텐서와 ERA5, 패러다임별 한 장(Pangu, GraphCast, Aurora/Stormer), lat-weighted RMSE, ACC, CRPS, rollout 안정성. 기상 트랙 프로젝트가 없으면 이 시간은 스튜디오로"
+     "min": 8,
+     "topic": "A small emulator, measured for this course: a 2.2 M-weight U-Net trained for an hour on ERA5 at 5.625° — skill against persistence and climatology (useful for 5.2 days), how the forecast blurs, what rollout fine-tuning buys and costs, five seeds as an ensemble that is too sure of itself.",
+     "topic_ko": "이 수업을 위해 측정한 작은 emulator: 5.625° ERA5로 한 시간 학습한 2.2 M weight U-Net — persistence·climatology 대비 skill(5.2일까지 유용), 예보가 흐려지는 방식, rollout fine-tuning의 이득과 비용, 스스로를 과신하는 다섯 seed 앙상블."
+    },
+    {
+     "min": 8,
+     "topic": "Claims you can defend: three questions to ask of “beats ECMWF” (which product, scored against what, started from what), the row Aurora’s table leaves out, weak extremes — and the paired block bootstrap, as a recipe and on our own numbers.",
+     "topic_ko": "방어할 수 있는 주장: “ECMWF를 이겼다”에 던질 세 질문(어떤 제품과, 무엇을 기준으로, 어떤 초기장에서), Aurora 표에 빠진 행, 약한 극값 — 그리고 paired block bootstrap을 절차로, 또 우리 숫자로."
     },
     {
      "min": 3,
@@ -1048,7 +1053,7 @@
     "task": "Project studio (65 min): launch the full run matrix — the four rows with genuine tuning of the supervised competitor on validation (Week 4 U-Net; persistence and climatology for forecasting), replicates, the registered ablation; metric code with paired block-bootstrap CIs.",
     "task_ko": "프로젝트 스튜디오(65분): 전체 run matrix 착수 — validation에서 supervised 경쟁자(4주차 U-Net; 예측 과제는 persistence·climatology)를 제대로 튜닝한 네 행, 반복, 등록한 ablation; paired block-bootstrap CI가 있는 지표 코드.",
     "data": [
-     "WeatherBench2 ERA5 5.625° Zarr (Z500 + T850)"
+     "WeatherBench 2 ERA5 5.625° Zarr (the lecture’s emulator data; loading code on slide A8)"
     ],
     "tools": [
      "xarray + gcsfs (WB2 public bucket)",
@@ -1096,8 +1101,10 @@
     "spherical/mesh representations",
     "rollout curriculum & stability",
     "WeatherBench2 evaluation",
-    "spectra diagnostics"
-   ]
+    "spectra diagnostics",
+    "paired block bootstrap"
+   ],
+   "slides": true
   },
   {
    "n": 12,

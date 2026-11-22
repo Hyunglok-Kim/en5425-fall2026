@@ -32,10 +32,14 @@
   "key": true
  },
  "w09": {
+  "quiz": true,
+  "key": true
+ },
+ "w10": {
   "quiz": false,
   "key": false
  },
- "w10": {
+ "w11": {
   "quiz": false,
   "key": false
  }

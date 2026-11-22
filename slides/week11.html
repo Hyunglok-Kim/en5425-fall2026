@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN5425 · Week 11 · Weather and Climate Foundation Models</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="deck.css">
+<script src="deck.js" defer></script>
+<script src="ink.js" defer></script>
+<script src="poll.js" defer></script>
+<style>
+/* compact video row (slide 3): small thumbnails; a playing video opens large over the slide,
+   and deck.js restores the thumbnail when the slide is left */
+.ytmini { display:flex; gap:1.4vw; margin-top:1.2vh; }
+.ytmini a.yt { flex:1; min-width:0; display:flex; gap:.8vw; align-items:center; text-decoration:none; color:inherit; }
+.ytmini .ytbox { position:relative; display:block; flex:0 0 9.5vw; }
+.ytmini .ytbox img { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:6px; display:block; }
+.ytmini .play { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.ytmini .play span { background:rgba(0,0,0,.62); color:#fff; border-radius:999px; padding:.6vh 1vh; font-size:1.7vh; line-height:1; }
+.ytmini .cap { font-size:clamp(12.5px,1.85vh,16px); line-height:1.35; color:var(--ink-2); min-width:0; }
+.ytmini .ytbox:has(iframe) { position:fixed; z-index:120; top:10vh; left:50%; transform:translateX(-50%);
+  width:min(80vw,140vh); flex:none; border-radius:10px; box-shadow:0 12px 48px rgba(0,0,0,.45); }
+</style>
+</head>
+<body>
+
+
+<!-- 1 -->
+
+<section class="slide title xl" style="background:linear-gradient(rgba(10,12,18,.46),rgba(10,12,18,.84)),url('img/fig-w11-title.jpg') center/cover no-repeat">
+  <p class="kicker" style="color:#e8a07a">EN5425 / EV4240 · Week 11 · Mon 23 Nov 2026</p>
+  <h1 style="color:#f4efe5;text-shadow:0 2px 24px rgba(0,0,0,.6)">Weather and Climate Foundation Models</h1>
+  <p class="big" style="color:#e8e2d8;text-shadow:0 1px 16px rgba(0,0,0,.6)">Water vapour over Asia and the Pacific on 7 August 2020, the day of the floods in southern Korea; bright is moist air. A network trained on decades of such fields now forecasts ten days ahead in under a minute, and three weather services run one every day. Today: how these models work, what a 2.2 M-weight copy trained on this Mac shows, and how to state a claim you can defend.</p>
+  <div class="foot" style="color:#cfc8bc"><span>Deep Learning Applications in Environmental Big Data · Prof. Hyunglok Kim · GIST</span><span>Image: ERA5 total column water vapour, 7 Aug 2020 06 UTC, 62° E to 118° W, drawn for this lecture from WeatherBench 2’s copy of ERA5. Contains modified Copernicus Climate Change Service information 2020.</span></div>
+  <aside class="notes">Timing for 23 Nov: quiz 11 at 0:00 (5 min), then Talk 3 by every student (10 min + 3 min of questions each, the drawn questioner asks first, ≈ 65 min). Then this lecture, about 26 min: roadmap 1.3 · Part 1 (the step, the sphere, ensembles) 5 · Part 2 (our emulator: skill, blur, rollout trade, five seeds) 8 · Part 3 (claims, the missing row, extremes, the paired block bootstrap) 8 · next talk 2 · studio 1. Then the 65-minute studio (slide 20). Cut order if short: the extremes slide (16) — say its lead sentence only — then the three routes to an ensemble (6). Open with the picture: this is one field of ERA5, the amount of water vapour above each point, six hours into 7 August 2020; Korea is in the upper left, under the bright band of moist air that brought that day's floods. A weather model's job is the next frame of this film, and the next, for ten days. Three years after the first papers, networks do that in a minute on one GPU and are operational at ECMWF, in the United States and in Germany. None of the class projects is a weather forecast, and that is the point of today: these models are the largest worked example of everything the projects need — a free baseline, a skill curve against lead time, what squared error does to a forecast, seeds as an ensemble, and an interval on a difference.</aside>
+</section>
+
+<!-- 2 -->
+
+<section class="slide xl">
+  <p class="kicker">Week 11 · after the talks</p>
+  <h2>Today: one six-hour step, a small copy we measured, a claim you can defend</h2>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 104" role="img" aria-label="Eight boxes joined left to right by arrows. Part 1, how a data-driven weather model works: a six-hour step, repeated; a sphere in a network; one forecast, or fifty. Part 2, a small copy measured on this Mac: our emulator, measured; blur and the rollout trade; five seeds make an ensemble. Part 3, claims you can defend: who beat whom; the paired block bootstrap. Brackets under the boxes mark the three parts." style="width:min(98%,1150px)">
+      <g fill="var(--wash)" stroke="currentColor" stroke-width="1.4">
+        <rect x="2" y="10" width="99" height="50" rx="8"/><rect x="113" y="10" width="99" height="50" rx="8"/><rect x="224" y="10" width="99" height="50" rx="8"/>
+        <rect x="456" y="10" width="99" height="50" rx="8"/><rect x="567" y="10" width="99" height="50" rx="8"/>
+      </g>
+      <g fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8">
+        <rect x="345" y="10" width="99" height="50" rx="8"/><rect x="799" y="10" width="99" height="50" rx="8"/>
+      </g>
+      <rect x="688" y="10" width="99" height="50" rx="8" fill="var(--wash)" stroke="var(--muted)" stroke-width="1.4"/>
+      <g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M101 35 H113 M212 35 H224 M323 35 H345 M444 35 H456 M555 35 H567 M666 35 H688 M787 35 H799"/></g>
+      <g fill="currentColor"><path d="M107 31 L113 35 L107 39 Z"/><path d="M218 31 L224 35 L218 39 Z"/><path d="M339 31 L345 35 L339 39 Z"/><path d="M450 31 L456 35 L450 39 Z"/><path d="M561 31 L567 35 L561 39 Z"/><path d="M682 31 L688 35 L682 39 Z"/><path d="M793 31 L799 35 L793 39 Z"/></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle">
+        <text x="51.5" y="31">a six-hour step,</text><text x="51.5" y="45">repeated</text>
+        <text x="162.5" y="31">a sphere in</text><text x="162.5" y="45">a network</text>
+        <text x="273.5" y="31">one forecast,</text><text x="273.5" y="45">or fifty</text>
+        <text x="394.5" y="31" font-weight="700" fill="var(--accent)">our emulator,</text><text x="394.5" y="45" font-weight="700" fill="var(--accent)">measured</text>
+        <text x="505.5" y="31">blur and the</text><text x="505.5" y="45">rollout trade</text>
+        <text x="616.5" y="31">five seeds =</text><text x="616.5" y="45">an ensemble</text>
+        <text x="737.5" y="31">who beat</text><text x="737.5" y="45">whom?</text>
+        <text x="848.5" y="31" font-weight="700" fill="var(--accent)">paired block</text><text x="848.5" y="45" font-weight="700" fill="var(--accent)">bootstrap</text>
+      </g>
+      <g fill="none" stroke="var(--muted)" stroke-width="1"><path d="M2 70 V76 H323 V70 M345 70 V76 H666 V70 M688 70 V76 H898 V70"/></g>
+      <g font-size="11.5" fill="var(--muted)" text-anchor="middle"><text x="162.5" y="93">Part 1 · how a data-driven weather model works</text><text x="505.5" y="93">Part 2 · a small copy, measured on this Mac</text><text x="793" y="93">Part 3 · claims you can defend</text></g>
+    </svg>
+  </div>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.05vh,18.5px);line-height:1.34">
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">1 · Models</td><td style="padding:.35vh .6vw"><b>ERA5</b> ECMWF’s reanalysis: past weather rebuilt from observations with one fixed model (Week 3) · <b>ECMWF</b> the European Centre for Medium-Range Weather Forecasts · <b>state</b> every variable on every level and grid point at one time · <b>rollout</b> feeding each forecast back in as the next input (Week 5) · <b>analysis</b> the best estimate of the atmosphere now; it starts a forecast · <b>mesh</b> points joined by edges, spread evenly over the sphere · <b>ensemble</b> many forecasts of the same days; each one is a member</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.35vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">2 · Emulator</td><td style="padding:.35vh .6vw"><b>emulator</b> a network trained to imitate another system’s output, here ERA5 · <b>Z500</b> geopotential at 500 hPa: the height of that pressure surface × g, the map of ridges and troughs · <b>persistence</b> the forecast “nothing changes” · <b>climatology</b> the forecast “the average for this date” · <b>RMSE</b> root-mean-square error · <b>ACC</b> anomaly correlation coefficient: are the departures from climatology in the right places? · <b>spread</b> how far the members of an ensemble lie apart</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .6vw;vertical-align:top;white-space:nowrap;color:var(--accent);font-weight:650">3 · Claims</td><td style="padding:.35vh .6vw"><b>target</b> one variable at one level and one lead time · <b>CRPS</b> continuous ranked probability score: absolute error, extended to an ensemble (Week 5) · <b>fine-tune</b> continue training a pretrained model on a new task (Week 9) · <b>bootstrap</b> resample your test cases with replacement to see how far a score could move · <b>paired block</b> the same blocks of neighbouring cases for both models</td></tr>
+  </table>
+  <p class="small" style="margin:.8vh 0 0;padding:.5vh .8vw;border-left:3px solid var(--accent);background:var(--wash)"><b style="color:var(--accent)">Talk 4 · Mon 30 Nov</b> — controlled runs and first results, on validation only · slides by Sun 29 Nov 23:59 (slide 19)</p>
+  <div class="foot"><span>Studio straight after the lecture (slide 20) · reading: Lam et al. 2023, GraphCast · model tables, score code and bootstrap code in the Appendix</span></div>
+  <aside class="notes">1.3 min. Read the chain left to right. Part 1 is this week's paper in three slides: what a data-driven weather model is, how it holds a sphere, and why one forecast is not enough. Part 2 is ours: a 2.2-million-weight network trained for an hour on this Mac, small enough to rerun, which shows every effect the big models show. Part 3 turns that into your Talk 4: how to read a claim, the row most papers leave out, what the scores miss, and — in orange — the paired block bootstrap, which is the interval you put on every difference in your table. Table: one breath per word; most are from Weeks 3, 5 and 9.</aside>
+</section>
+
+<!-- 3 -->
+
+<section class="slide section xl">
+  <p class="kicker">Part 1 · this week’s paper</p>
+  <h2>How a Data-Driven Weather Model Works</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Three slides: the forecast as one learned six-hour step fed back into itself; three ways to put a sphere into a network; three ways to get fifty forecasts instead of one. <b>By the end:</b> place any weather model you read about on these three axes.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>The same three choices sit in your project: what one step predicts, what it learned from, and what a single prediction hides. A forecast of soil moisture or river stage rolls out, and blurs, in the same way.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>ECMWF has run AIFS, its Artificial Intelligence Forecasting System, operationally since 25 Feb 2025 and its ensemble since 1 July 2025; the US weather service three GraphCast-based systems since 17 Dec 2025; Germany’s AICON since 2 Mar 2026.</p></div>
+  </div>
+  <aside class="notes">5 minutes for Part 1. Read the cards in thirty seconds. The reading is GraphCast; Pangu-Weather and GenCast are optional. AIFS stands for Artificial Intelligence Forecasting System; the dates on the right card are the weather services' own announcements, drawn as a timeline on appendix card A1.</aside>
+</section>
+
+<!-- 4 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · The forecasting problem</p>
+  <h2>A forecast is one learned six-hour step, fed back into itself</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">The network learns the step from ERA5; the state it starts from still comes from a numerical weather system.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 204" role="img" aria-label="Left: two stacked maps, the state six hours ago and the state now; for GraphCast that is 227 fields on a grid of 721 by 1,440 points. An arrow leads to a box, the network: one learned step of six hours, 36.7 million weights in GraphCast. An arrow leads to the state six hours later. A loop carries that output back to the input: forty steps make ten days, the rollout of Week 5. Right, highlighted: two things the network does not do. It does not start itself: the first state is an analysis, observations blended into a numerical model's short forecast. It does not judge itself: it learned ERA5, a 2016 model at 31 kilometres served at a quarter degree, so a score against ERA5 measures imitation." style="width:min(98%,1150px)">
+      <text x="18" y="64" font-size="13" fill="currentColor" font-weight="700">two states</text>
+      <g stroke="currentColor" stroke-width="1.2">
+        <rect x="34" y="74" width="108" height="64" rx="5" fill="var(--page)"/><rect x="34" y="74" width="108" height="64" rx="5" fill="var(--wash)"/>
+        <rect x="18" y="88" width="108" height="64" rx="5" fill="var(--page)"/><rect x="18" y="88" width="108" height="64" rx="5" fill="var(--wash)"/>
+      </g>
+      <text x="100" y="85.5" font-size="11.5" fill="var(--muted)" text-anchor="end">t − 6 h</text>
+      <text x="72" y="125" font-size="14" fill="currentColor" text-anchor="middle">t</text>
+      <g font-size="12.5" fill="var(--muted)"><text x="18" y="172">GraphCast: 227 fields on a</text><text x="18" y="188">721 × 1,440 grid (0.25°)</text></g>
+      <path d="M146 114 H182" stroke="currentColor" stroke-width="1.6"/><path d="M178 109 L186 114 L178 119 Z" fill="currentColor"/>
+      <rect x="190" y="74" width="196" height="80" rx="9" fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8"/>
+      <g font-size="13" fill="currentColor" text-anchor="middle"><text x="288" y="98" font-size="15" font-weight="700">network</text><text x="288" y="118">one learned step: + 6 hours</text><text x="288" y="137" fill="var(--muted)">GraphCast: 36.7 M weights</text></g>
+      <path d="M388 114 H420" stroke="currentColor" stroke-width="1.6"/><path d="M416 109 L424 114 L416 119 Z" fill="currentColor"/>
+      <rect x="428" y="82" width="108" height="64" rx="5" fill="var(--wash)" stroke="currentColor" stroke-width="1.2"/>
+      <text x="482" y="119" font-size="14" fill="currentColor" text-anchor="middle">t + 6 h</text>
+      <path d="M482 82 V34 H124 V66" fill="none" stroke="var(--accent)" stroke-width="1.6"/><path d="M119 64 L124 73 L129 64 Z" fill="var(--accent)"/>
+      <text x="303" y="26" font-size="13" fill="var(--accent)" text-anchor="middle" font-weight="700">feed the output back in: 40 steps = 10 days (the rollout of Week 5)</text>
+      <rect x="560" y="26" width="336" height="170" rx="10" fill="var(--accent)" opacity=".12"/>
+      <rect x="560" y="26" width="336" height="170" rx="10" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <g font-size="13.5" fill="currentColor">
+        <text x="576" y="50" font-size="15" font-weight="700" fill="var(--accent)">two things the network does not do</text>
+        <text x="576" y="76"><tspan font-weight="700">start itself</tspan> — the first state is an</text>
+        <text x="576" y="94">analysis: observations blended into a</text>
+        <text x="576" y="112">numerical model’s short forecast</text>
+        <text x="576" y="140"><tspan font-weight="700">judge itself</tspan> — it learned ERA5 (a 2016</text>
+        <text x="576" y="158">model at 31 km, served at 0.25°), so a</text>
+        <text x="576" y="176">score against ERA5 measures imitation</text>
+      </g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>The baseline is hard to beat: ECMWF integrates the equations of the atmosphere at about 9 km to 15 days — one run from its best analysis plus fifty perturbed ones.</li>
+    <li>The networks are small: tens of millions of weights, trained in hours to weeks on 8 to 192 GPUs; <span class="accent">one forecast then takes about a minute.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>HRES</b> — ECMWF’s single 9 km forecast · <b>ENS</b> — its ensemble of 51 runs · <b>GPU</b> — graphics processor</span>
+  </div>
+  <div class="foot"><span>Lam et al. 2023, GraphCast (the reading) · the numerical baseline: Bauer et al. 2015 · when each model went operational, and ECMWF’s product names: A1 · five models in one table: A2</span></div>
+  <aside class="notes">1.8 min. Read the picture left to right. The state is every variable on every level and grid point at one moment: GraphCast uses five variables at the surface and six on each of 37 pressure levels, 227 fields on a quarter-degree grid, about a million points each. The model takes the state now and six hours ago and returns the state six hours later; feed that back in forty times and you have ten days — exactly the autoregressive rollout of Week 5, with the same error growth. Then the orange box, the two limits to keep in mind all hour. One: the network does not start itself. Every operational data-driven forecast begins from the analysis of a numerical system, which turns observations into a state; the learned model replaces the forecast step, not the assimilation. Two: it does not judge itself. Almost all of these models learned from ERA5, a reanalysis made with a 2016 model at about 31 km; a score against ERA5 measures how well the network imitates ERA5, and the numerical forecast it is compared with was never built to do that. First bullet: the competitor. ECMWF's system has 137 levels and about 9 km spacing; one run from the best analysis — called HRES until recently — and fifty more with perturbed starts and physics; together the ensemble, ENS. Second bullet: the scale. GraphCast has 36.7 million weights, smaller than last week's Prithvi; training took 32 accelerators four weeks, and a ten-day forecast takes under a minute on one, against about an hour on 11,664 processor cores for the numerical run.</aside>
+</section>
+
+<!-- 5 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Architecture · this week’s paper is the middle one</p>
+  <h2>Three ways to put a sphere into a network: windows, a mesh, harmonics</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">The latitude–longitude grid is the problem: its cells shrink toward the poles, so equal windows cover unequal areas.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh"><img src="img/fig-w11-families.png" alt="Three globes. (a) Latitude-longitude grid: cells shrink toward the poles; patches attend to each other inside a window; Pangu-Weather, FuXi, Aurora. (b) Icosahedral mesh: nearly equal-area triangles; each node gathers messages from its neighbours; GraphCast, and AIFS with a graph encoder and decoder. (c) Spherical harmonics: the field is expanded in harmonics with coefficients a-l-m and the network computes on the coefficients; the spherical Fourier neural operator and FourCastNet 3." style="width:min(100%,1180px);max-height:41vh;object-fit:contain"></div>
+  <ul class="small">
+    <li><b>GraphCast:</b> 40,962 mesh nodes, 16 rounds of messages; a long edge crosses a continent in one step.</li>
+    <li>Architecture is not what decides: Stormer, a plain transformer at 1.4°, <span class="accent">leads beyond day 7 in its authors’ tests.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>message passing</b> — each node updates from its neighbours · <b>spherical harmonics</b> — the sphere’s own Fourier basis</span>
+  </div>
+  <div class="foot"><span>Bi et al. 2023 (Pangu-Weather) · Lam et al. 2023 (GraphCast) · Bonev et al. 2023 (spherical Fourier neural operator) · Nguyen et al. 2024 (Stormer) · the mesh, drawn: A3</span></div>
+  <aside class="notes">1.5 min. Every design starts from one difficulty. On the latitude–longitude grid a window of a fixed number of points is more than a thousand kilometres wide at the equator and a few tens of kilometres near the pole. Family (a) keeps that grid, cuts it into patches and uses attention inside windows — the Swin idea of Week 6, here in three dimensions: Pangu-Weather, FuXi, Aurora. Family (b), today's reading, leaves the grid for the computation: GraphCast maps the gridded state onto the nodes of an icosahedron refined six times — 40,962 nodes, nearly equally spaced — lets the nodes exchange messages along the edges sixteen times, and maps back. The mesh keeps the edges of every refinement level, so a message can cross a continent along a long edge in one step and be refined along the short ones. ECMWF's AIFS uses a graph to go between the grid and a coarser internal representation, and a transformer in between. Family (c) computes on spectral coefficients; with spherical harmonics no point is special, and its authors report stable six-hour rollouts for a year. Second bullet, the sober one: Stormer is an ordinary vision transformer on a 1.4-degree grid, trained with rollouts that grow and a step drawn at random from 6, 12 or 24 hours; its authors report it ahead beyond seven days of the models they compared, some at five times its resolution. What you train on, and how, matters more than which of the three families you pick.</aside>
+</section>
+
+<!-- 6 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 1 · Probabilistic models</p>
+  <h2>One forecast is the average of many futures — three ways to get fifty instead</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">Trained on squared error, a model answers uncertainty with the mean: right on average, smooth, and no storm in it.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .5vh">
+    <svg viewBox="0 0 900 262" role="img" aria-label="Three rows, each from two past states on the left to a stack of members on the right; the random ingredient is drawn in orange. Row 1, generate from noise, GenCast, a diffusion model: random noise enters a denoiser that refines it in 20 steps into the next state; new noise for every member and step; ahead of ECMWF's ensemble on 97.2 percent of 1,320 targets, 8 minutes per member. Row 2, a random input and a proper score, AIFS-CRPS and FGN: one network makes one pass per step, with 32 random numbers fed into its layer norms; trained on the CRPS itself, so spread must match error; FGN is ahead on 99.3 percent of targets at under 1 minute per member. Row 3, perturb the start, any deterministic model: a small random perturbation is added to the start and the same network is run once per start; cheapest, no new training, but every member is still a smoothed forecast, so they stay close together." style="width:min(98%,1150px)">
+      <defs>
+        <marker id="w11ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="currentColor"/></marker>
+        <g id="w11stk" stroke-width="1.2">
+          <rect x="12" y="0" width="100" height="42" rx="5" fill="var(--page)" stroke="none"/><rect x="12" y="0" width="100" height="42" rx="5" fill="var(--wash)" stroke="currentColor"/>
+          <rect x="6" y="5" width="100" height="42" rx="5" fill="var(--page)" stroke="none"/><rect x="6" y="5" width="100" height="42" rx="5" fill="var(--wash)" stroke="currentColor"/>
+          <rect x="0" y="10" width="100" height="42" rx="5" fill="var(--page)" stroke="none"/><rect x="0" y="10" width="100" height="42" rx="5" fill="var(--wash)" stroke="currentColor"/>
+        </g>
+      </defs>
+      <text x="4" y="14" font-size="14" fill="currentColor" font-weight="700">1 · generate from noise<tspan font-weight="400" fill="var(--muted)"> — GenCast, a diffusion model</tspan></text>
+      <rect x="4" y="24" width="84" height="52" rx="6" fill="var(--wash)" stroke="currentColor" stroke-width="1.2"/>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="46" y="46">two past</text><text x="46" y="62">states</text></g>
+      <path d="M88 50 H112" stroke="currentColor" stroke-width="1.4" marker-end="url(#w11ar)"/>
+      <rect x="116" y="24" width="100" height="52" rx="6" fill="var(--accent)" fill-opacity=".12" stroke="var(--accent)" stroke-width="1.8" stroke-dasharray="5 3"/>
+      <g font-size="12.5" fill="var(--accent)" text-anchor="middle" font-weight="700"><text x="166" y="46">random</text><text x="166" y="62">noise</text></g>
+      <path d="M216 50 H240" stroke="currentColor" stroke-width="1.4" marker-end="url(#w11ar)"/>
+      <rect x="244" y="24" width="202" height="52" rx="6" fill="var(--wash)" stroke="currentColor" stroke-width="1.2"/>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="345" y="46">denoiser: refines the noise</text><text x="345" y="62">in 20 steps → the next state</text></g>
+      <path d="M446 50 H474" stroke="currentColor" stroke-width="1.4" marker-end="url(#w11ar)"/>
+      <use href="#w11stk" x="478" y="24"/>
+      <text x="528" y="60" font-size="12.5" fill="currentColor" text-anchor="middle">50 members</text>
+      <g font-size="12.5" fill="var(--muted)"><text x="604" y="38">new noise for every member and step</text><text x="604" y="55" fill="currentColor">ahead of ECMWF’s ensemble on 97.2% of</text><text x="604" y="72" fill="currentColor">1,320 targets · 8 minutes per member</text></g>
+      <text x="4" y="104" font-size="14" fill="currentColor" font-weight="700">2 · a random input and a proper score<tspan font-weight="400" fill="var(--muted)"> — AIFS-CRPS; FGN, the Functional Generative Network (WeatherNext 2)</tspan></text>
+      <rect x="4" y="114" width="84" height="52" rx="6" fill="var(--wash)" stroke="currentColor" stroke-width="1.2"/>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="46" y="136">two past</text><text x="46" y="152">states</text></g>
+      <path d="M88 140 H112" stroke="currentColor" stroke-width="1.4" marker-end="url(#w11ar)"/>
+      <rect x="116" y="114" width="330" height="52" rx="6" fill="var(--wash)" stroke="currentColor" stroke-width="1.2"/>
+      <text x="281" y="134" font-size="12.5" fill="currentColor" text-anchor="middle">one network, one pass per step</text>
+      <rect x="163" y="141" width="236" height="20" rx="4" fill="var(--accent)" fill-opacity=".12" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="5 3"/>
+      <text x="281" y="155.5" font-size="12.5" fill="var(--accent)" text-anchor="middle" font-weight="700">+ 32 random numbers per member</text>
+      <path d="M446 140 H474" stroke="currentColor" stroke-width="1.4" marker-end="url(#w11ar)"/>
+      <use href="#w11stk" x="478" y="114"/>
+      <text x="528" y="150" font-size="12.5" fill="currentColor" text-anchor="middle">members</text>
+      <g font-size="12.5" fill="var(--muted)"><text x="604" y="128">trained on the CRPS: spread must match error</text><text x="604" y="145" fill="currentColor">FGN: ahead on 99.3% of targets,</text><text x="604" y="162" fill="currentColor">under 1 minute per member</text></g>
+      <text x="4" y="194" font-size="14" fill="currentColor" font-weight="700">3 · perturb the start<tspan font-weight="400" fill="var(--muted)"> — any deterministic model</tspan></text>
+      <rect x="4" y="204" width="84" height="52" rx="6" fill="var(--wash)" stroke="currentColor" stroke-width="1.2"/>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="46" y="226">two past</text><text x="46" y="242">states</text></g>
+      <path d="M88 230 H112" stroke="currentColor" stroke-width="1.4" marker-end="url(#w11ar)"/>
+      <rect x="116" y="204" width="100" height="52" rx="6" fill="var(--accent)" fill-opacity=".12" stroke="var(--accent)" stroke-width="1.8" stroke-dasharray="5 3"/>
+      <g font-size="12.5" fill="var(--accent)" text-anchor="middle" font-weight="700"><text x="166" y="226">+ a small</text><text x="166" y="242">random field</text></g>
+      <path d="M216 230 H240" stroke="currentColor" stroke-width="1.4" marker-end="url(#w11ar)"/>
+      <rect x="244" y="204" width="202" height="52" rx="6" fill="var(--wash)" stroke="currentColor" stroke-width="1.2"/>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="345" y="226">a deterministic network,</text><text x="345" y="242">run once from each start</text></g>
+      <path d="M446 230 H474" stroke="currentColor" stroke-width="1.4" marker-end="url(#w11ar)"/>
+      <use href="#w11stk" x="478" y="204"/>
+      <text x="528" y="240" font-size="12.5" fill="currentColor" text-anchor="middle">members</text>
+      <g font-size="12.5" fill="var(--muted)"><text x="604" y="218">cheapest: no new training</text><text x="604" y="235" fill="currentColor">each member is still a smoothed</text><text x="604" y="252" fill="currentColor">forecast, so they stay close together</text></g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li>A deterministic model already behaves like an ensemble mean: it beats ECMWF’s ensemble mean only for the first three to six days.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>diffusion model</b> — a network that turns random noise into a sample, a little at each step · <b>proper score</b> — a score that only an honest forecast distribution minimises; the CRPS is one</span>
+  </div>
+  <div class="foot"><span>Price et al. 2025 (GenCast) · Lang et al. 2024 (AIFS-CRPS) · Alet et al. 2025 (FGN) · Rasp et al. 2024 (WeatherBench 2) · the three routes drawn with fields: A4</span></div>
+  <aside class="notes">1.5 min. Week 5 derived it for a river: a model trained on squared error predicts the conditional mean. Beyond a few days the atmosphere could be in many states, and the mean of many states is smoother than any of them — a good score, a poor description of the weather that will happen. To say how likely a storm is, a forecast must show several possible futures. Three routes; orange marks what is random. One: generate from noise. GenCast is a diffusion model: given the two previous states it refines random noise in twenty steps into the state twelve hours later; different noise, different member. Fifty members beat ECMWF's ensemble on 97.2% of 1,320 targets in 2019; the price is eight minutes per fifteen-day member, against under a minute for a deterministic model of that size. Two: give the network a random vector as an extra input and train it directly on the CRPS, which is lowest when the spread of the members matches their error. One forward pass per step. This is ECMWF's operational ensemble, AIFS-CRPS, and Google's FGN, which draws 32 numbers per member and step. Three: perturb the initial state and run a deterministic model from each — cheapest, but every member is still a smoothed forecast, and smooth forecasts from nearby starts stay close. We test routes like this one on our emulator in Part 2. The bullet: in WeatherBench 2 the deterministic data-driven models beat the numerical ensemble mean only in the first three to six days; they are means without an ensemble.</aside>
+</section>
+
+<!-- 7 -->
+
+<section class="slide section xl">
+  <p class="kicker">Part 2 · measured on this Mac</p>
+  <h2>A Small Emulator, Measured</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>A 2.2 M-weight network trained for an hour on coarse ERA5, then four measurements: skill against two forecasts that cost nothing, blur, what rollout training buys, five seeds as an ensemble. <b>By the end:</b> read a skill curve and say what its score rewards.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>Every effect the large models show appears at this size, where you can rerun it. The same plots are your Talk 4 figures: a free baseline, a curve with its failure point, and what your seeds agree on.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>WeatherBench 2 scores GraphCast, Pangu-Weather and ECMWF’s forecasts with these definitions. Our data are its public ERA5 files on a 5.625° grid, 1979–2019.</p></div>
+  </div>
+  <aside class="notes">8 minutes for Part 2. Read the cards in twenty seconds. Everything in this Part was computed for this course on the M2 Ultra in the office: the training takes an hour, the 1,440 test forecasts ten minutes.</aside>
+</section>
+
+<!-- 8 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · The experiment</p>
+  <h2>Our emulator: twelve fields, 2.2 M weights, one hour of training</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">The recipe of the large models on a grid more than twenty times coarser: learn the six-hour change, then roll it out.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 150" role="img" aria-label="Left: the input, 31 maps on a grid of 32 by 64 cells: the state now and six hours ago, two times twelve fields, plus seven fixed maps: land-sea mask, orography, latitude, sunlight and time of year. An arrow leads to a U-Net from Week 4 with 2.2 million weights that wraps around in longitude. Its output is the change of the twelve fields over six hours, which is added to the state to give the state six hours later; a loop feeds it back, forty steps for ten days. Right, highlighted: trained on 1979 to 2015, every choice made on 2016 to 2017, tested once on 2018 to 2019 with 1,440 ten-day forecasts." style="width:min(98%,1150px)">
+      <rect x="4" y="34" width="238" height="92" rx="8" fill="var(--wash)" stroke="currentColor" stroke-width="1.2"/>
+      <g font-size="13" fill="currentColor"><text x="16" y="56" font-weight="700">input: 31 maps, 32 × 64 cells</text><text x="16" y="76">the state at t and t − 6 h: 2 × 12</text><text x="16" y="94">+ 7 fixed maps: land–sea mask,</text><text x="16" y="112">orography, latitude, sun, season</text></g>
+      <path d="M244 80 H268" stroke="currentColor" stroke-width="1.6"/><path d="M264 75 L272 80 L264 85 Z" fill="currentColor"/>
+      <rect x="276" y="40" width="186" height="80" rx="9" fill="var(--wash)" stroke="var(--accent)" stroke-width="1.8"/>
+      <g font-size="13" fill="currentColor" text-anchor="middle"><text x="369" y="63" font-size="15" font-weight="700">U-Net (Week 4)</text><text x="369" y="83">2.2 M weights</text><text x="369" y="102" fill="var(--muted)">wraps around in longitude</text></g>
+      <path d="M464 80 H488" stroke="currentColor" stroke-width="1.6"/><path d="M484 75 L492 80 L484 85 Z" fill="currentColor"/>
+      <rect x="496" y="46" width="132" height="68" rx="8" fill="var(--wash)" stroke="currentColor" stroke-width="1.2"/>
+      <g font-size="13" fill="currentColor" text-anchor="middle"><text x="562" y="70">the change over</text><text x="562" y="88">6 hours, 12 fields</text><text x="562" y="106" fill="var(--muted)">+ state → t + 6 h</text></g>
+      <path d="M562 46 V16 H123 V26" fill="none" stroke="var(--accent)" stroke-width="1.6"/><path d="M118 24 L123 33 L128 24 Z" fill="var(--accent)"/>
+      <text x="342" y="11" font-size="12.5" fill="var(--accent)" text-anchor="middle" font-weight="700">fed back in: 40 steps = 10 days</text>
+      <rect x="652" y="20" width="244" height="118" rx="10" fill="var(--accent)" opacity=".12"/>
+      <rect x="652" y="20" width="244" height="118" rx="10" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <g font-size="13.5" fill="currentColor"><text x="666" y="44" font-size="15" font-weight="700" fill="var(--accent)">the split, fixed first</text><text x="666" y="66">train 1979–2015</text><text x="666" y="85">every choice on 2016–2017</text><text x="666" y="104">test once, 2018–2019:</text><text x="666" y="123">1,440 ten-day forecasts</text></g>
+    </svg>
+  </div>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.1vh,19px);line-height:1.36">
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap"><b class="accent">A</b> · one step</td><td style="padding:.3vh .6vw">squared error of the next state, each grid row weighted by its area (cos latitude) · 1,688 updates, about an hour</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap"><b class="accent">B</b> · + rollouts</td><td style="padding:.3vh .6vw">A, then fine-tuned on its own output: 2 steps, then 4 · 422 more updates</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap"><b class="accent">C</b> · no weight</td><td style="padding:.3vh .6vw">A’s recipe with every grid row counted equally (result on A7; used again on slide 18)</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap"><b class="accent">free</b> baselines</td><td style="padding:.3vh .6vw"><b>persistence</b>: the state stays as it is · <b>climatology</b>: the 1979–2015 average for that day of the year and hour</td></tr>
+  </table>
+  <div class="gloss">
+    <span><b>Z500</b> — geopotential at 500 hPa, about 5.5 km up: the map of ridges and troughs that steer the weather · <b>T850</b> — temperature at 850 hPa, about 1.5 km up</span>
+  </div>
+  <div class="foot"><span>ERA5 at 5.625° from WeatherBench 2’s public bucket · fields: geopotential on 5 levels, temperature on 4, 2 m temperature, two 10 m wind components · protocol and loading code: A8</span></div>
+  <aside class="notes">1.2 min. The emulator in one picture. Input: the state now and six hours ago — twelve fields each: geopotential on five pressure levels, temperature on four, 2-metre temperature and the two 10-metre wind components — plus seven maps that never need forecasting: land–sea mask, orography, sine and cosine of latitude, incoming sunlight, and the time of year as a sine and cosine. 31 maps on a 32-by-64 grid, 5.625 degrees. The network is your Week 4 U-Net, 2.2 million weights, with one change: the convolutions wrap around in longitude. It predicts the change over six hours, not the state; add it, feed it back, forty times for ten days. The orange box is the contract, decided before anything was trained: fit on 1979–2015, make every choice on 2016–2017, and run the test years once — 1,440 forecasts, two per day. The table names the runs you will see: A is trained on one step; B is A fine-tuned on its own two- and four-step rollouts; C drops the latitude weight; and five copies of B from different random starts make the ensemble on slide 12. The two baselines cost nothing and need no network: persistence says nothing changes, climatology says the average for the date. Training was stopped after an hour while the validation loss was still falling, so every number today understates what this network could do.</aside>
+</section>
+
+<!-- 9 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Skill against lead time</p>
+  <h2>An hour of training gives five useful days — judged against two forecasts that cost nothing</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">A score means little alone: put it beside the forecast anyone could make without a model.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh"><img src="img/fig-w11-skill.png" alt="Two panels against lead time from 0 to 10 days, for the geopotential at 500 hPa. Left, error (RMSE): persistence rises fast, passing 800 before day 2 and reaching about 1,080; climatology is flat at 793; our emulator rises slowly from 0, is at 147 after one day and crosses climatology after 6.3 days. Right, pattern match (ACC): persistence falls below the 0.6 line after 1.5 days, our emulator after 5.2 days, and is still at 0.2 on day 10." style="width:min(100%,1180px);max-height:39vh;object-fit:contain"></div>
+  <ul class="small">
+    <li>Useful for <span class="accent">5.2 days; persistence, 1.5</span>. ECMWF’s numerical forecast: 8 to 9 days, on a grid 70 times finer.</li>
+    <li>Past day 6.3 climatology has the lower error, yet ACC is still above 0.4: the double penalty of Week 5.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>RMSE</b> — root-mean-square error, each grid row weighted by its area · <b>ACC</b> — correlation between forecast and observed departures from climatology; “useful above 0.6” is a convention from 1978</span>
+  </div>
+  <div class="foot"><span>Measured for this course: model A, 1,440 forecasts from 00 and 12 UTC, 2018–2019, against ERA5 · scores as in WeatherBench 2 · code: A9</span></div>
+  <aside class="notes">1.6 min. The first thing to draw for any forecast model, and for your project: skill against lead time, next to the forecasts that cost nothing. Left panel, error. Grey is persistence — tomorrow equals today — which is good for a few hours and useless after two days. The dashed line is climatology, the average for that date: it never gets worse, so it is the ceiling a forecast has to stay under. Orange is model A: 147 after one day, where persistence has 570; 673 at day five. Right panel, the same forecasts scored by pattern: the anomaly correlation asks whether the highs and lows are in the right places. The convention since a 1978 ECMWF report is that a forecast is useful while this is above 0.6. Persistence: a day and a half. Our emulator: 5.2 days — from one hour of training on a grid of 2,048 cells. ECMWF's numerical forecast reaches eight to nine days at about seventy times our resolution, and the large data-driven models a little more. Second bullet, the subtle one: after 6.3 days the emulator's error is above climatology's, and yet the correlation is still above 0.4 — the patterns are there, slightly displaced, and squared error charges a displaced pattern twice, once where it is and once where it should be. That was Week 5's double penalty. So read both panels: the error says when to stop using the numbers, the correlation says the forecast still knows something. In your project: what is your persistence, and what is your climatology? If you cannot name them, Talk 4's table has no floor.</aside>
+</section>
+
+<!-- 10 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Blur</p>
+  <h2>The forecast fades before it fails: big features stay in place, small ones vanish</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">Squared error rewards the average of the possible futures, and an average is smoother than any one of them.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh"><img src="img/fig-w11-case.png" alt="Six world maps of the 500 hPa anomaly, drawn as height in metres from minus 300 (blue) to plus 300 (brown), for one forecast started on 18 December 2018 at 00 UTC. Top row: ERA5 after 1, 3 and 5 days. Bottom row: model B's forecast for the same times, with anomaly correlations 0.98, 0.88 and 0.54. After one day the two rows are nearly identical; after three the forecast has the large highs and lows in the right places but weaker; after five the large pattern is still recognisable, but the strongest features of ERA5 are weaker, missing or displaced." style="width:min(100%,1180px);max-height:41vh;object-fit:contain"></div>
+  <ul class="small">
+    <li>One forecast, ERA5 above, model B below: ACC falls 0.98 → 0.88 → 0.54; the sharp features weaken or move.</li>
+    <li>All 1,440: the forecast keeps 76% of the smallest waves’ power after one step, <span class="accent">62% after a day.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>anomaly</b> — the departure from climatology for that date · <b>power</b> — the variance a field carries at one wavelength</span>
+  </div>
+  <div class="foot"><span>Measured for this course · power: model A, wavenumbers 21 to 32 (900–1,350 km at 45° N), relative to ERA5 · the same loss in the large models: Rasp et al. 2024 · why: Week 5</span></div>
+  <aside class="notes">1.5 min. One forecast, so you can see what the curves mean. Top row is ERA5 one, three and five days after the start on 18 December 2018; the colours are the departure of the 500-hectopascal surface from its climatology, in metres. Bottom row is model B. After one day you cannot tell them apart: correlation 0.98. After three days the big highs and lows are in the right places, a little weak: 0.88. After five days — just under the 0.6 line — look at what is left: the large pattern is roughly right, and what was small or strong is weaker, displaced or gone. That is not a failure of this small network; it is what squared error asks for. When several futures are possible, the answer that minimises squared error is their average, and an average of maps is smoother than any of them: Week 5's conditional mean. Second bullet: the same thing measured over all 1,440 forecasts. Take the shortest waves this grid can hold — 900 to 1,350 kilometres — and ask how much of ERA5's variance at those scales the forecast still has: 76% after a single six-hour step, 62% after a day. The smoothing starts at the first step, before any error has accumulated. WeatherBench 2 reports the same for GraphCast and Pangu-Weather in their first days. For your project: a model that scores well on squared error can still be missing the peak, the edge or the flood — look at a map, not only at the number.</aside>
+</section>
+
+<!-- 11 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Training on its own output</p>
+  <h2>Rollout training buys 8% at day 3 — and pays part of it in blur</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">Trained on its own output, the model learns to hedge: lower error later, smoother fields throughout.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh"><img src="img/fig-w11-rollout.png" alt="Two panels. Left: the change in RMSE after rollout fine-tuning, in percent, against lead time. Both curves start near zero at six hours, fall to a minimum near day 3, minus 8 percent for Z500 and minus 6 percent for T850, and return to about minus 3 percent by day 10. Right: the power of the day-5 forecast divided by the power of ERA5, against the number of waves around a latitude circle from 1 to 32. Both models are near 1 for the longest waves and fall with wavenumber; in the shaded band of the smallest waves, 21 to 32, one-step training keeps 64 percent and the rollout fine-tuned model 48 percent." style="width:min(100%,1180px);max-height:39vh;object-fit:contain"></div>
+  <ul class="small">
+    <li>A quarter more training, on rollouts of 2 then 4 steps: <span class="accent">day-3 error −8%</span>, useful range 5.2 → 5.6 days.</li>
+    <li>The price, on the right: at day 5 it keeps 48% of the smallest waves’ power; the one-step model, 64%.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>fine-tuning</b> — training on from learned weights · <b>wavenumber</b> — waves around a latitude circle; high = small features</span>
+  </div>
+  <div class="foot"><span>Models A and B, 1,440 forecasts · seeds of B differ by under 1% · GraphCast: rollouts of 2 to 12 steps (Lam et al. 2023) · is 8% more than noise? slide 18</span></div>
+  <aside class="notes">1.5 min. Model A never saw its own output in training; model B did, for 422 more updates — rollouts of two steps, then four, with the error summed over the steps. Left panel: the change in error from A to B. At six hours nothing changes, as it should: the first step was already trained. Then the gain grows, to 8% for the geopotential near day 3 and 6% for temperature, and shrinks again as both models approach climatology. The useful range moves from 5.2 to 5.6 days. A quarter more training, on the thing the model is used for. Every large model does this: GraphCast lengthens its rollouts from two to twelve steps at the end of training, FuXi and AIFS similarly; Pangu-Weather avoids long rollouts another way, with separate models for 1, 3, 6 and 24 hours. Right panel, the price. This is the day-5 forecast's variance divided by ERA5's, wave by wave; 1 means as much detail as the real atmosphere. Both models lose the small scales, and the fine-tuned one loses more: 48% against 64% in the shaded band. Part of the 8% is real — the model has learned to correct its own errors — and part is hedging: a smoother forecast is punished less. You cannot tell which from the error alone; you need the second diagnostic. That is the general lesson: when a training trick lowers your error, ask what it did to the thing the error does not see. And is 8% more than seed noise? Five seeds of B differ by less than 1%; slide 18 puts an interval on it.</aside>
+</section>
+
+<!-- 12 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 2 · Five seeds</p>
+  <h2>Five seeds make an ensemble for free — and it is too sure of itself</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">The same recipe trained five times from different random starts: the cheapest ensemble there is.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh"><img src="img/fig-w11-ensemble.png" alt="Three panels for the geopotential at 500 hPa. Left, spread is about half the error: against lead time, the error of one model reaches about 960 at day 10, the error of the mean of five about 800, and the spread of the five stays far below both, about 580 at day 10. Middle, truth falls outside: a rank histogram at day 3; ERA5 lies below all five members in 26 percent of cases and above all five in 32 percent, where a reliable ensemble would give 17 percent each; the four middle ranks hold 9 to 12 percent each. Right, still a third better than one: the CRPS of the five members against the absolute error of one member; at day 3, 167 against 246." style="width:min(100%,1180px);max-height:39vh;object-fit:contain"></div>
+  <ul class="small">
+    <li>The mean of five beats each member: error 568 against 631 at day 5, useful for 6.2 days instead of 5.6.</li>
+    <li>But the members agree with each other more than with the truth: spread is half the error, and ERA5 falls outside all five in <span class="accent">58% of cases; a reliable ensemble gives 33%.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>spread</b> — the members’ standard deviation · <b>rank histogram</b> — the truth’s rank among the members; flat if reliable</span>
+  </div>
+  <div class="foot"><span>Measured for this course: five copies of model B, 1,440 forecasts · spread corrected for the five members · a perturbed-start ensemble does no better (A4) · code: A9</span></div>
+  <aside class="notes">1.6 min. You will each train at least three seeds per row. Here is what five seeds of model B are worth. Left panel: grey is the error of one model, solid orange the error of the average of the five — lower at every lead time, 568 against 631 at day five, and useful for 6.2 days instead of 5.6. Averaging cancels the part of each model's error that is its own. That is free skill, and it is why a seed average is a fair row in a table only if every row gets one. The dashed line is the catch: the spread of the five, how far they lie apart. In a reliable ensemble the truth behaves like one more member, so spread and error are about equal. Here spread is about half the error — 0.43 after six hours, 0.55 after three days. Middle panel, the same statement as a histogram: sort the five members at every grid point and ask where ERA5 falls. If the ensemble were reliable, each of the six positions would hold a sixth of the cases. Instead ERA5 is below all five 26% of the time and above all five 32%: 58% outside, where 33% is expected. Five networks trained on the same data with the same loss make the same mistakes. Right panel: even so, scored as a probability forecast the five beat one — a CRPS of 167 against a mean absolute error of 246 at day three. So: seeds give you a better mean and a lower bound on your uncertainty, not the uncertainty. The models of slide 6 exist because of this gap: their spread is trained to match the error. For Talk 4: report the seed mean and the seed spread, and do not call the spread an error bar on the truth.</aside>
+</section>
+
+<!-- 13 -->
+
+<section class="slide section xl">
+  <p class="kicker">Part 3 · for your Talk 4</p>
+  <h2>Claims You Can Defend</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.6vw;flex:0 0 auto;margin-top:.5vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">What you will see</b><br>Three questions that decode “beats ECMWF”; the row most papers leave out; what average scores hide; and the paired block bootstrap, first as a recipe, then on our own numbers. <b>By the end:</b> put a defensible interval on a difference between two rows.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Why it matters here</b><br>Next Monday your table says one row is better than another. Whether that sentence survives a question depends on the baseline, the reference and the interval — not on the size of the number.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">Where it is used</b><br>WeatherBench 2 separates scores by verification reference; GraphCast’s paper tests each of its 1,380 targets: ahead on 90.3%, significantly on 89.9%; your 7 Dec table needs paired 95% block-bootstrap intervals.</p></div>
+  </div>
+  <aside class="notes">8 minutes for Part 3. Read the cards in twenty seconds. This is the part that goes straight into the talks: everything in Parts 1 and 2 was an example of how to make, and how to read, a comparison.</aside>
+</section>
+
+<!-- 14 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 3 · Reading a claim</p>
+  <h2>“Beats ECMWF” — ask three questions before you believe it, or write it</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">Every paper has this sentence, and it means something different in each one.</p>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.1vh,19px);line-height:1.36;flex:0 0 auto">
+    <tr style="border-bottom:1.5px solid currentColor;text-align:left"><th style="padding:.3vh .6vw">Model</th><th style="padding:.3vh .6vw">compared with</th><th style="padding:.3vh .6vw">each scored against</th><th style="padding:.3vh .6vw">what was reported</th></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap"><b>Pangu-Weather</b></td><td style="padding:.3vh .6vw">ECMWF’s control forecast, the ensemble’s unperturbed run</td><td style="padding:.3vh .6vw">ERA5, for both</td><td style="padding:.3vh .6vw">Z500 error at day 5: 296.7 against 333.7 m² s⁻², 11% lower</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap"><b>GraphCast</b></td><td style="padding:.3vh .6vw">HRES, the 9 km forecast</td><td style="padding:.3vh .6vw">ERA5 for GraphCast, HRES’s own analysis for HRES</td><td style="padding:.3vh .6vw">ahead on 90.3% of 1,380 targets; 99.7% without the 50 and 100 hPa levels</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap"><b>FuXi</b></td><td style="padding:.3vh .6vw">the mean of ECMWF’s ensemble, and HRES</td><td style="padding:.3vh .6vw">ERA5 for FuXi, their own analyses for the others</td><td style="padding:.3vh .6vw">comparable to the mean over 15 days; useful to 10.5 days, HRES to 9.25</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap"><b>AIFS</b></td><td style="padding:.3vh .6vw">ECMWF’s numerical forecast</td><td style="padding:.3vh .6vw">each against its own analysis</td><td style="padding:.3vh .6vw">about 10% lower error in the troposphere; behind on day 1 and in the stratosphere</td></tr>
+  </table>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.4vw;flex:0 0 auto;margin-top:1.2vh">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">1 · Which product?</b><br>The 9 km forecast, its coarser twin from the ensemble, or the ensemble mean — the mean is the hardest to beat after a week.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">2 · Scored against what?</b><br>ERA5 is what the network learned to imitate; a numerical forecast was built to match its own analysis. Fair: each against its own.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">3 · Started from what?</b><br>ERA5 at 00 and 12 UTC has seen observations up to 9 hours ahead; a real-time analysis, 3. Worth up to 5% of GraphCast’s error.</p></div>
+  </div>
+  <div class="gloss">
+    <span><b>target</b> — one variable, level and lead time · <b>control forecast</b> — the ensemble’s run from the unperturbed analysis</span>
+  </div>
+  <div class="foot"><span>Bi et al. 2023 · Lam et al. 2023 · Chen et al. 2023 · Lang et al. 2024 · Rasp et al. 2024 (WeatherBench 2: ERA5 for data-driven models, the operational analysis for ECMWF’s) · product names and years: A1</span></div>
+  <aside class="notes">2 min. Every one of these papers has a sentence saying the model is more accurate than ECMWF's forecast. Read the table across. Pangu-Weather: compared with the control forecast taken from a public archive — the unperturbed member of the ensemble, which then ran at 18 km, half the resolution of the high-resolution forecast — and both were scored against ERA5; at day five, 296.7 against 333.7. GraphCast: compared with the 9 km forecast itself, and scored fairly — GraphCast against ERA5, the numerical forecast against its own analysis; ahead on 90.3% of 1,380 combinations of variable, level and lead time, and on 99.7% once the two stratospheric levels, 50 and 100 hectopascals, are left out. FuXi: compared with the ensemble mean, which is much harder to beat late in the forecast, and found comparable; its anomaly correlation stays above 0.6 for 10.5 days against 9.25 for the high-resolution forecast. AIFS, by ECMWF itself: each against its own analysis, about 10% lower error through the troposphere, behind on the first day and in the stratosphere. Together this is strong evidence — independent groups, different architectures, the same result — and it is evidence about one kind of error: smooth, large-scale fields on a coarsened grid, which is what the models were trained to minimise. The three cards are the questions that make the four rows comparable. One: which product. Two: scored against what — a model trained on ERA5 and scored on ERA5 is being scored on its own training target. Three: started from what — ERA5's analysis at 00 and 12 UTC used observations up to nine hours after that time, an operational analysis three; GraphCast's authors measured up to 5% lower error from those starts and therefore evaluated from 06 and 18 UTC. Now turn it round. Next Monday you write "the foundation model is better than the supervised baseline". Which baseline, tuned how hard? Scored against which labels? Given which inputs — did one row see something the other could not? Same three questions.</aside>
+</section>
+
+<!-- 15 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 3 · Pretrain, then fine-tune</p>
+  <h2>Aurora adapts to air quality, waves and cyclones — and one row of its table is missing</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">The fine-tuned model is compared with operational systems, not with itself trained from scratch.</p>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.15vh,19.5px);line-height:1.38;flex:0 0 auto">
+    <tr style="border-bottom:1.5px solid currentColor;text-align:left"><th style="padding:.35vh .6vw">Fine-tuned for</th><th style="padding:.35vh .6vw">compared with</th><th style="padding:.35vh .6vw">reported</th></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .6vw;white-space:nowrap">weather, 0.25°</td><td style="padding:.35vh .6vw">HRES; GraphCast</td><td style="padding:.35vh .6vw">lower error than HRES on more than 91% of targets; matches or beats GraphCast on 94%</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .6vw;white-space:nowrap">air quality, 0.4°</td><td style="padding:.35vh .6vw">the Copernicus atmosphere service’s system</td><td style="padding:.35vh .6vw">matches or beats it on 74% of targets, at about 1/100,000 of the computing time</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .6vw;white-space:nowrap">ocean waves</td><td style="padding:.35vh .6vw">ECMWF’s wave model</td><td style="padding:.35vh .6vw">matches or beats it on 86% of targets</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.35vh .6vw;white-space:nowrap">cyclone tracks</td><td style="padding:.35vh .6vw">seven forecasting centres</td><td style="padding:.35vh .6vw">smaller track error in every comparison, 2022 and 2023</td></tr>
+    <tr style="background:var(--wash)"><td style="padding:.45vh .6vw;border-left:3px solid var(--accent)" colspan="2"><b class="accent">the same network, trained on the task without pretraining</b></td><td style="padding:.45vh .6vw"><b class="accent">not reported</b> — the random-init row of your table</td></tr>
+  </table>
+  <ul class="small" style="margin-top:1.2vh">
+    <li>1.3 B weights: 150,000 pretraining steps (32 GPUs, 2.5 weeks), then 30,000 to 56,000 steps per new task.</li>
+    <li>The closest evidence is in the supplement: <span class="accent">ten times the weights buys about 6% lower validation loss</span>; of ten datasets assembled, the released model uses six (Week 9).</li>
+  </ul>
+  <div class="gloss">
+    <span><b>pretraining</b> — training on broad data before any task is chosen (Week 9) · <b>random-init</b> — the same architecture started from random weights and trained on the task alone</span>
+  </div>
+  <div class="foot"><span>Bodnar et al. 2025, Aurora, and its supplement · ClimaX, Prithvi WxC and what a forecast costs: A6 · Aurora’s corpus: Week 9, slide 10</span></div>
+  <aside class="notes">1.6 min. This is the Week 9 pattern applied to the atmosphere: pretrain once on broad data, adapt to several tasks. Aurora has 1.3 billion weights and was pretrained for 150,000 steps to forecast six hours ahead, two and a half weeks on 32 GPUs. Then it was fine-tuned four times. The table: high-resolution weather, ahead of the numerical forecast on more than 91% of targets; air quality, where the competitor is an expensive chemistry model and Aurora matches or beats it on 74% of targets at a hundred-thousandth of the computing time; ocean waves, 86%; and cyclone tracks, with smaller errors than seven forecasting centres in 2022 and 2023. Air quality and waves are variables that were not in the pretraining data at all, and adapting took 30,000 to 56,000 steps. Impressive — and now the orange row. Every comparison in this table is against an operational system. That is the right comparison for someone who wants a forecast. It does not tell you what pretraining contributed, because the row that would tell you — the same 1.3-billion-weight network trained on air quality alone, from random weights — is not there. Most papers in this field leave it out. The supplement comes closest: with the pretraining budget fixed, ten times the weights gave about 6% lower validation loss, and using all ten datasets was often worse than the reanalysis alone, so the released model uses six — you saw that corpus in Week 9. Your table has that row. It is the one I will look at first next Monday: adapted model against the same architecture from random weights, same recipe, same tuning effort.</aside>
+</section>
+
+<!-- 16 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 3 · What the scores leave out</p>
+  <h2>Good on average, weak at the extremes</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">Smooth fields have low peaks, and a network cannot forecast a kind of weather it has never seen.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 190" role="img" aria-label="Two bar charts. Left, Storm Ciarán, November 2023, peak wind in metres per second: four data-driven models forecast 25 to 26; ERA5 has 30; ECMWF's analysis 34; ECMWF's high-resolution forecast 36. Right, Typhoon Doksuri, July 2023, central pressure five and a half days ahead, drawn as depth below 1,000 hectopascals: Pangu-Weather forecast 986 hectopascals, ECMWF's numerical forecast 957, and the observed value was 944. In both cases the data-driven forecast is the weakest." style="width:min(98%,1150px)">
+      <text x="4" y="16" font-size="14" font-weight="700" fill="currentColor">Storm Ciarán, November 2023 · peak wind (m s⁻¹)</text>
+      <g font-size="13" fill="currentColor" text-anchor="end"><text x="176" y="52">4 data-driven models</text><text x="176" y="92">ERA5</text><text x="176" y="132">ECMWF’s analysis</text><text x="176" y="172">ECMWF’s forecast, 9 km</text></g>
+      <rect x="184" y="32" width="153" height="30" rx="3" fill="var(--accent)"/>
+      <g fill="currentColor" fill-opacity=".38"><rect x="184" y="72" width="180" height="30" rx="3"/><rect x="184" y="112" width="204" height="30" rx="3"/><rect x="184" y="152" width="216" height="30" rx="3"/></g>
+      <g font-size="14" fill="currentColor"><text x="345" y="52" font-weight="700" fill="var(--accent)">25–26</text><text x="372" y="92">30</text><text x="396" y="132">34</text><text x="408" y="172">36</text></g>
+      <text x="474" y="16" font-size="14" font-weight="700" fill="currentColor">Typhoon Doksuri, July 2023 · central pressure (hPa)</text>
+      <g font-size="13" fill="currentColor" text-anchor="end"><text x="618" y="52">Pangu-Weather</text><text x="618" y="92">ECMWF’s forecast</text><text x="618" y="132">observed</text></g>
+      <rect x="626" y="32" width="56" height="30" rx="3" fill="var(--accent)"/>
+      <rect x="626" y="72" width="172" height="30" rx="3" fill="currentColor" fill-opacity=".38"/>
+      <rect x="626" y="112" width="224" height="30" rx="3" fill="currentColor" fill-opacity=".7"/>
+      <g font-size="14" fill="currentColor"><text x="690" y="52" font-weight="700" fill="var(--accent)">986</text><text x="806" y="92">957</text><text x="858" y="132">944</text></g>
+      <path d="M626 26 V148" stroke="currentColor" stroke-width="1"/>
+      <g font-size="12" fill="var(--muted)"><text x="626" y="166">forecasts made 5½ days ahead · bar = how far</text><text x="626" y="182">below 1,000 hPa: the longer, the stronger</text></g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li><b>Detail:</b> Pangu-Weather’s fields show no realistic variability below 500 to 700 km; the numerical model’s, about 200 km — both are issued on a 0.25° grid or finer.</li>
+    <li><b>Never seen:</b> on record-breaking heat, cold and wind the numerical forecast stays ahead; <span class="accent">trained without the strongest cyclones, a model could not produce one.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>hPa</b> — hectopascal; the lower a cyclone’s central pressure, the stronger it is · <b>analysis</b> — the best estimate of the actual state, from observations and a short forecast</span>
+  </div>
+  <div class="foot"><span>Charlton-Perez et al. 2024 (Storm Ciarán) · Bonavita 2024 (spectra, Typhoon Doksuri) · Zhang et al. 2026 (records) · Sun et al. 2025 (cyclones withheld) · hybrids and models that start from observations: A5</span></div>
+  <aside class="notes">1.2 min — the first slide to cut: if short, say the lead sentence and move on. The scores of the last slide are averages over the globe and the year. Two cases show what an average hides. Left: Storm Ciarán, the windstorm that crossed north-west Europe at the start of November 2023. Four data-driven models put the storm in the right place at the right time — and forecast peak winds of 25 to 26 metres per second, where ERA5 has 30, ECMWF's own analysis 34 and its high-resolution forecast 36. Right: Typhoon Doksuri, July 2023, five and a half days ahead. Pangu-Weather forecast a shallow low of 986 hectopascals; the numerical model kept a typhoon at 957; the observed value was 944. Same cause as our blur slide: a smooth field has weak gradients and low peaks. First bullet, the measurement behind it: Pangu-Weather's fields contain no realistic variability below 500 to 700 kilometres, the numerical model's down to about 200, although both arrive on a quarter-degree grid. The grid is not the resolution. Second bullet, the limit that matters for climate: on record-breaking heat, cold and wind, the numerical forecast stays ahead of three data-driven models; and when the strongest tropical cyclones were removed from the training data, the retrained model could not forecast one of the highest category. A network interpolates among what it has seen. For your project: an average score over the test set says little about the flood, the drought or the fire you built the model for — Talk 5 asks you to split the score by region, class or season, and to show a failure.</aside>
+</section>
+
+<!-- 17 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 3 · The interval on a difference</p>
+  <h2>Paired block bootstrap: the interval that belongs on every difference you report</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">A difference without an interval is one draw of the dice; resample your test cases to see how far it could move.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .6vh">
+    <svg viewBox="0 0 900 232" role="img" aria-label="Four steps. Step 1: cut the test set into blocks that are independent of each other; two aligned strips of per-case errors, row A and row B, are each divided into the same four blocks of three cases. Step 2: draw whole blocks with replacement, one draw used for both rows; here blocks 3, 1, 3 and 4 are drawn, so both resampled strips show block 3 twice and block 2 not at all. Step 3: the score of row B minus the score of row A on this draw is one number. Step 4: repeat 1,000 times or more; the numbers form a histogram, and the range that holds its middle 95 percent is the interval. A dashed line marks zero, no difference: if zero is outside the interval the rows differ; if it is inside, you cannot tell them apart." style="width:min(98%,1150px)">
+      <defs><g id="w11blk"><rect x="0" y="0" width="24" height="20"/><rect x="26" y="0" width="24" height="20"/><rect x="52" y="0" width="24" height="20"/></g></defs>
+      <text x="4" y="15" font-size="13.5" font-weight="700" fill="currentColor">1 · cut the test set into blocks that are independent of each other</text>
+      <g font-size="12.5" fill="currentColor" text-anchor="end"><text x="140" y="41">errors, row A</text><text x="140" y="65">errors, row B</text></g>
+      <g stroke="currentColor" stroke-width=".8">
+        <use href="#w11blk" x="150" y="26" fill="var(--accent)" fill-opacity=".95"/><use href="#w11blk" x="242" y="26" fill="var(--accent)" fill-opacity=".4"/><use href="#w11blk" x="334" y="26" fill="currentColor" fill-opacity=".55"/><use href="#w11blk" x="426" y="26" fill="currentColor" fill-opacity=".16"/>
+        <use href="#w11blk" x="150" y="50" fill="var(--accent)" fill-opacity=".95"/><use href="#w11blk" x="242" y="50" fill="var(--accent)" fill-opacity=".4"/><use href="#w11blk" x="334" y="50" fill="currentColor" fill-opacity=".55"/><use href="#w11blk" x="426" y="50" fill="currentColor" fill-opacity=".16"/>
+      </g>
+      <g font-size="11.5" fill="var(--muted)" text-anchor="middle"><text x="188" y="85">block 1</text><text x="280" y="85">block 2</text><text x="372" y="85">block 3</text><text x="464" y="85">block 4</text></g>
+      <text x="4" y="111" font-size="13.5" font-weight="700" fill="currentColor">2 · draw whole blocks with replacement — one draw, used for both rows</text>
+      <g font-size="12.5" fill="currentColor" text-anchor="end"><text x="140" y="137">row A, this draw</text><text x="140" y="161">row B, this draw</text></g>
+      <g stroke="currentColor" stroke-width=".8">
+        <use href="#w11blk" x="150" y="122" fill="currentColor" fill-opacity=".55"/><use href="#w11blk" x="242" y="122" fill="var(--accent)" fill-opacity=".95"/><use href="#w11blk" x="334" y="122" fill="currentColor" fill-opacity=".55"/><use href="#w11blk" x="426" y="122" fill="currentColor" fill-opacity=".16"/>
+        <use href="#w11blk" x="150" y="146" fill="currentColor" fill-opacity=".55"/><use href="#w11blk" x="242" y="146" fill="var(--accent)" fill-opacity=".95"/><use href="#w11blk" x="334" y="146" fill="currentColor" fill-opacity=".55"/><use href="#w11blk" x="426" y="146" fill="currentColor" fill-opacity=".16"/>
+      </g>
+      <g font-size="11.5" fill="var(--muted)" text-anchor="middle"><text x="188" y="181">block 3</text><text x="280" y="181">block 1</text><text x="372" y="181">block 3</text><text x="464" y="181">block 4</text></g>
+      <text x="4" y="209" font-size="13.5" font-weight="700" fill="currentColor">3 · score of row B − score of row A on this draw: one number</text>
+      <path d="M474 205 H536 V118 H588" fill="none" stroke="var(--accent)" stroke-width="1.6"/><path d="M584 113 L593 118 L584 123 Z" fill="var(--accent)"/>
+      <text x="566" y="15" font-size="13.5" font-weight="700" fill="currentColor">4 · repeat 1,000 times or more</text>
+      <g fill="currentColor" fill-opacity=".3"><rect x="600" y="144" width="16" height="6"/><rect x="618" y="136" width="16" height="14"/><rect x="636" y="120" width="16" height="30"/><rect x="654" y="96" width="16" height="54"/><rect x="672" y="72" width="16" height="78"/><rect x="690" y="60" width="16" height="90"/><rect x="708" y="74" width="16" height="76"/><rect x="726" y="98" width="16" height="52"/><rect x="744" y="120" width="16" height="30"/><rect x="762" y="136" width="16" height="14"/><rect x="780" y="144" width="16" height="6"/></g>
+      <path d="M596 150 H872" stroke="currentColor" stroke-width="1"/>
+      <path d="M625 44 V150 M773 44 V150" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="5 3"/>
+      <path d="M625 160 H773 M625 155 V165 M773 155 V165" stroke="var(--accent)" stroke-width="1.8" fill="none"/>
+      <text x="699" y="180" font-size="13.5" font-weight="700" fill="var(--accent)" text-anchor="middle">95% interval</text>
+      <g font-size="11.5" fill="var(--accent)" text-anchor="middle"><text x="625" y="38">2.5%</text><text x="773" y="38">97.5%</text></g>
+      <path d="M848 44 V150" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <g font-size="12" fill="currentColor" text-anchor="middle"><text x="848" y="38">0</text><text x="848" y="166" fill="var(--muted)">no difference</text></g>
+      <g font-size="12.5" fill="currentColor" text-anchor="middle"><text x="728" y="207">0 outside the interval: the rows differ</text><text x="728" y="224" fill="var(--muted)">0 inside: you cannot tell them apart</text></g>
+    </svg>
+  </div>
+  <ul class="small">
+    <li><b>Block</b> — the unit that is independent in your data: a 10-day window, a basin, a tile, a flood event. Neighbouring samples move together; drawn one by one they give an interval that is too narrow.</li>
+    <li><b>Paired</b> — one draw for every row of your table: a hard case is hard for all your models, and that shared part cancels in the difference. <span class="accent">Write “better” only when the interval excludes zero.</span></li>
+  </ul>
+  <div class="gloss">
+    <span><b>bootstrap</b> — resampling your own test cases · <b>with replacement</b> — a block may be drawn twice, or not at all</span>
+  </div>
+  <div class="foot"><span>Efron 1979 · Künsch 1989 (blocks) · code: A10 · your 7 Dec table: paired 95% block intervals, ≥ 1,000 resamples, the same draws for every row</span></div>
+  <aside class="notes">2 min. This is the slide Week 10 promised: you report block-bootstrap intervals. Why you need it: your test set is one sample of the cases you could have had. Had you drawn other basins, other tiles, other weeks, every score in your table would be a little different — and so would the difference between two rows. The bootstrap estimates how much, using only the test set you have. Follow the picture. One: write down the error of each model on each test case, in the same order — two aligned strips — and cut the test set into blocks that are independent of each other. Two: draw whole blocks with replacement, as many as you have; here blocks 3, 1, 3, 4. Use that one draw for both rows. Three: compute your score on the resampled cases for each row and subtract: one number. Four: do it a thousand times or more. The numbers pile up into a histogram; cut off 2.5% at each end; what is left is the 95% interval of the difference. If zero is outside it, the rows differ. If zero is inside, you may not write "better". Now the two words. Block: the bootstrap assumes the things you resample are independent. Two forecasts twelve hours apart are not; two tiles from the same scene are not; two days in the same flood are not. Resample the unit that is independent — the ten-day window, the basin, the scene, the event — and everything inside it comes along. If you resample single samples you are pretending to have more independent evidence than you do, and the interval comes out too narrow. Paired: use the same draw for every row. A hard case is hard for every model; that shared difficulty is most of the variation in each score, and it cancels in the difference only if both rows got the same cases. The next slide shows both effects in numbers. The function is nine lines; it is on A10 and it has been tested against today's figure.</aside>
+</section>
+
+<!-- 18 -->
+
+<section class="slide xl">
+  <p class="kicker">Part 3 · The interval, measured</p>
+  <h2>On our emulator: pairing makes the interval eight times narrower, blocks keep it honest</h2>
+  <p class="small" style="margin:-1.6vh 0 1.2vh;color:var(--ink-2);line-height:1.45">The same 1,440 forecasts and the same two differences, resampled three ways.</p>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh"><img src="img/fig-w11-bootstrap.png" alt="Three panels. Left, rollout fine-tuning changes the day-3 RMSE of Z500 by minus 32.7: when each row draws its own blocks the 95 percent interval is minus 40.3 to minus 25.4; paired on single forecasts, minus 33.3 to minus 32.2; paired on 10-day blocks, minus 33.6 to minus 31.8. Middle, training without the latitude weight changes the day-5 RMSE by plus 10.1: with separate draws the interval is minus 1.8 to plus 22.2 and contains zero; paired on single forecasts, plus 6.9 to plus 13.3; paired on 10-day blocks, plus 4.5 to plus 15.5. Right, how long a block: the width of the interval relative to single forecasts against block length from half a day to 30 days. For model against model it rises to about 1.6 at 5 days and then levels off near 1.7; for model against climatology it keeps rising, to 2.8 at 30 days." style="width:min(100%,1180px);max-height:37vh;object-fit:contain"></div>
+  <ul class="small">
+    <li>Unpaired, dropping the latitude weight looks like noise (−1.8 to +22.2); <span class="accent">paired on blocks: +4.5 to +15.5.</span></li>
+    <li>Forecasts 12 hours apart share their weather (correlation 0.7), so the single-forecast intervals are 1.5 to 2.4 times too narrow. For two models the width levels off beyond 5-day blocks.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>RMSE difference</b> — the row’s error minus model A’s; below zero is better · <b>10-day block</b> — 20 consecutive forecasts</span>
+  </div>
+  <div class="foot"><span>Per-forecast scores of models A, B and C, 2018–2019 · 10,000 resamples · top row: each model with its own 10-day blocks · code: A10</span></div>
+  <aside class="notes">2 min. The recipe on our own numbers. Two differences. Left: model B minus model A at day three, the 8% from rollout training — 32.7 lower. Middle: model C minus model A at day five, the cost of dropping the latitude weight — 10.1 higher, about 1.5%. Three ways to resample, top to bottom. Top row, grey: the wrong way that most people start with — give each model its own bootstrap draw, as if the two rows had been tested on different forecasts. The intervals are wide: minus 40 to minus 25 on the left, and in the middle minus 1.8 to plus 22: it contains zero, and you would report "no significant difference". Middle row: pair them — the same forecasts for both models. Minus 33.3 to minus 32.2; plus 6.9 to plus 13.3. On the left the interval is thirteen times narrower. Why? Some weeks are hard to forecast and some are easy, for every model; that is nearly all of the variation in each score, and it cancels when both rows see the same weeks. Bottom row, orange — what you report: paired, and resampled in ten-day blocks, because forecasts started twelve hours apart are forecasts of nearly the same weather; their errors correlate at 0.7. The intervals widen again by a factor of 1.5 to 1.7: minus 33.6 to minus 31.8, and plus 4.5 to plus 15.5. Both exclude zero; both differences are real. So the paired block interval is eight times narrower than the unpaired one on the left, and wider than the naive paired one: pairing removes noise that is not there, blocking puts back uncertainty that is. Right panel: how long must a block be? Width of the interval against block length. For two models it rises and levels off at about five days: beyond that the blocks are independent enough. Against climatology it keeps growing: there the difference depends on the weather regime, which lasts for weeks — and A10 shows the consequence: at day 6.75 the emulator's lead over climatology is 2.3, with an interval from minus 12.8 to plus 8.1 — no lead at all. For your project: say what your block is and why, in one line under the table.</aside>
+</section>
+
+<!-- 19 -->
+
+<section class="slide xl">
+  <p class="kicker">Next Monday</p>
+  <h2>30 Nov, Talk 4: controlled runs and first results — on validation only</h2>
+  <p class="small" style="margin:-1.6vh 0 1.4vh;color:var(--ink-2);line-height:1.45">Ten minutes + three of questions · slides (PDF) in the Talk 4 slot by Sun 29 Nov 23:59 · test sealed until Fri 4 Dec.</p>
+  <div class="cols" style="grid-template-columns:1fr 1fr 1fr;gap:1.2vw 1.6vw;flex:0 0 auto">
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">1 · Validation table</b><br>At least three of the four rows, one of them an adapted model. Name the runs still missing, the seeds done and the tuning effort per row. No test scores.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">2 · One figure, with a failure</b><br>A map, a hydrograph or a curve against the reference — and one case where your model is wrong, with your guess why.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">3 · Debugging evidence</b><br>Loss curves, what broke, what you changed — with the commit and the checkpoint for each change.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">4 · Compute, used and left</b><br>GPU-hours spent against your budget; progress toward three seeds per row and the registered ablation.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">5 · Completion plan</b><br>Finish model selection on validation; freeze every recipe and inference setting by Fri 4 Dec; then run the sealed test once for the 7 Dec table.</p></div>
+    <div class="card small" style="min-width:0"><p style="margin:0"><b class="accent">From today</b><br>Each number beside a free baseline; each difference with a paired block interval and your block named; the three questions answered for your own claim.</p></div>
+  </div>
+  <div class="gloss">
+    <span><b>ablation</b> — the same run with one ingredient changed · <b>inference setting</b> — checkpoint, threshold, tiling, averaging</span>
+  </div>
+  <div class="foot"><span>Repo by Sunday: eval/ (validation table, interval code) · run logs · checkpoints · dated amendments · then 7 Dec held-out results · 14 Dec final</span></div>
+  <aside class="notes">2 min. Read the cards once; cards 1 to 5 are next Monday's slide order. Card 1: a table on your validation split — at least three of the four rows of the contract, and one of them must be an adapted foundation model. Say which runs are missing, how many seeds each row has, and how much tuning each row got: a supervised competitor with one learning rate against an adapted model with twenty is not a comparison. No test scores: the test split stays sealed until every recipe is frozen on Friday 4 December. Card 2: one qualitative figure, and it must include a failure — a tile, a basin, a week where the model is wrong. Card 3: the evidence that you debugged rather than hoped — loss curves, what broke, what you changed, the commit and checkpoint for each. Card 4: compute — hours used against the budget you committed to in Talk 3, and how far you are toward three seeds per row and the ablation you registered. Card 5: the plan for the last week — finish selection on validation, freeze, then run the sealed test once for the 7 December table, where Dr. Budamala joins us and the peer code review follows. The sixth card is today's lecture as a checklist: a free baseline beside every number, an interval on every difference with the block named, and the three questions — which baseline, scored against what, given which inputs — answered for your own claim. Slides as a PDF in the Talk 4 slot by Sunday 23:59.</aside>
+</section>
+
+<!-- 20 -->
+
+<section class="slide xl">
+  <p class="kicker">Project studio · after the lecture</p>
+  <h2>Studio: launch the full run matrix — four rows, seeds, the ablation</h2>
+  <div class="cols" style="grid-template-columns:1.1fr 1fr;gap:2vw;align-items:start;flex:0 0 auto">
+    <div class="card small" style="min-width:0">
+      <p><b>1 · Start the long runs first</b>: the adapted model and the random-init row, same architecture and recipe, seed 0 of each.</p>
+      <p><b>2 · Tune the supervised competitor</b> on validation as hard as the adapted row: the same number of trials, written down.</p>
+      <p><b>3 · Queue the replicates and the ablation</b> you registered — two settings, at least three seeds per row.</p>
+      <p><b>4 · Write the metric code while they run</b>: a per-case error file for every row, then the paired block bootstrap (A10).</p>
+    </div>
+    <div class="card small" style="min-width:0">
+      <p style="margin:0 0 .6vh"><b class="accent">Check before you leave</b></p>
+      <p style="margin:0">One line per run in <code>eval/runs.csv</code>: row · seed · setting · commit · status · validation score · GPU-hours.</p>
+      <p style="margin:1vh 0 0">Your block unit, in one sentence, and a first interval on any two finished runs — even two seeds of one row.</p>
+    </div>
+  </div>
+  <div class="gloss">
+    <span><b>run matrix</b> — the table of every run you will launch: row, seed, setting, budget · <b>per-case error</b> — one number per test case and row, saved in the same order for every row; the input the bootstrap needs</span>
+  </div>
+  <div class="foot"><span>Note 11 (validation table so far with intervals, run matrix status), video summary 11 and Talk 4 slides — Sun 29 Nov 23:59 · the reading, the assigned video and two optional papers: A11</span></div>
+  <aside class="notes">1 min, then dismiss to the studio. The order matters. First start what takes longest: the adapted model and its random-init twin, seed 0 of each — they run while you do the rest. Second, the supervised competitor: tune it on validation as hard as you tune the adapted model, the same number of trials, and write the number down; an untuned baseline is the commonest way to fool yourself. Third, queue the replicates and the ablation you registered: at least three seeds per row, two settings of the one ingredient. Fourth, while they run, write the metric code: save one error per test case for every row, in the same order — that file is what the bootstrap needs, and it is what lets you split the score by region or season for Talk 5. I will come round and ask each of you two things: show me the line of the run that is running now, and tell me your block unit in one sentence. A first interval on any two finished runs is enough for today — two seeds of the same row will do: it tells you how wide your intervals are going to be before you have anything to claim.</aside>
+</section>
+
+<!-- 21 -->
+
+<section class="slide section xl">
+  <p class="kicker">Appendix</p>
+  <h2>Reference cards</h2>
+  <ul class="small">
+    <li><b>A1</b> when each model appeared and went operational; ECMWF’s product names · <b>A2</b> five deterministic models in one table · <b>A3</b> GraphCast’s mesh · <b>A4</b> the three routes to an ensemble, drawn</li>
+    <li><b>A5</b> hybrids, models that start from observations, climate emulators · <b>A6</b> three pretrained weather models, and what a forecast costs · <b>A7</b> what the latitude weight changes</li>
+    <li><b>A8</b> the emulator’s protocol and the ERA5 loading code · <b>A9</b> the scores in NumPy · <b>A10</b> the paired block bootstrap in NumPy · <b>A11–A12</b> reading and videos</li>
+  </ul>
+  <div class="foot"><span>The studio starts after slide 20.</span></div>
+  <aside class="notes">Not presented. Point students to A9 and A10 for the score and interval code, and to A8 if anyone wants to rerun the emulator's data loading.</aside>
+</section>
+
+<!-- 22 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A1 · Three years</p>
+  <h2>A1 · From the first preprints to operations, and what “the ECMWF forecast” means</h2>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh"><img src="img/fig-w11-timeline.png" alt="A timeline from 2022 to 2026. Above the axis, first public preprints: FourCastNet early 2022; Pangu-Weather, GraphCast and ClimaX late 2022 to early 2023; the spherical Fourier neural operator and FuXi mid 2023; NeuralGCM and GenCast late 2023; Aurora and AIFS mid 2024; Prithvi WxC and AIFS-CRPS late 2024; FGN (WeatherNext 2) and FourCastNet 3 mid 2025. Markers show the kind: deterministic, probabilistic, hybrid, or pretrained then fine-tuned. Below the axis, operational use: ECMWF's AIFS on 25 February 2025 and its AIFS ensemble on 1 July 2025; NOAA's AIGFS, AIGEFS and HGEFS, based on GraphCast, on 17 December 2025; DWD's AICON on 2 March 2026." style="width:min(100%,1180px);max-height:44vh;object-fit:contain"></div>
+  <ul class="small">
+    <li><b>HRES</b>: the single 9 km forecast. <b>ENS</b>: 51 runs, at 18 km until 2023. No separate HRES since May 2026.</li>
+    <li>“The ECMWF forecast” in a 2022 paper: the 9 km run, the ensemble’s unperturbed 18 km run, or the ensemble mean.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>NOAA</b> — the US weather and ocean agency · <b>DWD</b> — Germany’s weather service · <b>AIFS</b> — ECMWF’s data-driven forecast system</span>
+  </div>
+  <div class="foot"><span>Dates of first public preprints and of the services’ own announcements · ECMWF’s notes on its model cycles 48 (2023), 49 (2024) and 50 (2026)</span></div>
+  <aside class="notes">Reference only. Three years from the first preprint to three weather services running a learned model every day. NOAA is the National Oceanic and Atmospheric Administration, DWD the Deutscher Wetterdienst, AIFS the Artificial Intelligence Forecasting System. Since 2024 the ensemble's unperturbed member has been the same run as the single forecast. The naming matters for slide 14: Pangu-Weather and FourCastNet were compared with the archived control forecast, GraphCast with the 9 km forecast, FuXi with the ensemble mean.</aside>
+</section>
+
+<!-- 23 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A2 · Deterministic models</p>
+  <h2>A2 · Five models, as their papers describe them</h2>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.15vh,19.5px);line-height:1.38;flex:0 0 auto">
+    <tr style="border-bottom:1.5px solid currentColor;text-align:left"><th style="padding:.4vh .6vw">Model</th><th style="padding:.4vh .6vw">Fields</th><th style="padding:.4vh .6vw">Weights</th><th style="padding:.4vh .6vw">Training on its own output</th><th style="padding:.4vh .6vw">Training cost</th></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;white-space:nowrap"><b>FourCastNet</b> · 2022</td><td style="padding:.4vh .6vw">20, on 5 levels</td><td style="padding:.4vh .6vw">not given</td><td style="padding:.4vh .6vw">two-step rollouts after one-step training</td><td style="padding:.4vh .6vw">64 GPUs, 16 hours</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;white-space:nowrap"><b>Pangu-Weather</b> · 2022</td><td style="padding:.4vh .6vw">69: 5 on 13 levels, 4 at the surface</td><td style="padding:.4vh .6vw">4 models × 64 M</td><td style="padding:.4vh .6vw">none: models for 1, 3, 6 and 24 hours are chained</td><td style="padding:.4vh .6vw">192 GPUs, 16 days per model</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;white-space:nowrap"><b class="accent">GraphCast</b> · 2022</td><td style="padding:.4vh .6vw">227: 6 on 37 levels, 5 at the surface</td><td style="padding:.4vh .6vw">36.7 M</td><td style="padding:.4vh .6vw">rollouts growing from 2 to 12 steps</td><td style="padding:.4vh .6vw">32 accelerators, 4 weeks</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;white-space:nowrap"><b>FuXi</b> · 2023</td><td style="padding:.4vh .6vw">70: 5 on 13 levels, 5 at the surface</td><td style="padding:.4vh .6vw">not given</td><td style="padding:.4vh .6vw">2 to 12 steps; then two more copies, each trained on the previous one’s output</td><td style="padding:.4vh .6vw">8 GPUs, 30 hours, then 2 days per copy</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;white-space:nowrap"><b>AIFS</b> · 2024</td><td style="padding:.4vh .6vw">surface and 13 levels</td><td style="padding:.4vh .6vw">not given</td><td style="padding:.4vh .6vw">rollouts up to 72 hours</td><td style="padding:.4vh .6vw">64 GPUs, about a week</td></tr>
+  </table>
+  <ul class="small" style="margin-top:1.2vh">
+    <li>All five train on ERA5 at or near 0.25° and take a six-hour step, except Pangu-Weather’s chain of four step lengths. All but Pangu-Weather finish by training on their own output.</li>
+    <li>Tens of millions of weights, not billions: small beside last week’s Earth-observation models. The training data, not the size, is what they share.</li>
+  </ul>
+  <div class="foot"><span>Pathak et al. 2022 · Bi et al. 2023 · Lam et al. 2023 · Chen et al. 2023 · Lang et al. 2024 · years are those of the first preprint · “not given”: the paper states no parameter count</span></div>
+  <aside class="notes">Reference only. The column to read is the fourth: every model except Pangu-Weather ends its training on its own rollouts — the trade measured on slide 11.</aside>
+</section>
+
+<!-- 24 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A3 · The reading</p>
+  <h2>A3 · GraphCast’s mesh: split every triangle into four, six times, and keep all the edges</h2>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh"><img src="img/fig-w11-mesh.png" alt="Four spheres show an icosahedron refined step by step: level 0 has 12 nodes, level 1 has 42, level 2 has 162, level 3 has 642; every triangle is split into four, and each new node is the midpoint of an edge moved out to the sphere. Nodes at level r: 10 times 4 to the power r, plus 2; levels 4 to 6 have 2,562, 10,242 and 40,962 nodes, and level 6 is GraphCast's mesh. Right: the multi-mesh of levels 0 to 3 keeps long edges from levels 0 and 1 and short edges from levels 2 and 3, so the same distance is one step of 7,054 km or eight steps of 882 km." style="width:min(100%,1180px);max-height:46vh;object-fit:contain"></div>
+  <ul class="small">
+    <li><b>Encode</b> the grid onto 40,962 nodes · <b>process</b>: 16 rounds of messages · <b>decode</b> to the grid, as the 6-hour change.</li>
+    <li>The multi-mesh keeps every level’s edges: a long edge crosses an ocean, short ones spread the message locally.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>icosahedron</b> — the regular solid with 20 triangular faces and 12 corners; refined, its nodes are spread almost evenly over the sphere</span>
+  </div>
+  <div class="foot"><span>Lam et al. 2023, GraphCast · drawn for this course · 721 × 1,440 = 1,038,240 grid points</span></div>
+  <aside class="notes">Reference only, for the reading. The mesh answers the pole problem of slide 5: its nodes are nearly equally spaced — about 110 km apart at level 6, a sixty-fourth of the 7,054 km of level 0 — the same everywhere on the sphere.</aside>
+</section>
+
+<!-- 25 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A4 · Ensembles</p>
+  <h2>A4 · The three routes to an ensemble, with fields — and the cheap route, measured</h2>
+  <div class="cols" style="grid-template-columns:1.25fr 1fr;gap:2vw;align-items:center;flex:0 0 auto">
+    <div class="figure" style="margin:0"><img src="img/fig-w11-routes.png" alt="Three rows, each starting from two past states. (a) Generate from noise, GenCast: random noise is refined by a denoiser in 20 steps into the next state; a new noise field for every member. (b) A random input and a proper score, AIFS-CRPS and FGN: one network pass per step with a random vector as an extra input, trained on the CRPS. (c) Perturb the start: small random perturbations are added to the initial state and a deterministic network is run from each; the members remain smooth and close together." style="width:100%;max-height:62vh;object-fit:contain"></div>
+    <div class="small" style="min-width:0">
+      <p style="margin:0 0 1.2vh"><b class="accent">Route (c) on our emulator.</b> Model B started from five states perturbed with smooth random noise, the amplitude chosen on the validation years.</p>
+      <p style="margin:0 0 1.2vh">Too wide at first — spread 1.8 times the error after six hours: random noise is not what an analysis is unsure about. Too narrow from day 3 on: 0.66.</p>
+      <p style="margin:0 0 1.2vh">The noise damages the start, so each member is worse than the unperturbed forecast, and the ensemble scores slightly worse than the five seeds of slide 12.</p>
+      <p style="margin:0"><b>What both lack:</b> a source of spread that was trained to match the error. That is what routes (a) and (b) add.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Figure drawn for this course · Price et al. 2025 (GenCast: 57 M weights, 50 members, ahead of ECMWF’s ensemble on 97.2% of 1,320 targets, 99.6% beyond 36 hours) · Lang et al. 2024 · Alet et al. 2025</span></div>
+  <aside class="notes">Reference only. The perturbed-start ensemble is the third row of slide 6, tried on the small emulator: it fails in a different way from the seed ensemble — too wide, then too narrow — and for the same underlying reason.</aside>
+</section>
+
+<!-- 26 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A5 · Beyond imitating a reanalysis</p>
+  <h2>A5 · Hybrids, forecasts from observations, and climate emulators</h2>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(14px,2.1vh,19px);line-height:1.38;flex:0 0 auto">
+    <tr style="border-bottom:1.5px solid currentColor;text-align:left"><th style="padding:.4vh .6vw">Model</th><th style="padding:.4vh .6vw">What it changes</th><th style="padding:.4vh .6vw">Reported</th></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;white-space:nowrap"><b>NeuralGCM</b></td><td style="padding:.4vh .6vw">a numerical solver for the large-scale flow; a network for clouds, radiation and rain in each column; trained through the solver</td><td style="padding:.4vh .6vw">12 to 31 M weights at 2.8° to 0.7°; its ensemble is within 1% of ECMWF’s or ahead after day 2; stable in 22 of 37 forty-year runs</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;white-space:nowrap"><b>Aardvark Weather</b></td><td style="padding:.4vh .6vw">starts from raw observations: no analysis from a numerical system</td><td style="padding:.4vh .6vw">24 variables on 1.5°, ten days, about a second; matches or beats the US global system on most variables</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;white-space:nowrap"><b>GraphDOP</b></td><td style="padding:.4vh .6vw">observations as input and as target: no reanalysis even in training</td><td style="padding:.4vh .6vw">skilful to five days, still well behind the numerical forecast; a successor is reported close on several scores</td></tr>
+    <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .6vw;white-space:nowrap"><b>ACE2</b></td><td style="padding:.4vh .6vw">built for climate: conserves dry air and moisture exactly; runs for decades</td><td style="padding:.4vh .6vw">about 1,500 simulated years per day; 81 years with the observed trends and El Niño response; its response to warmer seas and more carbon dioxide is not yet realistic</td></tr>
+  </table>
+  <ul class="small" style="margin-top:1.2vh">
+    <li><b>Outside the training climate:</b> started from a simulated 2049 that is 2.9 K warmer, two of three weather models drifted back toward the climate they were trained on, cooling 0.04 and 0.07 K per forecast day.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>hybrid</b> — equations for what the grid resolves, a network for what it cannot · <b>emulator</b> — a network trained to reproduce another model’s or a reanalysis’s output</span>
+  </div>
+  <div class="foot"><span>Kochkov et al. 2024 (NeuralGCM) · Allen et al. 2025 (Aardvark) · Alexe et al. 2024 (GraphDOP) · Watt-Meyer et al. 2025 (ACE2) · Rackow et al. 2024 (the 2049 experiment)</span></div>
+  <aside class="notes">Reference only. Two directions change one half each of the arrangement on slide 4: hybrids keep the physics and learn the rest; observation-driven models remove the numerical analysis at the start. Climate emulators face a different test: no drift over decades and the right response to a forcing. The last bullet is the limit that matters most for climate use.</aside>
+</section>
+
+<!-- 27 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A6 · Pretrained weather models</p>
+  <h2>A6 · Three pretrained models, and what one forecast costs</h2>
+  <div class="cols" style="grid-template-columns:1fr 1fr;gap:2vw;align-items:start;flex:0 0 auto">
+    <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(13.5px,2.0vh,18px);line-height:1.36">
+      <tr style="border-bottom:1.5px solid currentColor;text-align:left"><th style="padding:.4vh .5vw">Model</th><th style="padding:.4vh .5vw">Pretrained on</th><th style="padding:.4vh .5vw">Then tested on</th></tr>
+      <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .5vw"><b>ClimaX</b></td><td style="padding:.4vh .5vw">five climate models’ simulations, 1850–2015; no reanalysis</td><td style="padding:.4vh .5vw">forecasting, downscaling, climate projection; ahead of the numerical forecast for T850 from day 7, for Z500 only at day 14</td></tr>
+      <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .5vw"><b>Aurora</b> · 1.3 B</td><td style="padding:.4vh .5vw">a reanalysis, two operational systems’ forecasts and two climate simulations</td><td style="padding:.4vh .5vw">weather, air quality, waves, cyclone tracks (slide 15)</td></tr>
+      <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .5vw"><b>Prithvi WxC</b> · 2.3 B</td><td style="padding:.4vh .5vw">NASA’s MERRA-2 reanalysis, with masking and forecasting together</td><td style="padding:.4vh .5vw">downscaling 2 m temperature (0.73 K error; interpolation 3.08 K), a gravity-wave scheme, filling in masked fields</td></tr>
+    </table>
+    <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(13.5px,2.0vh,18px);line-height:1.36">
+      <tr style="border-bottom:1.5px solid currentColor;text-align:left"><th style="padding:.4vh .5vw">Model</th><th style="padding:.4vh .5vw">Training</th><th style="padding:.4vh .5vw">One forecast</th></tr>
+      <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .5vw"><b>Pangu-Weather</b></td><td style="padding:.4vh .5vw">192 GPUs, 16 days, × 4</td><td style="padding:.4vh .5vw">one day in 1.4 s, one GPU</td></tr>
+      <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .5vw"><b>GraphCast</b></td><td style="padding:.4vh .5vw">32 accelerators, 4 weeks</td><td style="padding:.4vh .5vw">10 days in under a minute; the numerical run: about an hour on 11,664 cores</td></tr>
+      <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .5vw"><b>AIFS</b></td><td style="padding:.4vh .5vw">64 GPUs, about a week</td><td style="padding:.4vh .5vw">10 days in 2.5 minutes, one GPU</td></tr>
+      <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .5vw"><b>GenCast</b></td><td style="padding:.4vh .5vw">32 accelerators, 5 days</td><td style="padding:.4vh .5vw">15 days in 8 minutes per member</td></tr>
+      <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .5vw"><b>Aurora</b></td><td style="padding:.4vh .5vw">32 GPUs, 2.5 weeks</td><td style="padding:.4vh .5vw">0.6 s per forecast hour (air quality)</td></tr>
+      <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.4vh .5vw"><b>Aardvark</b></td><td style="padding:.4vh .5vw">4 GPUs, about 100 GPU-hours</td><td style="padding:.4vh .5vw">about a second, from observations; numerical with assimilation: about 1,000 node-hours</td></tr>
+    </table>
+  </div>
+  <div class="gloss">
+    <span><b>MERRA-2</b> — NASA’s Modern-Era Retrospective analysis for Research and Applications, version 2 · <b>downscaling</b> — producing a finer field from a coarse one · <b>assimilation</b> — blending observations into a model state</span>
+  </div>
+  <div class="foot"><span>Nguyen et al. 2023 (ClimaX) · Bodnar et al. 2025 (Aurora) · Schmude et al. 2024 (Prithvi WxC) · costs as published; hardware and resolution differ, and all but Aardvark’s exclude the assimilation that provides the start</span></div>
+  <aside class="notes">Reference only. Left: the three models that follow the pretrain-then-adapt pattern; none reports the same network trained without pretraining (slide 15). ClimaX's summary reads better than its table: for the geopotential at 500 hPa the numerical forecast is ahead at seven days. Right: cost is the least disputed property of these models.</aside>
+</section>
+
+<!-- 28 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A7 · The latitude weight</p>
+  <h2>A7 · The weight does not make the model better — it decides where the model is good</h2>
+  <div class="figure" style="flex:0 0 auto;margin:0 0 .4vh"><img src="img/fig-w11-weights.png" alt="Three panels against latitude. Left, the loss weight per grid row: for models A and B it is the cosine of latitude divided by its mean, about 1.57 at the equator and 0.077 in the row nearest each pole; for model C it is 1 everywhere. Middle and right, the RMSE of model C divided by that of model A, for Z500 and T850, at lead times of 1, 3 and 5 days: between 20 degrees south and 20 degrees north the ratio is above 1, up to about 1.1; poleward of 60 degrees it falls well below 1, to 0.6 near the poles after one day." style="width:min(100%,1180px);max-height:42vh;object-fit:contain"></div>
+  <ul class="small">
+    <li>Model C, no weight: global Z500 error within 2% of A’s — 3 to 9% higher in the tropics, <span class="accent">12% lower in the polar caps.</span></li>
+    <li>On a latitude–longitude grid a cell at 60° covers half the area of one at the equator. Unweighted, the many small polar cells count as much as the large ones, and the network spends its capacity there.</li>
+  </ul>
+  <div class="gloss">
+    <span><b>latitude weight</b> — cos(latitude) divided by its mean over the rows: each cell counts in the loss, and in the score, by the area it covers</span>
+  </div>
+  <div class="foot"><span>Models A and C, 1,440 forecasts · polar caps: at day 1 · 2 m temperature: 4 to 20% higher in the tropics · the interval on C − A: slide 18</span></div>
+  <aside class="notes">Reference only; it answers the first discussion question of the reading. cos 60° = 0.5, so an unweighted loss counts a square kilometre at 60° twice as much as one at the equator, and at 87° twenty times. The global score barely moves, because the weighted score hardly sees the poles; the trade shows only when the error is split by latitude — which is why Talk 5 asks for the score split by region.</aside>
+</section>
+
+<!-- 29 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A8 · The emulator</p>
+  <h2>A8 · The emulator’s protocol, and the six lines that load its data</h2>
+  <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(13.5px,2.0vh,18px);line-height:1.36;flex:0 0 auto">
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap;color:var(--accent);font-weight:650">Data</td><td style="padding:.3vh .6vw">ERA5 every 6 hours on 64 × 32 cells (5.625°), from WeatherBench 2 · train 1979–2015, validate 2016–2017, test 2018–2019</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap;color:var(--accent);font-weight:650">State</td><td style="padding:.3vh .6vw">12 fields: geopotential at 250, 500, 700, 850, 1000 hPa · temperature at 250, 500, 700, 850 hPa · 2 m temperature · 10 m wind, two components</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap;color:var(--accent);font-weight:650">Input</td><td style="padding:.3vh .6vw">31 maps: the state at t and t − 6 h · land–sea mask, orography, sin and cos of latitude · sunlight at the top of the atmosphere · sin and cos of the day of year</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap;color:var(--accent);font-weight:650">Network</td><td style="padding:.3vh .6vw">U-Net, widths 48, 96, 160, 160; 2,176,204 weights; convolutions wrap in longitude · output: the six-hour change of the 12 fields, standardised</td></tr>
+    <tr style="border-top:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap;color:var(--accent);font-weight:650">Training</td><td style="padding:.3vh .6vw">AdamW optimizer, batch 256, 8 epochs = 1,688 updates, learning rate warmed up to 0.002 then cosine decay · B: 422 more updates at 0.0002 · settings fixed in advance, not tuned</td></tr>
+    <tr style="border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)"><td style="padding:.3vh .6vw;white-space:nowrap;color:var(--accent);font-weight:650">Test</td><td style="padding:.3vh .6vw">ten-day forecasts from 00 and 12 UTC of every test day: 1,440 · about an hour to train on an Apple M2 Ultra; 0.24 s per forecast</td></tr>
+  </table>
+<pre style="flex:0 0 auto;font-size:clamp(11px,1.65vh,14.5px);line-height:1.4;margin:1.2vh 0 0;padding:.8vh 1vw;background:var(--surface);border-radius:8px"><code>import xarray as xr                                          # pip install xarray zarr gcsfs
+BUCKET = "gs://weatherbench2/datasets/era5/"                 # public: no account, no key
+ds = xr.open_zarr(BUCKET + "1959-2023_01_10-6h-64x32_equiangular_conservative.zarr",
+                  storage_options={"token": "anon"})
+z500 = ds["geopotential"].sel(level=500, time=slice("2018", "2019"))
+x = z500.transpose("time", "latitude", "longitude").values   # (2920, 32, 64) in m2 s-2; rows run south to north</code></pre>
+  <div class="foot"><span>Run on 22 Nov 2026 against the public bucket · the store holds 62 variables from 1959 to 2023 · WeatherBench 2: Rasp et al. 2024 · Contains modified Copernicus Climate Change Service information</span></div>
+  <aside class="notes">Reference only. Everything a student needs to rebuild the experiment: the data are public and small — twelve fields on 2,048 cells; the whole 1979–2019 array is about 6 GB as 32-bit floats. The model is the Week 4 U-Net with wrap-around padding in longitude.</aside>
+</section>
+
+<!-- 30 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A9 · Scores</p>
+  <h2>A9 · Today’s scores in NumPy: weights, RMSE, ACC, fair CRPS, spread–skill</h2>
+<pre style="flex:0 0 auto;font-size:clamp(11px,1.65vh,14.5px);line-height:1.38;margin:0 0 .8vh;padding:.8vh 1vw;background:var(--surface);border-radius:8px"><code>def lat_weights(lat):                        # lat: degrees, one value per grid row
+    w = np.cos(np.deg2rad(lat))
+    return w / w.mean()                      # mean 1, so a weighted mean is an area mean
+
+def rmse(f, o, w):                           # f, o: (forecasts, lat, lon); w: (lat,)
+    return np.sqrt(np.mean(w[None, :, None] * (f - o) ** 2))
+
+def acc(f, o, c, w):                         # c: the climatology at each forecast's valid time
+    fa, oa = f - c, o - c                    # anomalies
+    m = lambda x: np.mean(w[None, :, None] * x, axis=(1, 2))
+    return np.mean(m(fa * oa) / np.sqrt(m(fa ** 2) * m(oa ** 2)))     # one value per forecast, then their mean</code></pre>
+<pre style="flex:0 0 auto;font-size:clamp(11px,1.65vh,14.5px);line-height:1.38;margin:0;padding:.8vh 1vw;background:var(--surface);border-radius:8px"><code>def crps_fair(X, o, w):                      # X: (members, forecasts, lat, lon), two members or more
+    M = X.shape[0]
+    err = np.abs(X - o).mean(0)              # the members' mean absolute error ...
+    gap = sum(np.abs(X[i] - X[j]) for i in range(M) for j in range(M)) / (2 * M * (M - 1))
+    return np.mean(w[None, :, None] * (err - gap))                    # ... minus half their mean distance apart
+
+def spread_skill(X, o, w):                   # 1 for a reliable ensemble, below 1 when it is too narrow
+    M = X.shape[0]
+    spread = np.sqrt(np.mean(w[None, :, None] * X.var(0, ddof=1)))
+    return np.sqrt((M + 1) / M) * spread / rmse(X.mean(0), o, w)</code></pre>
+  <ul class="small" style="margin-top:1vh">
+    <li><code>o</code> is the reference (here ERA5). A single forecast’s CRPS is its mean absolute error, so one scale serves both.</li>
+  </ul>
+  <div class="foot"><span>Tested: persistence at day 1 gives RMSE 570.31 and ACC 0.7385, as on slide 9 · a reliable toy ensemble gives spread–skill 1.00 · definitions: Rasp et al. 2024</span></div>
+  <aside class="notes">Reference only. The same weights enter every score. The anomaly correlation is computed per forecast and then averaged; the fair CRPS divides the member-to-member term by M(M − 1), not M squared, so a small ensemble is not penalised for its size.</aside>
+</section>
+
+<!-- 31 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A10 · The interval</p>
+  <h2>A10 · The paired block bootstrap in nine lines, and how to choose the block</h2>
+<pre style="flex:0 0 auto;font-size:clamp(11px,1.65vh,14.5px);line-height:1.4;margin:0 0 .8vh;padding:.8vh 1vw;background:var(--surface);border-radius:8px"><code>def paired_block_ci(err_a, err_b, block_id, stat, n_boot=2000, seed=0):
+    blocks = [np.flatnonzero(block_id == b) for b in np.unique(block_id)]
+    rng = np.random.default_rng(seed)
+    d = np.empty(n_boot)
+    for r in range(n_boot):
+        draw = rng.integers(0, len(blocks), len(blocks))       # whole blocks, with replacement
+        i = np.concatenate([blocks[k] for k in draw])          # the SAME cases for both rows
+        d[r] = stat(err_b[i]) - stat(err_a[i])
+    return np.percentile(d, [2.5, 97.5])                       # the 95% interval of (row B - row A)
+
+score = lambda se: np.sqrt(se.mean())                 # se: squared error per forecast, area-weighted -&gt; RMSE
+block = np.arange(len(se_a)) // 20                    # 20 consecutive forecasts = 10 days
+lo, hi = paired_block_ci(se_a, se_b, block, score)    # models A and B, Z500 at day 3: -33.6 to -31.9</code></pre>
+  <div class="cols" style="grid-template-columns:1.05fr 1fr;gap:2vw;align-items:start;flex:0 0 auto">
+    <table class="small" style="border-collapse:collapse;width:100%;font-size:clamp(13.5px,2.0vh,18px);line-height:1.36">
+      <tr style="border-bottom:1.5px solid currentColor;text-align:left"><th style="padding:.3vh .5vw">Z500, RMSE difference</th><th style="padding:.3vh .5vw">value</th><th style="padding:.3vh .5vw">single forecasts</th><th style="padding:.3vh .5vw">10-day blocks</th></tr>
+      <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.3vh .5vw">C − A, day 3</td><td style="padding:.3vh .5vw">−1.0</td><td style="padding:.3vh .5vw">−2.6 to +0.7</td><td style="padding:.3vh .5vw">−3.8 to +1.9</td></tr>
+      <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.3vh .5vw">B − climatology, day 6.75</td><td style="padding:.3vh .5vw">−2.3</td><td style="padding:.3vh .5vw">−6.7 to +2.1</td><td style="padding:.3vh .5vw">−12.8 to +8.1</td></tr>
+      <tr style="border-bottom:1px solid var(--hairline)"><td style="padding:.3vh .5vw">B − climatology, day 7</td><td style="padding:.3vh .5vw">+15.9</td><td style="padding:.3vh .5vw">+11.5 to +20.3</td><td style="padding:.3vh .5vw">+5.4 to +26.3</td></tr>
+    </table>
+    <ul class="small" style="margin:0">
+      <li><b>Choose the block</b> from the data’s structure — a basin, a scene, an event, a window longer than the weather lasts — then check: widen it until the interval stops growing.</li>
+      <li>Keep enough blocks: 10-day blocks leave 72 here. With only ten or so the interval itself is rough — report the number of blocks beside it.</li>
+    </ul>
+  </div>
+  <div class="gloss">
+    <span><b>stat</b> — a function from per-case errors to your score · <b>block_id</b> — one integer per test case: its block</span>
+  </div>
+  <div class="foot"><span>Tested against slide 18: the call returns −33.6 to −31.9; the figure, with 10,000 resamples, −33.6 to −31.8 · the table: paired intervals, 10,000 resamples</span></div>
+  <aside class="notes">Reference only. The function takes per-case errors, not scores: save one number per test case and row, in the same order. Against climatology the single-forecast interval is 2.4 times too narrow; at day 6.75 the emulator and climatology cannot be told apart. The second bullet matters for small test sets: with a handful of basins or scenes the percentiles rest on very few distinct draws — give the number of blocks beside the interval, and show every block's own difference.</aside>
+</section>
+
+<!-- 32 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A11 · Read and watch</p>
+  <h2>A11 · The reading, the week’s video, three short ones</h2>
+  <ul class="small">
+    <li><b>Read:</b> Lam et al. 2023, GraphCast (arXiv 2212.12794) · optional: Bi et al. 2023, Pangu-Weather (arXiv 2211.02556) · Price et al. 2025, GenCast (arXiv 2312.15796)</li>
+  </ul>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=JUsFvifyZeM" class="yt" data-id="JUsFvifyZeM" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w11-ecmwf-revolution.jpg" alt="ECMWF video: The AI Weather Forecasting Revolution" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>The week’s video</b> — the AI weather forecasting revolution · ECMWF · 68 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=vFFJJ21UjfM" class="yt" data-id="vFFJJ21UjfM" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w11-aurora-abstracts.jpg" alt="Microsoft Research video: Abstracts: Aurora with Megan Stanley and Wessel Bruinsma" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>Aurora</b>, from two of its authors · Microsoft Research · 10 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=KUAWw32FjIo" class="yt" data-id="KUAWw32FjIo" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w11-neuralgcm.jpg" alt="Google Research video: Making Weather Forecasts More Accurate" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>NeuralGCM</b>, physics plus a network · Google Research · 3 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=Oje9LHlFNGo" class="yt" data-id="Oje9LHlFNGo" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w11-ensembles.jpg" alt="Met Office - Learn About Weather video: What are ensemble forecasts? | Up in the air | Met Office Learn About Weather" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>Why ensembles?</b> · Met Office · 4 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <div class="foot"><span>All embed (checked 22 Nov 2026) · the week’s video is 68 min — watch at home; video summary 11 due Sun 29 Nov 23:59 · longer talks from the authors: A12</span></div>
+  <aside class="notes">Reference only. The ECMWF talk is the assigned video for the week: why machine learning works for weather prediction, a short history, and extreme-event examples. The Met Office clip was also on a Week 5 card.</aside>
+</section>
+
+<!-- 33 -->
+
+<section class="slide xl">
+  <p class="kicker">Appendix A12 · From the authors</p>
+  <h2>A12 · Four longer talks by the people who built today’s models</h2>
+  <div style="display:flex;gap:1vw;margin-top:1.2vh;align-items:flex-start;justify-content:center">
+    <a href="https://www.youtube.com/watch?v=lZlm1YSdQ9E" class="yt" data-id="lZlm1YSdQ9E" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w11-graphcast-lam.jpg" alt="CMCC Channel video: GraphCast: Learning skillful medium-range global weather forecasting" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>GraphCast</b> — the reading, by its first author · Remi Lam · 60 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=0WJ553G9SzM" class="yt" data-id="0WJ553G9SzM" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w11-gencast-elkadi.jpg" alt="MenaML Machine Learning School video: [MenaML 2025]GenAI and Diffusion Applications by Andrew ElKadi" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>GenCast</b> — diffusion for ensembles · Andrew El-Kadi · 63 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=O2YQOXu7Ero" class="yt" data-id="O2YQOXu7Ero" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w11-aifs.jpg" alt="ECMWF video: The Deterministic AI Forecasting Systems (AIFS-Single)" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>AIFS</b> — the operational model · Gabriel Moldovan, ECMWF · 31 min — <span class="accent">click to play here</span></p>
+    </a>
+    <a href="https://www.youtube.com/watch?v=XSULa3xGORU" class="yt" data-id="XSULa3xGORU" style="flex:1;max-width:23.5%;text-decoration:none;color:inherit">
+      <span class="ytbox" style="position:relative;display:block"><img src="img/yt-w11-weatherbench2.jpg" alt="AI for Good video: WeatherBench 2 and the second revolution of weather prediction" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block"><span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="background:rgba(0,0,0,.62);color:#fff;border-radius:999px;padding:1vh 1.6vh;font-size:2.4vh;line-height:1">&#9654;</span></span></span>
+      <p class="small muted" style="margin:.5vh 0 0;font-size:clamp(13px,2.0vh,17px);line-height:1.38"><b>WeatherBench 2</b> — how the models are scored · Stephan Rasp · 82 min — <span class="accent">click to play here</span></p>
+    </a>
+  </div>
+  <div class="foot"><span>All embed (checked 22 Nov 2026) · more: Aardvark Weather, Richard Turner (33 min, youtu.be/PpfPB2Dlp6Q) · ClimaX and Stormer, Aditya Grover (64 min, youtu.be/-l7rbpS4Ias) · ACE2, Oliver Watt-Meyer (58 min, youtu.be/r4Ya2wSEP1I) · Pangu-Weather in 2 min (youtu.be/DuUHRkrEW9U)</span></div>
+  <aside class="notes">Reference only. The GraphCast talk follows the reading figure by figure; the WeatherBench 2 talk is the long version of slide 14.</aside>
+</section>
+
+
+</body>
+</html>
